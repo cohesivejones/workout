@@ -218,6 +218,23 @@ form button[type="submit"]:disabled {
   border-bottom: 1px solid #eee;
 }
 
+.loading {
+  text-align: center;
+  padding: 2rem;
+  font-size: 1.2rem;
+  color: #666;
+}
+
+.error-message {
+  background-color: #ffebee;
+  color: #c62828;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 4px;
+  text-align: center;
+  font-weight: 500;
+}
+
 @media (max-width: 768px) {
   .workout-container {
     grid-template-columns: 1fr;

@@ -1,10 +1,16 @@
 import React from 'react';
 
 function WorkoutList({ workouts }) {
-  const getDayName = (dateStr) => {
-    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const formatDate = (dateStr) => {
     const date = new Date(dateStr);
-    return days[date.getDay()];
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const day = days[date.getDay()];
+    const formattedDate = date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+    return `${formattedDate} (${day})`;
   };
 
   return (
@@ -16,9 +22,9 @@ function WorkoutList({ workouts }) {
         <div className="workouts">
           {workouts.map(workout => (
             <div key={workout.id} className="workout-card">
-              <h3>Workout on {workout.date} ({getDayName(workout.date)})</h3>
+              <h3>Workout on {formatDate(workout.date)}</h3>
               <ul>
-                {workout.exercises.map((exercise, index) => (
+                {(workout.exercises || []).filter(ex => ex).map((exercise, index) => (
                   <li key={index}>
                     {exercise.name} - {exercise.reps} reps
                   </li>

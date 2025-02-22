@@ -5,35 +5,54 @@ function WorkoutForm({ onSubmit, savedExercises, onSaveExercise }) {
   const [currentExercise, setCurrentExercise] = useState({ name: '', reps: '' });
   const [isNewExercise, setIsNewExercise] = useState(false);
   const [workoutDate, setWorkoutDate] = useState(new Date().toISOString().split('T')[0]);
-  
-  const handleSubmit = (e) => {
+  const [status, setStatus] = useState({ loading: false, error: null });
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (exercises.length === 0) return;
     
-    onSubmit({
-      date: workoutDate,
-      exercises: exercises
-    });
-    
-    setExercises([]);
-    setCurrentExercise({ name: '', reps: '' });
+    setStatus({ loading: true, error: null });
+    try {
+      const success = await onSubmit({
+        date: workoutDate,
+        exercises: exercises
+      });
+      
+      if (success) {
+        setExercises([]);
+        setCurrentExercise({ name: '', reps: '' });
+      }
+    } catch (err) {
+      setStatus({ loading: false, error: err.message });
+    }
+    setStatus({ loading: false, error: null });
   };
 
-  const addExercise = (e) => {
+  const addExercise = async (e) => {
     e.preventDefault();
     if (!currentExercise.name || !currentExercise.reps) return;
     
-    const exerciseName = currentExercise.name.trim();
-    if (exerciseName) {
-      setExercises([...exercises, { ...currentExercise, name: exerciseName }]);
-      onSaveExercise(exerciseName);
-      setCurrentExercise({ name: '', reps: '' });
+    const name = currentExercise.name.trim();
+    if (name) {
+      setStatus({ loading: true, error: null });
+      try {
+        const success = await onSaveExercise(name);
+        if (success) {
+          setExercises([...exercises, { ...currentExercise, name }]);
+          setCurrentExercise({ name: '', reps: '' });
+          setIsNewExercise(false);
+        }
+      } catch (err) {
+        setStatus({ loading: false, error: err.message });
+      }
+      setStatus({ loading: false, error: null });
     }
   };
 
   return (
     <div className="workout-form">
       <h2>Add New Workout</h2>
+      {status.error && <div className="error-message">{status.error}</div>}
       <form onSubmit={handleSubmit}>
         <div className="date-input">
           <label htmlFor="workout-date">Workout Date:</label>
@@ -70,6 +89,7 @@ function WorkoutForm({ onSubmit, savedExercises, onSaveExercise }) {
               value={currentExercise.name}
               onChange={(e) => setCurrentExercise({ ...currentExercise, name: e.target.value })}
               className="exercise-input-field"
+              autoFocus
             />
           ) : (
             <select
@@ -94,10 +114,10 @@ function WorkoutForm({ onSubmit, savedExercises, onSaveExercise }) {
           <button 
             type="button" 
             onClick={addExercise}
-            disabled={!currentExercise.name || !currentExercise.reps}
+            disabled={!currentExercise.name || !currentExercise.reps || status.loading}
             className="add-exercise-btn"
           >
-            Add Exercise
+            {status.loading ? 'Adding...' : 'Add Exercise'}
           </button>
         </div>
 
@@ -118,10 +138,10 @@ function WorkoutForm({ onSubmit, savedExercises, onSaveExercise }) {
 
         <button 
           type="submit" 
-          disabled={exercises.length === 0}
+          disabled={exercises.length === 0 || status.loading}
           className="save-workout-btn"
         >
-          Save Workout
+          {status.loading ? 'Saving...' : 'Save Workout'}
         </button>
       </form>
     </div>
