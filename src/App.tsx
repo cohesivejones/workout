@@ -35,7 +35,10 @@ function App(): React.ReactElement {
     try {
       setError(null);
       const newWorkout = await createWorkout(workout as Workout);
-      setWorkouts(prevWorkouts => [newWorkout, ...prevWorkouts]);
+      setWorkouts(prevWorkouts => {
+        const updatedWorkouts = [newWorkout, ...prevWorkouts];
+        return updatedWorkouts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      });
       return true;
     } catch (err) {
       console.error('Failed to add workout:', err);
@@ -49,7 +52,7 @@ function App(): React.ReactElement {
       setError(null);
       if (!savedExercises.includes(exerciseName)) {
         const result = await createExercise(exerciseName);
-        setSavedExercises(prev => [...prev, result.name]);
+        setSavedExercises(prev => [...prev, result.name].sort());
         return true;
       }
       return true;
