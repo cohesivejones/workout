@@ -4,13 +4,14 @@ function WorkoutForm({ onSubmit, savedExercises, onSaveExercise }) {
   const [exercises, setExercises] = useState([]);
   const [currentExercise, setCurrentExercise] = useState({ name: '', reps: '' });
   const [isNewExercise, setIsNewExercise] = useState(false);
+  const [workoutDate, setWorkoutDate] = useState(new Date().toISOString().split('T')[0]);
   
   const handleSubmit = (e) => {
     e.preventDefault();
     if (exercises.length === 0) return;
     
     onSubmit({
-      date: new Date().toISOString().split('T')[0],
+      date: workoutDate,
       exercises: exercises
     });
     
@@ -34,6 +35,16 @@ function WorkoutForm({ onSubmit, savedExercises, onSaveExercise }) {
     <div className="workout-form">
       <h2>Add New Workout</h2>
       <form onSubmit={handleSubmit}>
+        <div className="date-input">
+          <label htmlFor="workout-date">Workout Date:</label>
+          <input
+            type="date"
+            id="workout-date"
+            value={workoutDate}
+            onChange={(e) => setWorkoutDate(e.target.value)}
+            className="exercise-input-field"
+          />
+        </div>
         <div className="exercise-input">
           <div className="exercise-type-toggle">
             <button 

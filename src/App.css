@@ -35,6 +35,33 @@
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
+.date-input {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.date-input label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #333;
+}
+
+.date-input input[type="date"] {
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.date-input input[type="date"]:focus {
+  border-color: #4CAF50;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+}
+
 .exercise-input {
   display: grid;
   gap: 15px;
