@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { Exercise, Workout } from './types';
 
 const api = axios.create({
   baseURL: 'http://localhost:5001/api',
@@ -16,10 +17,10 @@ api.interceptors.response.use(
   }
 );
 
-export const fetchWorkouts = () => api.get('/workouts');
+export const fetchWorkouts = (): Promise<Workout[]> => api.get('/workouts');
 
-export const fetchExercises = () => api.get('/exercises');
+export const fetchExercises = (): Promise<Exercise[]> => api.get('/exercises');
 
-export const createWorkout = (workout) => api.post('/workouts', workout);
+export const createWorkout = (workout: Workout): Promise<Workout> => api.post('/workouts', workout);
 
-export const createExercise = (exerciseName) => api.post('/exercises', { name: exerciseName });
+export const createExercise = (exerciseName: string): Promise<Exercise> => api.post('/exercises', { name: exerciseName });

@@ -1,7 +1,8 @@
-import React from 'react';
+import * as React from 'react';
+import { WorkoutListProps } from '../types';
 
-function WorkoutList({ workouts }) {
-  const formatDate = (dateStr) => {
+function WorkoutList({ workouts }: WorkoutListProps): React.ReactElement {
+  const formatDate = (dateStr: string): string => {
     const date = new Date(dateStr);
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     const day = days[date.getDay()];

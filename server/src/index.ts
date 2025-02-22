@@ -1,7 +1,10 @@
-const express = require('express');
-const cors = require('cors');
-const db = require('./db');
-require('dotenv').config();
+import express, { Request, Response } from 'express';
+import cors from 'cors';
+import db from './db';
+import { Exercise, Workout, DatabaseError } from './types';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const app = express();
 
@@ -12,9 +15,9 @@ app.use(express.json());
 // Routes
 
 // Get all exercises
-app.get('/api/exercises', async (req, res) => {
+app.get('/api/exercises', async (_req: Request, res: Response) => {
   try {
-    const result = await db.query('SELECT * FROM exercises ORDER BY name');
+    const result = await db.query<Exercise>('SELECT * FROM exercises ORDER BY name');
     res.json(result.rows);
   } catch (err) {
     console.error(err);
@@ -23,10 +26,10 @@ app.get('/api/exercises', async (req, res) => {
 });
 
 // Add new exercise
-app.post('/api/exercises', async (req, res) => {
+app.post('/api/exercises', async (req: Request, res: Response) => {
   try {
     const { name } = req.body;
-    const result = await db.query(
+    const result = await db.query<Exercise>(
       'INSERT INTO exercises (name) VALUES ($1) ON CONFLICT (name) DO UPDATE SET name = EXCLUDED.name RETURNING *',
       [name]
     );
@@ -38,9 +41,9 @@ app.post('/api/exercises', async (req, res) => {
 });
 
 // Get all workouts with exercises
-app.get('/api/workouts', async (req, res) => {
+app.get('/api/workouts', async (_req: Request, res: Response) => {
   try {
-    const result = await db.query(`
+    const result = await db.query<Workout>(`
       SELECT 
         w.id,
         w.date,
@@ -52,7 +55,7 @@ app.get('/api/workouts', async (req, res) => {
               'reps', we.reps
             )
           ) FILTER (WHERE e.id IS NOT NULL),
-          '[]'
+          '[]'::json
         ) as exercises
       FROM workouts w
       LEFT JOIN workout_exercises we ON w.id = we.workout_id
@@ -68,13 +71,13 @@ app.get('/api/workouts', async (req, res) => {
 });
 
 // Add new workout
-app.post('/api/workouts', async (req, res) => {
+app.post('/api/workouts', async (req: Request, res: Response) => {
   try {
     await db.query('BEGIN');
     const { date, exercises } = req.body;
 
     // Insert workout
-    const workoutResult = await db.query(
+    const workoutResult = await db.query<{ id: number }>(
       'INSERT INTO workouts (date) VALUES ($1) RETURNING id',
       [date]
     );
@@ -83,7 +86,7 @@ app.post('/api/workouts', async (req, res) => {
     // Insert exercises and workout_exercises
     for (const exercise of exercises) {
       // Get or create exercise
-      const exerciseResult = await db.query(
+      const exerciseResult = await db.query<Exercise>(
         'INSERT INTO exercises (name) VALUES ($1) ON CONFLICT (name) DO UPDATE SET name = EXCLUDED.name RETURNING id',
         [exercise.name]
       );
@@ -99,7 +102,7 @@ app.post('/api/workouts', async (req, res) => {
     await db.query('COMMIT');
 
     // Fetch the complete workout with exercises
-    const result = await db.query(`
+    const result = await db.query<Workout>(`
       SELECT 
         w.id,
         w.date,
@@ -124,7 +127,8 @@ app.post('/api/workouts', async (req, res) => {
   } catch (err) {
     await db.query('ROLLBACK');
     console.error(err);
-    res.status(500).json({ error: 'Server error' });
+    const error = err as DatabaseError;
+    res.status(500).json({ error: error.message || 'Server error' });
   }
 });
 

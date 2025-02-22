@@ -1,17 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import * as React from 'react';
 import './App.css';
 import WorkoutForm from './components/WorkoutForm';
 import WorkoutList from './components/WorkoutList';
 import { fetchWorkouts, fetchExercises, createWorkout, createExercise } from './api';
+import { Workout } from './types';
 
-function App() {
-  const [workouts, setWorkouts] = useState([]);
-  const [savedExercises, setSavedExercises] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+function App(): React.ReactElement {
+  const [workouts, setWorkouts] = React.useState<Workout[]>([]);
+  const [savedExercises, setSavedExercises] = React.useState<string[]>([]);
+  const [loading, setLoading] = React.useState<boolean>(true);
+  const [error, setError] = React.useState<string | null>(null);
   
   // Load data from API on component mount
-  useEffect(() => {
+  React.useEffect(() => {
     const loadData = async () => {
       try {
         const [workoutsData, exercisesData] = await Promise.all([
@@ -30,7 +31,7 @@ function App() {
     loadData();
   }, []);
 
-  const addWorkout = async (workout) => {
+  const addWorkout = async (workout: Workout): Promise<boolean> => {
     try {
       setError(null);
       const newWorkout = await createWorkout(workout);
@@ -38,12 +39,12 @@ function App() {
       return true;
     } catch (err) {
       console.error('Failed to add workout:', err);
-      setError(err.message || 'Failed to add workout. Please try again.');
+      setError(err instanceof Error ? err.message : 'Failed to add workout. Please try again.');
       return false;
     }
   };
 
-  const addExerciseToSaved = async (exerciseName) => {
+  const addExerciseToSaved = async (exerciseName: string): Promise<boolean> => {
     try {
       setError(null);
       if (!savedExercises.includes(exerciseName)) {
@@ -54,7 +55,7 @@ function App() {
       return true;
     } catch (err) {
       console.error('Failed to save exercise:', err);
-      setError(err.message || 'Failed to save exercise. Please try again.');
+      setError(err instanceof Error ? err.message : 'Failed to save exercise. Please try again.');
       return false;
     }
   };

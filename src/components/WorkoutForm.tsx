@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
+import * as React from 'react';
+import { WorkoutFormProps, Status } from '../types';
 
-function WorkoutForm({ onSubmit, savedExercises, onSaveExercise }) {
-  const [exercises, setExercises] = useState([]);
-  const [currentExercise, setCurrentExercise] = useState({ name: '', reps: '' });
-  const [isNewExercise, setIsNewExercise] = useState(false);
-  const [workoutDate, setWorkoutDate] = useState(new Date().toISOString().split('T')[0]);
-  const [status, setStatus] = useState({ loading: false, error: null });
+function WorkoutForm({ onSubmit, savedExercises, onSaveExercise }: WorkoutFormProps): React.ReactElement {
+  const [exercises, setExercises] = React.useState<Array<{ name: string; reps: number }>>([]);
+  const [currentExercise, setCurrentExercise] = React.useState<{ name: string; reps: string }>({ name: '', reps: '' });
+  const [isNewExercise, setIsNewExercise] = React.useState<boolean>(false);
+  const [workoutDate, setWorkoutDate] = React.useState<string>(new Date().toISOString().split('T')[0]);
+  const [status, setStatus] = React.useState<Status>({ loading: false, error: null });
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (exercises.length === 0) return;
     
@@ -15,7 +16,7 @@ function WorkoutForm({ onSubmit, savedExercises, onSaveExercise }) {
     try {
       const success = await onSubmit({
         date: workoutDate,
-        exercises: exercises
+        exercises: exercises.map(ex => ({ ...ex, reps: Number(ex.reps) }))
       });
       
       if (success) {
@@ -23,12 +24,12 @@ function WorkoutForm({ onSubmit, savedExercises, onSaveExercise }) {
         setCurrentExercise({ name: '', reps: '' });
       }
     } catch (err) {
-      setStatus({ loading: false, error: err.message });
+      setStatus({ loading: false, error: err instanceof Error ? err.message : 'An error occurred' });
     }
     setStatus({ loading: false, error: null });
   };
 
-  const addExercise = async (e) => {
+  const addExercise = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     if (!currentExercise.name || !currentExercise.reps) return;
     
@@ -38,12 +39,12 @@ function WorkoutForm({ onSubmit, savedExercises, onSaveExercise }) {
       try {
         const success = await onSaveExercise(name);
         if (success) {
-          setExercises([...exercises, { ...currentExercise, name }]);
+          setExercises([...exercises, { name, reps: Number(currentExercise.reps) }]);
           setCurrentExercise({ name: '', reps: '' });
           setIsNewExercise(false);
         }
       } catch (err) {
-        setStatus({ loading: false, error: err.message });
+        setStatus({ loading: false, error: err instanceof Error ? err.message : 'An error occurred' });
       }
       setStatus({ loading: false, error: null });
     }
