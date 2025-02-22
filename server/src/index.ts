@@ -114,7 +114,7 @@ app.post('/api/workouts', async (req: Request, res: Response) => {
               'reps', we.reps
             )
           ) FILTER (WHERE e.id IS NOT NULL),
-          '[]'
+          '[]'::json
         ) as exercises
       FROM workouts w
       LEFT JOIN workout_exercises we ON w.id = we.workout_id
@@ -124,6 +124,38 @@ app.post('/api/workouts', async (req: Request, res: Response) => {
     `, [workoutId]);
 
     res.json(result.rows[0]);
+  } catch (err) {
+    await db.query('ROLLBACK');
+    console.error(err);
+    const error = err as DatabaseError;
+    res.status(500).json({ error: error.message || 'Server error' });
+  }
+});
+
+// Delete workout
+app.delete('/api/workouts/:id', async (req: Request, res: Response) => {
+  try {
+    await db.query('BEGIN');
+    
+    // Delete workout exercises first (due to foreign key constraint)
+    await db.query(
+      'DELETE FROM workout_exercises WHERE workout_id = $1',
+      [req.params.id]
+    );
+
+    // Delete workout
+    const result = await db.query(
+      'DELETE FROM workouts WHERE id = $1 RETURNING id',
+      [req.params.id]
+    );
+
+    await db.query('COMMIT');
+
+    if (result.rowCount === 0) {
+      res.status(404).json({ error: 'Workout not found' });
+    } else {
+      res.json({ id: req.params.id });
+    }
   } catch (err) {
     await db.query('ROLLBACK');
     console.error(err);

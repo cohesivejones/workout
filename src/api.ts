@@ -24,3 +24,5 @@ export const fetchExercises = (): Promise<Exercise[]> => api.get('/exercises');
 export const createWorkout = (workout: Workout): Promise<Workout> => api.post('/workouts', workout);
 
 export const createExercise = (exerciseName: string): Promise<Exercise> => api.post('/exercises', { name: exerciseName });
+
+export const deleteWorkout = (workoutId: number): Promise<{ id: number }> => api.delete(`/workouts/${workoutId}`);

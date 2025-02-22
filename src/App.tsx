@@ -31,10 +31,10 @@ function App(): React.ReactElement {
     loadData();
   }, []);
 
-  const addWorkout = async (workout: Workout): Promise<boolean> => {
+  const addWorkout = async (workout: Omit<Workout, 'id'>): Promise<boolean> => {
     try {
       setError(null);
-      const newWorkout = await createWorkout(workout);
+      const newWorkout = await createWorkout(workout as Workout);
       setWorkouts(prevWorkouts => [newWorkout, ...prevWorkouts]);
       return true;
     } catch (err) {
@@ -58,6 +58,10 @@ function App(): React.ReactElement {
       setError(err instanceof Error ? err.message : 'Failed to save exercise. Please try again.');
       return false;
     }
+  };
+
+  const handleWorkoutDeleted = (workoutId: number) => {
+    setWorkouts(prevWorkouts => prevWorkouts.filter(w => w.id !== workoutId));
   };
 
   if (loading) {
@@ -86,7 +90,10 @@ function App(): React.ReactElement {
             savedExercises={savedExercises}
             onSaveExercise={addExerciseToSaved}
           />
-          <WorkoutList workouts={workouts} />
+          <WorkoutList 
+            workouts={workouts} 
+            onWorkoutDeleted={handleWorkoutDeleted}
+          />
         </div>
       </main>
     </div>

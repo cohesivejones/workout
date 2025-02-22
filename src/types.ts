@@ -5,19 +5,20 @@ export interface Exercise {
 }
 
 export interface Workout {
-  id?: number;
+  id: number;
   date: string;
   exercises: Exercise[];
 }
 
 export interface WorkoutFormProps {
-  onSubmit: (workout: Workout) => Promise<boolean>;
+  onSubmit: (workout: Omit<Workout, 'id'>) => Promise<boolean>;
   savedExercises: string[];
   onSaveExercise: (exerciseName: string) => Promise<boolean>;
 }
 
 export interface WorkoutListProps {
   workouts: Workout[];
+  onWorkoutDeleted: (workoutId: number) => void;
 }
 
 export interface Status {
