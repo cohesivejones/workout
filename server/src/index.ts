@@ -128,7 +128,13 @@ app.post('/api/workouts', async (req: Request, res: Response) => {
     await db.query('ROLLBACK');
     console.error(err);
     const error = err as DatabaseError;
-    res.status(500).json({ error: error.message || 'Server error' });
+    
+    // Check for unique constraint violation
+    if (error.code === '23505' && error.constraint === 'workouts_date_key') {
+      res.status(400).json({ error: 'A workout already exists for this date' });
+    } else {
+      res.status(500).json({ error: error.message || 'Server error' });
+    }
   }
 });
 

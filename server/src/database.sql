@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS exercises (
 
 CREATE TABLE IF NOT EXISTS workouts (
     id SERIAL PRIMARY KEY,
-    date DATE NOT NULL
+    date DATE NOT NULL UNIQUE
 );
 
 CREATE TABLE IF NOT EXISTS workout_exercises (
