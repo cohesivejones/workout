@@ -1,38 +1,198 @@
 .App {
   text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+  min-height: 100vh;
+  background-color: #f5f5f5;
 }
 
 .App-header {
   background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+  padding: 20px;
+  color: white;
+  margin-bottom: 30px;
+}
+
+.App-header h1 {
+  margin: 0;
+}
+
+.App-main {
+  padding: 0 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.workout-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  align-items: start;
+}
+
+.workout-form, .workout-list {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.exercise-input {
+  display: grid;
+  gap: 15px;
+  margin-bottom: 20px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.exercise-type-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.exercise-type-toggle button {
+  padding: 10px;
+  border: 2px solid #4CAF50;
+  background: white;
+  color: #4CAF50;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 600;
+}
+
+.exercise-type-toggle button:hover {
+  background: #edf7ed;
+}
+
+.exercise-type-toggle button.active {
+  background: #4CAF50;
   color: white;
 }
 
-.App-link {
-  color: #61dafb;
+.exercise-input-field {
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
+.exercise-input-field:focus {
+  border-color: #4CAF50;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+}
+
+.add-exercise-btn {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+}
+
+.add-exercise-btn:hover {
+  background-color: #45a049;
+}
+
+.add-exercise-btn:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.save-workout-btn {
+  background-color: #2196F3;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  margin-top: 20px;
+  transition: background-color 0.3s ease;
+}
+
+.save-workout-btn:hover {
+  background-color: #1976D2;
+}
+
+.save-workout-btn:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.exercise-input select,
+.exercise-input input {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+.exercise-input button,
+form button[type="submit"] {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+form button[type="submit"]:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.exercise-list {
+  margin: 20px 0;
+  text-align: left;
+}
+
+.exercise-list ul {
+  list-style: none;
+  padding: 0;
+}
+
+.exercise-list li {
+  padding: 8px;
+  border-bottom: 1px solid #eee;
+}
+
+.workout-card {
+  background: #f8f9fa;
+  border-radius: 4px;
+  padding: 15px;
+  margin-bottom: 15px;
+  text-align: left;
+}
+
+.workout-card h3 {
+  margin-top: 0;
+  color: #333;
+}
+
+.workout-card ul {
+  list-style: none;
+  padding: 0;
+}
+
+.workout-card li {
+  padding: 5px 0;
+  border-bottom: 1px solid #eee;
+}
+
+@media (max-width: 768px) {
+  .workout-container {
+    grid-template-columns: 1fr;
   }
 }
