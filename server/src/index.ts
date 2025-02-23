@@ -1,8 +1,8 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
-import db from './db';
+import pool from './db';
 import { Exercise, Workout, DatabaseError } from './types';
-import dotenv from 'dotenv';
+import * as dotenv from 'dotenv';
 
 dotenv.config();
 
@@ -15,9 +15,9 @@ app.use(express.json());
 // Routes
 
 // Get all exercises
-app.get('/api/exercises', async (_req: Request, res: Response) => {
+app.get('/exercises', async (_req: Request, res: Response) => {
   try {
-    const result = await db.query<Exercise>('SELECT * FROM exercises ORDER BY name');
+    const result = await pool.query<Exercise>('SELECT * FROM exercises ORDER BY name');
     res.json(result.rows);
   } catch (err) {
     console.error(err);
@@ -26,10 +26,10 @@ app.get('/api/exercises', async (_req: Request, res: Response) => {
 });
 
 // Add new exercise
-app.post('/api/exercises', async (req: Request, res: Response) => {
+app.post('/exercises', async (req: Request, res: Response) => {
   try {
     const { name } = req.body;
-    const result = await db.query<Exercise>(
+    const result = await pool.query<Exercise>(
       'INSERT INTO exercises (name) VALUES ($1) ON CONFLICT (name) DO UPDATE SET name = EXCLUDED.name RETURNING *',
       [name]
     );
@@ -41,9 +41,9 @@ app.post('/api/exercises', async (req: Request, res: Response) => {
 });
 
 // Get all workouts with exercises
-app.get('/api/workouts', async (_req: Request, res: Response) => {
+app.get('/workouts', async (_req: Request, res: Response) => {
   try {
-    const result = await db.query<Workout>(`
+    const result = await pool.query<Workout>(`
       SELECT 
         w.id,
         w.date,
@@ -71,13 +71,13 @@ app.get('/api/workouts', async (_req: Request, res: Response) => {
 });
 
 // Add new workout
-app.post('/api/workouts', async (req: Request, res: Response) => {
+app.post('/workouts', async (req: Request, res: Response) => {
   try {
-    await db.query('BEGIN');
+    await pool.query('BEGIN');
     const { date, exercises } = req.body;
 
     // Insert workout
-    const workoutResult = await db.query<{ id: number }>(
+    const workoutResult = await pool.query<{ id: number }>(
       'INSERT INTO workouts (date) VALUES ($1) RETURNING id',
       [date]
     );
@@ -86,23 +86,23 @@ app.post('/api/workouts', async (req: Request, res: Response) => {
     // Insert exercises and workout_exercises
     for (const exercise of exercises) {
       // Get or create exercise
-      const exerciseResult = await db.query<Exercise>(
+      const exerciseResult = await pool.query<Exercise>(
         'INSERT INTO exercises (name) VALUES ($1) ON CONFLICT (name) DO UPDATE SET name = EXCLUDED.name RETURNING id',
         [exercise.name]
       );
       const exerciseId = exerciseResult.rows[0].id;
 
       // Link exercise to workout with reps
-      await db.query(
+      await pool.query(
         'INSERT INTO workout_exercises (workout_id, exercise_id, reps) VALUES ($1, $2, $3)',
         [workoutId, exerciseId, exercise.reps]
       );
     }
 
-    await db.query('COMMIT');
+    await pool.query('COMMIT');
 
     // Fetch the complete workout with exercises
-    const result = await db.query<Workout>(`
+    const result = await pool.query<Workout>(`
       SELECT 
         w.id,
         w.date,
@@ -125,7 +125,7 @@ app.post('/api/workouts', async (req: Request, res: Response) => {
 
     res.json(result.rows[0]);
   } catch (err) {
-    await db.query('ROLLBACK');
+    await pool.query('ROLLBACK');
     console.error(err);
     const error = err as DatabaseError;
     
@@ -139,23 +139,23 @@ app.post('/api/workouts', async (req: Request, res: Response) => {
 });
 
 // Delete workout
-app.delete('/api/workouts/:id', async (req: Request, res: Response) => {
+app.delete('/workouts/:id', async (req: Request, res: Response) => {
   try {
-    await db.query('BEGIN');
+    await pool.query('BEGIN');
     
     // Delete workout exercises first (due to foreign key constraint)
-    await db.query(
+    await pool.query(
       'DELETE FROM workout_exercises WHERE workout_id = $1',
       [req.params.id]
     );
 
     // Delete workout
-    const result = await db.query(
+    const result = await pool.query(
       'DELETE FROM workouts WHERE id = $1 RETURNING id',
       [req.params.id]
     );
 
-    await db.query('COMMIT');
+    await pool.query('COMMIT');
 
     if (result.rowCount === 0) {
       res.status(404).json({ error: 'Workout not found' });
@@ -163,14 +163,14 @@ app.delete('/api/workouts/:id', async (req: Request, res: Response) => {
       res.json({ id: req.params.id });
     }
   } catch (err) {
-    await db.query('ROLLBACK');
+    await pool.query('ROLLBACK');
     console.error(err);
     const error = err as DatabaseError;
     res.status(500).json({ error: error.message || 'Server error' });
   }
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

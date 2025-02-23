@@ -1,9 +1,7 @@
-import pg from 'pg';
+import { Pool } from 'pg';
 import dotenv from 'dotenv';
 
 dotenv.config();
-
-const { Pool } = pg;
 
 // Parse DATABASE_URL if provided (Heroku), otherwise use individual config vars
 const pool = process.env.DATABASE_URL
