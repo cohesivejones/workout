@@ -2,7 +2,7 @@ import axios from "axios";
 import { Exercise, Workout } from "./types";
 
 const api = axios.create({
-  baseURL: `${process.env.VITE_API_URL}/api`,
+  baseURL: import.meta.env.VITE_API_URL,
   headers: {
     "Content-Type": "application/json",
   },
