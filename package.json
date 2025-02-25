@@ -8,8 +8,9 @@
     "build": "tsc && vite build && npm run build --prefix server",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "start": "node server.js",
-    "heroku-postbuild": "npm run build",
+    "start": "concurrently \"npm:start:web\" \"npm:start:server\"",
+    "start:web": "node server.js",
+    "start:server": "npm start --prefix server",
     "postinstall": "npm install --prefix server"
   },
   "dependencies": {
@@ -34,6 +35,7 @@
     "@typescript-eslint/eslint-plugin": "^6.14.0",
     "@typescript-eslint/parser": "^6.14.0",
     "@vitejs/plugin-react": "^4.2.1",
+    "concurrently": "^9.1.2",
     "eslint": "^8.55.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
