@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import './CalendarView.css';
 import { Workout } from '../types';
+import { deleteWorkout } from '../api';
 import {
   startOfMonth,
   endOfMonth,
@@ -22,6 +23,22 @@ interface CalendarViewProps {
 
 const CalendarView: React.FC<CalendarViewProps> = ({ workouts, onWorkoutDeleted }) => {
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
+  const [isDeleting, setIsDeleting] = useState<number | null>(null);
+  
+  const handleDelete = async (workoutId: number) => {
+    if (window.confirm('Are you sure you want to delete this workout?')) {
+      try {
+        setIsDeleting(workoutId);
+        await deleteWorkout(workoutId);
+        onWorkoutDeleted(workoutId);
+      } catch (err) {
+        console.error('Failed to delete workout:', err);
+        alert('Failed to delete workout. Please try again.');
+      } finally {
+        setIsDeleting(null);
+      }
+    }
+  };
   
   // Group workouts by date
   const workoutsByDate = workouts.reduce((acc, workout) => {
@@ -100,10 +117,11 @@ const CalendarView: React.FC<CalendarViewProps> = ({ workouts, onWorkoutDeleted 
                     ))}
                   </div>
                   <button
-                    onClick={() => onWorkoutDeleted(workout.id)}
+                    onClick={() => handleDelete(workout.id)}
+                    disabled={isDeleting === workout.id}
                     className="delete-btn"
                   >
-                    ×
+                    {isDeleting === workout.id ? "..." : "×"}
                   </button>
                 </div>
               ))}

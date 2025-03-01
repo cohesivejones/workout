@@ -29,15 +29,17 @@ function WorkoutList({
   };
 
   const handleDelete = async (workoutId: number) => {
-    try {
-      setIsDeleting(workoutId);
-      await deleteWorkout(workoutId);
-      onWorkoutDeleted(workoutId);
-    } catch (err) {
-      console.error("Failed to delete workout:", err);
-      alert("Failed to delete workout. Please try again.");
-    } finally {
-      setIsDeleting(null);
+    if (window.confirm("Are you sure you want to delete this workout?")) {
+      try {
+        setIsDeleting(workoutId);
+        await deleteWorkout(workoutId);
+        onWorkoutDeleted(workoutId);
+      } catch (err) {
+        console.error("Failed to delete workout:", err);
+        alert("Failed to delete workout. Please try again.");
+      } finally {
+        setIsDeleting(null);
+      }
     }
   };
 
