@@ -4,14 +4,16 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
     "build": "tsc && vite build && npm run build --prefix server",
+    "dev": "concurrently \"npm:dev:web\" \"npm:dev:server\"",
+    "dev:server": "npm run dev --prefix server",
+    "dev:web": "vite",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "postinstall": "npm install --prefix server",
     "preview": "vite preview",
     "start": "concurrently \"npm:start:web\" \"npm:start:server\"",
-    "start:web": "node server.js",
     "start:server": "npm start --prefix server",
-    "postinstall": "npm install --prefix server"
+    "start:web": "node server.js"
   },
   "dependencies": {
     "@testing-library/jest-dom": "^5.16.5",
