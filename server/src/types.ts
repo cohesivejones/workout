@@ -1,18 +1,23 @@
-export interface Exercise {
-  id: number;
-  name: string;
-}
+import { Exercise, Workout, WorkoutExercise } from "./entities";
 
-export interface Workout {
+// Interface for API responses
+export interface WorkoutResponse {
   id: number;
   date: string;
-  exercises: Array<Exercise & { reps: number }>;
+  exercises: Array<{
+    id: number;
+    name: string;
+    reps: number;
+  }>;
 }
 
-export interface WorkoutExercise {
-  workout_id: number;
-  exercise_id: number;
-  reps: number;
+// Interface for workout creation request
+export interface CreateWorkoutRequest {
+  date: string;
+  exercises: Array<{
+    name: string;
+    reps: number;
+  }>;
 }
 
 export interface DatabaseError extends Error {

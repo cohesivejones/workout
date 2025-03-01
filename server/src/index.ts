@@ -1,10 +1,24 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
-import pool from './db';
-import { Exercise, Workout, DatabaseError } from './types';
+import { DatabaseError, WorkoutResponse, CreateWorkoutRequest } from './types';
 import * as dotenv from 'dotenv';
+import dataSource from './data-source';
+import { Exercise, Workout, WorkoutExercise } from './entities';
+import { In } from 'typeorm';
+
+// Initialize reflect-metadata
+import "reflect-metadata";
 
 dotenv.config();
+
+// Initialize TypeORM connection
+dataSource.initialize()
+  .then(() => {
+    console.log("Data Source has been initialized!");
+  })
+  .catch((err) => {
+    console.error("Error during Data Source initialization:", err);
+  });
 
 const app = express();
 
@@ -17,8 +31,13 @@ app.use(express.json());
 // Get all exercises
 app.get('/exercises', async (_req: Request, res: Response) => {
   try {
-    const result = await pool.query<Exercise>('SELECT * FROM exercises ORDER BY name');
-    res.json(result.rows);
+    const exerciseRepository = dataSource.getRepository(Exercise);
+    const exercises = await exerciseRepository.find({
+      order: {
+        name: 'ASC'
+      }
+    });
+    res.json(exercises);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Server error' });
@@ -29,11 +48,19 @@ app.get('/exercises', async (_req: Request, res: Response) => {
 app.post('/exercises', async (req: Request, res: Response) => {
   try {
     const { name } = req.body;
-    const result = await pool.query<Exercise>(
-      'INSERT INTO exercises (name) VALUES ($1) ON CONFLICT (name) DO UPDATE SET name = EXCLUDED.name RETURNING *',
-      [name]
-    );
-    res.json(result.rows[0]);
+    const exerciseRepository = dataSource.getRepository(Exercise);
+    
+    // Check if exercise exists
+    let exercise = await exerciseRepository.findOne({ where: { name } });
+    
+    if (!exercise) {
+      // Create new exercise
+      exercise = exerciseRepository.create({ name });
+    }
+    
+    // Save exercise (either new or existing)
+    await exerciseRepository.save(exercise);
+    res.json(exercise);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Server error' });
@@ -43,27 +70,31 @@ app.post('/exercises', async (req: Request, res: Response) => {
 // Get all workouts with exercises
 app.get('/workouts', async (_req: Request, res: Response) => {
   try {
-    const result = await pool.query<Workout>(`
-      SELECT 
-        w.id,
-        w.date,
-        COALESCE(
-          json_agg(
-            json_build_object(
-              'id', e.id,
-              'name', e.name,
-              'reps', we.reps
-            )
-          ) FILTER (WHERE e.id IS NOT NULL),
-          '[]'::json
-        ) as exercises
-      FROM workouts w
-      LEFT JOIN workout_exercises we ON w.id = we.workout_id
-      LEFT JOIN exercises e ON we.exercise_id = e.id
-      GROUP BY w.id, w.date
-      ORDER BY w.date DESC
-    `);
-    res.json(result.rows);
+    const workoutRepository = dataSource.getRepository(Workout);
+    
+    const workouts = await workoutRepository.find({
+      relations: {
+        workoutExercises: {
+          exercise: true
+        }
+      },
+      order: {
+        date: 'DESC'
+      }
+    });
+    
+    // Transform to match the expected response format
+    const workoutResponses: WorkoutResponse[] = workouts.map(workout => ({
+      id: workout.id,
+      date: workout.date.toISOString().split('T')[0], // Format as YYYY-MM-DD
+      exercises: workout.workoutExercises.map(we => ({
+        id: we.exercise.id,
+        name: we.exercise.name,
+        reps: we.reps
+      }))
+    }));
+    
+    res.json(workoutResponses);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Server error' });
@@ -72,60 +103,68 @@ app.get('/workouts', async (_req: Request, res: Response) => {
 
 // Add new workout
 app.post('/workouts', async (req: Request, res: Response) => {
+  const queryRunner = dataSource.createQueryRunner();
+  
   try {
-    await pool.query('BEGIN');
-    const { date, exercises } = req.body;
-
-    // Insert workout
-    const workoutResult = await pool.query<{ id: number }>(
-      'INSERT INTO workouts (date) VALUES ($1) RETURNING id',
-      [date]
-    );
-    const workoutId = workoutResult.rows[0].id;
-
-    // Insert exercises and workout_exercises
-    for (const exercise of exercises) {
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    
+    const { date, exercises } = req.body as CreateWorkoutRequest;
+    
+    // Create new workout
+    const workoutRepository = queryRunner.manager.getRepository(Workout);
+    const workout = workoutRepository.create({
+      date: new Date(date),
+      workoutExercises: []
+    });
+    
+    // Save workout to get ID
+    await workoutRepository.save(workout);
+    
+    // Process exercises
+    const exerciseRepository = queryRunner.manager.getRepository(Exercise);
+    const workoutExerciseRepository = queryRunner.manager.getRepository(WorkoutExercise);
+    
+    for (const exerciseData of exercises) {
       // Get or create exercise
-      const exerciseResult = await pool.query<Exercise>(
-        'INSERT INTO exercises (name) VALUES ($1) ON CONFLICT (name) DO UPDATE SET name = EXCLUDED.name RETURNING id',
-        [exercise.name]
-      );
-      const exerciseId = exerciseResult.rows[0].id;
-
-      // Link exercise to workout with reps
-      await pool.query(
-        'INSERT INTO workout_exercises (workout_id, exercise_id, reps) VALUES ($1, $2, $3)',
-        [workoutId, exerciseId, exercise.reps]
-      );
+      let exercise = await exerciseRepository.findOne({
+        where: { name: exerciseData.name }
+      });
+      
+      if (!exercise) {
+        exercise = exerciseRepository.create({ name: exerciseData.name });
+        await exerciseRepository.save(exercise);
+      }
+      
+      // Create workout-exercise relationship
+      const workoutExercise = workoutExerciseRepository.create({
+        workout_id: workout.id,
+        exercise_id: exercise.id,
+        reps: exerciseData.reps,
+        workout,
+        exercise
+      });
+      
+      await workoutExerciseRepository.save(workoutExercise);
+      workout.workoutExercises.push(workoutExercise);
     }
-
-    await pool.query('COMMIT');
-
-    // Fetch the complete workout with exercises
-    const result = await pool.query<Workout>(`
-      SELECT 
-        w.id,
-        w.date,
-        COALESCE(
-          json_agg(
-            json_build_object(
-              'id', e.id,
-              'name', e.name,
-              'reps', we.reps
-            )
-          ) FILTER (WHERE e.id IS NOT NULL),
-          '[]'::json
-        ) as exercises
-      FROM workouts w
-      LEFT JOIN workout_exercises we ON w.id = we.workout_id
-      LEFT JOIN exercises e ON we.exercise_id = e.id
-      WHERE w.id = $1
-      GROUP BY w.id, w.date
-    `, [workoutId]);
-
-    res.json(result.rows[0]);
+    
+    await queryRunner.commitTransaction();
+    
+    // Format response
+    const response: WorkoutResponse = {
+      id: workout.id,
+      date: workout.date.toISOString().split('T')[0],
+      exercises: workout.workoutExercises.map(we => ({
+        id: we.exercise.id,
+        name: we.exercise.name,
+        reps: we.reps
+      }))
+    };
+    
+    res.json(response);
   } catch (err) {
-    await pool.query('ROLLBACK');
+    await queryRunner.rollbackTransaction();
     console.error(err);
     const error = err as DatabaseError;
     
@@ -135,38 +174,44 @@ app.post('/workouts', async (req: Request, res: Response) => {
     } else {
       res.status(500).json({ error: error.message || 'Server error' });
     }
+  } finally {
+    await queryRunner.release();
   }
 });
 
 // Delete workout
 app.delete('/workouts/:id', async (req: Request, res: Response) => {
+  const queryRunner = dataSource.createQueryRunner();
+  
   try {
-    await pool.query('BEGIN');
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
     
-    // Delete workout exercises first (due to foreign key constraint)
-    await pool.query(
-      'DELETE FROM workout_exercises WHERE workout_id = $1',
-      [req.params.id]
-    );
-
-    // Delete workout
-    const result = await pool.query(
-      'DELETE FROM workouts WHERE id = $1 RETURNING id',
-      [req.params.id]
-    );
-
-    await pool.query('COMMIT');
-
-    if (result.rowCount === 0) {
-      res.status(404).json({ error: 'Workout not found' });
-    } else {
-      res.json({ id: req.params.id });
+    const workoutId = parseInt(req.params.id);
+    const workoutRepository = queryRunner.manager.getRepository(Workout);
+    
+    // Find workout
+    const workout = await workoutRepository.findOne({
+      where: { id: workoutId }
+    });
+    
+    if (!workout) {
+      return res.status(404).json({ error: 'Workout not found' });
     }
+    
+    // Delete workout (cascade will handle workout_exercises)
+    await workoutRepository.remove(workout);
+    
+    await queryRunner.commitTransaction();
+    
+    res.json({ id: workoutId });
   } catch (err) {
-    await pool.query('ROLLBACK');
+    await queryRunner.rollbackTransaction();
     console.error(err);
     const error = err as DatabaseError;
     res.status(500).json({ error: error.message || 'Server error' });
+  } finally {
+    await queryRunner.release();
   }
 });
 
