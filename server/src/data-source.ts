@@ -11,13 +11,13 @@ const dataSource = process.env.DATABASE_URL
       type: "postgres",
       url: process.env.DATABASE_URL,
       ssl: {
-        rejectUnauthorized: false // Required for Heroku
+        rejectUnauthorized: false, // Required for Heroku
       },
       synchronize: false, // Set to true only in development
       logging: process.env.NODE_ENV === "development",
       entities: [Exercise, Workout, WorkoutExercise],
-      migrations: [],
-      subscribers: []
+      migrations: [__dirname + "/migrations/*.ts"],
+      subscribers: [],
     })
   : new DataSource({
       type: "postgres",
@@ -29,8 +29,8 @@ const dataSource = process.env.DATABASE_URL
       synchronize: false, // Set to true only in development
       logging: process.env.NODE_ENV === "development",
       entities: [Exercise, Workout, WorkoutExercise],
-      migrations: [],
-      subscribers: []
+      migrations: [__dirname + "/migrations/*.ts"],
+      subscribers: [],
     });
 
 export default dataSource;

@@ -7,6 +7,7 @@ export interface Exercise {
 export interface Workout {
   id: number;
   date: string;
+  withInstructor: boolean;
   exercises: Exercise[];
 }
 

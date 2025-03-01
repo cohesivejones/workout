@@ -6,7 +6,9 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
-    "dev": "ts-node src/index.ts"
+    "dev": "ts-node src/index.ts",
+    "migrate": "ts-node ./node_modules/typeorm/cli.js migration:run -d src/data-source.ts",
+    "migrate:revert": "ts-node ./node_modules/typeorm/cli.js migration:revert -d src/data-source.ts"
   },
   "keywords": [],
   "author": "",

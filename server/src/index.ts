@@ -87,6 +87,7 @@ app.get('/workouts', async (_req: Request, res: Response) => {
     const workoutResponses: WorkoutResponse[] = workouts.map(workout => ({
       id: workout.id,
       date: workout.date.toISOString().split('T')[0], // Format as YYYY-MM-DD
+      withInstructor: workout.withInstructor,
       exercises: workout.workoutExercises.map(we => ({
         id: we.exercise.id,
         name: we.exercise.name,
@@ -109,12 +110,13 @@ app.post('/workouts', async (req: Request, res: Response) => {
     await queryRunner.connect();
     await queryRunner.startTransaction();
     
-    const { date, exercises } = req.body as CreateWorkoutRequest;
+    const { date, withInstructor, exercises } = req.body as CreateWorkoutRequest;
     
     // Create new workout
     const workoutRepository = queryRunner.manager.getRepository(Workout);
     const workout = workoutRepository.create({
       date: new Date(date),
+      withInstructor: withInstructor || false,
       workoutExercises: []
     });
     
@@ -155,6 +157,7 @@ app.post('/workouts', async (req: Request, res: Response) => {
     const response: WorkoutResponse = {
       id: workout.id,
       date: workout.date.toISOString().split('T')[0],
+      withInstructor: workout.withInstructor,
       exercises: workout.workoutExercises.map(we => ({
         id: we.exercise.id,
         name: we.exercise.name,

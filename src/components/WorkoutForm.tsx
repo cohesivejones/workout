@@ -11,6 +11,7 @@ function WorkoutForm({ onSubmit, savedExercises, onSaveExercise }: WorkoutFormPr
   const [exercises, setExercises] = React.useState<Array<{ name: string; reps: number }>>([]);
   const [currentExercise, setCurrentExercise] = React.useState<{ name: string; reps: string }>({ name: '', reps: '' });
   const [workoutDate, setWorkoutDate] = React.useState<string>(new Date().toISOString().split('T')[0]);
+  const [withInstructor, setWithInstructor] = React.useState<boolean>(false);
   const [status, setStatus] = React.useState<Status>({ loading: false, error: null });
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -21,6 +22,7 @@ function WorkoutForm({ onSubmit, savedExercises, onSaveExercise }: WorkoutFormPr
     try {
       const success = await onSubmit({
         date: workoutDate,
+        withInstructor,
         exercises: exercises.map(ex => ({ ...ex, reps: Number(ex.reps) }))
       });
       
@@ -76,6 +78,17 @@ function WorkoutForm({ onSubmit, savedExercises, onSaveExercise }: WorkoutFormPr
             onChange={(e) => setWorkoutDate(e.target.value)}
             className="exercise-input-field"
           />
+        </div>
+        <div className="instructor-checkbox">
+          <label htmlFor="with-instructor">
+            <input
+              type="checkbox"
+              id="with-instructor"
+              checked={withInstructor}
+              onChange={(e) => setWithInstructor(e.target.checked)}
+            />
+            With Instructor
+          </label>
         </div>
         <div className="exercise-input">
           <CreatableSelect

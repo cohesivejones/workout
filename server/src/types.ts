@@ -4,6 +4,7 @@ import { Exercise, Workout, WorkoutExercise } from "./entities";
 export interface WorkoutResponse {
   id: number;
   date: string;
+  withInstructor: boolean;
   exercises: Array<{
     id: number;
     name: string;
@@ -14,6 +15,7 @@ export interface WorkoutResponse {
 // Interface for workout creation request
 export interface CreateWorkoutRequest {
   date: string;
+  withInstructor: boolean;
   exercises: Array<{
     name: string;
     reps: number;

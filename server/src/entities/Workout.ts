@@ -9,6 +9,9 @@ export class Workout {
   @Column({ type: "date", unique: true })
   date: Date;
 
+  @Column({ type: "boolean", default: false })
+  withInstructor: boolean;
+
   @OneToMany(() => WorkoutExercise, workoutExercise => workoutExercise.workout, {
     cascade: true
   })
