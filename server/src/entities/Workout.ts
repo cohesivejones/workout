@@ -7,13 +7,17 @@ export class Workout {
   id: number;
 
   @Column({ type: "date", unique: true })
-  date: Date;
+  date: string;
 
   @Column({ type: "boolean", default: false })
   withInstructor: boolean;
 
-  @OneToMany(() => WorkoutExercise, workoutExercise => workoutExercise.workout, {
-    cascade: true
-  })
+  @OneToMany(
+    () => WorkoutExercise,
+    (workoutExercise) => workoutExercise.workout,
+    {
+      cascade: true,
+    }
+  )
   workoutExercises: WorkoutExercise[];
 }

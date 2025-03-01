@@ -103,6 +103,12 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  border-left: 3px solid transparent;
+}
+
+.calendar-workout.with-instructor {
+  background-color: #e6f7ff;
+  border-left: 3px solid #1890ff;
 }
 
 .workout-exercises {

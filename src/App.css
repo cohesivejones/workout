@@ -37,6 +37,12 @@
   padding: 20px;
   margin-bottom: 20px;
   border-radius: 8px;
+  border-left: 4px solid transparent;
+}
+
+.workout-card.with-instructor {
+  background: #e6f7ff;
+  border-left: 4px solid #1890ff;
 }
 
 .workout-header {
@@ -179,6 +185,20 @@
 .date-input label {
   display: block;
   margin-bottom: 5px;
+}
+
+.instructor-checkbox {
+  margin-bottom: 20px;
+}
+
+.instructor-checkbox label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.instructor-checkbox input[type="checkbox"] {
+  margin-right: 8px;
 }
 
 ul {

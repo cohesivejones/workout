@@ -49,7 +49,10 @@ function WorkoutList({
       ) : (
         <div className="workouts">
           {workouts.map((workout) => (
-            <div key={workout.id} className="workout-card">
+            <div 
+              key={workout.id} 
+              className={`workout-card ${workout.withInstructor ? 'with-instructor' : ''}`}
+            >
               <div className="workout-header">
                 <h3>{formatDate(workout.date)}</h3>
                 <button

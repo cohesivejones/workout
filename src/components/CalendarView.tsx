@@ -88,7 +88,10 @@ const CalendarView: React.FC<CalendarViewProps> = ({ workouts, onWorkoutDeleted 
             <div className="calendar-date">{formattedDate}</div>
             <div className="calendar-workouts">
               {dayWorkouts.map(workout => (
-                <div key={workout.id} className="calendar-workout">
+                <div 
+                  key={workout.id} 
+                  className={`calendar-workout ${workout.withInstructor ? 'with-instructor' : ''}`}
+                >
                   <div className="workout-exercises">
                     {workout.exercises.map((exercise, idx) => (
                       <div key={idx} className="workout-exercise">
