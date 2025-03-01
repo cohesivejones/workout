@@ -87,6 +87,39 @@
   border-radius: 4px;
 }
 
+/* React Select Styles */
+.react-select-container {
+  margin-bottom: 10px;
+}
+
+.react-select__control {
+  border: 1px solid #ddd !important;
+  border-radius: 4px !important;
+  box-shadow: none !important;
+  min-height: 38px !important;
+}
+
+.react-select__control--is-focused {
+  border-color: #4CAF50 !important;
+  box-shadow: 0 0 0 1px #4CAF50 !important;
+}
+
+.react-select__value-container {
+  padding: 2px 8px !important;
+}
+
+.react-select__menu {
+  z-index: 100 !important;
+}
+
+.react-select__option--is-focused {
+  background-color: rgba(76, 175, 80, 0.1) !important;
+}
+
+.react-select__option--is-selected {
+  background-color: #4CAF50 !important;
+}
+
 .exercise-type-toggle {
   display: flex;
   gap: 10px;

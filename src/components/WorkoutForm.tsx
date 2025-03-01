@@ -1,10 +1,15 @@
 import * as React from 'react';
 import { WorkoutFormProps, Status } from '../types';
+import CreatableSelect from 'react-select/creatable';
+
+interface OptionType {
+  label: string;
+  value: string;
+}
 
 function WorkoutForm({ onSubmit, savedExercises, onSaveExercise }: WorkoutFormProps): React.ReactElement {
   const [exercises, setExercises] = React.useState<Array<{ name: string; reps: number }>>([]);
   const [currentExercise, setCurrentExercise] = React.useState<{ name: string; reps: string }>({ name: '', reps: '' });
-  const [isNewExercise, setIsNewExercise] = React.useState<boolean>(false);
   const [workoutDate, setWorkoutDate] = React.useState<string>(new Date().toISOString().split('T')[0]);
   const [status, setStatus] = React.useState<Status>({ loading: false, error: null });
 
@@ -41,12 +46,19 @@ function WorkoutForm({ onSubmit, savedExercises, onSaveExercise }: WorkoutFormPr
         if (success) {
           setExercises([...exercises, { name, reps: Number(currentExercise.reps) }]);
           setCurrentExercise({ name: '', reps: '' });
-          setIsNewExercise(false);
         }
       } catch (err) {
         setStatus({ loading: false, error: err instanceof Error ? err.message : 'An error occurred' });
       }
       setStatus({ loading: false, error: null });
+    }
+  };
+
+  const handleExerciseChange = (newValue: any) => {
+    if (newValue) {
+      setCurrentExercise({ ...currentExercise, name: newValue.value });
+    } else {
+      setCurrentExercise({ ...currentExercise, name: '' });
     }
   };
 
@@ -66,44 +78,16 @@ function WorkoutForm({ onSubmit, savedExercises, onSaveExercise }: WorkoutFormPr
           />
         </div>
         <div className="exercise-input">
-          <div className="exercise-type-toggle">
-            <button 
-              type="button" 
-              className={!isNewExercise ? 'active' : ''} 
-              onClick={() => setIsNewExercise(false)}
-            >
-              Select Exercise
-            </button>
-            <button 
-              type="button" 
-              className={isNewExercise ? 'active' : ''} 
-              onClick={() => setIsNewExercise(true)}
-            >
-              Add New Exercise
-            </button>
-          </div>
-
-          {isNewExercise ? (
-            <input
-              type="text"
-              placeholder="Enter exercise name"
-              value={currentExercise.name}
-              onChange={(e) => setCurrentExercise({ ...currentExercise, name: e.target.value })}
-              className="exercise-input-field"
-              autoFocus
-            />
-          ) : (
-            <select
-              value={currentExercise.name}
-              onChange={(e) => setCurrentExercise({ ...currentExercise, name: e.target.value })}
-              className="exercise-input-field"
-            >
-              <option value="">Select Exercise</option>
-              {savedExercises.map((exercise, index) => (
-                <option key={index} value={exercise}>{exercise}</option>
-              ))}
-            </select>
-          )}
+          <CreatableSelect
+            isClearable
+            placeholder="Select or create an exercise"
+            options={savedExercises.map(exercise => ({ label: exercise, value: exercise }))}
+            onChange={handleExerciseChange}
+            value={currentExercise.name ? { label: currentExercise.name, value: currentExercise.name } : null}
+            className="react-select-container"
+            classNamePrefix="react-select"
+            formatCreateLabel={(inputValue) => `Create "${inputValue}"`}
+          />
           <input
             type="number"
             placeholder="Reps"
