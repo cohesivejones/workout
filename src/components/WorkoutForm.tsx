@@ -8,8 +8,8 @@ interface OptionType {
 }
 
 function WorkoutForm({ onSubmit, savedExercises, onSaveExercise }: WorkoutFormProps): React.ReactElement {
-  const [exercises, setExercises] = React.useState<Array<{ name: string; reps: number }>>([]);
-  const [currentExercise, setCurrentExercise] = React.useState<{ name: string; reps: string }>({ name: '', reps: '' });
+  const [exercises, setExercises] = React.useState<Array<{ name: string; reps: number; weight?: number | null }>>([]);
+  const [currentExercise, setCurrentExercise] = React.useState<{ name: string; reps: string; weight: string }>({ name: '', reps: '', weight: '' });
   const [workoutDate, setWorkoutDate] = React.useState<string>(new Date().toISOString().split('T')[0]);
   const [withInstructor, setWithInstructor] = React.useState<boolean>(false);
   const [status, setStatus] = React.useState<Status>({ loading: false, error: null });
@@ -28,7 +28,7 @@ function WorkoutForm({ onSubmit, savedExercises, onSaveExercise }: WorkoutFormPr
       
       if (success) {
         setExercises([]);
-        setCurrentExercise({ name: '', reps: '' });
+        setCurrentExercise({ name: '', reps: '', weight: '' });
       }
     } catch (err) {
       setStatus({ loading: false, error: err instanceof Error ? err.message : 'An error occurred' });
@@ -46,8 +46,12 @@ function WorkoutForm({ onSubmit, savedExercises, onSaveExercise }: WorkoutFormPr
       try {
         const success = await onSaveExercise(name);
         if (success) {
-          setExercises([...exercises, { name, reps: Number(currentExercise.reps) }]);
-          setCurrentExercise({ name: '', reps: '' });
+          setExercises([...exercises, { 
+            name, 
+            reps: Number(currentExercise.reps),
+            weight: currentExercise.weight ? Number(currentExercise.weight) : null 
+          }]);
+          setCurrentExercise({ name: '', reps: '', weight: '' });
         }
       } catch (err) {
         setStatus({ loading: false, error: err instanceof Error ? err.message : 'An error occurred' });
@@ -109,6 +113,15 @@ function WorkoutForm({ onSubmit, savedExercises, onSaveExercise }: WorkoutFormPr
             min="1"
             className="exercise-input-field"
           />
+          <input
+            type="number"
+            placeholder="Weight (lbs)"
+            value={currentExercise.weight}
+            onChange={(e) => setCurrentExercise({ ...currentExercise, weight: e.target.value })}
+            min="0"
+            step="0.5"
+            className="exercise-input-field"
+          />
           <button 
             type="button" 
             onClick={addExercise}
@@ -128,6 +141,7 @@ function WorkoutForm({ onSubmit, savedExercises, onSaveExercise }: WorkoutFormPr
               {exercises.map((exercise, index) => (
                 <li key={index}>
                   {exercise.name} - {exercise.reps} reps
+                  {exercise.weight ? ` - ${exercise.weight} lbs` : ''}
                 </li>
               ))}
             </ul>

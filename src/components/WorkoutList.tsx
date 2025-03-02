@@ -71,6 +71,7 @@ function WorkoutList({
                   .map((exercise, index) => (
                     <li key={index}>
                       {exercise.name} - {exercise.reps} reps
+                      {exercise.weight ? ` - ${exercise.weight} lbs` : ''}
                     </li>
                   ))}
               </ul>

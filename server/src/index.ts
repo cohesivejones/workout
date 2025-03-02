@@ -93,6 +93,7 @@ app.get("/workouts", async (_req: Request, res: Response) => {
         id: we.exercise.id,
         name: we.exercise.name,
         reps: we.reps,
+        weight: we.weight,
       })),
     }));
 
@@ -146,6 +147,7 @@ app.post("/workouts", async (req: Request, res: Response) => {
         workout_id: workout.id,
         exercise_id: exercise.id,
         reps: exerciseData.reps,
+        weight: exerciseData.weight || null,
         workout,
         exercise,
       });
@@ -165,6 +167,7 @@ app.post("/workouts", async (req: Request, res: Response) => {
         id: we.exercise.id,
         name: we.exercise.name,
         reps: we.reps,
+        weight: we.weight,
       })),
     };
 

@@ -9,6 +9,7 @@ export interface WorkoutResponse {
     id: number;
     name: string;
     reps: number;
+    weight?: number | null;
   }>;
 }
 
@@ -19,6 +20,7 @@ export interface CreateWorkoutRequest {
   exercises: Array<{
     name: string;
     reps: number;
+    weight?: number | null;
   }>;
 }
 
