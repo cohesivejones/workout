@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc && vite build && npm run build --prefix server",
+    "db:migrate": "npm run db:migrate --prefix server",
     "dev": "concurrently \"npm:dev:web\" \"npm:dev:server\"",
     "dev:server": "npm run dev --prefix server",
     "dev:web": "vite",

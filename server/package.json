@@ -5,10 +5,10 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/index.js",
+    "db:migrate": "ts-node ./node_modules/typeorm/cli.js migration:run -d src/data-source.ts",
+    "db:revert": "ts-node ./node_modules/typeorm/cli.js migration:revert -d src/data-source.ts",
     "dev": "ts-node src/index.ts",
-    "migrate": "ts-node ./node_modules/typeorm/cli.js migration:run -d src/data-source.ts",
-    "migrate:revert": "ts-node ./node_modules/typeorm/cli.js migration:revert -d src/data-source.ts"
+    "start": "node dist/index.js"
   },
   "keywords": [],
   "author": "",
