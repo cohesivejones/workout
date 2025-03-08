@@ -1,0 +1,154 @@
+.workout-form {
+  flex: 1;
+  text-align: left;
+  padding: 20px;
+  background: #f5f5f5;
+  border-radius: 8px;
+}
+
+.error-message {
+  color: #ff4444;
+  margin-bottom: 20px;
+}
+
+.date-input {
+  margin-bottom: 20px;
+}
+
+.date-input label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.exercise-input-field {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.instructor-checkbox {
+  margin-bottom: 20px;
+}
+
+.instructor-checkbox label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.instructor-checkbox input[type="checkbox"] {
+  margin-right: 8px;
+}
+
+.exercise-input {
+  margin-bottom: 20px;
+}
+
+/* React Select Styles */
+.react-select-container {
+  margin-bottom: 10px;
+}
+
+.react-select__control {
+  border: 1px solid #ddd !important;
+  border-radius: 4px !important;
+  box-shadow: none !important;
+  min-height: 38px !important;
+}
+
+.react-select__control--is-focused {
+  border-color: #4CAF50 !important;
+  box-shadow: 0 0 0 1px #4CAF50 !important;
+}
+
+.react-select__value-container {
+  padding: 2px 8px !important;
+}
+
+.react-select__menu {
+  z-index: 100 !important;
+}
+
+.react-select__option--is-focused {
+  background-color: rgba(76, 175, 80, 0.1) !important;
+}
+
+.react-select__option--is-selected {
+  background-color: #4CAF50 !important;
+}
+
+.add-exercise-btn {
+  width: 100%;
+  padding: 10px;
+  background: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.add-exercise-btn:hover {
+  background: #45a049;
+}
+
+.add-exercise-btn:disabled {
+  background: #cccccc;
+  cursor: not-allowed;
+}
+
+.exercise-list {
+  /* Add any specific styles for exercise list here */
+}
+
+.exercise-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 0;
+}
+
+.exercise-info {
+  flex: 1;
+}
+
+.remove-exercise-btn {
+  background: #ff4444;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  line-height: 1;
+  margin-left: 10px;
+}
+
+.remove-exercise-btn:hover {
+  background: #cc0000;
+}
+
+.save-workout-btn {
+  width: 100%;
+  padding: 10px;
+  background: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.save-workout-btn:hover {
+  background: #45a049;
+}
+
+.save-workout-btn:disabled {
+  background: #cccccc;
+  cursor: not-allowed;
+}

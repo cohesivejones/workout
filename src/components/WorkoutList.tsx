@@ -2,6 +2,7 @@ import * as React from "react";
 import { Link } from "react-router-dom";
 import { WorkoutListProps } from "../types";
 import { deleteWorkout } from "../api";
+import "./WorkoutList.css";
 
 function WorkoutList({
   workouts,

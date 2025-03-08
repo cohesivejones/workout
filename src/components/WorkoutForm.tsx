@@ -1,6 +1,7 @@
 import * as React from "react";
 import { WorkoutFormProps, Status } from "../types";
 import CreatableSelect from "react-select/creatable";
+import "./WorkoutForm.css";
 
 function WorkoutForm({
   onSubmit,
