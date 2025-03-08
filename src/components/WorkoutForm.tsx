@@ -87,7 +87,12 @@ function WorkoutForm({
     }
   };
 
-  const handleExerciseChange = (newValue: any) => {
+  interface SelectOption {
+    label: string;
+    value: string;
+  }
+
+  const handleExerciseChange = (newValue: SelectOption | null) => {
     if (newValue) {
       setCurrentExercise({ ...currentExercise, name: newValue.value });
     } else {
