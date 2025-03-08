@@ -32,3 +32,6 @@ export const deleteWorkout = (workoutId: number): Promise<{ id: number }> =>
 
 export const updateWorkout = (workoutId: number, workout: Omit<Workout, 'id'>): Promise<Workout> =>
   api.put(`/workouts/${workoutId}`, workout);
+
+export const fetchWorkout = (workoutId: number): Promise<Workout> =>
+  api.get(`/workouts/${workoutId}`);

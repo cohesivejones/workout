@@ -4,6 +4,7 @@ import './App.css';
 import WorkoutListPage from './pages/WorkoutListPage';
 import AddWorkoutPage from './pages/AddWorkoutPage';
 import EditWorkoutPage from './pages/EditWorkoutPage';
+import WorkoutShowPage from './pages/WorkoutShowPage';
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
             <Route path="/" element={<WorkoutListPage />} />
             <Route path="/add" element={<AddWorkoutPage />} />
             <Route path="/edit/:id" element={<EditWorkoutPage />} />
+            <Route path="/workout/:id" element={<WorkoutShowPage />} />
           </Routes>
         </main>
       </div>

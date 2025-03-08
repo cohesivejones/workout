@@ -104,6 +104,45 @@ app.get("/workouts", async (_req: Request, res: Response) => {
   }
 });
 
+// Get a single workout by ID
+app.get("/workouts/:id", async (req: Request, res: Response) => {
+  try {
+    const workoutId = parseInt(req.params.id);
+    const workoutRepository = dataSource.getRepository(Workout);
+
+    const workout = await workoutRepository.findOne({
+      where: { id: workoutId },
+      relations: {
+        workoutExercises: {
+          exercise: true,
+        },
+      },
+    });
+
+    if (!workout) {
+      return res.status(404).json({ error: "Workout not found" });
+    }
+
+    // Transform to match the expected response format
+    const workoutResponse: WorkoutResponse = {
+      id: workout.id,
+      date: workout.date,
+      withInstructor: workout.withInstructor,
+      exercises: workout.workoutExercises.map((we) => ({
+        id: we.exercise.id,
+        name: we.exercise.name,
+        reps: we.reps,
+        weight: we.weight,
+      })),
+    };
+
+    res.json(workoutResponse);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 // Add new workout
 app.post("/workouts", async (req: Request, res: Response) => {
   const queryRunner = dataSource.createQueryRunner();

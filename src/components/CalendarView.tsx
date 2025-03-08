@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import "./CalendarView.css";
 import { Workout } from "../types";
-import { deleteWorkout } from "../api";
 import {
   startOfMonth,
   endOfMonth,
@@ -13,33 +12,14 @@ import {
   subMonths,
   isToday,
 } from "date-fns";
+import { Link } from "react-router-dom";
 
 interface CalendarViewProps {
   workouts: Workout[];
-  onWorkoutDeleted: (workoutId: number) => void;
 }
 
-const CalendarView: React.FC<CalendarViewProps> = ({
-  workouts,
-  onWorkoutDeleted,
-}) => {
+const CalendarView: React.FC<CalendarViewProps> = ({ workouts }) => {
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
-  const [isDeleting, setIsDeleting] = useState<number | null>(null);
-
-  const handleDelete = async (workoutId: number) => {
-    if (window.confirm("Are you sure you want to delete this workout?")) {
-      try {
-        setIsDeleting(workoutId);
-        await deleteWorkout(workoutId);
-        onWorkoutDeleted(workoutId);
-      } catch (err) {
-        console.error("Failed to delete workout:", err);
-        alert("Failed to delete workout. Please try again.");
-      } finally {
-        setIsDeleting(null);
-      }
-    }
-  };
 
   // Group workouts by date
   const workoutsByDate = workouts.reduce((acc, workout) => {
@@ -106,7 +86,8 @@ const CalendarView: React.FC<CalendarViewProps> = ({
             <div className="calendar-date">{formattedDate}</div>
             <div className="calendar-workouts">
               {dayWorkouts.map((workout) => (
-                <div
+                <Link
+                  to={`/workout/${workout.id}`}
                   key={workout.id}
                   className={`calendar-workout ${
                     workout.withInstructor ? "with-instructor" : ""
@@ -119,14 +100,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({
                       </div>
                     ))}
                   </div>
-                  <button
-                    onClick={() => handleDelete(workout.id)}
-                    disabled={isDeleting === workout.id}
-                    className="delete-btn"
-                  >
-                    {isDeleting === workout.id ? "..." : "×"}
-                  </button>
-                </div>
+                </Link>
               ))}
             </div>
           </div>
