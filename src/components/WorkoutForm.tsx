@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { WorkoutFormProps, Status } from '../types';
+import { WorkoutFormProps, Status, Workout } from '../types';
 import CreatableSelect from 'react-select/creatable';
 
 interface OptionType {
@@ -7,11 +7,15 @@ interface OptionType {
   value: string;
 }
 
-function WorkoutForm({ onSubmit, savedExercises, onSaveExercise }: WorkoutFormProps): React.ReactElement {
-  const [exercises, setExercises] = React.useState<Array<{ name: string; reps: number; weight?: number | null }>>([]);
+function WorkoutForm({ onSubmit, savedExercises, onSaveExercise, existingWorkout }: WorkoutFormProps): React.ReactElement {
+  const [exercises, setExercises] = React.useState<Array<{ name: string; reps: number; weight?: number | null }>>(
+    existingWorkout?.exercises || []
+  );
   const [currentExercise, setCurrentExercise] = React.useState<{ name: string; reps: string; weight: string }>({ name: '', reps: '', weight: '' });
-  const [workoutDate, setWorkoutDate] = React.useState<string>(new Date().toISOString().split('T')[0]);
-  const [withInstructor, setWithInstructor] = React.useState<boolean>(false);
+  const [workoutDate, setWorkoutDate] = React.useState<string>(
+    existingWorkout ? new Date(existingWorkout.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]
+  );
+  const [withInstructor, setWithInstructor] = React.useState<boolean>(existingWorkout?.withInstructor || false);
   const [status, setStatus] = React.useState<Status>({ loading: false, error: null });
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -70,7 +74,7 @@ function WorkoutForm({ onSubmit, savedExercises, onSaveExercise }: WorkoutFormPr
 
   return (
     <div className="workout-form">
-      <h2>Add New Workout</h2>
+      <h2>{existingWorkout ? 'Edit Workout' : 'Add New Workout'}</h2>
       {status.error && <div className="error-message">{status.error}</div>}
       <form onSubmit={handleSubmit}>
         <div className="date-input">
@@ -139,9 +143,20 @@ function WorkoutForm({ onSubmit, savedExercises, onSaveExercise }: WorkoutFormPr
           ) : (
             <ul>
               {exercises.map((exercise, index) => (
-                <li key={index}>
-                  {exercise.name} - {exercise.reps} reps
-                  {exercise.weight ? ` - ${exercise.weight} lbs` : ''}
+                <li key={index} className="exercise-item">
+                  <div className="exercise-info">
+                    {exercise.name} - {exercise.reps} reps
+                    {exercise.weight ? ` - ${exercise.weight} lbs` : ''}
+                  </div>
+                  <button 
+                    type="button" 
+                    className="remove-exercise-btn"
+                    onClick={() => {
+                      setExercises(exercises.filter((_, i) => i !== index));
+                    }}
+                  >
+                    ×
+                  </button>
                 </li>
               ))}
             </ul>
@@ -153,7 +168,7 @@ function WorkoutForm({ onSubmit, savedExercises, onSaveExercise }: WorkoutFormPr
           disabled={exercises.length === 0 || status.loading}
           className="save-workout-btn"
         >
-          {status.loading ? 'Saving...' : 'Save Workout'}
+          {status.loading ? 'Saving...' : existingWorkout ? 'Update Workout' : 'Save Workout'}
         </button>
       </form>
     </div>

@@ -29,3 +29,6 @@ export const createExercise = (exerciseName: string): Promise<Exercise> =>
 
 export const deleteWorkout = (workoutId: number): Promise<{ id: number }> =>
   api.delete(`/workouts/${workoutId}`);
+
+export const updateWorkout = (workoutId: number, workout: Omit<Workout, 'id'>): Promise<Workout> =>
+  api.put(`/workouts/${workoutId}`, workout);

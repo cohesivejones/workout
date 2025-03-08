@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import './App.css';
 import WorkoutListPage from './pages/WorkoutListPage';
 import AddWorkoutPage from './pages/AddWorkoutPage';
+import EditWorkoutPage from './pages/EditWorkoutPage';
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
           <Routes>
             <Route path="/" element={<WorkoutListPage />} />
             <Route path="/add" element={<AddWorkoutPage />} />
+            <Route path="/edit/:id" element={<EditWorkoutPage />} />
           </Routes>
         </main>
       </div>

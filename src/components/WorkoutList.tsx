@@ -1,4 +1,5 @@
 import * as React from "react";
+import { Link } from "react-router-dom";
 import { WorkoutListProps } from "../types";
 import { deleteWorkout } from "../api";
 
@@ -45,25 +46,31 @@ function WorkoutList({
 
   return (
     <div className="workout-list">
-      <h2>Your Workouts</h2>
       {workouts.length === 0 ? (
         <p>No workouts yet. Add your first workout!</p>
       ) : (
         <div className="workouts">
           {workouts.map((workout) => (
-            <div 
-              key={workout.id} 
-              className={`workout-card ${workout.withInstructor ? 'with-instructor' : ''}`}
+            <div
+              key={workout.id}
+              className={`workout-card ${
+                workout.withInstructor ? "with-instructor" : ""
+              }`}
             >
               <div className="workout-header">
                 <h3>{formatDate(workout.date)}</h3>
-                <button
-                  onClick={() => handleDelete(workout.id)}
-                  disabled={isDeleting === workout.id}
-                  className="delete-btn"
-                >
-                  {isDeleting === workout.id ? "Deleting..." : "×"}
-                </button>
+                <div className="workout-actions">
+                  <Link to={`/edit/${workout.id}`} className="edit-btn">
+                    Edit
+                  </Link>
+                  <button
+                    onClick={() => handleDelete(workout.id)}
+                    disabled={isDeleting === workout.id}
+                    className="delete-btn"
+                  >
+                    {isDeleting === workout.id ? "Deleting..." : "×"}
+                  </button>
+                </div>
               </div>
               <ul>
                 {(workout.exercises || [])
@@ -71,7 +78,7 @@ function WorkoutList({
                   .map((exercise, index) => (
                     <li key={index}>
                       {exercise.name} - {exercise.reps} reps
-                      {exercise.weight ? ` - ${exercise.weight} lbs` : ''}
+                      {exercise.weight ? ` - ${exercise.weight} lbs` : ""}
                     </li>
                   ))}
               </ul>

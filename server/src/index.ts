@@ -130,6 +130,7 @@ app.post("/workouts", async (req: Request, res: Response) => {
     const exerciseRepository = queryRunner.manager.getRepository(Exercise);
     const workoutExerciseRepository =
       queryRunner.manager.getRepository(WorkoutExercise);
+    const createdWorkoutExercises: WorkoutExercise[] = [];
 
     for (const exerciseData of exercises) {
       // Get or create exercise
@@ -154,6 +155,7 @@ app.post("/workouts", async (req: Request, res: Response) => {
 
       await workoutExerciseRepository.save(workoutExercise);
       workout.workoutExercises.push(workoutExercise);
+      createdWorkoutExercises.push(workoutExercise);
     }
 
     await queryRunner.commitTransaction();
@@ -163,7 +165,108 @@ app.post("/workouts", async (req: Request, res: Response) => {
       id: workout.id,
       date: workout.date,
       withInstructor: workout.withInstructor,
-      exercises: workout.workoutExercises.map((we) => ({
+      exercises: createdWorkoutExercises.map((we) => ({
+        id: we.exercise.id,
+        name: we.exercise.name,
+        reps: we.reps,
+        weight: we.weight,
+      })),
+    };
+
+    res.json(response);
+  } catch (err) {
+    await queryRunner.rollbackTransaction();
+    console.error(err);
+    const error = err as DatabaseError;
+
+    // Check for unique constraint violation
+    if (error.code === "23505" && error.constraint === "workouts_date_key") {
+      res.status(400).json({ error: "A workout already exists for this date" });
+    } else {
+      res.status(500).json({ error: error.message || "Server error" });
+    }
+  } finally {
+    await queryRunner.release();
+  }
+});
+
+// Update workout
+app.put("/workouts/:id", async (req: Request, res: Response) => {
+  const queryRunner = dataSource.createQueryRunner();
+
+  try {
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    const workoutId = parseInt(req.params.id);
+    const { date, withInstructor, exercises } =
+      req.body as CreateWorkoutRequest;
+
+    // Find workout
+    const workoutRepository = queryRunner.manager.getRepository(Workout);
+    const workout = await workoutRepository.findOne({
+      where: { id: workoutId },
+      loadRelationIds: true,
+      relations: {
+        workoutExercises: {
+          exercise: true,
+        },
+      },
+    });
+
+    if (!workout) {
+      return res.status(404).json({ error: "Workout not found" });
+    }
+
+    // Update workout properties
+    workout.date = date;
+    workout.withInstructor = withInstructor || false;
+    await workoutRepository.save(workout);
+
+    // Delete existing workout exercises
+    const workoutExerciseRepository =
+      queryRunner.manager.getRepository(WorkoutExercise);
+
+    // First, delete all existing workout exercises for this workout
+    await workoutExerciseRepository.delete({ workout_id: workout.id });
+
+    // Process new exercises
+    const exerciseRepository = queryRunner.manager.getRepository(Exercise);
+    const newWorkoutExercises = [];
+
+    for (const exerciseData of exercises) {
+      // Get or create exercise
+      let exercise = await exerciseRepository.findOne({
+        where: { name: exerciseData.name },
+      });
+
+      if (!exercise) {
+        exercise = exerciseRepository.create({ name: exerciseData.name });
+        await exerciseRepository.save(exercise);
+      }
+
+      // Create workout-exercise relationship
+      const workoutExercise = workoutExerciseRepository.create({
+        workout_id: workout.id,
+        exercise_id: exercise.id,
+        reps: exerciseData.reps,
+        weight: exerciseData.weight || null,
+        workout: workout,
+        exercise: exercise,
+      });
+
+      await workoutExerciseRepository.save(workoutExercise);
+      newWorkoutExercises.push(workoutExercise);
+    }
+
+    await queryRunner.commitTransaction();
+
+    // Format response
+    const response: WorkoutResponse = {
+      id: workout.id,
+      date: workout.date,
+      withInstructor: workout.withInstructor,
+      exercises: newWorkoutExercises.map((we: WorkoutExercise) => ({
         id: we.exercise.id,
         name: we.exercise.name,
         reps: we.reps,
