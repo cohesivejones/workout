@@ -28,6 +28,7 @@
   margin-bottom: 10px;
   border: 1px solid #ddd;
   border-radius: 4px;
+  box-sizing: border-box;
 }
 
 .instructor-checkbox {
@@ -50,6 +51,7 @@
 
 /* React Select Styles */
 .react-select-container {
+  width: 100%;
   margin-bottom: 10px;
 }
 
