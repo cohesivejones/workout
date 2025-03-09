@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import type { ReactElement } from "react";
 import { Link } from "react-router-dom";
 import WorkoutList from "../components/WorkoutList";

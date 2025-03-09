@@ -2,7 +2,7 @@ import axios from "axios";
 import { Exercise, Workout } from "./types";
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: process.env.VITE_API_URL,
   headers: {
     "Content-Type": "application/json",
   },
@@ -30,8 +30,10 @@ export const createExercise = (exerciseName: string): Promise<Exercise> =>
 export const deleteWorkout = (workoutId: number): Promise<{ id: number }> =>
   api.delete(`/workouts/${workoutId}`);
 
-export const updateWorkout = (workoutId: number, workout: Omit<Workout, 'id'>): Promise<Workout> =>
-  api.put(`/workouts/${workoutId}`, workout);
+export const updateWorkout = (
+  workoutId: number,
+  workout: Omit<Workout, "id">
+): Promise<Workout> => api.put(`/workouts/${workoutId}`, workout);
 
 export const fetchWorkout = (workoutId: number): Promise<Workout> =>
   api.get(`/workouts/${workoutId}`);
