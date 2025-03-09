@@ -52,7 +52,6 @@ function WorkoutForm({
         error: err instanceof Error ? err.message : "An error occurred",
       });
     }
-    setStatus({ loading: false, error: null });
   };
 
   const addExercise = async (e: React.MouseEvent<HTMLButtonElement>) => {

@@ -1,4 +1,4 @@
-import React from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import WorkoutForm from "../components/WorkoutForm";
 import { createWorkout, createExercise, fetchExercises } from "../api";
@@ -6,10 +6,10 @@ import { Workout } from "../types";
 
 export default function AddWorkoutPage() {
   const navigate = useNavigate();
-  const [savedExercises, setSavedExercises] = React.useState<string[]>([]);
-  const [error, setError] = React.useState<string | null>(null);
+  const [savedExercises, setSavedExercises] = useState<string[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const loadExercises = async () => {
       try {
         const exercisesData = await fetchExercises();
