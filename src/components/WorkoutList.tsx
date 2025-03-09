@@ -3,32 +3,13 @@ import { Link } from "react-router-dom";
 import { WorkoutListProps } from "../types";
 import { deleteWorkout } from "../api";
 import "./WorkoutList.css";
+import { format } from "date-fns";
 
 function WorkoutList({
   workouts,
   onWorkoutDeleted,
 }: WorkoutListProps): React.ReactElement {
   const [isDeleting, setIsDeleting] = React.useState<number | null>(null);
-
-  const formatDate = (dateStr: string): string => {
-    const date = new Date(dateStr);
-    const days = [
-      "Sunday",
-      "Monday",
-      "Tuesday",
-      "Wednesday",
-      "Thursday",
-      "Friday",
-      "Saturday",
-    ];
-    const day = days[date.getDay()];
-    const formattedDate = date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-    return `${formattedDate} (${day})`;
-  };
 
   const handleDelete = async (workoutId: number) => {
     if (window.confirm("Are you sure you want to delete this workout?")) {
@@ -59,7 +40,7 @@ function WorkoutList({
               }`}
             >
               <div className="workout-header">
-                <h3>{formatDate(workout.date)}</h3>
+                <h3>{format(workout.date, "MMM d, yyyy (eeee)")}</h3>
                 <div className="workout-actions">
                   <Link to={`/edit/${workout.id}`} className="edit-btn">
                     Edit
