@@ -1,12 +1,11 @@
 import { useState, useEffect } from "react";
-import type { ReactElement } from "react";
 import { Link } from "react-router-dom";
 import UserList from "../components/UserList";
 import { fetchUsers } from "../api";
 import { User } from "../types";
-import "./UserListPage.css";
+import "./LoginPage.css";
 
-function UserListPage(): ReactElement {
+function LoginPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -47,4 +46,4 @@ function UserListPage(): ReactElement {
   );
 }
 
-export default UserListPage;
+export default LoginPage;

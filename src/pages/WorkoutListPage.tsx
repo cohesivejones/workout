@@ -7,12 +7,14 @@ import { fetchWorkouts } from "../api";
 import { Workout } from "../types";
 import classNames from "classnames";
 import "./WorkoutListPage.css";
+import { useUserContext } from "../contexts/useUserContext";
 
 function WorkoutListPage(): ReactElement {
   const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"calendar" | "list">("calendar");
+  const { user } = useUserContext();
 
   useEffect(() => {
     const loadWorkouts = async () => {
@@ -42,7 +44,7 @@ function WorkoutListPage(): ReactElement {
   return (
     <div>
       <div className="page-header">
-        <h2>Your Workouts</h2>
+        <h2>{user?.name} Workouts</h2>
         <div className="page-actions">
           <Link to="/add" className="button">
             Add New Workout

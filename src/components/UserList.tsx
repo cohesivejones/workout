@@ -1,12 +1,14 @@
-import { ReactElement } from "react";
 import { User } from "../types";
 import "./UserList.css";
+import { useUserContext } from "../contexts/useUserContext";
 
 interface UserListProps {
   users: User[];
 }
 
-function UserList({ users }: UserListProps): ReactElement {
+function UserList({ users }: UserListProps) {
+  const { login } = useUserContext();
+
   if (users.length === 0) {
     return <div className="no-users">No users found</div>;
   }
@@ -16,15 +18,15 @@ function UserList({ users }: UserListProps): ReactElement {
       <table>
         <thead>
           <tr>
-            <th>ID</th>
             <th>Name</th>
           </tr>
         </thead>
         <tbody>
           {users.map((user) => (
             <tr key={user.id}>
-              <td>{user.id}</td>
-              <td>{user.name}</td>
+              <td>
+                <button onClick={() => login(user)}>{user.name}</button>
+              </td>
             </tr>
           ))}
         </tbody>
