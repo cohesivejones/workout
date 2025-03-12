@@ -73,7 +73,7 @@ const WorkoutShowPage: React.FC = () => {
 
       <div
         className={classNames("workout-detail-card", {
-          "with-instructor": workout.withInstructor
+          "with-instructor": workout.withInstructor,
         })}
       >
         <div className="workout-detail-header">
