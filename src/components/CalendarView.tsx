@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import "./CalendarView.css";
 import { Workout } from "../types";
+import classNames from "classnames";
 import {
   startOfMonth,
   endOfMonth,
@@ -78,9 +79,10 @@ const CalendarView: React.FC<CalendarViewProps> = ({ workouts }) => {
 
         days.push(
           <div
-            className={`calendar-cell ${
-              !isSameMonth(day, monthStart) ? "disabled" : ""
-            } ${isToday(day) ? "today" : ""}`}
+            className={classNames("calendar-cell", {
+              disabled: !isSameMonth(day, monthStart),
+              today: isToday(day)
+            })}
             key={day.toString()}
           >
             <div className="calendar-date">{formattedDate}</div>
@@ -89,9 +91,9 @@ const CalendarView: React.FC<CalendarViewProps> = ({ workouts }) => {
                 <Link
                   to={`/workout/${workout.id}`}
                   key={workout.id}
-                  className={`calendar-workout ${
-                    workout.withInstructor ? "with-instructor" : ""
-                  }`}
+                  className={classNames("calendar-workout", {
+                    "with-instructor": workout.withInstructor
+                  })}
                 >
                   <div className="workout-exercises">
                     {workout.exercises.map((exercise, idx) => (
