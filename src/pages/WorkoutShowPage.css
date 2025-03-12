@@ -34,7 +34,7 @@
 }
 
 .button.primary {
-  background-color: #4CAF50;
+  background-color: #4caf50;
   color: white;
 }
 
@@ -137,7 +137,8 @@
   color: #666;
 }
 
-.exercise-detail-reps, .exercise-detail-weight {
+.exercise-detail-reps,
+.exercise-detail-weight {
   background-color: #f1f1f1;
   padding: 4px 8px;
   border-radius: 4px;
@@ -153,7 +154,8 @@
   border-top: 1px solid #ddd;
 }
 
-.loading, .error-message {
+.loading,
+.error-message {
   text-align: center;
   padding: 40px;
   font-size: 1.2rem;
@@ -171,17 +173,17 @@
     align-items: flex-start;
     gap: 10px;
   }
-  
+
   .exercise-detail-item {
     flex-direction: column;
     align-items: flex-start;
     gap: 5px;
   }
-  
+
   .workout-detail-actions {
     flex-direction: column;
   }
-  
+
   .button {
     width: 100%;
     text-align: center;

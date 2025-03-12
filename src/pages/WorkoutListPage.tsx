@@ -5,6 +5,7 @@ import WorkoutList from "../components/WorkoutList";
 import CalendarView from "../components/CalendarView";
 import { fetchWorkouts } from "../api";
 import { Workout } from "../types";
+import classNames from "classnames";
 import "./WorkoutListPage.css";
 
 function WorkoutListPage(): ReactElement {
@@ -43,23 +44,27 @@ function WorkoutListPage(): ReactElement {
       <div className="page-header">
         <h2>Your Workouts</h2>
         <div className="page-actions">
+          <Link to="/add" className="button">
+            Add New Workout
+          </Link>
           <div className="view-toggle">
             <button
-              className={viewMode === "calendar" ? "active" : ""}
+              className={classNames({
+                active: viewMode === "calendar",
+              })}
               onClick={() => setViewMode("calendar")}
             >
               Calendar
             </button>
             <button
-              className={viewMode === "list" ? "active" : ""}
+              className={classNames({
+                active: viewMode === "list",
+              })}
               onClick={() => setViewMode("list")}
             >
               List
             </button>
           </div>
-          <Link to="/add" className="button">
-            Add New Workout
-          </Link>
         </div>
       </div>
       {error && <div className="error-message">{error}</div>}
