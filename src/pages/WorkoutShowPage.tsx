@@ -4,6 +4,7 @@ import { fetchWorkout, deleteWorkout } from "../api";
 import { Workout } from "../types";
 import "./WorkoutShowPage.css";
 import { format } from "date-fns";
+import classNames from "classnames";
 
 const WorkoutShowPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -71,9 +72,9 @@ const WorkoutShowPage: React.FC = () => {
       </div>
 
       <div
-        className={`workout-detail-card ${
-          workout.withInstructor ? "with-instructor" : ""
-        }`}
+        className={classNames("workout-detail-card", {
+          "with-instructor": workout.withInstructor,
+        })}
       >
         <div className="workout-detail-header">
           <h3>{format(workout.date, "MMM d, yyyy (eeee)")}</h3>

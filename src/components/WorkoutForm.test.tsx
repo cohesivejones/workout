@@ -3,32 +3,31 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import WorkoutForm from "./WorkoutForm";
 import { Workout } from "../types";
 
-jest.mock(
-  "react-select/creatable",
-  () =>
-    ({ options, value, onChange }: any) => {
-      function handleChange(event: React.ChangeEvent<HTMLSelectElement>) {
-        const option = options.find(
-          (option: any) => option.value === event.currentTarget.value
-        );
-        onChange(option);
-      }
-
-      return (
-        <select
-          data-testid="exercise-select"
-          value={value ? value.value : ""}
-          onChange={handleChange}
-        >
-          <option value="">Select...</option>
-          {options.map(({ label, value }: any) => (
-            <option key={value} value={value}>
-              {label}
-            </option>
-          ))}
-        </select>
+jest.mock("react-select/creatable", () =>
+  // eslint-disable-next-line react/display-name
+  ({ options, value, onChange }: any) => {
+    function handleChange(event: React.ChangeEvent<HTMLSelectElement>) {
+      const option = options.find(
+        (option: any) => option.value === event.currentTarget.value
       );
+      onChange(option);
     }
+
+    return (
+      <select
+        data-testid="exercise-select"
+        value={value ? value.value : ""}
+        onChange={handleChange}
+      >
+        <option value="">Select...</option>
+        {options.map(({ label, value }: any) => (
+          <option key={value} value={value}>
+            {label}
+          </option>
+        ))}
+      </select>
+    );
+  }
 );
 
 describe("WorkoutForm", () => {

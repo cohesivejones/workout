@@ -4,6 +4,7 @@ import { WorkoutListProps } from "../types";
 import { deleteWorkout } from "../api";
 import "./WorkoutList.css";
 import { format } from "date-fns";
+import classNames from "classnames";
 
 function WorkoutList({
   workouts,
@@ -35,9 +36,9 @@ function WorkoutList({
           {workouts.map((workout) => (
             <div
               key={workout.id}
-              className={`workout-card ${
-                workout.withInstructor ? "with-instructor" : ""
-              }`}
+              className={classNames("workout-card", {
+                "with-instructor": workout.withInstructor
+              })}
             >
               <div className="workout-header">
                 <h3>{format(workout.date, "MMM d, yyyy (eeee)")}</h3>
