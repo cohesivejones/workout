@@ -15,22 +15,18 @@ function UserList({ users }: UserListProps) {
 
   return (
     <div className="user-list">
-      <table>
-        <thead>
-          <tr>
-            <th>Name</th>
-          </tr>
-        </thead>
-        <tbody>
-          {users.map((user) => (
-            <tr key={user.id}>
-              <td>
-                <button onClick={() => login(user)}>{user.name}</button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <h2>Login</h2>
+      <div className="user-buttons">
+        {users.map((user) => (
+          <button
+            key={user.id}
+            className="user-button"
+            onClick={() => login(user)}
+          >
+            {user.name}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
