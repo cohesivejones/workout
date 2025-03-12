@@ -1,12 +1,11 @@
-import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "./App.css";
 import WorkoutListPage from "./pages/WorkoutListPage";
 import AddWorkoutPage from "./pages/AddWorkoutPage";
 import EditWorkoutPage from "./pages/EditWorkoutPage";
 import WorkoutShowPage from "./pages/WorkoutShowPage";
-import LoginPage from "./pages/LoginPage";
 import NotFoundPage from "./pages/NotFoundPage";
-import { UserContextProvider } from "./contexts/UserContextProvider";
+import { Layout } from "./Layout";
 
 function App() {
   return (
@@ -17,16 +16,8 @@ function App() {
         </header>
         <main className="App-main">
           <Routes>
-            <Route
-              path="/"
-              element={
-                <UserContextProvider>
-                  <Outlet />
-                </UserContextProvider>
-              }
-            >
-              <Route path="/" element={<LoginPage />} />
-              <Route path="/workouts" element={<WorkoutListPage />} />
+            <Route element={<Layout />}>
+              <Route index path="/" element={<WorkoutListPage />} />
               <Route path="/add" element={<AddWorkoutPage />} />
               <Route path="/edit/:id" element={<EditWorkoutPage />} />
               <Route path="/workout/:id" element={<WorkoutShowPage />} />
