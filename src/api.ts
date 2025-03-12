@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Exercise, Workout } from "./types";
+import { Exercise, Workout, User } from "./types";
 
 const api = axios.create({
   baseURL: process.env.VITE_API_URL,
@@ -16,6 +16,8 @@ api.interceptors.response.use(
     throw new Error(error.response?.data?.error || "An error occurred");
   }
 );
+
+export const fetchUsers = (): Promise<User[]> => api.get("/users");
 
 export const fetchWorkouts = (): Promise<Workout[]> => api.get("/workouts");
 

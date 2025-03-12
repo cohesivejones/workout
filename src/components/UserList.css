@@ -1,0 +1,43 @@
+.user-list {
+  margin: 20px 0;
+  width: 100%;
+}
+
+.user-list table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.user-list th,
+.user-list td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.user-list th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  color: #333;
+}
+
+.user-list tr:last-child td {
+  border-bottom: none;
+}
+
+.user-list tr:hover {
+  background-color: #f5f5f5;
+}
+
+.no-users {
+  text-align: center;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  color: #666;
+}

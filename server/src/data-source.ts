@@ -1,6 +1,6 @@
 import "reflect-metadata";
 import { DataSource } from "typeorm";
-import { Exercise, Workout, WorkoutExercise } from "./entities";
+import * as entities from "./entities";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -15,8 +15,9 @@ const dataSource = process.env.DATABASE_URL
       },
       synchronize: false, // Set to true only in development
       logging: process.env.NODE_ENV === "development",
-      entities: [Exercise, Workout, WorkoutExercise],
+      entities,
       migrations: [__dirname + "/migrations/*.ts"],
+      migrationsTransactionMode: "each",
       subscribers: [],
     })
   : new DataSource({
@@ -28,8 +29,9 @@ const dataSource = process.env.DATABASE_URL
       database: process.env.PGDATABASE,
       synchronize: false, // Set to true only in development
       logging: process.env.NODE_ENV === "development",
-      entities: [Exercise, Workout, WorkoutExercise],
+      entities,
       migrations: [__dirname + "/migrations/*.ts"],
+      migrationsTransactionMode: "each",
       subscribers: [],
     });
 

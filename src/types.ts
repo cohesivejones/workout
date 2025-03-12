@@ -1,3 +1,12 @@
+export interface User {
+  id: number;
+  name: string;
+}
+
+export interface UserListProps {
+  users: User[];
+}
+
 export interface Exercise {
   id?: number;
   name: string;

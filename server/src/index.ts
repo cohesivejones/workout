@@ -3,8 +3,7 @@ import cors from "cors";
 import { DatabaseError, WorkoutResponse, CreateWorkoutRequest } from "./types";
 import * as dotenv from "dotenv";
 import dataSource from "./data-source";
-import { Exercise, Workout, WorkoutExercise } from "./entities";
-import { In } from "typeorm";
+import { Exercise, Workout, WorkoutExercise, User } from "./entities";
 
 // Initialize reflect-metadata
 import "reflect-metadata";
@@ -28,6 +27,23 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
+
+// User routes
+// Get all users
+app.get("/users", async (_req: Request, res: Response) => {
+  try {
+    const userRepository = dataSource.getRepository(User);
+    const users = await userRepository.find({
+      order: {
+        name: "ASC",
+      },
+    });
+    res.json(users);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
 
 // Get all exercises
 app.get("/exercises", async (_req: Request, res: Response) => {

@@ -4,6 +4,7 @@ import WorkoutListPage from './pages/WorkoutListPage';
 import AddWorkoutPage from './pages/AddWorkoutPage';
 import EditWorkoutPage from './pages/EditWorkoutPage';
 import WorkoutShowPage from './pages/WorkoutShowPage';
+import UserListPage from './pages/UserListPage';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
             <Route path="/add" element={<AddWorkoutPage />} />
             <Route path="/edit/:id" element={<EditWorkoutPage />} />
             <Route path="/workout/:id" element={<WorkoutShowPage />} />
+            <Route path="/users" element={<UserListPage />} />
           </Routes>
         </main>
       </div>

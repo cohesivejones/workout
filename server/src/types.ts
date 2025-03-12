@@ -1,4 +1,4 @@
-import { Exercise, Workout, WorkoutExercise } from "./entities";
+import { Exercise, Workout, WorkoutExercise, User } from "./entities";
 
 // Interface for API responses
 export interface WorkoutResponse {
