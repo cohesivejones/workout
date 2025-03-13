@@ -17,12 +17,13 @@ export interface Exercise {
 export interface Workout {
   id: number;
   date: string;
+  userId: number;
   withInstructor: boolean;
   exercises: Exercise[];
 }
 
 export interface WorkoutFormProps {
-  onSubmit: (workout: Omit<Workout, 'id'>) => Promise<boolean>;
+  onSubmit: (workout: Omit<Workout, "id">) => Promise<boolean>;
   savedExercises: string[];
   onSaveExercise: (exerciseName: string) => Promise<boolean>;
   existingWorkout?: Workout;

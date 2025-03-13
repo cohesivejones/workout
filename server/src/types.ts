@@ -15,6 +15,7 @@ export interface WorkoutResponse {
 
 // Interface for workout creation request
 export interface CreateWorkoutRequest {
+  userId: number;
   date: string;
   withInstructor: boolean;
   exercises: Array<{

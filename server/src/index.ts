@@ -46,10 +46,17 @@ app.get("/users", async (_req: Request, res: Response) => {
 });
 
 // Get all exercises
-app.get("/exercises", async (_req: Request, res: Response) => {
+app.get("/exercises", async (req: Request, res: Response) => {
+  const { userId } = req.query;
+  if (!userId)
+    return res.status(400).json({
+      error: "User ID is required",
+    });
+
   try {
     const exerciseRepository = dataSource.getRepository(Exercise);
     const exercises = await exerciseRepository.find({
+      where: { userId: Number(userId) },
       order: {
         name: "ASC",
       },
@@ -64,15 +71,17 @@ app.get("/exercises", async (_req: Request, res: Response) => {
 // Add new exercise
 app.post("/exercises", async (req: Request, res: Response) => {
   try {
-    const { name } = req.body;
+    const { name, userId } = req.body;
     const exerciseRepository = dataSource.getRepository(Exercise);
 
     // Check if exercise exists
-    let exercise = await exerciseRepository.findOne({ where: { name } });
+    let exercise = await exerciseRepository.findOne({
+      where: { name, userId },
+    });
 
     if (!exercise) {
       // Create new exercise
-      exercise = exerciseRepository.create({ name });
+      exercise = exerciseRepository.create({ name, userId });
     }
 
     // Save exercise (either new or existing)
@@ -174,12 +183,13 @@ app.post("/workouts", async (req: Request, res: Response) => {
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
-    const { date, withInstructor, exercises } =
+    const { date, withInstructor, exercises, userId } =
       req.body as CreateWorkoutRequest;
 
     // Create new workout
     const workoutRepository = queryRunner.manager.getRepository(Workout);
     const workout = workoutRepository.create({
+      userId,
       date,
       withInstructor: withInstructor || false,
       workoutExercises: [],
@@ -197,11 +207,14 @@ app.post("/workouts", async (req: Request, res: Response) => {
     for (const exerciseData of exercises) {
       // Get or create exercise
       let exercise = await exerciseRepository.findOne({
-        where: { name: exerciseData.name },
+        where: { name: exerciseData.name, userId },
       });
 
       if (!exercise) {
-        exercise = exerciseRepository.create({ name: exerciseData.name });
+        exercise = exerciseRepository.create({
+          name: exerciseData.name,
+          userId,
+        });
         await exerciseRepository.save(exercise);
       }
 
@@ -299,11 +312,14 @@ app.put("/workouts/:id", async (req: Request, res: Response) => {
     for (const exerciseData of exercises) {
       // Get or create exercise
       let exercise = await exerciseRepository.findOne({
-        where: { name: exerciseData.name },
+        where: { name: exerciseData.name, userId: workout.userId },
       });
 
       if (!exercise) {
-        exercise = exerciseRepository.create({ name: exerciseData.name });
+        exercise = exerciseRepository.create({
+          name: exerciseData.name,
+          userId: workout.userId,
+        });
         await exerciseRepository.save(exercise);
       }
 
