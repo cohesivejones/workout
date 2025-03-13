@@ -18,8 +18,9 @@ function WorkoutListPage(): ReactElement {
 
   useEffect(() => {
     const loadWorkouts = async () => {
+      if (!user) return;
       try {
-        const workoutsData = await fetchWorkouts();
+        const workoutsData = await fetchWorkouts(user.id);
         setWorkouts(workoutsData);
         setLoading(false);
       } catch (err) {

@@ -85,11 +85,18 @@ app.post("/exercises", async (req: Request, res: Response) => {
 });
 
 // Get all workouts with exercises
-app.get("/workouts", async (_req: Request, res: Response) => {
+app.get("/workouts", async (req: Request, res: Response) => {
   try {
+    const { userId } = req.query;
+    if (!userId)
+      return res.status(400).json({
+        error: "User ID is required",
+      });
+
     const workoutRepository = dataSource.getRepository(Workout);
 
     const workouts = await workoutRepository.find({
+      where: { userId: Number(userId) },
       relations: {
         workoutExercises: {
           exercise: true,

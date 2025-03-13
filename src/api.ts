@@ -19,7 +19,8 @@ api.interceptors.response.use(
 
 export const fetchUsers = (): Promise<User[]> => api.get("/users");
 
-export const fetchWorkouts = (): Promise<Workout[]> => api.get("/workouts");
+export const fetchWorkouts = (userId: number): Promise<Workout[]> =>
+  api.get(`/workouts?userId=${userId}`);
 
 export const fetchExercises = (): Promise<Exercise[]> => api.get("/exercises");
 

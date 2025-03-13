@@ -6,6 +6,9 @@ export class Workout {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column({ type: "integer" })
+  userId: number;
+
   @Column({ type: "date", unique: true })
   date: string;
 
