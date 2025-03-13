@@ -8,11 +8,13 @@ import {
   fetchExercises,
 } from "../api";
 import { Workout } from "../types";
+import { useUserContext } from "../contexts/useUserContext";
 
 export default function EditWorkoutPage() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const workoutId = parseInt(id || "0");
+  const { user } = useUserContext();
 
   const [workout, setWorkout] = useState<Workout | null>(null);
   const [savedExercises, setSavedExercises] = useState<string[]>([]);
@@ -22,11 +24,12 @@ export default function EditWorkoutPage() {
   useEffect(() => {
     const loadData = async () => {
       try {
+        if (!user) return;
         setLoading(true);
         setError(null);
 
         // Load workouts and find the one we're editing
-        const workoutsData = await fetchWorkouts();
+        const workoutsData = await fetchWorkouts(user.id);
         const foundWorkout = workoutsData.find((w) => w.id === workoutId);
 
         if (!foundWorkout) {
@@ -38,7 +41,7 @@ export default function EditWorkoutPage() {
         setWorkout(foundWorkout);
 
         // Load exercises
-        const exercisesData = await fetchExercises();
+        const exercisesData = await fetchExercises(user.id);
         setSavedExercises(exercisesData.map((e) => e.name));
 
         setLoading(false);
@@ -73,9 +76,10 @@ export default function EditWorkoutPage() {
 
   const addExerciseToSaved = async (exerciseName: string): Promise<boolean> => {
     try {
+      if (!user) return false;
       setError(null);
       if (!savedExercises.includes(exerciseName)) {
-        const result = await createExercise(exerciseName);
+        const result = await createExercise(exerciseName, user.id);
         setSavedExercises((prev) => [...prev, result.name].sort());
         return true;
       }

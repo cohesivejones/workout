@@ -6,9 +6,15 @@ export class Exercise {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column({ type: "integer" })
+  userId: number;
+
   @Column({ unique: true })
   name: string;
 
-  @OneToMany(() => WorkoutExercise, workoutExercise => workoutExercise.exercise)
+  @OneToMany(
+    () => WorkoutExercise,
+    (workoutExercise) => workoutExercise.exercise
+  )
   workoutExercises: WorkoutExercise[];
 }

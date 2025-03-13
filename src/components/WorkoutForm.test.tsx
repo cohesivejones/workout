@@ -2,6 +2,7 @@ import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import WorkoutForm from "./WorkoutForm";
 import { Workout } from "../types";
+import * as UserContext from "../contexts/useUserContext";
 
 jest.mock("react-select/creatable", () =>
   // eslint-disable-next-line react/display-name
@@ -34,6 +35,9 @@ describe("WorkoutForm", () => {
   const mockOnSubmit = jest.fn().mockResolvedValue(true);
   const mockOnSaveExercise = jest.fn().mockResolvedValue(true);
   const mockSavedExercises = ["Push-ups", "Squats", "Lunges"];
+  jest
+    .spyOn(UserContext, "useUserContext")
+    .mockReturnValue({ user: { id: 1, name: "Bob Jones" }, login: jest.fn() });
 
   const defaultProps = {
     onSubmit: mockOnSubmit,
@@ -80,6 +84,7 @@ describe("WorkoutForm", () => {
   it("renders the form with correct initial state for existing workout", () => {
     const existingWorkout: Workout = {
       id: 1,
+      userId: 1,
       date: "2025-03-01",
       withInstructor: true,
       exercises: [
@@ -145,6 +150,7 @@ describe("WorkoutForm", () => {
   it("allows removing an exercise", async () => {
     const existingWorkout: Workout = {
       id: 1,
+      userId: 1,
       date: "2025-03-01",
       withInstructor: false,
       exercises: [
@@ -206,6 +212,7 @@ describe("WorkoutForm", () => {
     // Check that onSubmit was called with the correct data
     await waitFor(() => {
       expect(mockOnSubmit).toHaveBeenCalledWith({
+        userId: 1,
         date: today,
         withInstructor: true,
         exercises: [
@@ -227,6 +234,7 @@ describe("WorkoutForm", () => {
 
     const existingWorkout: Workout = {
       id: 1,
+      userId: 1,
       date: "2025-03-01",
       withInstructor: false,
       exercises: [{ id: 1, name: "Push-ups", reps: 10 }],

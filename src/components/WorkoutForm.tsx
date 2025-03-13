@@ -2,6 +2,7 @@ import * as React from "react";
 import { WorkoutFormProps, Status } from "../types";
 import CreatableSelect from "react-select/creatable";
 import "./WorkoutForm.css";
+import { useUserContext } from "../contexts/useUserContext";
 
 function WorkoutForm({
   onSubmit,
@@ -9,6 +10,7 @@ function WorkoutForm({
   onSaveExercise,
   existingWorkout,
 }: WorkoutFormProps): React.ReactElement {
+  const { user } = useUserContext();
   const [exercises, setExercises] = React.useState<
     Array<{ name: string; reps: number; weight?: number | null }>
   >(existingWorkout?.exercises || []);
@@ -33,10 +35,12 @@ function WorkoutForm({
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (exercises.length === 0) return;
+    if (!user) return;
 
     setStatus({ loading: true, error: null });
     try {
       const success = await onSubmit({
+        userId: user.id,
         date: workoutDate,
         withInstructor,
         exercises: exercises.map((ex) => ({ ...ex, reps: Number(ex.reps) })),

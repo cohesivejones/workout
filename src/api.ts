@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Exercise, Workout } from "./types";
+import { Exercise, Workout, User } from "./types";
 
 const api = axios.create({
   baseURL: process.env.VITE_API_URL,
@@ -17,15 +17,21 @@ api.interceptors.response.use(
   }
 );
 
-export const fetchWorkouts = (): Promise<Workout[]> => api.get("/workouts");
+export const fetchUsers = (): Promise<User[]> => api.get("/users");
 
-export const fetchExercises = (): Promise<Exercise[]> => api.get("/exercises");
+export const fetchWorkouts = (userId: number): Promise<Workout[]> =>
+  api.get(`/workouts?userId=${userId}`);
+
+export const fetchExercises = (userId: number): Promise<Exercise[]> =>
+  api.get(`/exercises?userId=${userId}`);
 
 export const createWorkout = (workout: Workout): Promise<Workout> =>
   api.post("/workouts", workout);
 
-export const createExercise = (exerciseName: string): Promise<Exercise> =>
-  api.post("/exercises", { name: exerciseName });
+export const createExercise = (
+  exerciseName: string,
+  userId: number
+): Promise<Exercise> => api.post("/exercises", { name: exerciseName, userId });
 
 export const deleteWorkout = (workoutId: number): Promise<{ id: number }> =>
   api.delete(`/workouts/${workoutId}`);

@@ -1,9 +1,11 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import './App.css';
-import WorkoutListPage from './pages/WorkoutListPage';
-import AddWorkoutPage from './pages/AddWorkoutPage';
-import EditWorkoutPage from './pages/EditWorkoutPage';
-import WorkoutShowPage from './pages/WorkoutShowPage';
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import "./App.css";
+import WorkoutListPage from "./pages/WorkoutListPage";
+import AddWorkoutPage from "./pages/AddWorkoutPage";
+import EditWorkoutPage from "./pages/EditWorkoutPage";
+import WorkoutShowPage from "./pages/WorkoutShowPage";
+import NotFoundPage from "./pages/NotFoundPage";
+import { Layout } from "./Layout";
 
 function App() {
   return (
@@ -14,10 +16,13 @@ function App() {
         </header>
         <main className="App-main">
           <Routes>
-            <Route path="/" element={<WorkoutListPage />} />
-            <Route path="/add" element={<AddWorkoutPage />} />
-            <Route path="/edit/:id" element={<EditWorkoutPage />} />
-            <Route path="/workout/:id" element={<WorkoutShowPage />} />
+            <Route element={<Layout />}>
+              <Route index path="/" element={<WorkoutListPage />} />
+              <Route path="/add" element={<AddWorkoutPage />} />
+              <Route path="/edit/:id" element={<EditWorkoutPage />} />
+              <Route path="/workout/:id" element={<WorkoutShowPage />} />
+              <Route path="*" element={<NotFoundPage />} />
+            </Route>
           </Routes>
         </main>
       </div>

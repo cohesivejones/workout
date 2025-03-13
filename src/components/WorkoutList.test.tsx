@@ -2,6 +2,7 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import WorkoutList from "./WorkoutList";
 import { Workout } from "../types";
 import { deleteWorkout } from "../api";
+import * as UserContext from "../contexts/useUserContext";
 
 jest.mock("react-router-dom", () => ({
   Link: ({ to, className, children }: any) => (
@@ -28,6 +29,7 @@ describe("WorkoutList", () => {
   const mockWorkouts: Workout[] = [
     {
       id: 1,
+      userId: 1,
       date: "2025-03-01",
       withInstructor: true,
       exercises: [
@@ -37,6 +39,7 @@ describe("WorkoutList", () => {
     },
     {
       id: 2,
+      userId: 1,
       date: "2025-03-02",
       withInstructor: false,
       exercises: [{ id: 3, name: "Lunges", reps: 12 }],
@@ -45,6 +48,10 @@ describe("WorkoutList", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.spyOn(UserContext, "useUserContext").mockReturnValue({
+      user: { id: 1, name: "Bob Jones" },
+      login: jest.fn(),
+    });
     // Mock window.confirm to always return true
     window.confirm = jest.fn(() => true);
   });

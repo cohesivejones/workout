@@ -1,4 +1,4 @@
-import { Exercise, Workout, WorkoutExercise } from "./entities";
+import { Exercise, Workout, WorkoutExercise, User } from "./entities";
 
 // Interface for API responses
 export interface WorkoutResponse {
@@ -15,6 +15,7 @@ export interface WorkoutResponse {
 
 // Interface for workout creation request
 export interface CreateWorkoutRequest {
+  userId: number;
   date: string;
   withInstructor: boolean;
   exercises: Array<{

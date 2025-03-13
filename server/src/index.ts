@@ -3,8 +3,7 @@ import cors from "cors";
 import { DatabaseError, WorkoutResponse, CreateWorkoutRequest } from "./types";
 import * as dotenv from "dotenv";
 import dataSource from "./data-source";
-import { Exercise, Workout, WorkoutExercise } from "./entities";
-import { In } from "typeorm";
+import { Exercise, Workout, WorkoutExercise, User } from "./entities";
 
 // Initialize reflect-metadata
 import "reflect-metadata";
@@ -29,11 +28,35 @@ app.use(express.json());
 
 // Routes
 
+// User routes
+// Get all users
+app.get("/users", async (_req: Request, res: Response) => {
+  try {
+    const userRepository = dataSource.getRepository(User);
+    const users = await userRepository.find({
+      order: {
+        name: "ASC",
+      },
+    });
+    res.json(users);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 // Get all exercises
-app.get("/exercises", async (_req: Request, res: Response) => {
+app.get("/exercises", async (req: Request, res: Response) => {
+  const { userId } = req.query;
+  if (!userId)
+    return res.status(400).json({
+      error: "User ID is required",
+    });
+
   try {
     const exerciseRepository = dataSource.getRepository(Exercise);
     const exercises = await exerciseRepository.find({
+      where: { userId: Number(userId) },
       order: {
         name: "ASC",
       },
@@ -48,15 +71,17 @@ app.get("/exercises", async (_req: Request, res: Response) => {
 // Add new exercise
 app.post("/exercises", async (req: Request, res: Response) => {
   try {
-    const { name } = req.body;
+    const { name, userId } = req.body;
     const exerciseRepository = dataSource.getRepository(Exercise);
 
     // Check if exercise exists
-    let exercise = await exerciseRepository.findOne({ where: { name } });
+    let exercise = await exerciseRepository.findOne({
+      where: { name, userId },
+    });
 
     if (!exercise) {
       // Create new exercise
-      exercise = exerciseRepository.create({ name });
+      exercise = exerciseRepository.create({ name, userId });
     }
 
     // Save exercise (either new or existing)
@@ -69,11 +94,18 @@ app.post("/exercises", async (req: Request, res: Response) => {
 });
 
 // Get all workouts with exercises
-app.get("/workouts", async (_req: Request, res: Response) => {
+app.get("/workouts", async (req: Request, res: Response) => {
   try {
+    const { userId } = req.query;
+    if (!userId)
+      return res.status(400).json({
+        error: "User ID is required",
+      });
+
     const workoutRepository = dataSource.getRepository(Workout);
 
     const workouts = await workoutRepository.find({
+      where: { userId: Number(userId) },
       relations: {
         workoutExercises: {
           exercise: true,
@@ -151,12 +183,13 @@ app.post("/workouts", async (req: Request, res: Response) => {
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
-    const { date, withInstructor, exercises } =
+    const { date, withInstructor, exercises, userId } =
       req.body as CreateWorkoutRequest;
 
     // Create new workout
     const workoutRepository = queryRunner.manager.getRepository(Workout);
     const workout = workoutRepository.create({
+      userId,
       date,
       withInstructor: withInstructor || false,
       workoutExercises: [],
@@ -174,11 +207,14 @@ app.post("/workouts", async (req: Request, res: Response) => {
     for (const exerciseData of exercises) {
       // Get or create exercise
       let exercise = await exerciseRepository.findOne({
-        where: { name: exerciseData.name },
+        where: { name: exerciseData.name, userId },
       });
 
       if (!exercise) {
-        exercise = exerciseRepository.create({ name: exerciseData.name });
+        exercise = exerciseRepository.create({
+          name: exerciseData.name,
+          userId,
+        });
         await exerciseRepository.save(exercise);
       }
 
@@ -276,11 +312,14 @@ app.put("/workouts/:id", async (req: Request, res: Response) => {
     for (const exerciseData of exercises) {
       // Get or create exercise
       let exercise = await exerciseRepository.findOne({
-        where: { name: exerciseData.name },
+        where: { name: exerciseData.name, userId: workout.userId },
       });
 
       if (!exercise) {
-        exercise = exerciseRepository.create({ name: exerciseData.name });
+        exercise = exerciseRepository.create({
+          name: exerciseData.name,
+          userId: workout.userId,
+        });
         await exerciseRepository.save(exercise);
       }
 

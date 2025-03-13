@@ -3,16 +3,19 @@ import { useNavigate } from "react-router-dom";
 import WorkoutForm from "../components/WorkoutForm";
 import { createWorkout, createExercise, fetchExercises } from "../api";
 import { Workout } from "../types";
+import { useUserContext } from "../contexts/useUserContext";
 
 export default function AddWorkoutPage() {
   const navigate = useNavigate();
   const [savedExercises, setSavedExercises] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const { user } = useUserContext();
 
   useEffect(() => {
     const loadExercises = async () => {
       try {
-        const exercisesData = await fetchExercises();
+        if (!user) return;
+        const exercisesData = await fetchExercises(user.id);
         setSavedExercises(exercisesData.map((e) => e.name));
       } catch (err) {
         console.error("Failed to load exercises:", err);
@@ -41,9 +44,10 @@ export default function AddWorkoutPage() {
 
   const addExerciseToSaved = async (exerciseName: string): Promise<boolean> => {
     try {
+      if (!user) return false;
       setError(null);
       if (!savedExercises.includes(exerciseName)) {
-        const result = await createExercise(exerciseName);
+        const result = await createExercise(exerciseName, user.id);
         setSavedExercises((prev) => [...prev, result.name].sort());
         return true;
       }
