@@ -16,14 +16,6 @@ jest.mock("../api", () => ({
   deleteWorkout: jest.fn(),
 }));
 
-jest.mock("date-fns", () => ({
-  format: jest.fn((date, _formatStr) => {
-    // Simple mock implementation for testing
-    const dateObj = new Date(date);
-    return `${dateObj.toLocaleDateString()} (Monday)`;
-  }),
-}));
-
 describe("WorkoutList", () => {
   const mockOnWorkoutDeleted = jest.fn();
   const mockWorkouts: Workout[] = [
@@ -75,8 +67,8 @@ describe("WorkoutList", () => {
     );
 
     // Check that both workouts are rendered
-    const dateElements = screen.getAllByText(/\d+\/\d+\/2025 \(Monday\)/);
-    expect(dateElements).toHaveLength(2);
+    expect(screen.getByText(/Mar 1, 2025 \(Saturday\)/)).toBeVisible();
+    expect(screen.getByText(/Mar 2, 2025 \(Sunday\)/)).toBeVisible();
 
     // Check that exercises are rendered
     expect(screen.getByText("Push-ups - 10 reps")).toBeInTheDocument();

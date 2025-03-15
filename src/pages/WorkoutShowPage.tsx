@@ -77,7 +77,9 @@ const WorkoutShowPage: React.FC = () => {
         })}
       >
         <div className="workout-detail-header">
-          <h3>{format(workout.date, "MMM d, yyyy (eeee)")}</h3>
+          <h3>
+            {format(`${workout.date}T12:00:00.000`, "MMM d, yyyy (eeee)")}
+          </h3>
           {workout.withInstructor && (
             <div className="instructor-badge">With Instructor</div>
           )}

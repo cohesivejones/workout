@@ -37,11 +37,13 @@ function WorkoutList({
             <div
               key={workout.id}
               className={classNames("workout-card", {
-                "with-instructor": workout.withInstructor
+                "with-instructor": workout.withInstructor,
               })}
             >
               <div className="workout-header">
-                <h3>{format(workout.date, "MMM d, yyyy (eeee)")}</h3>
+                <h3>
+                  {format(`${workout.date}T12:00:00.000`, "MMM d, yyyy (eeee)")}
+                </h3>
                 <div className="workout-actions">
                   <Link to={`/edit/${workout.id}`} className="edit-btn">
                     Edit
