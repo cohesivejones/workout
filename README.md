@@ -4,39 +4,17 @@ A full-stack React application for tracking workouts, built with Vite, TypeScrip
 
 ## Local Development
 
-### Frontend
-
 1. Install dependencies:
 
 ```bash
 npm install
 ```
 
-2. Copy `.env.example` to `.env` and configure variables:
+2. Copy `.env.example` to `.env` and configure Frontend/Backend variables:
 
 ```bash
 cp .env.example .env
-```
-
-3. Start the development server:
-
-```bash
-npm run dev
-```
-
-### API Server
-
-1. Navigate to server directory and install dependencies:
-
-```bash
-cd server
-npm install
-```
-
-2. Copy `.env.example` to `.env` and configure variables:
-
-```bash
-cp .env.example .env
+cp server/.env.example server/.env
 ```
 
 3. Set up the database:
@@ -46,6 +24,12 @@ psql -U postgres
 CREATE DATABASE workout;
 \c workout
 \i src/database.sql
+```
+
+4. Run migrations:
+
+```bash
+npm run db:migrate
 ```
 
 4. Start the development server:
@@ -73,16 +57,36 @@ npm run dev
 
 ### Frontend
 
+- `npm run db:migrate`: Run migrations
 - `npm run dev`: Start development server
 - `npm run build`: Build for production
 - `npm start`: Start production server
 - `npm run preview`: Preview production build locally
 
-### API Server
+## Deployment
 
-- `npm run dev`: Start development server
-- `npm run build`: Build TypeScript
-- `npm start`: Start production server
+The application includes a deployment script that automates the process of updating and running the application in a production environment.
+
+### Using the Deployment Script
+
+```bash
+./scripts/deploy.sh
+```
+
+This script performs the following actions:
+
+1. Kills all running Node.js processes
+2. Pulls the latest code from git
+3. Installs packages for both frontend and backend
+4. Runs database migrations
+5. Builds the application (frontend and backend)
+6. Starts the application in production mode
+
+Make sure the script is executable:
+
+```bash
+chmod +x scripts/deploy.sh
+```
 
 ## Tech Stack
 
