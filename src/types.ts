@@ -7,11 +7,17 @@ export interface UserListProps {
   users: User[];
 }
 
-export interface Exercise {
+export interface WorkoutExercise {
   id?: number;
   name: string;
   reps: number;
   weight?: number | null;
+}
+
+export interface Exercise {
+  id: number;
+  userId: number;
+  name: string;
 }
 
 export interface Workout {
@@ -19,12 +25,12 @@ export interface Workout {
   date: string;
   userId: number;
   withInstructor: boolean;
-  exercises: Exercise[];
+  exercises: WorkoutExercise[];
 }
 
 export interface WorkoutFormProps {
   onSubmit: (workout: Omit<Workout, "id">) => Promise<boolean>;
-  savedExercises: string[];
+  savedExercises: Exercise[];
   onSaveExercise: (exerciseName: string) => Promise<boolean>;
   existingWorkout?: Workout;
 }

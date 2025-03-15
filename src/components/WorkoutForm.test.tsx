@@ -1,8 +1,9 @@
 import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import WorkoutForm from "./WorkoutForm";
-import { Workout } from "../types";
+import { Workout, WorkoutFormProps } from "../types";
 import * as UserContext from "../contexts/useUserContext";
+import * as Api from "../api";
 
 jest.mock("react-select/creatable", () =>
   // eslint-disable-next-line react/display-name
@@ -34,12 +35,19 @@ jest.mock("react-select/creatable", () =>
 describe("WorkoutForm", () => {
   const mockOnSubmit = jest.fn().mockResolvedValue(true);
   const mockOnSaveExercise = jest.fn().mockResolvedValue(true);
-  const mockSavedExercises = ["Push-ups", "Squats", "Lunges"];
+  const mockSavedExercises = [
+    { id: 1, userId: 1, name: "Push-ups" },
+    { id: 2, userId: 1, name: "Squats" },
+    { id: 3, userId: 1, name: "Lunges" },
+  ];
   jest
     .spyOn(UserContext, "useUserContext")
     .mockReturnValue({ user: { id: 1, name: "Bob Jones" }, login: jest.fn() });
+  jest
+    .spyOn(Api, "fetchRecentExerciseData")
+    .mockRejectedValue(new Error("Failed to fetch recent data"));
 
-  const defaultProps = {
+  const defaultProps: WorkoutFormProps = {
     onSubmit: mockOnSubmit,
     onSaveExercise: mockOnSaveExercise,
     savedExercises: mockSavedExercises,

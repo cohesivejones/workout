@@ -1,24 +1,21 @@
 import * as React from "react";
-import { WorkoutFormProps, Exercise } from "../types";
+import { WorkoutFormProps, WorkoutExercise } from "../types";
 import CreatableSelect from "react-select/creatable";
 import "./WorkoutForm.css";
 import { useUserContext } from "../contexts/useUserContext";
+import { fetchRecentExerciseData } from "../api";
 import {
   useForm,
   useFieldArray,
   Controller,
   SubmitHandler,
 } from "react-hook-form";
-
-interface SelectOption {
-  label: string;
-  value: string;
-}
+import { SingleValue } from "react-select";
 
 interface FormValues {
   date: string;
   withInstructor: boolean;
-  exercises: Exercise[];
+  exercises: WorkoutExercise[];
   currentExercise: {
     name: string;
     reps: string;
@@ -140,10 +137,33 @@ function WorkoutForm({
     }
   };
 
-  const handleExerciseChange = (newValue: SelectOption | null) => {
-    setValue("currentExercise.name", newValue ? newValue.value : "");
+  const handlePopulateRepsAndWeight = async (
+    val: SingleValue<{ label: string; value: string }>
+  ) => {
+    if (val === null) {
+      setValue("currentExercise.reps", "");
+      setValue("currentExercise.weight", "");
+      return;
+    }
+    const exerciseId = savedExercises.find((ex) => ex.name === val.value)?.id;
+    if (!exerciseId) return;
+    if (!user) return;
+    try {
+      const recentData = await fetchRecentExerciseData(user.id, exerciseId);
+      setValue("currentExercise.reps", String(recentData.reps));
+      setValue(
+        "currentExercise.weight",
+        recentData.weight ? String(recentData.weight) : ""
+      );
+    } catch (err) {
+      // fail silently
+    }
   };
 
+  const exerciseSelectOptions = savedExercises.map((exercise) => ({
+    label: exercise.name,
+    value: exercise.name,
+  }));
   return (
     <div className="workout-form">
       <h2>{existingWorkout ? "Edit Workout" : "Add New Workout"}</h2>
@@ -176,28 +196,26 @@ function WorkoutForm({
           <Controller
             name="currentExercise.name"
             control={control}
-            render={({ field }) => (
-              <CreatableSelect
-                isClearable
-                placeholder="Select or create an exercise"
-                options={savedExercises.map((exercise) => ({
-                  label: exercise,
-                  value: exercise,
-                }))}
-                onChange={(val) => {
-                  field.onChange(val ? val.value : "");
-                  handleExerciseChange(val);
-                }}
-                value={
-                  field.value
-                    ? { label: field.value, value: field.value }
-                    : null
-                }
-                className="react-select-container"
-                classNamePrefix="react-select"
-                formatCreateLabel={(inputValue) => `Create "${inputValue}"`}
-              />
-            )}
+            render={({ field }) => {
+              const selectedExerciseOption = field.value
+                ? { label: field.value, value: field.value }
+                : null;
+              return (
+                <CreatableSelect
+                  isClearable
+                  placeholder="Select or create an exercise"
+                  options={exerciseSelectOptions}
+                  onChange={(val) => {
+                    field.onChange(val ? val.value : "");
+                    handlePopulateRepsAndWeight(val);
+                  }}
+                  value={selectedExerciseOption}
+                  className="react-select-container"
+                  classNamePrefix="react-select"
+                  formatCreateLabel={(inputValue) => `Create "${inputValue}"`}
+                />
+              );
+            }}
           />
           <input
             type="number"
