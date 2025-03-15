@@ -27,6 +27,6 @@ npm run build
 
 # 6. Run the app (this will start both frontend and backend)
 echo "Starting the application..."
-npm start &
+nohup npm start > /dev/null 2>&1 &
 
 echo "Deployment completed successfully!"
