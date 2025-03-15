@@ -2,12 +2,12 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import WorkoutForm from "../components/WorkoutForm";
 import { createWorkout, createExercise, fetchExercises } from "../api";
-import { Workout } from "../types";
+import { Exercise, Workout } from "../types";
 import { useUserContext } from "../contexts/useUserContext";
 
 export default function AddWorkoutPage() {
   const navigate = useNavigate();
-  const [savedExercises, setSavedExercises] = useState<string[]>([]);
+  const [savedExercises, setSavedExercises] = useState<Exercise[]>([]);
   const [error, setError] = useState<string | null>(null);
   const { user } = useUserContext();
 
@@ -16,7 +16,7 @@ export default function AddWorkoutPage() {
       try {
         if (!user) return;
         const exercisesData = await fetchExercises(user.id);
-        setSavedExercises(exercisesData.map((e) => e.name));
+        setSavedExercises(exercisesData);
       } catch (err) {
         console.error("Failed to load exercises:", err);
         setError("Failed to load exercises. Please try again later.");
@@ -46,9 +46,9 @@ export default function AddWorkoutPage() {
     try {
       if (!user) return false;
       setError(null);
-      if (!savedExercises.includes(exerciseName)) {
+      if (!savedExercises.find((e) => e.name === exerciseName)) {
         const result = await createExercise(exerciseName, user.id);
-        setSavedExercises((prev) => [...prev, result.name].sort());
+        setSavedExercises((prev) => [...prev, result].sort());
         return true;
       }
       return true;

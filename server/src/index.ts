@@ -68,6 +68,49 @@ app.get("/exercises", async (req: Request, res: Response) => {
   }
 });
 
+// Get most recent workout exercise data
+app.get("/exercises/recent", async (req: Request, res: Response) => {
+  const { userId, exerciseId } = req.query;
+
+  if (!userId || !exerciseId) {
+    return res.status(400).json({
+      error: "User ID and exercise ID are required",
+    });
+  }
+
+  try {
+    // Find the most recent workout that contains this exercise
+    const workoutExerciseRepository = dataSource.getRepository(WorkoutExercise);
+
+    // Use a raw query to get the most recent workout exercise
+    const result = await workoutExerciseRepository
+      .createQueryBuilder("we")
+      .innerJoin("we.workout", "w")
+      .innerJoin("we.exercise", "e")
+      .where("e.id = :exerciseId", { exerciseId: Number(exerciseId) })
+      .andWhere("e.userId = :userId", { userId: Number(userId) })
+      .orderBy("w.date", "DESC")
+      .select(["we.reps", "we.weight"])
+      .limit(1)
+      .getRawOne();
+
+    if (!result) {
+      return res.status(404).json({
+        error: "No workout found with this exercise",
+      });
+    }
+
+    // Return the exercise data
+    res.json({
+      reps: result.we_reps,
+      weight: result.we_weight,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 // Add new exercise
 app.post("/exercises", async (req: Request, res: Response) => {
   try {

@@ -7,7 +7,7 @@ import {
   createExercise,
   fetchExercises,
 } from "../api";
-import { Workout } from "../types";
+import { Exercise, Workout } from "../types";
 import { useUserContext } from "../contexts/useUserContext";
 
 export default function EditWorkoutPage() {
@@ -17,7 +17,7 @@ export default function EditWorkoutPage() {
   const { user } = useUserContext();
 
   const [workout, setWorkout] = useState<Workout | null>(null);
-  const [savedExercises, setSavedExercises] = useState<string[]>([]);
+  const [savedExercises, setSavedExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -42,7 +42,7 @@ export default function EditWorkoutPage() {
 
         // Load exercises
         const exercisesData = await fetchExercises(user.id);
-        setSavedExercises(exercisesData.map((e) => e.name));
+        setSavedExercises(exercisesData);
 
         setLoading(false);
       } catch (err) {
@@ -78,9 +78,9 @@ export default function EditWorkoutPage() {
     try {
       if (!user) return false;
       setError(null);
-      if (!savedExercises.includes(exerciseName)) {
+      if (!savedExercises.find((e) => e.name === exerciseName)) {
         const result = await createExercise(exerciseName, user.id);
-        setSavedExercises((prev) => [...prev, result.name].sort());
+        setSavedExercises((prev) => [...prev, result].sort());
         return true;
       }
       return true;

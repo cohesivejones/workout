@@ -1,8 +1,27 @@
 import * as React from "react";
-import { WorkoutFormProps, Status } from "../types";
+import { WorkoutFormProps, WorkoutExercise } from "../types";
 import CreatableSelect from "react-select/creatable";
 import "./WorkoutForm.css";
 import { useUserContext } from "../contexts/useUserContext";
+import { fetchRecentExerciseData } from "../api";
+import {
+  useForm,
+  useFieldArray,
+  Controller,
+  SubmitHandler,
+} from "react-hook-form";
+import { SingleValue } from "react-select";
+
+interface FormValues {
+  date: string;
+  withInstructor: boolean;
+  exercises: WorkoutExercise[];
+  currentExercise: {
+    name: string;
+    reps: string;
+    weight: string;
+  };
+}
 
 function WorkoutForm({
   onSubmit,
@@ -11,49 +30,73 @@ function WorkoutForm({
   existingWorkout,
 }: WorkoutFormProps): React.ReactElement {
   const { user } = useUserContext();
-  const [exercises, setExercises] = React.useState<
-    Array<{ name: string; reps: number; weight?: number | null }>
-  >(existingWorkout?.exercises || []);
-  const [currentExercise, setCurrentExercise] = React.useState<{
-    name: string;
-    reps: string;
-    weight: string;
-  }>({ name: "", reps: "", weight: "" });
-  const [workoutDate, setWorkoutDate] = React.useState<string>(
-    existingWorkout
-      ? new Date(existingWorkout.date).toISOString().split("T")[0]
-      : new Date().toISOString().split("T")[0]
-  );
-  const [withInstructor, setWithInstructor] = React.useState<boolean>(
-    existingWorkout?.withInstructor || false
-  );
-  const [status, setStatus] = React.useState<Status>({
-    loading: false,
-    error: null,
+  const [isSavingExercise, setIsSavingExercise] =
+    React.useState<boolean>(false);
+
+  // Initialize form with default values
+  const {
+    register,
+    control,
+    handleSubmit,
+    watch,
+    setValue,
+    reset,
+    setError,
+    formState: { errors, isSubmitting },
+  } = useForm<FormValues>({
+    defaultValues: {
+      date: existingWorkout
+        ? new Date(existingWorkout.date).toISOString().split("T")[0]
+        : new Date().toISOString().split("T")[0],
+      withInstructor: existingWorkout?.withInstructor || false,
+      exercises: existingWorkout?.exercises || [],
+      currentExercise: {
+        name: "",
+        reps: "",
+        weight: "",
+      },
+    },
   });
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (exercises.length === 0) return;
-    if (!user) return;
+  // Use fieldArray to manage the dynamic exercises list
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "exercises",
+  });
 
-    setStatus({ loading: true, error: null });
+  // Watch current values
+  const currentExercise = watch("currentExercise");
+  const exercises = watch("exercises");
+
+  const onFormSubmit: SubmitHandler<FormValues> = async (data) => {
+    if (exercises.length === 0 || !user) return;
+
     try {
       const success = await onSubmit({
         userId: user.id,
-        date: workoutDate,
-        withInstructor,
-        exercises: exercises.map((ex) => ({ ...ex, reps: Number(ex.reps) })),
+        date: data.date,
+        withInstructor: data.withInstructor,
+        exercises: data.exercises.map((ex) => ({
+          ...ex,
+          reps: Number(ex.reps),
+        })),
       });
 
       if (success) {
-        setExercises([]);
-        setCurrentExercise({ name: "", reps: "", weight: "" });
+        reset({
+          ...data,
+          exercises: [],
+          currentExercise: {
+            name: "",
+            reps: "",
+            weight: "",
+          },
+        });
       }
     } catch (err) {
-      setStatus({
-        loading: false,
-        error: err instanceof Error ? err.message : "An error occurred",
+      setError("serverError" as any, {
+        type: "server",
+        message: err instanceof Error ? err.message : "An error occurred",
       });
     }
   };
@@ -64,58 +107,79 @@ function WorkoutForm({
 
     const name = currentExercise.name.trim();
     if (name) {
-      setStatus({ loading: true, error: null });
+      setIsSavingExercise(true);
       try {
         const success = await onSaveExercise(name);
         if (success) {
-          setExercises([
-            ...exercises,
-            {
-              name,
-              reps: Number(currentExercise.reps),
-              weight: currentExercise.weight
-                ? Number(currentExercise.weight)
-                : null,
-            },
-          ]);
-          setCurrentExercise({ name: "", reps: "", weight: "" });
+          append({
+            name,
+            reps: Number(currentExercise.reps),
+            weight: currentExercise.weight
+              ? Number(currentExercise.weight)
+              : null,
+          });
+
+          // Reset current exercise fields
+          setValue("currentExercise", {
+            name: "",
+            reps: "",
+            weight: "",
+          });
         }
       } catch (err) {
-        setStatus({
-          loading: false,
-          error: err instanceof Error ? err.message : "An error occurred",
+        setError("serverError" as any, {
+          type: "server",
+          message: err instanceof Error ? err.message : "An error occurred",
         });
+      } finally {
+        setIsSavingExercise(false);
       }
-      setStatus({ loading: false, error: null });
     }
   };
 
-  interface SelectOption {
-    label: string;
-    value: string;
-  }
-
-  const handleExerciseChange = (newValue: SelectOption | null) => {
-    if (newValue) {
-      setCurrentExercise({ ...currentExercise, name: newValue.value });
-    } else {
-      setCurrentExercise({ ...currentExercise, name: "" });
+  const handlePopulateRepsAndWeight = async (
+    val: SingleValue<{ label: string; value: string }>
+  ) => {
+    if (val === null) {
+      setValue("currentExercise.reps", "");
+      setValue("currentExercise.weight", "");
+      return;
+    }
+    const exerciseId = savedExercises.find((ex) => ex.name === val.value)?.id;
+    if (!exerciseId) return;
+    if (!user) return;
+    try {
+      const recentData = await fetchRecentExerciseData(user.id, exerciseId);
+      setValue("currentExercise.reps", String(recentData.reps));
+      setValue(
+        "currentExercise.weight",
+        recentData.weight ? String(recentData.weight) : ""
+      );
+    } catch (err) {
+      // fail silently
     }
   };
 
+  const exerciseSelectOptions = savedExercises.map((exercise) => ({
+    label: exercise.name,
+    value: exercise.name,
+  }));
   return (
     <div className="workout-form">
       <h2>{existingWorkout ? "Edit Workout" : "Add New Workout"}</h2>
-      {status.error && <div className="error-message">{status.error}</div>}
-      <form onSubmit={handleSubmit}>
+      {(errors as any).serverError && (
+        <div className="error-message">
+          {(errors as any).serverError.message}
+        </div>
+      )}
+      <form onSubmit={handleSubmit(onFormSubmit)}>
         <div className="date-input">
           <label htmlFor="workout-date">Workout Date:</label>
           <input
             type="date"
             id="workout-date"
-            value={workoutDate}
-            onChange={(e) => setWorkoutDate(e.target.value)}
             className="exercise-input-field"
+            {...register("date")}
           />
         </div>
         <div className="instructor-checkbox">
@@ -123,81 +187,84 @@ function WorkoutForm({
             <input
               type="checkbox"
               id="with-instructor"
-              checked={withInstructor}
-              onChange={(e) => setWithInstructor(e.target.checked)}
+              {...register("withInstructor")}
             />
             With Instructor
           </label>
         </div>
         <div className="exercise-input">
-          <CreatableSelect
-            isClearable
-            placeholder="Select or create an exercise"
-            options={savedExercises.map((exercise) => ({
-              label: exercise,
-              value: exercise,
-            }))}
-            onChange={handleExerciseChange}
-            value={
-              currentExercise.name
-                ? { label: currentExercise.name, value: currentExercise.name }
-                : null
-            }
-            className="react-select-container"
-            classNamePrefix="react-select"
-            formatCreateLabel={(inputValue) => `Create "${inputValue}"`}
+          <Controller
+            name="currentExercise.name"
+            control={control}
+            render={({ field }) => {
+              const selectedExerciseOption = field.value
+                ? { label: field.value, value: field.value }
+                : null;
+              return (
+                <CreatableSelect
+                  isClearable
+                  placeholder="Select or create an exercise"
+                  options={exerciseSelectOptions}
+                  onChange={(val) => {
+                    field.onChange(val ? val.value : "");
+                    handlePopulateRepsAndWeight(val);
+                  }}
+                  value={selectedExerciseOption}
+                  className="react-select-container"
+                  classNamePrefix="react-select"
+                  formatCreateLabel={(inputValue) => `Create "${inputValue}"`}
+                />
+              );
+            }}
           />
           <input
             type="number"
             placeholder="Reps"
-            value={currentExercise.reps}
-            onChange={(e) =>
-              setCurrentExercise({ ...currentExercise, reps: e.target.value })
-            }
             min="1"
             className="exercise-input-field"
+            {...register("currentExercise.reps")}
           />
           <input
             type="number"
             placeholder="Weight (lbs)"
-            value={currentExercise.weight}
-            onChange={(e) =>
-              setCurrentExercise({ ...currentExercise, weight: e.target.value })
-            }
             min="0"
             step="0.5"
             className="exercise-input-field"
+            {...register("currentExercise.weight")}
           />
           <button
             type="button"
             onClick={addExercise}
             disabled={
-              !currentExercise.name || !currentExercise.reps || status.loading
+              !currentExercise.name ||
+              !currentExercise.reps ||
+              isSavingExercise ||
+              isSubmitting
             }
             className="add-exercise-btn"
           >
-            {status.loading ? "Adding..." : "Add Exercise"}
+            {isSavingExercise ? "Adding..." : "Add Exercise"}
           </button>
         </div>
 
         <div className="exercise-list">
           <h3>Current Exercises:</h3>
-          {exercises.length === 0 ? (
+          {fields.length === 0 ? (
             <p>No exercises added yet</p>
           ) : (
             <ul>
-              {exercises.map((exercise, index) => (
-                <li key={index} className="exercise-item">
+              {fields.map((field, index) => (
+                <li key={field.id} className="exercise-item">
                   <div className="exercise-info">
-                    {exercise.name} - {exercise.reps} reps
-                    {exercise.weight ? ` - ${exercise.weight} lbs` : ""}
+                    {exercises[index].name} - {exercises[index].reps} reps
+                    {exercises[index].weight
+                      ? ` - ${exercises[index].weight} lbs`
+                      : ""}
                   </div>
                   <button
                     type="button"
                     className="remove-exercise-btn"
-                    onClick={() => {
-                      setExercises(exercises.filter((_, i) => i !== index));
-                    }}
+                    onClick={() => remove(index)}
                   >
                     ×
                   </button>
@@ -209,10 +276,10 @@ function WorkoutForm({
 
         <button
           type="submit"
-          disabled={exercises.length === 0 || status.loading}
+          disabled={fields.length === 0 || isSubmitting}
           className="save-workout-btn"
         >
-          {status.loading
+          {isSubmitting
             ? "Saving..."
             : existingWorkout
             ? "Update Workout"

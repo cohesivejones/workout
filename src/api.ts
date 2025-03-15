@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Exercise, Workout, User } from "./types";
+import { Workout, User, Exercise } from "./types";
 
 const api = axios.create({
   baseURL: process.env.VITE_API_URL,
@@ -43,3 +43,19 @@ export const updateWorkout = (
 
 export const fetchWorkout = (workoutId: number): Promise<Workout> =>
   api.get(`/workouts/${workoutId}`);
+
+// Fetch the most recent workout exercise data for a given user and exercise name
+export interface RecentExerciseData {
+  reps: number;
+  weight: number | null;
+}
+
+export const fetchRecentExerciseData = (
+  userId: number,
+  exerciseId: number
+): Promise<RecentExerciseData> =>
+  api.get(
+    `/exercises/recent?userId=${userId}&exerciseId=${encodeURIComponent(
+      exerciseId
+    )}`
+  );
