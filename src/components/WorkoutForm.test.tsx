@@ -252,9 +252,48 @@ describe("WorkoutForm", () => {
     const submitButton = screen.getByText("Update Workout");
     fireEvent.click(submitButton);
 
-    // Check that the error message is displayed
-    await waitFor(() => {
-      expect(screen.getByText("Failed to save workout")).toBeInTheDocument();
-    });
+    expect(
+      await screen.findByText("Failed to save workout")
+    ).toBeInTheDocument();
+  });
+
+  it("displays error message when add exercise fails", async () => {
+    // Override the mock to simulate an error
+    const mockOnSaveExercise = jest
+      .fn()
+      .mockRejectedValue(new Error("Failed to save exercise"));
+
+    const existingWorkout: Workout = {
+      id: 1,
+      userId: 1,
+      date: "2025-03-01",
+      withInstructor: false,
+      exercises: [{ id: 1, name: "Push-ups", reps: 10 }],
+    };
+
+    render(
+      <WorkoutForm
+        {...defaultProps}
+        onSaveExercise={mockOnSaveExercise}
+        existingWorkout={existingWorkout}
+      />
+    );
+
+    // Add an exercise
+    const exerciseSelect = screen.getByTestId("exercise-select");
+    fireEvent.change(exerciseSelect, { target: { value: "Squats" } });
+
+    const repsInput = screen.getByPlaceholderText("Reps");
+    fireEvent.change(repsInput, { target: { value: "15" } });
+
+    const weightInput = screen.getByPlaceholderText("Weight (lbs)");
+    fireEvent.change(weightInput, { target: { value: "20" } });
+
+    const addButton = screen.getByText("Add Exercise");
+    fireEvent.click(addButton);
+
+    expect(
+      await screen.findByText("Failed to save exercise")
+    ).toBeInTheDocument();
   });
 });

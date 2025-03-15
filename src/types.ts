@@ -33,8 +33,3 @@ export interface WorkoutListProps {
   workouts: Workout[];
   onWorkoutDeleted: (workoutId: number) => void;
 }
-
-export interface Status {
-  loading: boolean;
-  error: string | null;
-}
