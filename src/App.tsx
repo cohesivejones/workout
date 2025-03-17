@@ -10,22 +10,15 @@ import { Layout } from "./Layout";
 function App() {
   return (
     <BrowserRouter>
-      <div className="App">
-        <header className="App-header">
-          <h1>Workout Tracker</h1>
-        </header>
-        <main className="App-main">
-          <Routes>
-            <Route element={<Layout />}>
-              <Route index path="/" element={<WorkoutListPage />} />
-              <Route path="/workouts/new" element={<AddWorkoutPage />} />
-              <Route path="/workouts/:id/edit" element={<EditWorkoutPage />} />
-              <Route path="/workouts/:id" element={<WorkoutShowPage />} />
-              <Route path="*" element={<NotFoundPage />} />
-            </Route>
-          </Routes>
-        </main>
-      </div>
+      <Routes>
+        <Route element={<Layout />}>
+          <Route index path="/" element={<WorkoutListPage />} />
+          <Route path="/workouts/new" element={<AddWorkoutPage />} />
+          <Route path="/workouts/:id/edit" element={<EditWorkoutPage />} />
+          <Route path="/workouts/:id" element={<WorkoutShowPage />} />
+          <Route path="*" element={<NotFoundPage />} />
+        </Route>
+      </Routes>
     </BrowserRouter>
   );
 }

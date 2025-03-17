@@ -4,6 +4,8 @@ import WorkoutForm from "../components/WorkoutForm";
 import { createWorkout, createExercise, fetchExercises } from "../api";
 import { Exercise, Workout } from "../types";
 import { useUserContext } from "../contexts/useUserContext";
+import { Link } from "react-router-dom";
+import { toHomePath } from "../utils/paths";
 
 export default function AddWorkoutPage() {
   const navigate = useNavigate();
