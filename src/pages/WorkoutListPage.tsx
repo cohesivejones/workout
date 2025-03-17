@@ -8,6 +8,7 @@ import { Workout } from "../types";
 import classNames from "classnames";
 import "./WorkoutListPage.css";
 import { useUserContext } from "../contexts/useUserContext";
+import { toWorkoutNewPath } from "../utils/paths";
 
 function WorkoutListPage(): ReactElement {
   const [workouts, setWorkouts] = useState<Workout[]>([]);
@@ -47,7 +48,7 @@ function WorkoutListPage(): ReactElement {
       <div className="page-header">
         <h2>{user?.name} Workouts</h2>
         <div className="page-actions">
-          <Link to="/add" className="button">
+          <Link to={toWorkoutNewPath()} className="button">
             Add New Workout
           </Link>
           <div className="view-toggle">

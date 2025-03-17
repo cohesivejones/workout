@@ -5,6 +5,7 @@ import { deleteWorkout } from "../api";
 import "./WorkoutList.css";
 import { format } from "date-fns";
 import classNames from "classnames";
+import { toWorkoutEditPath } from "../utils/paths";
 
 function WorkoutList({
   workouts,
@@ -45,7 +46,7 @@ function WorkoutList({
                   {format(`${workout.date}T12:00:00.000`, "MMM d, yyyy (eeee)")}
                 </h3>
                 <div className="workout-actions">
-                  <Link to={`/edit/${workout.id}`} className="edit-btn">
+                  <Link to={toWorkoutEditPath(workout)} className="edit-btn">
                     Edit
                   </Link>
                   <button

@@ -14,6 +14,7 @@ import {
   isToday,
 } from "date-fns";
 import { Link } from "react-router-dom";
+import { toWorkoutPath } from "../utils/paths";
 
 interface CalendarViewProps {
   workouts: Workout[];
@@ -81,7 +82,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ workouts }) => {
           <div
             className={classNames("calendar-cell", {
               disabled: !isSameMonth(day, monthStart),
-              today: isToday(day)
+              today: isToday(day),
             })}
             key={day.toString()}
           >
@@ -89,10 +90,10 @@ const CalendarView: React.FC<CalendarViewProps> = ({ workouts }) => {
             <div className="calendar-workouts">
               {dayWorkouts.map((workout) => (
                 <Link
-                  to={`/workout/${workout.id}`}
+                  to={toWorkoutPath(workout)}
                   key={workout.id}
                   className={classNames("calendar-workout", {
-                    "with-instructor": workout.withInstructor
+                    "with-instructor": workout.withInstructor,
                   })}
                 >
                   <div className="workout-exercises">

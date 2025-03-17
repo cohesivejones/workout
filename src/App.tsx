@@ -18,9 +18,9 @@ function App() {
           <Routes>
             <Route element={<Layout />}>
               <Route index path="/" element={<WorkoutListPage />} />
-              <Route path="/add" element={<AddWorkoutPage />} />
-              <Route path="/edit/:id" element={<EditWorkoutPage />} />
-              <Route path="/workout/:id" element={<WorkoutShowPage />} />
+              <Route path="/workouts/new" element={<AddWorkoutPage />} />
+              <Route path="/workouts/:id/edit" element={<EditWorkoutPage />} />
+              <Route path="/workouts/:id" element={<WorkoutShowPage />} />
               <Route path="*" element={<NotFoundPage />} />
             </Route>
           </Routes>

@@ -5,6 +5,7 @@ import { Workout } from "../types";
 import "./WorkoutShowPage.css";
 import { format } from "date-fns";
 import classNames from "classnames";
+import { toHomePath, toWorkoutEditPath } from "../utils/paths";
 
 const WorkoutShowPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -65,7 +66,7 @@ const WorkoutShowPage: React.FC = () => {
       <div className="page-header">
         <h2>Workout Details</h2>
         <div className="page-actions">
-          <Link to="/" className="button secondary">
+          <Link to={toHomePath()} className="button secondary">
             Back to List
           </Link>
         </div>
@@ -111,7 +112,7 @@ const WorkoutShowPage: React.FC = () => {
         </div>
 
         <div className="workout-detail-actions">
-          <Link to={`/edit/${workout.id}`} className="button primary">
+          <Link to={toWorkoutEditPath(workout)} className="button primary">
             Edit Workout
           </Link>
           <button
