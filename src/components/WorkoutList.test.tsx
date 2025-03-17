@@ -76,8 +76,8 @@ describe("WorkoutList", () => {
     expect(screen.getByText("Lunges - 12 reps")).toBeInTheDocument();
 
     // Check that edit links are rendered
-    expect(screen.getByTestId("link-to-/edit/1")).toBeInTheDocument();
-    expect(screen.getByTestId("link-to-/edit/2")).toBeInTheDocument();
+    expect(screen.getByTestId("link-to-/workouts/1/edit")).toBeInTheDocument();
+    expect(screen.getByTestId("link-to-/workouts/2/edit")).toBeInTheDocument();
 
     // Check that delete buttons are rendered
     const deleteButtons = screen.getAllByText("×");

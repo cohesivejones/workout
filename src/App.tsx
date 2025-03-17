@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "./App.css";
 import WorkoutListPage from "./pages/WorkoutListPage";
-import AddWorkoutPage from "./pages/AddWorkoutPage";
+import AddWorkoutPage from "./pages/NewWorkoutPage";
 import EditWorkoutPage from "./pages/EditWorkoutPage";
 import WorkoutShowPage from "./pages/WorkoutShowPage";
 import NotFoundPage from "./pages/NotFoundPage";
