@@ -16,8 +16,8 @@ export function toWorkoutEditPath(workout: Workout) {
   return `/workouts/${workout.id}/edit`;
 }
 
-export function toPainScoreNewPath() {
-  return "/pain-scores/new";
+export function toPainScoreNewPath(date?: string) {
+  return date ? `/pain-scores/new?date=${date}` : "/pain-scores/new";
 }
 
 export function toPainScoreEditPath(painScore: PainScore) {

@@ -93,7 +93,11 @@ function WorkoutListPage(): ReactElement {
       {error && <div className="error-message">{error}</div>}
 
       {viewMode === "calendar" ? (
-        <CalendarView workouts={workouts} painScores={painScores} />
+        <CalendarView 
+          workouts={workouts} 
+          painScores={painScores} 
+          onDeletePainScore={handlePainScoreDelete}
+        />
       ) : (
         <ListView
           workouts={workouts}
