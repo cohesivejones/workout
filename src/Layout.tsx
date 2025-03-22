@@ -5,12 +5,32 @@ import LoginPage from "./pages/LoginPage";
 import "./App.css";
 
 const Header = () => {
+  const { user } = useUserContext();
+  
   return (
     <header className="App-header">
-      <Link to="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none', color: 'white' }}>
-        <img src="/dumbbell.svg" alt="Dumbbell" style={{ height: '30px', marginRight: '10px', filter: 'invert(1)' }} />
+      <Link
+        to="/"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          textDecoration: "none",
+          color: "white",
+        }}
+      >
+        <img
+          src="/dumbbell.svg"
+          alt="Dumbbell"
+          style={{ height: "30px", marginRight: "10px", filter: "invert(1)" }}
+        />
         <h1 style={{ margin: 0 }}>Workout Tracker</h1>
       </Link>
+      
+      {user && (
+        <div className="user-info">
+          <span>{user.name}</span>
+        </div>
+      )}
     </header>
   );
 };

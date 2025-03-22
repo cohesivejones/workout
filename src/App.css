@@ -6,6 +6,14 @@
   background-color: #282c34;
   padding: 20px;
   color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.user-info {
+  font-size: 1.75rem;
+  font-weight: 600;
 }
 
 .App-main {
@@ -28,15 +36,15 @@
 .exercise-type-toggle button {
   flex: 1;
   padding: 8px;
-  border: 1px solid #4CAF50;
+  border: 1px solid #4caf50;
   background: white;
-  color: #4CAF50;
+  color: #4caf50;
   cursor: pointer;
   border-radius: 4px;
 }
 
 .exercise-type-toggle button.active {
-  background: #4CAF50;
+  background: #4caf50;
   color: white;
 }
 

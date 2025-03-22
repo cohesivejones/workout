@@ -60,7 +60,7 @@ function WorkoutListPage(): ReactElement {
   return (
     <div>
       <div className="page-header">
-        <h2>{user?.name} Workouts</h2>
+        <h2>Workouts & Pain Scores</h2>
         <div className="page-actions">
           <div className="view-toggle">
             <button
