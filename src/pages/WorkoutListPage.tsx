@@ -1,13 +1,11 @@
 import { useState, useEffect } from "react";
 import type { ReactElement } from "react";
-import { Link } from "react-router-dom";
 import CalendarView from "../components/CalendarView";
 import { fetchWorkouts, fetchPainScores, deletePainScore } from "../api";
 import { Workout, PainScore } from "../types";
 import classNames from "classnames";
 import "./WorkoutListPage.css";
 import { useUserContext } from "../contexts/useUserContext";
-import { toWorkoutNewPath, toPainScoreNewPath } from "../utils/paths";
 import { ListView } from "../components/ListView";
 
 function WorkoutListPage(): ReactElement {
@@ -64,12 +62,6 @@ function WorkoutListPage(): ReactElement {
       <div className="page-header">
         <h2>{user?.name} Workouts</h2>
         <div className="page-actions">
-          <Link to={toWorkoutNewPath()} className="button">
-            New Workout
-          </Link>
-          <Link to={toPainScoreNewPath()} className="button">
-            New Pain Score
-          </Link>
           <div className="view-toggle">
             <button
               className={classNames({
@@ -93,11 +85,7 @@ function WorkoutListPage(): ReactElement {
       {error && <div className="error-message">{error}</div>}
 
       {viewMode === "calendar" ? (
-        <CalendarView 
-          workouts={workouts} 
-          painScores={painScores} 
-          onDeletePainScore={handlePainScoreDelete}
-        />
+        <CalendarView workouts={workouts} painScores={painScores} />
       ) : (
         <ListView
           workouts={workouts}

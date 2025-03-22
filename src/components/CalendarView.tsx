@@ -14,18 +14,20 @@ import {
   isToday,
 } from "date-fns";
 import { Link, useNavigate } from "react-router-dom";
-import { toWorkoutPath, toPainScoreEditPath, toPainScoreNewPath } from "../utils/paths";
+import {
+  toWorkoutPath,
+  toPainScoreEditPath,
+  toPainScoreNewPath,
+} from "../utils/paths";
 
 interface CalendarViewProps {
   workouts: Workout[];
   painScores: PainScore[];
-  onDeletePainScore: (painScoreId: number) => Promise<void>;
 }
 
 const CalendarView: React.FC<CalendarViewProps> = ({
   workouts,
   painScores,
-  onDeletePainScore
 }) => {
   const navigate = useNavigate();
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
@@ -117,7 +119,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({
             tabIndex={isSameMonth(day, monthStart) ? 0 : -1}
             aria-label={`Add pain score for ${dateStr}`}
             onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
+              if (e.key === "Enter" || e.key === " ") {
                 e.preventDefault();
                 if (isSameMonth(day, monthStart)) {
                   navigate(toPainScoreNewPath(dateStr));
