@@ -7,6 +7,14 @@ export interface UserListProps {
   users: User[];
 }
 
+export interface PainScore {
+  id: number;
+  userId: number;
+  date: string;
+  score: number;
+  notes?: string | null;
+}
+
 export interface WorkoutExercise {
   id?: number;
   name: string;

@@ -1,0 +1,136 @@
+.pain-score-form {
+  max-width: 500px;
+  margin: 0 auto;
+  text-align: left;
+  padding: 20px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.pain-score-form h2 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.pain-score-form form {
+  display: flex;
+  flex-direction: column;
+}
+
+.date-input {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 20px;
+}
+
+.date-input label {
+  font-weight: 500;
+}
+
+.date-input input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.pain-score-select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.pain-score-input {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 20px;
+}
+
+.pain-score-input label {
+  font-weight: 500;
+}
+
+.notes-input {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 20px;
+}
+
+.notes-input label {
+  font-weight: 500;
+}
+
+.notes-input textarea {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  min-height: 80px;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.save-pain-score-btn {
+  width: 100%;
+  padding: 10px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  margin-top: 10px;
+}
+
+.save-pain-score-btn:hover {
+  background-color: #45a049;
+}
+
+.save-pain-score-btn:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.error-message {
+  color: #dc3545;
+  margin-bottom: 10px;
+}
+
+.pain-score-legend {
+  margin-top: 15px;
+  font-size: 0.9em;
+  color: #666;
+}
+
+.pain-score-legend h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 1em;
+  color: #333;
+}
+
+.pain-score-legend ul {
+  list-style-type: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+.pain-score-legend li {
+  margin-bottom: 5px;
+  padding: 5px;
+  border-radius: 4px;
+}
+
+.pain-score-legend li.selected {
+  background-color: #e9f5ff;
+  font-weight: 500;
+}

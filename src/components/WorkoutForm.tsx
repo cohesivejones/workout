@@ -166,7 +166,7 @@ function WorkoutForm({
   }));
   return (
     <div className="workout-form">
-      <h2>{existingWorkout ? "Edit Workout" : "Add New Workout"}</h2>
+      <h2>{existingWorkout ? "Edit Workout" : "New Workout"}</h2>
       {(errors as any).serverError && (
         <div className="error-message">
           {(errors as any).serverError.message}

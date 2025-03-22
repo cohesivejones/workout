@@ -1,42 +1,56 @@
 import { useState, useEffect } from "react";
 import type { ReactElement } from "react";
-import { Link } from "react-router-dom";
-import WorkoutList from "../components/WorkoutList";
 import CalendarView from "../components/CalendarView";
-import { fetchWorkouts } from "../api";
-import { Workout } from "../types";
+import { fetchWorkouts, fetchPainScores, deletePainScore } from "../api";
+import { Workout, PainScore } from "../types";
 import classNames from "classnames";
 import "./WorkoutListPage.css";
 import { useUserContext } from "../contexts/useUserContext";
-import { toWorkoutNewPath } from "../utils/paths";
+import { ListView } from "../components/ListView";
 
 function WorkoutListPage(): ReactElement {
   const [workouts, setWorkouts] = useState<Workout[]>([]);
+  const [painScores, setPainScores] = useState<PainScore[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"calendar" | "list">("calendar");
   const { user } = useUserContext();
 
   useEffect(() => {
-    const loadWorkouts = async () => {
+    const loadData = async () => {
       if (!user) return;
       try {
-        const workoutsData = await fetchWorkouts(user.id);
+        const [workoutsData, painScoresData] = await Promise.all([
+          fetchWorkouts(user.id),
+          fetchPainScores(user.id),
+        ]);
         setWorkouts(workoutsData);
+        setPainScores(painScoresData);
         setLoading(false);
       } catch (err) {
-        console.error("Failed to load workouts:", err);
-        setError("Failed to load workouts. Please try again later.");
+        console.error("Failed to load data:", err);
+        setError("Failed to load data. Please try again later.");
         setLoading(false);
       }
     };
-    loadWorkouts();
-  }, []);
+    loadData();
+  }, [user]);
 
   const handleWorkoutDeleted = (workoutId: number) => {
     setWorkouts((prevWorkouts) =>
       prevWorkouts.filter((w) => w.id !== workoutId)
     );
+  };
+
+  const handlePainScoreDelete = async (painScoreId: number) => {
+    if (window.confirm("Are you sure you want to delete this pain score?")) {
+      try {
+        await deletePainScore(painScoreId);
+        setPainScores((prev) => prev.filter((ps) => ps.id !== painScoreId));
+      } catch (err) {
+        console.error("Failed to delete pain score:", err);
+      }
+    }
   };
 
   if (loading) {
@@ -46,11 +60,8 @@ function WorkoutListPage(): ReactElement {
   return (
     <div>
       <div className="page-header">
-        <h2>{user?.name} Workouts</h2>
+        <h2>Workouts & Pain Scores</h2>
         <div className="page-actions">
-          <Link to={toWorkoutNewPath()} className="button">
-            Add New Workout
-          </Link>
           <div className="view-toggle">
             <button
               className={classNames({
@@ -74,11 +85,13 @@ function WorkoutListPage(): ReactElement {
       {error && <div className="error-message">{error}</div>}
 
       {viewMode === "calendar" ? (
-        <CalendarView workouts={workouts} />
+        <CalendarView workouts={workouts} painScores={painScores} />
       ) : (
-        <WorkoutList
+        <ListView
           workouts={workouts}
-          onWorkoutDeleted={handleWorkoutDeleted}
+          painScores={painScores}
+          handleWorkoutDeleted={handleWorkoutDeleted}
+          handlePainScoreDelete={handlePainScoreDelete}
         />
       )}
     </div>

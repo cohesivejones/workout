@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Workout, User, Exercise } from "./types";
+import { Workout, User, Exercise, PainScore } from "./types";
 
 const api = axios.create({
   baseURL: process.env.VITE_API_URL,
@@ -59,3 +59,21 @@ export const fetchRecentExerciseData = (
       exerciseId
     )}`
   );
+
+// Pain Score API functions
+export const fetchPainScores = (userId: number): Promise<PainScore[]> =>
+  api.get(`/pain-scores?userId=${userId}`);
+
+export const fetchPainScore = (painScoreId: number): Promise<PainScore> =>
+  api.get(`/pain-scores/${painScoreId}`);
+
+export const createPainScore = (painScore: Omit<PainScore, "id">): Promise<PainScore> =>
+  api.post("/pain-scores", painScore);
+
+export const updatePainScore = (
+  painScoreId: number,
+  painScore: Omit<PainScore, "id">
+): Promise<PainScore> => api.put(`/pain-scores/${painScoreId}`, painScore);
+
+export const deletePainScore = (painScoreId: number): Promise<{ id: number }> =>
+  api.delete(`/pain-scores/${painScoreId}`);

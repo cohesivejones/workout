@@ -73,13 +73,139 @@
   color: #6c757d;
 }
 
+/* Pain Score Styles */
+.pain-score-section {
+  margin-bottom: 20px;
+}
+
+.cancel-button-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 0;
+  margin-bottom: 20px;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.cancel-edit-btn {
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 16px;
+  cursor: pointer;
+  max-width: 500px;
+  width: 100%;
+}
+
+.cancel-edit-btn:hover {
+  background-color: #5a6268;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: 16px;
+  background-color: #f8f9fa;
+  border-radius: 8px 8px 0 0;
+}
+
+.section-header h3 {
+  margin: 0;
+}
+
+.add-pain-score-btn {
+  display: inline-block;
+  background: #4CAF50;
+  color: white;
+  text-decoration: none;
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-size: 14px;
+}
+
+.add-pain-score-btn:hover {
+  background: #45a049;
+  text-decoration: none;
+  color: white;
+}
+
+.pain-score-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 16px;
+}
+
+.pain-score-card {
+  background-color: white;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.pain-score-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.pain-score-header h4 {
+  margin: 0;
+}
+
+.pain-score-value {
+  font-size: 0.9rem;
+}
+
+.pain-score-notes {
+  margin-top: 8px;
+  margin-bottom: 12px;
+  font-size: 0.9rem;
+  color: #6c757d;
+}
+
+.pain-score-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.pain-score-actions .edit-btn,
+.pain-score-actions .delete-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 4px 8px;
+}
+
+.pain-score-actions .edit-btn {
+  color: #007bff;
+}
+
+.pain-score-actions .edit-btn:hover {
+  color: #0056b3;
+}
+
+.pain-score-actions .delete-btn {
+  color: #dc3545;
+}
+
+.pain-score-actions .delete-btn:hover {
+  color: #c82333;
+}
+
 @media (max-width: 768px) {
   .page-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 16px;
   }
-  
+
   .page-actions {
     width: 100%;
     justify-content: space-between;
