@@ -1,18 +1,14 @@
 import { useState, useEffect } from "react";
 import type { ReactElement } from "react";
 import { Link } from "react-router-dom";
-import WorkoutList from "../components/WorkoutList";
 import CalendarView from "../components/CalendarView";
 import { fetchWorkouts, fetchPainScores, deletePainScore } from "../api";
 import { Workout, PainScore } from "../types";
 import classNames from "classnames";
 import "./WorkoutListPage.css";
 import { useUserContext } from "../contexts/useUserContext";
-import {
-  toWorkoutNewPath,
-  toPainScoreNewPath,
-  toPainScoreEditPath,
-} from "../utils/paths";
+import { toWorkoutNewPath, toPainScoreNewPath } from "../utils/paths";
+import { ListView } from "../components/ListView";
 
 function WorkoutListPage(): ReactElement {
   const [workouts, setWorkouts] = useState<Workout[]>([]);
@@ -99,49 +95,12 @@ function WorkoutListPage(): ReactElement {
       {viewMode === "calendar" ? (
         <CalendarView workouts={workouts} painScores={painScores} />
       ) : (
-        <div>
-          <div className="pain-scores-list">
-            <h3>Pain Scores</h3>
-            {painScores.length === 0 ? (
-              <p>No pain scores recorded yet.</p>
-            ) : (
-              <div className="pain-score-cards">
-                {painScores.map((painScore) => (
-                  <div key={painScore.id} className="pain-score-card">
-                    <div className="pain-score-header">
-                      <h4>{new Date(painScore.date).toLocaleDateString()}</h4>
-                      <div className="pain-score-value">
-                        Pain Level: <strong>{painScore.score}</strong>
-                      </div>
-                    </div>
-                    {painScore.notes && (
-                      <div className="pain-score-notes">{painScore.notes}</div>
-                    )}
-                    <div className="pain-score-actions">
-                      <Link
-                        to={toPainScoreEditPath(painScore)}
-                        className="edit-btn"
-                      >
-                        Edit
-                      </Link>
-                      <button
-                        onClick={() => handlePainScoreDelete(painScore.id)}
-                        className="delete-btn"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <WorkoutList
-            workouts={workouts}
-            onWorkoutDeleted={handleWorkoutDeleted}
-          />
-        </div>
+        <ListView
+          workouts={workouts}
+          painScores={painScores}
+          handleWorkoutDeleted={handleWorkoutDeleted}
+          handlePainScoreDelete={handlePainScoreDelete}
+        />
       )}
     </div>
   );
