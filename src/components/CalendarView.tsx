@@ -13,24 +13,19 @@ import {
   subMonths,
   isToday,
 } from "date-fns";
-import { Link } from "react-router-dom";
-import { toWorkoutPath } from "../utils/paths";
+import { Link, useNavigate } from "react-router-dom";
+import { toWorkoutPath, toPainScoreEditPath } from "../utils/paths";
 
 interface CalendarViewProps {
   workouts: Workout[];
   painScores: PainScore[];
-  onDateSelect: (date: string) => void;
-  onEditPainScore: (painScore: PainScore) => void;
-  onDeletePainScore: (painScoreId: number) => Promise<void>;
 }
 
-const CalendarView: React.FC<CalendarViewProps> = ({ 
-  workouts, 
-  painScores, 
-  onDateSelect, 
-  onEditPainScore, 
-  onDeletePainScore 
+const CalendarView: React.FC<CalendarViewProps> = ({
+  workouts,
+  painScores,
 }) => {
+  const navigate = useNavigate();
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
 
   // Group workouts and pain scores by date
@@ -111,38 +106,22 @@ const CalendarView: React.FC<CalendarViewProps> = ({
               today: isToday(day),
             })}
             key={day.toString()}
-            onClick={() => {
-              if (isSameMonth(day, monthStart)) {
-                onDateSelect(dateStr);
-              }
-            }}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                if (isSameMonth(day, monthStart)) {
-                  onDateSelect(dateStr);
-                }
-              }
-            }}
-            tabIndex={isSameMonth(day, monthStart) ? 0 : -1}
-            role="button"
-            aria-label={`Select date ${dateStr}`}
           >
             <div className="calendar-date">{formattedDate}</div>
-            
+
             {painScore && (
-              <button 
+              <button
                 className="calendar-pain-score"
                 style={{ backgroundColor: getPainScoreColor(painScore.score) }}
                 onClick={(e) => {
                   e.stopPropagation();
-                  onEditPainScore(painScore);
+                  navigate(toPainScoreEditPath(painScore));
                 }}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
+                  if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();
                     e.stopPropagation();
-                    onEditPainScore(painScore);
+                    navigate(toPainScoreEditPath(painScore));
                   }
                 }}
                 aria-label={`Edit pain score ${painScore.score} for ${dateStr}`}
@@ -150,7 +129,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({
                 Pain: {painScore.score}
               </button>
             )}
-            
+
             <div className="calendar-workouts">
               {dayWorkouts.map((workout) => (
                 <Link

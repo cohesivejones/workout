@@ -61,7 +61,7 @@ describe("WorkoutForm", () => {
     render(<WorkoutForm {...defaultProps} />);
 
     // Check title
-    expect(screen.getByText("Add New Workout")).toBeInTheDocument();
+    expect(screen.getByText("New Workout")).toBeInTheDocument();
 
     // Check date input
     expect(screen.getByLabelText(/workout date/i)).toBeInTheDocument();
