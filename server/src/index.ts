@@ -1,9 +1,9 @@
 import express, { Request, Response } from "express";
 import cors from "cors";
-import { DatabaseError, WorkoutResponse, CreateWorkoutRequest } from "./types";
+import { DatabaseError, WorkoutResponse, CreateWorkoutRequest, PainScoreResponse, CreatePainScoreRequest } from "./types";
 import * as dotenv from "dotenv";
 import dataSource from "./data-source";
-import { Exercise, Workout, WorkoutExercise, User } from "./entities";
+import { Exercise, Workout, WorkoutExercise, User, PainScore } from "./entities";
 
 // Initialize reflect-metadata
 import "reflect-metadata";
@@ -445,6 +445,154 @@ app.delete("/workouts/:id", async (req: Request, res: Response) => {
     res.status(500).json({ error: error.message || "Server error" });
   } finally {
     await queryRunner.release();
+  }
+});
+
+// Pain Score Routes
+
+// Get all pain scores for a user
+app.get("/pain-scores", async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.query;
+    if (!userId)
+      return res.status(400).json({
+        error: "User ID is required",
+      });
+
+    const painScoreRepository = dataSource.getRepository(PainScore);
+    const painScores = await painScoreRepository.find({
+      where: { userId: Number(userId) },
+      order: {
+        date: "DESC",
+      },
+    });
+
+    res.json(painScores);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// Get a single pain score by ID
+app.get("/pain-scores/:id", async (req: Request, res: Response) => {
+  try {
+    const painScoreId = parseInt(req.params.id);
+    const painScoreRepository = dataSource.getRepository(PainScore);
+
+    const painScore = await painScoreRepository.findOne({
+      where: { id: painScoreId },
+    });
+
+    if (!painScore) {
+      return res.status(404).json({ error: "Pain score not found" });
+    }
+
+    res.json(painScore);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// Add new pain score
+app.post("/pain-scores", async (req: Request, res: Response) => {
+  try {
+    const { userId, date, score, notes } = req.body as CreatePainScoreRequest;
+
+    // Validate score is between 0 and 10
+    if (score < 0 || score > 10) {
+      return res.status(400).json({ error: "Pain score must be between 0 and 10" });
+    }
+
+    // Create new pain score
+    const painScoreRepository = dataSource.getRepository(PainScore);
+    const painScore = painScoreRepository.create({
+      userId,
+      date,
+      score,
+      notes: notes || null,
+    });
+
+    // Save pain score
+    await painScoreRepository.save(painScore);
+    res.json(painScore);
+  } catch (err) {
+    console.error(err);
+    const error = err as DatabaseError;
+
+    // Check for unique constraint violation
+    if (error.code === "23505" && error.constraint === "UQ_pain_scores_userId_date") {
+      res.status(400).json({ error: "A pain score already exists for this date" });
+    } else {
+      res.status(500).json({ error: error.message || "Server error" });
+    }
+  }
+});
+
+// Update pain score
+app.put("/pain-scores/:id", async (req: Request, res: Response) => {
+  try {
+    const painScoreId = parseInt(req.params.id);
+    const { date, score, notes } = req.body as Omit<CreatePainScoreRequest, "userId">;
+
+    // Validate score is between 0 and 10
+    if (score < 0 || score > 10) {
+      return res.status(400).json({ error: "Pain score must be between 0 and 10" });
+    }
+
+    // Find pain score
+    const painScoreRepository = dataSource.getRepository(PainScore);
+    const painScore = await painScoreRepository.findOne({
+      where: { id: painScoreId },
+    });
+
+    if (!painScore) {
+      return res.status(404).json({ error: "Pain score not found" });
+    }
+
+    // Update pain score properties
+    painScore.date = date;
+    painScore.score = score;
+    painScore.notes = notes || null;
+
+    // Save updated pain score
+    await painScoreRepository.save(painScore);
+    res.json(painScore);
+  } catch (err) {
+    console.error(err);
+    const error = err as DatabaseError;
+
+    // Check for unique constraint violation
+    if (error.code === "23505" && error.constraint === "UQ_pain_scores_userId_date") {
+      res.status(400).json({ error: "A pain score already exists for this date" });
+    } else {
+      res.status(500).json({ error: error.message || "Server error" });
+    }
+  }
+});
+
+// Delete pain score
+app.delete("/pain-scores/:id", async (req: Request, res: Response) => {
+  try {
+    const painScoreId = parseInt(req.params.id);
+    const painScoreRepository = dataSource.getRepository(PainScore);
+
+    // Find pain score
+    const painScore = await painScoreRepository.findOne({
+      where: { id: painScoreId },
+    });
+
+    if (!painScore) {
+      return res.status(404).json({ error: "Pain score not found" });
+    }
+
+    // Delete pain score
+    await painScoreRepository.remove(painScore);
+    res.json({ id: painScoreId });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
   }
 });
 

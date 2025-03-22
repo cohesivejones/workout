@@ -1,4 +1,4 @@
-import { Exercise, Workout, WorkoutExercise, User } from "./entities";
+import { Exercise, Workout, WorkoutExercise, User, PainScore } from "./entities";
 
 // Interface for API responses
 export interface WorkoutResponse {
@@ -23,6 +23,22 @@ export interface CreateWorkoutRequest {
     reps: number;
     weight?: number | null;
   }>;
+}
+
+// Pain score interfaces
+export interface PainScoreResponse {
+  id: number;
+  userId: number;
+  date: string;
+  score: number;
+  notes: string | null;
+}
+
+export interface CreatePainScoreRequest {
+  userId: number;
+  date: string;
+  score: number;
+  notes?: string | null;
 }
 
 export interface DatabaseError extends Error {

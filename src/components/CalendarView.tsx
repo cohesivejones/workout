@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import "./CalendarView.css";
-import { Workout } from "../types";
+import { Workout, PainScore } from "../types";
 import classNames from "classnames";
 import {
   startOfMonth,
@@ -18,12 +18,22 @@ import { toWorkoutPath } from "../utils/paths";
 
 interface CalendarViewProps {
   workouts: Workout[];
+  painScores: PainScore[];
+  onDateSelect: (date: string) => void;
+  onEditPainScore: (painScore: PainScore) => void;
+  onDeletePainScore: (painScoreId: number) => Promise<void>;
 }
 
-const CalendarView: React.FC<CalendarViewProps> = ({ workouts }) => {
+const CalendarView: React.FC<CalendarViewProps> = ({ 
+  workouts, 
+  painScores, 
+  onDateSelect, 
+  onEditPainScore, 
+  onDeletePainScore 
+}) => {
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
 
-  // Group workouts by date
+  // Group workouts and pain scores by date
   const workoutsByDate = workouts.reduce((acc, workout) => {
     const dateStr = workout.date.split("T")[0]; // Handle ISO date format
     if (!acc[dateStr]) {
@@ -32,6 +42,21 @@ const CalendarView: React.FC<CalendarViewProps> = ({ workouts }) => {
     acc[dateStr].push(workout);
     return acc;
   }, {} as Record<string, Workout[]>);
+
+  const painScoresByDate = painScores.reduce((acc, painScore) => {
+    const dateStr = painScore.date.split("T")[0]; // Handle ISO date format
+    acc[dateStr] = painScore;
+    return acc;
+  }, {} as Record<string, PainScore>);
+
+  // Function to get color based on pain score
+  const getPainScoreColor = (score: number): string => {
+    if (score === 0) return "#4caf50"; // Green for no pain
+    if (score <= 3) return "#8bc34a"; // Light green for mild pain
+    if (score <= 5) return "#ffc107"; // Yellow for moderate pain
+    if (score <= 7) return "#ff9800"; // Orange for severe pain
+    return "#f44336"; // Red for extreme pain
+  };
 
   const renderHeader = () => {
     return (
@@ -77,6 +102,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ workouts }) => {
         formattedDate = format(day, dateFormat);
         const dateStr = format(day, "yyyy-MM-dd");
         const dayWorkouts = workoutsByDate[dateStr] || [];
+        const painScore = painScoresByDate[dateStr];
 
         days.push(
           <div
@@ -85,8 +111,46 @@ const CalendarView: React.FC<CalendarViewProps> = ({ workouts }) => {
               today: isToday(day),
             })}
             key={day.toString()}
+            onClick={() => {
+              if (isSameMonth(day, monthStart)) {
+                onDateSelect(dateStr);
+              }
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                if (isSameMonth(day, monthStart)) {
+                  onDateSelect(dateStr);
+                }
+              }
+            }}
+            tabIndex={isSameMonth(day, monthStart) ? 0 : -1}
+            role="button"
+            aria-label={`Select date ${dateStr}`}
           >
             <div className="calendar-date">{formattedDate}</div>
+            
+            {painScore && (
+              <button 
+                className="calendar-pain-score"
+                style={{ backgroundColor: getPainScoreColor(painScore.score) }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEditPainScore(painScore);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onEditPainScore(painScore);
+                  }
+                }}
+                aria-label={`Edit pain score ${painScore.score} for ${dateStr}`}
+              >
+                Pain: {painScore.score}
+              </button>
+            )}
+            
             <div className="calendar-workouts">
               {dayWorkouts.map((workout) => (
                 <Link
@@ -95,6 +159,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ workouts }) => {
                   className={classNames("calendar-workout", {
                     "with-instructor": workout.withInstructor,
                   })}
+                  onClick={(e) => e.stopPropagation()}
                 >
                   <div className="workout-exercises">
                     {workout.exercises.map((exercise, idx) => (
