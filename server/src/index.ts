@@ -1,14 +1,33 @@
 import express, { Request, Response } from "express";
 import cors from "cors";
-import { DatabaseError, WorkoutResponse, CreateWorkoutRequest, PainScoreResponse, CreatePainScoreRequest } from "./types";
+import cookieParser from "cookie-parser";
+import {
+  DatabaseError,
+  WorkoutResponse,
+  CreateWorkoutRequest,
+  PainScoreResponse,
+  CreatePainScoreRequest,
+  LoginRequest,
+  LoginResponse,
+} from "./types";
 import * as dotenv from "dotenv";
 import dataSource from "./data-source";
-import { Exercise, Workout, WorkoutExercise, User, PainScore } from "./entities";
+import {
+  Exercise,
+  Workout,
+  WorkoutExercise,
+  User,
+  PainScore,
+} from "./entities";
+import { authenticateToken, generateToken } from "./middleware/auth";
 
 // Initialize reflect-metadata
 import "reflect-metadata";
 
 dotenv.config();
+
+// JWT secret key
+const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 
 // Initialize TypeORM connection
 dataSource
@@ -23,26 +42,78 @@ dataSource
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL || "http://localhost:3000",
+    credentials: true,
+  })
+);
 app.use(express.json());
+app.use(cookieParser());
 
 // Routes
 
-// User routes
-// Get all users
-app.get("/users", async (_req: Request, res: Response) => {
+// Authentication routes
+// Login endpoint
+app.post("/auth/login", async (req: Request, res: Response) => {
   try {
+    const { email } = req.body as LoginRequest;
+
+    if (!email) {
+      return res.status(400).json({ error: "Email is required" });
+    }
+
     const userRepository = dataSource.getRepository(User);
-    const users = await userRepository.find({
-      order: {
-        name: "ASC",
+
+    // Find user by email
+    let user = await userRepository.findOne({ where: { email } });
+
+    if (!user) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    // Generate JWT token
+    const token = generateToken(user);
+
+    // Set cookie
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
+    // Return user info and token
+    res.json({
+      token,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
       },
     });
-    res.json(users);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error" });
   }
+});
+
+// Logout endpoint
+app.post("/auth/logout", (_req: Request, res: Response) => {
+  // Clear the token cookie
+  res.clearCookie("token");
+  res.json({ message: "Logged out successfully" });
+});
+
+// Get current user
+app.get("/auth/me", authenticateToken, (req: Request, res: Response) => {
+  // User is attached to request by authenticateToken middleware
+  const user = req.user!;
+
+  res.json({
+    id: user.id,
+    name: user.name,
+    email: user.email,
+  });
 });
 
 // Get all exercises
@@ -502,7 +573,9 @@ app.post("/pain-scores", async (req: Request, res: Response) => {
 
     // Validate score is between 0 and 10
     if (score < 0 || score > 10) {
-      return res.status(400).json({ error: "Pain score must be between 0 and 10" });
+      return res
+        .status(400)
+        .json({ error: "Pain score must be between 0 and 10" });
     }
 
     // Create new pain score
@@ -522,8 +595,13 @@ app.post("/pain-scores", async (req: Request, res: Response) => {
     const error = err as DatabaseError;
 
     // Check for unique constraint violation
-    if (error.code === "23505" && error.constraint === "UQ_pain_scores_userId_date") {
-      res.status(400).json({ error: "A pain score already exists for this date" });
+    if (
+      error.code === "23505" &&
+      error.constraint === "UQ_pain_scores_userId_date"
+    ) {
+      res
+        .status(400)
+        .json({ error: "A pain score already exists for this date" });
     } else {
       res.status(500).json({ error: error.message || "Server error" });
     }
@@ -534,11 +612,16 @@ app.post("/pain-scores", async (req: Request, res: Response) => {
 app.put("/pain-scores/:id", async (req: Request, res: Response) => {
   try {
     const painScoreId = parseInt(req.params.id);
-    const { date, score, notes } = req.body as Omit<CreatePainScoreRequest, "userId">;
+    const { date, score, notes } = req.body as Omit<
+      CreatePainScoreRequest,
+      "userId"
+    >;
 
     // Validate score is between 0 and 10
     if (score < 0 || score > 10) {
-      return res.status(400).json({ error: "Pain score must be between 0 and 10" });
+      return res
+        .status(400)
+        .json({ error: "Pain score must be between 0 and 10" });
     }
 
     // Find pain score
@@ -564,8 +647,13 @@ app.put("/pain-scores/:id", async (req: Request, res: Response) => {
     const error = err as DatabaseError;
 
     // Check for unique constraint violation
-    if (error.code === "23505" && error.constraint === "UQ_pain_scores_userId_date") {
-      res.status(400).json({ error: "A pain score already exists for this date" });
+    if (
+      error.code === "23505" &&
+      error.constraint === "UQ_pain_scores_userId_date"
+    ) {
+      res
+        .status(400)
+        .json({ error: "A pain score already exists for this date" });
     } else {
       res.status(500).json({ error: error.message || "Server error" });
     }

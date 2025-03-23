@@ -5,7 +5,11 @@ import LoginPage from "./pages/LoginPage";
 import "./App.css";
 
 const Header = () => {
-  const { user } = useUserContext();
+  const { user, logout } = useUserContext();
+  
+  const handleLogout = async () => {
+    await logout();
+  };
   
   return (
     <header className="App-header">
@@ -29,6 +33,12 @@ const Header = () => {
       {user && (
         <div className="user-info">
           <span>{user.name}</span>
+          <button 
+            onClick={handleLogout}
+            className="logout-button"
+          >
+            Logout
+          </button>
         </div>
       )}
     </header>

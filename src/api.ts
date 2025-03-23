@@ -1,11 +1,16 @@
 import axios from "axios";
-import { Workout, User, Exercise, PainScore } from "./types";
+import { Workout, Exercise, PainScore } from "./types";
+
+// Get token from localStorage if available
+const token = localStorage.getItem("token");
 
 const api = axios.create({
   baseURL: process.env.VITE_API_URL,
   headers: {
     "Content-Type": "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
   },
+  withCredentials: true, // Include cookies in requests
 });
 
 // Add response interceptor for error handling
@@ -16,8 +21,6 @@ api.interceptors.response.use(
     throw new Error(error.response?.data?.error || "An error occurred");
   }
 );
-
-export const fetchUsers = (): Promise<User[]> => api.get("/users");
 
 export const fetchWorkouts = (userId: number): Promise<Workout[]> =>
   api.get(`/workouts?userId=${userId}`);
@@ -67,8 +70,9 @@ export const fetchPainScores = (userId: number): Promise<PainScore[]> =>
 export const fetchPainScore = (painScoreId: number): Promise<PainScore> =>
   api.get(`/pain-scores/${painScoreId}`);
 
-export const createPainScore = (painScore: Omit<PainScore, "id">): Promise<PainScore> =>
-  api.post("/pain-scores", painScore);
+export const createPainScore = (
+  painScore: Omit<PainScore, "id">
+): Promise<PainScore> => api.post("/pain-scores", painScore);
 
 export const updatePainScore = (
   painScoreId: number,
