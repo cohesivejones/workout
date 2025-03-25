@@ -1,38 +1,70 @@
-import { useState, useEffect } from "react";
-import UserList from "../components/UserList";
-import { fetchUsers } from "../api";
-import { User } from "../types";
+import { useForm } from "react-hook-form";
+import { useUserContext } from "../contexts/useUserContext";
 import "./LoginPage.css";
 
+type FormValues = {
+  email: string;
+};
+
 function LoginPage() {
-  const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const { login, loading } = useUserContext();
+  const { 
+    register, 
+    handleSubmit, 
+    formState: { errors, isSubmitting },
+    setError: setFormError,
+    clearErrors
+  } = useForm<FormValues>();
 
-  useEffect(() => {
-    const loadUsers = async () => {
-      try {
-        const usersData = await fetchUsers();
-        setUsers(usersData);
-        setLoading(false);
-      } catch (err) {
-        console.error("Failed to load users:", err);
-        setError("Failed to load users. Please try again later.");
-        setLoading(false);
-      }
-    };
-    loadUsers();
-  }, []);
-
-  if (loading) {
-    return <div className="loading">Loading...</div>;
-  }
+  const onSubmit = async (data: FormValues) => {
+    try {
+      clearErrors();
+      await login(data.email);
+    } catch (err) {
+      console.error("Login error:", err);
+      setFormError("root", { 
+        type: "manual", 
+        message: "Failed to login. Please try again." 
+      });
+    }
+  };
 
   return (
-    <div>
-      {error && <div className="error-message">{error}</div>}
-
-      <UserList users={users} />
+    <div className="login-container">
+      <h2>Login</h2>
+      <p>Enter your email to login or create an account</p>
+      
+      {errors.root && (
+        <div className="error-message">{errors.root.message}</div>
+      )}
+      
+      <form onSubmit={handleSubmit(onSubmit)} className="login-form">
+        <div className="form-group">
+          <label htmlFor="email">Email</label>
+          <input
+            id="email"
+            placeholder="Enter your email"
+            {...register("email", { 
+              required: "Email is required", 
+              pattern: {
+                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                message: "Please enter a valid email address"
+              }
+            })}
+          />
+          {errors.email && (
+            <div className="field-error">{errors.email.message}</div>
+          )}
+        </div>
+        
+        <button 
+          type="submit" 
+          className="login-button"
+          disabled={isSubmitting || loading}
+        >
+          {isSubmitting || loading ? "Logging in..." : "Login"}
+        </button>
+      </form>
     </div>
   );
 }

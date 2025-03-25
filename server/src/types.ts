@@ -1,5 +1,19 @@
 import { Exercise, Workout, WorkoutExercise, User, PainScore } from "./entities";
 
+// Authentication interfaces
+export interface LoginRequest {
+  email: string;
+}
+
+export interface LoginResponse {
+  token: string;
+  user: {
+    id: number;
+    name: string;
+    email: string;
+  };
+}
+
 // Interface for API responses
 export interface WorkoutResponse {
   id: number;

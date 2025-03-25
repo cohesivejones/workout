@@ -40,9 +40,12 @@ describe("WorkoutForm", () => {
     { id: 2, userId: 1, name: "Squats" },
     { id: 3, userId: 1, name: "Lunges" },
   ];
-  jest
-    .spyOn(UserContext, "useUserContext")
-    .mockReturnValue({ user: { id: 1, name: "Bob Jones" }, login: jest.fn() });
+  jest.spyOn(UserContext, "useUserContext").mockReturnValue({
+    user: { id: 1, name: "Bob Jones" },
+    login: jest.fn(),
+    logout: jest.fn(),
+    loading: false,
+  });
   jest
     .spyOn(Api, "fetchRecentExerciseData")
     .mockRejectedValue(new Error("Failed to fetch recent data"));
