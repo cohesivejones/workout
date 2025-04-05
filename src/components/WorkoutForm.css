@@ -49,6 +49,36 @@
   margin-bottom: 20px;
 }
 
+.weight-input-container {
+  position: relative;
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.weight-input-wrapper {
+  position: relative;
+}
+
+.weight-input {
+  padding-right: 70px !important; /* Make room for the suffix */
+}
+
+.weight-suffix {
+  position: absolute;
+  right: 10px;
+  top: 9px; /* Exact positioning */
+  color: #666;
+  font-size: 14px;
+  pointer-events: none; /* Allows clicks to pass through to the input */
+}
+
+/* Ensure consistent input height and alignment */
+.exercise-input-field[type="number"] {
+  height: 36px; /* Set a fixed height */
+  padding: 0 8px; /* Horizontal padding only */
+  line-height: 36px; /* Match line-height to height */
+}
+
 /* React Select Styles */
 .react-select-container {
   width: 100%;

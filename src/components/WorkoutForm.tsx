@@ -224,14 +224,25 @@ function WorkoutForm({
             className="exercise-input-field"
             {...register("currentExercise.reps")}
           />
-          <input
-            type="number"
-            placeholder="Weight (lbs)"
-            min="0"
-            step="0.5"
-            className="exercise-input-field"
-            {...register("currentExercise.weight")}
-          />
+          <div className="weight-input-container">
+            <div className="weight-input-wrapper">
+              <input
+                type="number"
+                placeholder="Weight (lbs)"
+                min="0"
+                step="0.5"
+                className="exercise-input-field weight-input"
+                {...register("currentExercise.weight")}
+              />
+              <span className="weight-suffix">
+                {currentExercise.weight
+                  ? `${(Number(currentExercise.weight) * 0.453592).toFixed(
+                      1
+                    )} kg`
+                  : "0 kg"}
+              </span>
+            </div>
+          </div>
           <button
             type="button"
             onClick={addExercise}
