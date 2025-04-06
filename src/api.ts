@@ -36,6 +36,11 @@ export const createExercise = (
   userId: number,
 ): Promise<Exercise> => api.post("/exercises", { name: exerciseName, userId });
 
+export const updateExercise = (
+  exerciseId: number,
+  name: string,
+): Promise<Exercise> => api.put(`/exercises/${exerciseId}`, { name });
+
 export const deleteWorkout = (workoutId: number): Promise<{ id: number }> =>
   api.delete(`/workouts/${workoutId}`);
 
