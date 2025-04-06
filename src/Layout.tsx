@@ -6,11 +6,11 @@ import "./App.css";
 
 const Header = () => {
   const { user, logout } = useUserContext();
-  
+
   const handleLogout = async () => {
     await logout();
   };
-  
+
   return (
     <header className="App-header">
       <Link
@@ -29,14 +29,11 @@ const Header = () => {
         />
         <h1 style={{ margin: 0 }}>Workout Tracker</h1>
       </Link>
-      
+
       {user && (
         <div className="user-info">
           <span>{user.name}</span>
-          <button 
-            onClick={handleLogout}
-            className="logout-button"
-          >
+          <button onClick={handleLogout} className="logout-button">
             Logout
           </button>
         </div>

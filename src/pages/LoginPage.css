@@ -63,3 +63,16 @@
   font-size: 0.875rem;
   margin-top: 5px;
 }
+
+.login-note {
+  margin-top: 20px;
+  padding: 10px;
+  background-color: #e2f3ff;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.login-note p {
+  margin: 0;
+  color: #0069d9;
+}

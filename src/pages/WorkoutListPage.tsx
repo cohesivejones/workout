@@ -38,7 +38,7 @@ function WorkoutListPage(): ReactElement {
 
   const handleWorkoutDeleted = (workoutId: number) => {
     setWorkouts((prevWorkouts) =>
-      prevWorkouts.filter((w) => w.id !== workoutId)
+      prevWorkouts.filter((w) => w.id !== workoutId),
     );
   };
 

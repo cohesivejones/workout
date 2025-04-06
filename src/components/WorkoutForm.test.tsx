@@ -10,7 +10,7 @@ jest.mock("react-select/creatable", () =>
   ({ options, value, onChange }: any) => {
     function handleChange(event: React.ChangeEvent<HTMLSelectElement>) {
       const option = options.find(
-        (option: any) => option.value === event.currentTarget.value
+        (option: any) => option.value === event.currentTarget.value,
       );
       onChange(option);
     }
@@ -29,7 +29,7 @@ jest.mock("react-select/creatable", () =>
         ))}
       </select>
     );
-  }
+  },
 );
 
 describe("WorkoutForm", () => {
@@ -256,7 +256,7 @@ describe("WorkoutForm", () => {
         {...defaultProps}
         onSubmit={mockOnSubmitError}
         existingWorkout={existingWorkout}
-      />
+      />,
     );
 
     // Submit the form
@@ -264,7 +264,7 @@ describe("WorkoutForm", () => {
     fireEvent.click(submitButton);
 
     expect(
-      await screen.findByText("Failed to save workout")
+      await screen.findByText("Failed to save workout"),
     ).toBeInTheDocument();
   });
 
@@ -287,7 +287,7 @@ describe("WorkoutForm", () => {
         {...defaultProps}
         onSaveExercise={mockOnSaveExercise}
         existingWorkout={existingWorkout}
-      />
+      />,
     );
 
     // Add an exercise
@@ -304,7 +304,7 @@ describe("WorkoutForm", () => {
     fireEvent.click(addButton);
 
     expect(
-      await screen.findByText("Failed to save exercise")
+      await screen.findByText("Failed to save exercise"),
     ).toBeInTheDocument();
   });
 });

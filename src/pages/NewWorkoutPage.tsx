@@ -36,7 +36,7 @@ export default function AddWorkoutPage() {
       setError(
         err instanceof Error
           ? err.message
-          : "Failed to add workout. Please try again."
+          : "Failed to add workout. Please try again.",
       );
       return false;
     }
@@ -57,7 +57,7 @@ export default function AddWorkoutPage() {
       setError(
         err instanceof Error
           ? err.message
-          : "Failed to save exercise. Please try again."
+          : "Failed to save exercise. Please try again.",
       );
       return false;
     }

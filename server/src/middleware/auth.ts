@@ -17,24 +17,21 @@ const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 
 // Generate JWT token
 export const generateToken = (user: User): string => {
-  return jwt.sign(
-    { id: user.id, email: user.email },
-    JWT_SECRET,
-    { expiresIn: "7d" }
-  );
+  return jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, {
+    expiresIn: "7d",
+  });
 };
 
 // Verify JWT token middleware
 export const authenticateToken = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     // Get token from cookies or Authorization header
-    const token = 
-      req.cookies?.token || 
-      req.header("Authorization")?.replace("Bearer ", "");
+    const token =
+      req.cookies?.token || req.header("Authorization")?.replace("Bearer ", "");
 
     if (!token) {
       return res.status(401).json({ error: "Authentication required" });
@@ -42,7 +39,7 @@ export const authenticateToken = async (
 
     // Verify token
     const decoded = jwt.verify(token, JWT_SECRET) as { id: number };
-    
+
     // Get user from database
     const userRepository = dataSource.getRepository(User);
     const user = await userRepository.findOne({ where: { id: decoded.id } });
@@ -63,13 +60,12 @@ export const authenticateToken = async (
 export const optionalAuth = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     // Get token from cookies or Authorization header
-    const token = 
-      req.cookies?.token || 
-      req.header("Authorization")?.replace("Bearer ", "");
+    const token =
+      req.cookies?.token || req.header("Authorization")?.replace("Bearer ", "");
 
     if (!token) {
       return next();
@@ -77,7 +73,7 @@ export const optionalAuth = async (
 
     // Verify token
     const decoded = jwt.verify(token, JWT_SECRET) as { id: number };
-    
+
     // Get user from database
     const userRepository = dataSource.getRepository(User);
     const user = await userRepository.findOne({ where: { id: decoded.id } });
@@ -86,7 +82,7 @@ export const optionalAuth = async (
       // Attach user to request object
       req.user = user;
     }
-    
+
     next();
   } catch (error) {
     // Continue without authentication if token is invalid

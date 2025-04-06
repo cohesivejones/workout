@@ -29,20 +29,26 @@ const CalendarView: React.FC<CalendarViewProps> = ({
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
 
   // Group workouts and pain scores by date
-  const workoutsByDate = workouts.reduce((acc, workout) => {
-    const dateStr = workout.date.split("T")[0]; // Handle ISO date format
-    if (!acc[dateStr]) {
-      acc[dateStr] = [];
-    }
-    acc[dateStr].push(workout);
-    return acc;
-  }, {} as Record<string, Workout[]>);
+  const workoutsByDate = workouts.reduce(
+    (acc, workout) => {
+      const dateStr = workout.date.split("T")[0]; // Handle ISO date format
+      if (!acc[dateStr]) {
+        acc[dateStr] = [];
+      }
+      acc[dateStr].push(workout);
+      return acc;
+    },
+    {} as Record<string, Workout[]>,
+  );
 
-  const painScoresByDate = painScores.reduce((acc, painScore) => {
-    const dateStr = painScore.date.split("T")[0]; // Handle ISO date format
-    acc[dateStr] = painScore;
-    return acc;
-  }, {} as Record<string, PainScore>);
+  const painScoresByDate = painScores.reduce(
+    (acc, painScore) => {
+      const dateStr = painScore.date.split("T")[0]; // Handle ISO date format
+      acc[dateStr] = painScore;
+      return acc;
+    },
+    {} as Record<string, PainScore>,
+  );
 
   // Function to get color based on pain score
   const getPainScoreColor = (score: number): string => {
@@ -149,14 +155,14 @@ const CalendarView: React.FC<CalendarViewProps> = ({
                 </Link>
               ))}
             </div>
-          </div>
+          </div>,
         );
         day = new Date(day.getTime() + 24 * 60 * 60 * 1000); // Add one day
       }
       rows.push(
         <div className="calendar-row" key={day.toString()}>
           {days}
-        </div>
+        </div>,
       );
       days = [];
     }

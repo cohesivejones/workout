@@ -25,7 +25,9 @@
   cursor: pointer;
   border: none;
   font-size: 14px;
-  transition: background-color 0.2s, opacity 0.2s;
+  transition:
+    background-color 0.2s,
+    opacity 0.2s;
 }
 
 .button:disabled {

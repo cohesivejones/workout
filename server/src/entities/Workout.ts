@@ -20,7 +20,7 @@ export class Workout {
     (workoutExercise) => workoutExercise.workout,
     {
       cascade: true,
-    }
+    },
   )
   workoutExercises: WorkoutExercise[];
 }

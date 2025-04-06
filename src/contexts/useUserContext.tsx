@@ -6,7 +6,7 @@ export const useUserContext = () => {
 
   if (!context)
     throw new Error(
-      "UserContext must be called from within the UserContextProvider"
+      "UserContext must be called from within the UserContextProvider",
     );
 
   return context;

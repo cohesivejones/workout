@@ -29,17 +29,17 @@ const painScoreDescriptions = [
   "7: Severe pain that dominates your senses and limits your ability to perform normal activities",
   "8: Intense pain. Physical activity is severely limited. Conversing requires great effort",
   "9: Excruciating pain. Unable to converse. Crying out and/or moaning uncontrollably",
-  "10: Unspeakable pain. Bedridden and possibly delirious. Very few people will ever experience this level of pain"
+  "10: Unspeakable pain. Bedridden and possibly delirious. Very few people will ever experience this level of pain",
 ];
 
-function PainScoreForm({ 
-  onSubmit, 
-  existingPainScore, 
+function PainScoreForm({
+  onSubmit,
+  existingPainScore,
   userId,
-  selectedDate 
+  selectedDate,
 }: PainScoreFormProps): React.ReactElement {
   const [selectedScore, setSelectedScore] = React.useState<number | null>(
-    existingPainScore?.score ?? null
+    existingPainScore?.score ?? null,
   );
 
   // Use react-hook-form
@@ -150,8 +150,8 @@ function PainScoreForm({
           {isSubmitting
             ? "Saving..."
             : existingPainScore
-            ? "Update Pain Score"
-            : "Save Pain Score"}
+              ? "Update Pain Score"
+              : "Save Pain Score"}
         </button>
       </form>
 
