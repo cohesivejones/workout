@@ -16,14 +16,14 @@ export class WorkoutExercise {
   @Column({ type: "float", nullable: true })
   weight: number | null;
 
-  @ManyToOne(() => Workout, workout => workout.workoutExercises, {
-    onDelete: "CASCADE"
+  @ManyToOne(() => Workout, (workout) => workout.workoutExercises, {
+    onDelete: "CASCADE",
   })
   @JoinColumn({ name: "workout_id" })
   workout: Workout;
 
-  @ManyToOne(() => Exercise, exercise => exercise.workoutExercises, {
-    onDelete: "CASCADE"
+  @ManyToOne(() => Exercise, (exercise) => exercise.workoutExercises, {
+    onDelete: "CASCADE",
   })
   @JoinColumn({ name: "exercise_id" })
   exercise: Exercise;

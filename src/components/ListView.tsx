@@ -139,7 +139,7 @@ export const ListView = ({
                     <h3>
                       {format(
                         `${workout.date}T12:00:00.000`,
-                        "MMM d, yyyy (eeee)"
+                        "MMM d, yyyy (eeee)",
                       )}
                     </h3>
                     <div className="list-card-type">Workout</div>
@@ -193,7 +193,7 @@ export const ListView = ({
                     <h3>
                       {format(
                         `${painScore.date}T12:00:00.000`,
-                        "MMM d, yyyy (eeee)"
+                        "MMM d, yyyy (eeee)",
                       )}
                     </h3>
                     <div className="list-card-type">Pain Score</div>

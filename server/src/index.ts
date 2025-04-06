@@ -46,7 +46,7 @@ app.use(
   cors({
     origin: process.env.CLIENT_URL || "http://localhost:3000",
     credentials: true,
-  })
+  }),
 );
 app.use(express.json());
 app.use(cookieParser());
@@ -54,13 +54,16 @@ app.use(cookieParser());
 // Routes
 
 // Authentication routes
+// Import bcrypt for password hashing
+import * as bcrypt from "bcrypt";
+
 // Login endpoint
 app.post("/auth/login", async (req: Request, res: Response) => {
   try {
-    const { email } = req.body as LoginRequest;
+    const { email, password } = req.body as LoginRequest;
 
-    if (!email) {
-      return res.status(400).json({ error: "Email is required" });
+    if (!email || !password) {
+      return res.status(400).json({ error: "Email and password are required" });
     }
 
     const userRepository = dataSource.getRepository(User);
@@ -69,7 +72,16 @@ app.post("/auth/login", async (req: Request, res: Response) => {
     let user = await userRepository.findOne({ where: { email } });
 
     if (!user) {
-      return res.status(401).json({ error: "Unauthorized" });
+      return res.status(401).json({ error: "Invalid email or password" });
+    }
+
+    // Check if password is correct
+    const isPasswordValid = user.password
+      ? await bcrypt.compare(password, user.password)
+      : false;
+
+    if (!isPasswordValid) {
+      return res.status(401).json({ error: "Invalid email or password" });
     }
 
     // Generate JWT token

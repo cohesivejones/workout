@@ -19,7 +19,7 @@ api.interceptors.response.use(
   (error) => {
     console.error("API Error:", error.response?.data || error.message);
     throw new Error(error.response?.data?.error || "An error occurred");
-  }
+  },
 );
 
 export const fetchWorkouts = (userId: number): Promise<Workout[]> =>
@@ -33,7 +33,7 @@ export const createWorkout = (workout: Workout): Promise<Workout> =>
 
 export const createExercise = (
   exerciseName: string,
-  userId: number
+  userId: number,
 ): Promise<Exercise> => api.post("/exercises", { name: exerciseName, userId });
 
 export const deleteWorkout = (workoutId: number): Promise<{ id: number }> =>
@@ -41,7 +41,7 @@ export const deleteWorkout = (workoutId: number): Promise<{ id: number }> =>
 
 export const updateWorkout = (
   workoutId: number,
-  workout: Omit<Workout, "id">
+  workout: Omit<Workout, "id">,
 ): Promise<Workout> => api.put(`/workouts/${workoutId}`, workout);
 
 export const fetchWorkout = (workoutId: number): Promise<Workout> =>
@@ -55,12 +55,12 @@ export interface RecentExerciseData {
 
 export const fetchRecentExerciseData = (
   userId: number,
-  exerciseId: number
+  exerciseId: number,
 ): Promise<RecentExerciseData> =>
   api.get(
     `/exercises/recent?userId=${userId}&exerciseId=${encodeURIComponent(
-      exerciseId
-    )}`
+      exerciseId,
+    )}`,
   );
 
 // Pain Score API functions
@@ -71,12 +71,12 @@ export const fetchPainScore = (painScoreId: number): Promise<PainScore> =>
   api.get(`/pain-scores/${painScoreId}`);
 
 export const createPainScore = (
-  painScore: Omit<PainScore, "id">
+  painScore: Omit<PainScore, "id">,
 ): Promise<PainScore> => api.post("/pain-scores", painScore);
 
 export const updatePainScore = (
   painScoreId: number,
-  painScore: Omit<PainScore, "id">
+  painScore: Omit<PainScore, "id">,
 ): Promise<PainScore> => api.put(`/pain-scores/${painScoreId}`, painScore);
 
 export const deletePainScore = (painScoreId: number): Promise<{ id: number }> =>

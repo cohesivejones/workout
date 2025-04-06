@@ -138,7 +138,7 @@ function WorkoutForm({
   };
 
   const handlePopulateRepsAndWeight = async (
-    val: SingleValue<{ label: string; value: string }>
+    val: SingleValue<{ label: string; value: string }>,
   ) => {
     if (val === null) {
       setValue("currentExercise.reps", "");
@@ -153,7 +153,7 @@ function WorkoutForm({
       setValue("currentExercise.reps", String(recentData.reps));
       setValue(
         "currentExercise.weight",
-        recentData.weight ? String(recentData.weight) : ""
+        recentData.weight ? String(recentData.weight) : "",
       );
     } catch (err) {
       // fail silently
@@ -237,7 +237,7 @@ function WorkoutForm({
               <span className="weight-suffix">
                 {currentExercise.weight
                   ? `${(Number(currentExercise.weight) * 0.453592).toFixed(
-                      1
+                      1,
                     )} kg`
                   : "0 kg"}
               </span>
@@ -293,8 +293,8 @@ function WorkoutForm({
           {isSubmitting
             ? "Saving..."
             : existingWorkout
-            ? "Update Workout"
-            : "Save Workout"}
+              ? "Update Workout"
+              : "Save Workout"}
         </button>
       </form>
     </div>

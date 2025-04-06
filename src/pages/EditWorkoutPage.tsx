@@ -56,7 +56,7 @@ export default function EditWorkoutPage() {
   }, [workoutId]);
 
   const handleUpdateWorkout = async (
-    updatedWorkout: Omit<Workout, "id">
+    updatedWorkout: Omit<Workout, "id">,
   ): Promise<boolean> => {
     try {
       setError(null);
@@ -68,7 +68,7 @@ export default function EditWorkoutPage() {
       setError(
         err instanceof Error
           ? err.message
-          : "Failed to update workout. Please try again."
+          : "Failed to update workout. Please try again.",
       );
       return false;
     }
@@ -89,7 +89,7 @@ export default function EditWorkoutPage() {
       setError(
         err instanceof Error
           ? err.message
-          : "Failed to save exercise. Please try again."
+          : "Failed to save exercise. Please try again.",
       );
       return false;
     }

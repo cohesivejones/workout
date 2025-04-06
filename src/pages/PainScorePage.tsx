@@ -40,7 +40,7 @@ function PainScorePage(): React.ReactElement {
   }, [id, user]);
 
   const handlePainScoreSubmit = async (
-    painScoreData: Omit<PainScore, "id">
+    painScoreData: Omit<PainScore, "id">,
   ) => {
     if (!user) return false;
 
