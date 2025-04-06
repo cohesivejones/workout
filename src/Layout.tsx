@@ -33,6 +33,9 @@ const Header = () => {
       {user && (
         <div className="user-info">
           <span>{user.name}</span>
+          <Link to="/change-password" className="change-password-link">
+            Change Password
+          </Link>
           <button onClick={handleLogout} className="logout-button">
             Logout
           </button>

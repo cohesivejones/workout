@@ -17,6 +17,21 @@
   gap: 10px;
 }
 
+.change-password-link {
+  color: white;
+  text-decoration: none;
+  padding: 5px 10px;
+  background-color: #007bff;
+  border-radius: 4px;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.change-password-link:hover {
+  background-color: #0069d9;
+  text-decoration: none;
+}
+
 .logout-button {
   background-color: #dc3545;
   color: white;

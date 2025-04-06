@@ -128,6 +128,53 @@ app.get("/auth/me", authenticateToken, (req: Request, res: Response) => {
   });
 });
 
+// Change password endpoint
+app.post(
+  "/auth/change-password",
+  authenticateToken,
+  async (req: Request, res: Response) => {
+    try {
+      const { currentPassword, newPassword } = req.body;
+      const user = req.user!;
+
+      if (!currentPassword || !newPassword) {
+        return res
+          .status(400)
+          .json({ error: "Current password and new password are required" });
+      }
+
+      // Validate new password
+      if (newPassword.length < 6) {
+        return res
+          .status(400)
+          .json({ error: "New password must be at least 6 characters" });
+      }
+
+      // Verify current password
+      const isPasswordValid = user.password
+        ? await bcrypt.compare(currentPassword, user.password)
+        : false;
+
+      if (!isPasswordValid) {
+        return res.status(401).json({ error: "Current password is incorrect" });
+      }
+
+      // Hash new password
+      const saltRounds = 10;
+      const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+
+      // Update user's password
+      const userRepository = dataSource.getRepository(User);
+      await userRepository.update(user.id, { password: hashedPassword });
+
+      res.json({ message: "Password changed successfully" });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: "Server error" });
+    }
+  },
+);
+
 // Get all exercises
 app.get("/exercises", async (req: Request, res: Response) => {
   const { userId } = req.query;

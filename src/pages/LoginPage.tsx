@@ -87,8 +87,9 @@ function LoginPage() {
       </form>
 
       <div className="login-note">
-        <p>
-          Note: For existing users, the default password is &quot;changeme&quot;
+        <p className="login-note-link">
+          After logging in, you can{" "}
+          <a href="/change-password">change your password</a>.
         </p>
       </div>
     </div>
