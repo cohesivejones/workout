@@ -266,6 +266,39 @@ app.post("/exercises", async (req: Request, res: Response) => {
   }
 });
 
+// Update exercise
+app.put("/exercises/:id", async (req: Request, res: Response) => {
+  try {
+    const exerciseId = parseInt(req.params.id);
+    const { name } = req.body;
+    
+    if (!name) {
+      return res.status(400).json({ error: "Exercise name is required" });
+    }
+    
+    const exerciseRepository = dataSource.getRepository(Exercise);
+    
+    // Find exercise
+    const exercise = await exerciseRepository.findOne({
+      where: { id: exerciseId },
+    });
+    
+    if (!exercise) {
+      return res.status(404).json({ error: "Exercise not found" });
+    }
+    
+    // Update exercise name
+    exercise.name = name;
+    
+    // Save updated exercise
+    await exerciseRepository.save(exercise);
+    res.json(exercise);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 // Get all workouts with exercises
 app.get("/workouts", async (req: Request, res: Response) => {
   try {

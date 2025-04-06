@@ -5,6 +5,7 @@ import AddWorkoutPage from "./pages/NewWorkoutPage";
 import EditWorkoutPage from "./pages/EditWorkoutPage";
 import WorkoutShowPage from "./pages/WorkoutShowPage";
 import PainScorePage from "./pages/PainScorePage";
+import ExerciseListPage from "./pages/ExerciseListPage";
 import ChangePasswordPage from "./pages/ChangePasswordPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import { Layout } from "./Layout";
@@ -20,6 +21,7 @@ function App() {
           <Route path="/workouts/:id" element={<WorkoutShowPage />} />
           <Route path="/pain-scores/new" element={<PainScorePage />} />
           <Route path="/pain-scores/:id/edit" element={<PainScorePage />} />
+          <Route path="/exercises" element={<ExerciseListPage />} />
           <Route path="/change-password" element={<ChangePasswordPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>

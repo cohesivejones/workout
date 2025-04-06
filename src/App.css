@@ -11,6 +11,44 @@
   align-items: center;
 }
 
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
+.main-nav {
+  display: flex;
+  gap: 20px;
+}
+
+.nav-link {
+  color: white;
+  text-decoration: none;
+  font-size: 16px;
+  padding: 5px 0;
+  position: relative;
+}
+
+.nav-link:hover {
+  color: #f0f0f0;
+}
+
+.nav-link:after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 2px;
+  bottom: 0;
+  left: 0;
+  background-color: white;
+  transition: width 0.3s;
+}
+
+.nav-link:hover:after {
+  width: 100%;
+}
+
 .user-info {
   display: flex;
   align-items: center;
@@ -98,5 +136,27 @@ li {
 @media (max-width: 768px) {
   .workout-container {
     flex-direction: column;
+  }
+  
+  .App-header {
+    flex-direction: column;
+    padding: 15px;
+    gap: 15px;
+  }
+  
+  .header-left {
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+  }
+  
+  .main-nav {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .user-info {
+    width: 100%;
+    justify-content: center;
   }
 }

@@ -13,22 +13,28 @@ const Header = () => {
 
   return (
     <header className="App-header">
-      <Link
-        to="/"
-        style={{
-          display: "flex",
-          alignItems: "center",
-          textDecoration: "none",
-          color: "white",
-        }}
-      >
-        <img
-          src="/dumbbell.svg"
-          alt="Dumbbell"
-          style={{ height: "30px", marginRight: "10px", filter: "invert(1)" }}
-        />
-        <h1 style={{ margin: 0 }}>Workout Tracker</h1>
-      </Link>
+      <div className="header-left">
+        <Link
+          to="/"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            textDecoration: "none",
+            color: "white",
+          }}
+        >
+          <img
+            src="/dumbbell.svg"
+            alt="Dumbbell"
+            style={{ height: "30px", marginRight: "10px", filter: "invert(1)" }}
+          />
+          <h1 style={{ margin: 0 }}>Workout Tracker</h1>
+        </Link>
+        <nav className="main-nav">
+          <Link to="/" className="nav-link">Workouts</Link>
+          <Link to="/exercises" className="nav-link">Exercises</Link>
+        </nav>
+      </div>
 
       {user && (
         <div className="user-info">

@@ -1,0 +1,139 @@
+.exercise-list-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.error-message {
+  color: #dc3545;
+  margin-bottom: 16px;
+  padding: 8px;
+  background-color: #f8d7da;
+  border-radius: 4px;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  font-size: 18px;
+  color: #6c757d;
+}
+
+.no-exercises {
+  text-align: center;
+  color: #6c757d;
+  margin-top: 40px;
+}
+
+.exercise-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 16px;
+}
+
+.exercise-card {
+  background-color: white;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+.exercise-name {
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin-bottom: 12px;
+}
+
+.exercise-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: auto;
+}
+
+.edit-btn {
+  background: none;
+  border: none;
+  color: #007bff;
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 4px 8px;
+}
+
+.edit-btn:hover {
+  color: #0056b3;
+  text-decoration: underline;
+}
+
+.exercise-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.exercise-name-input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.exercise-edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.save-btn, .cancel-btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.save-btn {
+  background-color: #28a745;
+  color: white;
+}
+
+.save-btn:hover:not(:disabled) {
+  background-color: #218838;
+}
+
+.cancel-btn {
+  background-color: #6c757d;
+  color: white;
+}
+
+.cancel-btn:hover:not(:disabled) {
+  background-color: #5a6268;
+}
+
+.save-btn:disabled, .cancel-btn:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  
+  .exercise-cards {
+    grid-template-columns: 1fr;
+  }
+}
