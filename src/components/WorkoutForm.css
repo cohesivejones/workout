@@ -61,6 +61,13 @@
 
 .weight-input {
   padding-right: 70px !important; /* Make room for the suffix */
+  -moz-appearance: textfield;
+}
+
+.weight-input::-webkit-outer-spin-button,
+.weight-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 .weight-suffix {
