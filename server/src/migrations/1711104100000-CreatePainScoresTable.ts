@@ -1,8 +1,8 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
 export class CreatePainScoresTable1711104100000 implements MigrationInterface {
-    public async up(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(`
+  public async up(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(`
             CREATE TABLE "pain_scores" (
                 "id" SERIAL NOT NULL,
                 "userId" integer NOT NULL,
@@ -13,9 +13,9 @@ export class CreatePainScoresTable1711104100000 implements MigrationInterface {
                 CONSTRAINT "UQ_pain_scores_userId_date" UNIQUE ("userId", "date")
             )
         `);
-    }
+  }
 
-    public async down(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(`DROP TABLE "pain_scores"`);
-    }
+  public async down(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(`DROP TABLE "pain_scores"`);
+  }
 }
