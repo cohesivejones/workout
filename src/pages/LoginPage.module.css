@@ -1,4 +1,4 @@
-.change-password-container {
+.loginContainer {
   max-width: 400px;
   margin: 0 auto;
   padding: 20px;
@@ -7,30 +7,30 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.change-password-form {
+.loginForm {
   display: flex;
   flex-direction: column;
   gap: 15px;
 }
 
-.form-group {
+.formGroup {
   display: flex;
   flex-direction: column;
   gap: 5px;
 }
 
-.form-group label {
+.formGroup label {
   font-weight: bold;
 }
 
-.form-group input {
+.formGroup input {
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 4px;
   font-size: 16px;
 }
 
-.change-password-button {
+.loginButton {
   padding: 12px;
   background-color: #007bff;
   color: white;
@@ -39,19 +39,18 @@
   font-size: 16px;
   cursor: pointer;
   transition: background-color 0.2s;
-  margin-top: 10px;
 }
 
-.change-password-button:hover {
+.loginButton:hover {
   background-color: #0069d9;
 }
 
-.change-password-button:disabled {
+.loginButton:disabled {
   background-color: #cccccc;
   cursor: not-allowed;
 }
 
-.error-message {
+.errorMessage {
   color: #dc3545;
   margin-bottom: 15px;
   padding: 10px;
@@ -59,16 +58,35 @@
   border-radius: 4px;
 }
 
-.success-message {
-  color: #28a745;
-  margin-bottom: 15px;
-  padding: 10px;
-  background-color: #d4edda;
-  border-radius: 4px;
-}
-
-.field-error {
+.fieldError {
   color: #dc3545;
   font-size: 0.875rem;
   margin-top: 5px;
+}
+
+.loginNote {
+  margin-top: 20px;
+  padding: 10px;
+  background-color: #e2f3ff;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.loginNote p {
+  margin: 0;
+  color: #0069d9;
+}
+
+.loginNoteLink {
+  margin-top: 8px !important;
+  font-size: 0.85rem;
+}
+
+.loginNoteLink a {
+  color: #0069d9;
+  text-decoration: underline;
+}
+
+.loginNoteLink a:hover {
+  color: #004a99;
 }

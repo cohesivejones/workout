@@ -1,4 +1,4 @@
-.not-found-container {
+.notFoundContainer {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -8,19 +8,19 @@
   min-height: 50vh;
 }
 
-.not-found-container h2 {
+.notFoundContainer h2 {
   font-size: 2.5rem;
   margin-bottom: 1rem;
   color: #e74c3c;
 }
 
-.not-found-container p {
+.notFoundContainer p {
   font-size: 1.2rem;
   margin-bottom: 2rem;
   color: #555;
 }
 
-.home-link {
+.homeLink {
   display: inline-block;
   padding: 0.8rem 1.5rem;
   background-color: #3498db;
@@ -31,6 +31,6 @@
   transition: background-color 0.3s;
 }
 
-.home-link:hover {
+.homeLink:hover {
   background-color: #2980b9;
 }

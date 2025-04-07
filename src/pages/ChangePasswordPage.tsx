@@ -2,7 +2,7 @@ import { useForm } from "react-hook-form";
 import { useState } from "react";
 import axios from "axios";
 import { useUserContext } from "../contexts/useUserContext";
-import "./ChangePasswordPage.css";
+import styles from "./ChangePasswordPage.module.css";
 
 type FormValues = {
   currentPassword: string;
@@ -83,7 +83,7 @@ function ChangePasswordPage() {
 
   if (!user) {
     return (
-      <div className="change-password-container">
+      <div className={styles.changePasswordContainer}>
         <h2>Change Password</h2>
         <p>You must be logged in to change your password.</p>
       </div>
@@ -91,20 +91,23 @@ function ChangePasswordPage() {
   }
 
   return (
-    <div className="change-password-container">
+    <div className={styles.changePasswordContainer}>
       <h2>Change Password</h2>
       <p>Update your password below</p>
 
       {errors.root && (
-        <div className="error-message">{errors.root.message}</div>
+        <div className={styles.errorMessage}>{errors.root.message}</div>
       )}
 
       {successMessage && (
-        <div className="success-message">{successMessage}</div>
+        <div className={styles.successMessage}>{successMessage}</div>
       )}
 
-      <form onSubmit={handleSubmit(onSubmit)} className="change-password-form">
-        <div className="form-group">
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className={styles.changePasswordForm}
+      >
+        <div className={styles.formGroup}>
           <label htmlFor="currentPassword">Current Password</label>
           <input
             id="currentPassword"
@@ -115,11 +118,13 @@ function ChangePasswordPage() {
             })}
           />
           {errors.currentPassword && (
-            <div className="field-error">{errors.currentPassword.message}</div>
+            <div className={styles.fieldError}>
+              {errors.currentPassword.message}
+            </div>
           )}
         </div>
 
-        <div className="form-group">
+        <div className={styles.formGroup}>
           <label htmlFor="newPassword">New Password</label>
           <input
             id="newPassword"
@@ -134,11 +139,13 @@ function ChangePasswordPage() {
             })}
           />
           {errors.newPassword && (
-            <div className="field-error">{errors.newPassword.message}</div>
+            <div className={styles.fieldError}>
+              {errors.newPassword.message}
+            </div>
           )}
         </div>
 
-        <div className="form-group">
+        <div className={styles.formGroup}>
           <label htmlFor="confirmPassword">Confirm New Password</label>
           <input
             id="confirmPassword"
@@ -151,13 +158,15 @@ function ChangePasswordPage() {
             })}
           />
           {errors.confirmPassword && (
-            <div className="field-error">{errors.confirmPassword.message}</div>
+            <div className={styles.fieldError}>
+              {errors.confirmPassword.message}
+            </div>
           )}
         </div>
 
         <button
           type="submit"
-          className="change-password-button"
+          className={styles.changePasswordButton}
           disabled={isSubmitting}
         >
           {isSubmitting ? "Changing Password..." : "Change Password"}

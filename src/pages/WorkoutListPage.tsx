@@ -4,7 +4,7 @@ import CalendarView from "../components/CalendarView";
 import { fetchWorkouts, fetchPainScores, deletePainScore } from "../api";
 import { Workout, PainScore } from "../types";
 import classNames from "classnames";
-import "./WorkoutListPage.css";
+import styles from "./WorkoutListPage.module.css";
 import { useUserContext } from "../contexts/useUserContext";
 import { ListView } from "../components/ListView";
 
@@ -54,18 +54,18 @@ function WorkoutListPage(): ReactElement {
   };
 
   if (loading) {
-    return <div className="loading">Loading...</div>;
+    return <div className={styles.loading}>Loading...</div>;
   }
 
   return (
     <div>
-      <div className="page-header">
+      <div className={styles.pageHeader}>
         <h2>Workouts & Pain Scores</h2>
-        <div className="page-actions">
-          <div className="view-toggle">
+        <div className={styles.pageActions}>
+          <div className={styles.viewToggle}>
             <button
               className={classNames({
-                active: viewMode === "calendar",
+                [styles.active]: viewMode === "calendar",
               })}
               onClick={() => setViewMode("calendar")}
             >
@@ -73,7 +73,7 @@ function WorkoutListPage(): ReactElement {
             </button>
             <button
               className={classNames({
-                active: viewMode === "list",
+                [styles.active]: viewMode === "list",
               })}
               onClick={() => setViewMode("list")}
             >
@@ -82,7 +82,7 @@ function WorkoutListPage(): ReactElement {
           </div>
         </div>
       </div>
-      {error && <div className="error-message">{error}</div>}
+      {error && <div className={styles.errorMessage}>{error}</div>}
 
       {viewMode === "calendar" ? (
         <CalendarView workouts={workouts} painScores={painScores} />

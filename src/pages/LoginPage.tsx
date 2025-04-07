@@ -1,6 +1,6 @@
 import { useForm } from "react-hook-form";
 import { useUserContext } from "../contexts/useUserContext";
-import "./LoginPage.css";
+import styles from "./LoginPage.module.css";
 
 type FormValues = {
   email: string;
@@ -31,16 +31,16 @@ function LoginPage() {
   };
 
   return (
-    <div className="login-container">
+    <div className={styles.loginContainer}>
       <h2>Login</h2>
       <p>Enter your email and password to login</p>
 
       {errors.root && (
-        <div className="error-message">{errors.root.message}</div>
+        <div className={styles.errorMessage}>{errors.root.message}</div>
       )}
 
-      <form onSubmit={handleSubmit(onSubmit)} className="login-form">
-        <div className="form-group">
+      <form onSubmit={handleSubmit(onSubmit)} className={styles.loginForm}>
+        <div className={styles.formGroup}>
           <label htmlFor="email">Email</label>
           <input
             id="email"
@@ -54,11 +54,11 @@ function LoginPage() {
             })}
           />
           {errors.email && (
-            <div className="field-error">{errors.email.message}</div>
+            <div className={styles.fieldError}>{errors.email.message}</div>
           )}
         </div>
 
-        <div className="form-group">
+        <div className={styles.formGroup}>
           <label htmlFor="password">Password</label>
           <input
             id="password"
@@ -73,21 +73,21 @@ function LoginPage() {
             })}
           />
           {errors.password && (
-            <div className="field-error">{errors.password.message}</div>
+            <div className={styles.fieldError}>{errors.password.message}</div>
           )}
         </div>
 
         <button
           type="submit"
-          className="login-button"
+          className={styles.loginButton}
           disabled={isSubmitting || loading}
         >
           {isSubmitting || loading ? "Logging in..." : "Login"}
         </button>
       </form>
 
-      <div className="login-note">
-        <p className="login-note-link">
+      <div className={styles.loginNote}>
+        <p className={styles.loginNoteLink}>
           After logging in, you can{" "}
           <a href="/change-password">change your password</a>.
         </p>
