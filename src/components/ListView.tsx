@@ -10,7 +10,7 @@ import {
 } from "../utils/paths";
 import { deletePainScore, deleteWorkout } from "../api";
 import classNames from "classnames";
-import "./ListView.css";
+import styles from "./ListView.module.css";
 
 interface ListViewProps {
   painScores: PainScore[];
@@ -108,74 +108,74 @@ export const ListView = ({
   };
 
   return (
-    <div className="chronological-list">
-      <div className="section-header">
-        <h3>Activity Timeline</h3>
-        <div className="action-buttons">
-          <Link to={toWorkoutNewPath()} className="add-btn workout-btn">
-            New Workout
-          </Link>
-          <Link to={toPainScoreNewPath()} className="add-btn pain-score-btn">
-            New Pain Score
-          </Link>
-        </div>
+    <div className={styles.chronologicalList}>
+      <div className={styles.sectionHeader}>
+      <h3>Activity Timeline</h3>
+      <div className={styles.actionButtons}>
+        <Link to={toWorkoutNewPath()} className={styles.addBtn + " " + styles.workoutBtn}>
+        New Workout
+        </Link>
+        <Link to={toPainScoreNewPath()} className={styles.addBtn + " " + styles.painScoreBtn}>
+        New Pain Score
+        </Link>
+      </div>
       </div>
 
       {items.length === 0 ? (
         <p>No workouts or pain scores recorded yet.</p>
       ) : (
-        <div className="list-items">
+        <div className={styles.listItems}>
           {items.map((item) => {
             if (item.type === "workout") {
               const workout = item.data;
               return (
                 <div
                   key={`workout-${workout.id}`}
-                  className={classNames("list-card workout-card", {
-                    "with-instructor": workout.withInstructor,
+                  className={classNames(styles.listCard, styles.workoutCard, {
+                  [styles.withInstructor]: workout.withInstructor,
                   })}
                 >
-                  <div className="list-card-header">
-                    <h3>
-                      {format(
-                        `${workout.date}T12:00:00.000`,
-                        "MMM d, yyyy (eeee)",
-                      )}
-                    </h3>
-                    <div className="list-card-type">Workout</div>
-                    <div className="list-card-actions">
-                      <Link
-                        to={toWorkoutEditPath(workout)}
-                        className="edit-btn"
-                      >
-                        Edit
-                      </Link>
-                      <button
-                        onClick={() => handleDeleteWorkout(workout.id)}
-                        disabled={
-                          isDeleting?.type === "workout" &&
-                          isDeleting.id === workout.id
-                        }
-                        className="delete-btn"
-                      >
-                        {isDeleting?.type === "workout" &&
-                        isDeleting.id === workout.id
-                          ? "..."
-                          : "×"}
-                      </button>
-                    </div>
+                  <div className={styles.listCardHeader}>
+                  <h3>
+                    {format(
+                    `${workout.date}T12:00:00.000`,
+                    "MMM d, yyyy (eeee)"
+                    )}
+                  </h3>
+                  <div className={styles.listCardType}>Workout</div>
+                  <div className={styles.listCardActions}>
+                    <Link
+                    to={toWorkoutEditPath(workout)}
+                    className={styles.editBtn}
+                    >
+                    Edit
+                    </Link>
+                    <button
+                    onClick={() => handleDeleteWorkout(workout.id)}
+                    disabled={
+                      isDeleting?.type === "workout" &&
+                      isDeleting.id === workout.id
+                    }
+                    className={styles.deleteBtn}
+                    >
+                    {isDeleting?.type === "workout" &&
+                    isDeleting.id === workout.id
+                      ? "..."
+                      : "×"}
+                    </button>
                   </div>
-                  <div className="list-card-content">
-                    <ul>
-                      {(workout.exercises || [])
-                        .filter((ex) => ex)
-                        .map((exercise, idx) => (
-                          <li key={idx}>
-                            {exercise.name} - {exercise.reps} reps
-                            {exercise.weight ? ` - ${exercise.weight} lbs` : ""}
-                          </li>
-                        ))}
-                    </ul>
+                  </div>
+                  <div className={styles.listCardContent}>
+                  <ul>
+                    {(workout.exercises || [])
+                    .filter((ex) => ex)
+                    .map((exercise, idx) => (
+                      <li key={idx}>
+                      {exercise.name} - {exercise.reps} reps
+                      {exercise.weight ? ` - ${exercise.weight} lbs` : ""}
+                      </li>
+                    ))}
+                  </ul>
                   </div>
                 </div>
               );
@@ -184,51 +184,51 @@ export const ListView = ({
               return (
                 <div
                   key={`pain-score-${painScore.id}`}
-                  className="list-card pain-score-card"
+                  className={classNames(styles.listCard, styles.painScoreCard)}
                   style={{
-                    borderLeftColor: getPainScoreColor(painScore.score),
+                  borderLeftColor: getPainScoreColor(painScore.score),
                   }}
                 >
-                  <div className="list-card-header">
-                    <h3>
-                      {format(
-                        `${painScore.date}T12:00:00.000`,
-                        "MMM d, yyyy (eeee)",
-                      )}
-                    </h3>
-                    <div className="list-card-type">Pain Score</div>
-                    <div className="list-card-actions">
-                      <Link
-                        to={toPainScoreEditPath(painScore)}
-                        className="edit-btn"
-                      >
-                        Edit
-                      </Link>
-                      <button
-                        onClick={() => handleDeletePainScore(painScore.id)}
-                        disabled={
-                          isDeleting?.type === "painScore" &&
-                          isDeleting.id === painScore.id
-                        }
-                        className="delete-btn"
-                      >
-                        {isDeleting?.type === "painScore" &&
-                        isDeleting.id === painScore.id
-                          ? "..."
-                          : "×"}
-                      </button>
-                    </div>
-                  </div>
-                  <div className="list-card-content">
-                    <div className="pain-score-level">
-                      <strong>Pain Level: {painScore.score}</strong> -{" "}
-                      {getPainScoreDescription(painScore.score)}
-                    </div>
-                    {painScore.notes && (
-                      <div className="pain-score-notes">
-                        <strong>Notes:</strong> {painScore.notes}
-                      </div>
+                  <div className={styles.listCardHeader}>
+                  <h3>
+                    {format(
+                    `${painScore.date}T12:00:00.000`,
+                    "MMM d, yyyy (eeee)"
                     )}
+                  </h3>
+                  <div className={styles.listCardType}>Pain Score</div>
+                  <div className={styles.listCardActions}>
+                    <Link
+                    to={toPainScoreEditPath(painScore)}
+                    className={styles.editBtn}
+                    >
+                    Edit
+                    </Link>
+                    <button
+                    onClick={() => handleDeletePainScore(painScore.id)}
+                    disabled={
+                      isDeleting?.type === "painScore" &&
+                      isDeleting.id === painScore.id
+                    }
+                    className={styles.deleteBtn}
+                    >
+                    {isDeleting?.type === "painScore" &&
+                    isDeleting.id === painScore.id
+                      ? "..."
+                      : "×"}
+                    </button>
+                  </div>
+                  </div>
+                  <div className={styles.listCardContent}>
+                  <div className={styles.painScoreLevel}>
+                    <strong>Pain Level: {painScore.score}</strong> -{" "}
+                    {getPainScoreDescription(painScore.score)}
+                  </div>
+                  {painScore.notes && (
+                    <div className={styles.painScoreNotes}>
+                    <strong>Notes:</strong> {painScore.notes}
+                    </div>
+                  )}
                   </div>
                 </div>
               );
