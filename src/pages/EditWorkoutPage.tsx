@@ -9,6 +9,8 @@ import {
 } from "../api";
 import { Exercise, Workout } from "../types";
 import { useUserContext } from "../contexts/useUserContext";
+import styles from "../components/WorkoutForm.module.css";
+import loadingStyles from "../App.module.css";
 
 export default function EditWorkoutPage() {
   const navigate = useNavigate();
@@ -56,7 +58,7 @@ export default function EditWorkoutPage() {
   }, [workoutId]);
 
   const handleUpdateWorkout = async (
-    updatedWorkout: Omit<Workout, "id">,
+    updatedWorkout: Omit<Workout, "id">
   ): Promise<boolean> => {
     try {
       setError(null);
@@ -68,7 +70,7 @@ export default function EditWorkoutPage() {
       setError(
         err instanceof Error
           ? err.message
-          : "Failed to update workout. Please try again.",
+          : "Failed to update workout. Please try again."
       );
       return false;
     }
@@ -89,22 +91,22 @@ export default function EditWorkoutPage() {
       setError(
         err instanceof Error
           ? err.message
-          : "Failed to save exercise. Please try again.",
+          : "Failed to save exercise. Please try again."
       );
       return false;
     }
   };
 
   if (loading) {
-    return <div className="loading">Loading...</div>;
+    return <div className={loadingStyles.loading}>Loading...</div>;
   }
 
   if (error) {
-    return <div className="error-message">{error}</div>;
+    return <div className={styles.errorMessage}>{error}</div>;
   }
 
   if (!workout) {
-    return <div className="error-message">Workout not found</div>;
+    return <div className={styles.errorMessage}>Workout not found</div>;
   }
 
   return (

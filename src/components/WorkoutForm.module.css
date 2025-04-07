@@ -1,4 +1,4 @@
-.workout-form {
+.workoutForm {
   max-width: 500px;
   margin: 0 auto;
   text-align: left;
@@ -8,21 +8,21 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.error-message {
+.errorMessage {
   color: #ff4444;
   margin-bottom: 20px;
 }
 
-.date-input {
+.dateInput {
   margin-bottom: 20px;
 }
 
-.date-input label {
+.dateInput label {
   display: block;
   margin-bottom: 5px;
 }
 
-.exercise-input-field {
+.exerciseInputField {
   width: 100%;
   padding: 8px;
   margin-bottom: 10px;
@@ -31,46 +31,46 @@
   box-sizing: border-box;
 }
 
-.instructor-checkbox {
+.instructorCheckbox {
   margin-bottom: 20px;
 }
 
-.instructor-checkbox label {
+.instructorCheckbox label {
   display: flex;
   align-items: center;
   cursor: pointer;
 }
 
-.instructor-checkbox input[type="checkbox"] {
+.instructorCheckbox input[type="checkbox"] {
   margin-right: 8px;
 }
 
-.exercise-input {
+.exerciseInput {
   margin-bottom: 20px;
 }
 
-.weight-input-container {
+.weightInputContainer {
   position: relative;
   width: 100%;
   margin-bottom: 10px;
 }
 
-.weight-input-wrapper {
+.weightInputWrapper {
   position: relative;
 }
 
-.weight-input {
+.weightInput {
   padding-right: 70px !important; /* Make room for the suffix */
   -moz-appearance: textfield;
 }
 
-.weight-input::-webkit-outer-spin-button,
-.weight-input::-webkit-inner-spin-button {
+.weightInput::-webkit-outer-spin-button,
+.weightInput::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
 
-.weight-suffix {
+.weightSuffix {
   position: absolute;
   right: 10px;
   top: 9px; /* Exact positioning */
@@ -80,47 +80,47 @@
 }
 
 /* Ensure consistent input height and alignment */
-.exercise-input-field[type="number"] {
+.exerciseInputField[type="number"] {
   height: 36px; /* Set a fixed height */
   padding: 0 8px; /* Horizontal padding only */
   line-height: 36px; /* Match line-height to height */
 }
 
 /* React Select Styles */
-.react-select-container {
+.reactSelectContainer {
   width: 100%;
   margin-bottom: 10px;
 }
 
-.react-select__control {
+.reactSelect__control {
   border: 1px solid #ddd !important;
   border-radius: 4px !important;
   box-shadow: none !important;
   min-height: 38px !important;
 }
 
-.react-select__control--is-focused {
+.reactSelect__control--is-focused {
   border-color: #4caf50 !important;
   box-shadow: 0 0 0 1px #4caf50 !important;
 }
 
-.react-select__value-container {
+.reactSelect__value-container {
   padding: 2px 8px !important;
 }
 
-.react-select__menu {
+.reactSelect__menu {
   z-index: 100 !important;
 }
 
-.react-select__option--is-focused {
+.reactSelect__option--is-focused {
   background-color: rgba(76, 175, 80, 0.1) !important;
 }
 
-.react-select__option--is-selected {
+.reactSelect__option--is-selected {
   background-color: #4caf50 !important;
 }
 
-.add-exercise-btn {
+.addExerciseBtn {
   width: 100%;
   padding: 10px;
   background: #4caf50;
@@ -130,31 +130,31 @@
   cursor: pointer;
 }
 
-.add-exercise-btn:hover {
+.addExerciseBtn:hover {
   background: #45a049;
 }
 
-.add-exercise-btn:disabled {
+.addExerciseBtn:disabled {
   background: #cccccc;
   cursor: not-allowed;
 }
 
-.exercise-list {
+.exerciseList {
   /* Add any specific styles for exercise list here */
 }
 
-.exercise-item {
+.exerciseItem {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 5px 0;
 }
 
-.exercise-info {
+.exerciseInfo {
   flex: 1;
 }
 
-.remove-exercise-btn {
+.removeExerciseBtn {
   background: #ff4444;
   color: white;
   border: none;
@@ -171,11 +171,11 @@
   margin-left: 10px;
 }
 
-.remove-exercise-btn:hover {
+.removeExerciseBtn:hover {
   background: #cc0000;
 }
 
-.save-workout-btn {
+.saveWorkoutBtn {
   width: 100%;
   padding: 10px;
   background: #4caf50;
@@ -185,11 +185,11 @@
   cursor: pointer;
 }
 
-.save-workout-btn:hover {
+.saveWorkoutBtn:hover {
   background: #45a049;
 }
 
-.save-workout-btn:disabled {
+.saveWorkoutBtn:disabled {
   background: #cccccc;
   cursor: not-allowed;
 }

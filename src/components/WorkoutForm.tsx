@@ -1,7 +1,7 @@
 import * as React from "react";
 import { WorkoutFormProps, WorkoutExercise } from "../types";
 import CreatableSelect from "react-select/creatable";
-import "./WorkoutForm.css";
+import styles from "./WorkoutForm.module.css";
 import { useUserContext } from "../contexts/useUserContext";
 import { fetchRecentExerciseData } from "../api";
 import {
@@ -138,7 +138,7 @@ function WorkoutForm({
   };
 
   const handlePopulateRepsAndWeight = async (
-    val: SingleValue<{ label: string; value: string }>,
+    val: SingleValue<{ label: string; value: string }>
   ) => {
     if (val === null) {
       setValue("currentExercise.reps", "");
@@ -153,7 +153,7 @@ function WorkoutForm({
       setValue("currentExercise.reps", String(recentData.reps));
       setValue(
         "currentExercise.weight",
-        recentData.weight ? String(recentData.weight) : "",
+        recentData.weight ? String(recentData.weight) : ""
       );
     } catch (err) {
       // fail silently
@@ -165,24 +165,24 @@ function WorkoutForm({
     value: exercise.name,
   }));
   return (
-    <div className="workout-form">
+    <div className={styles.workoutForm}>
       <h2>{existingWorkout ? "Edit Workout" : "New Workout"}</h2>
       {(errors as any).serverError && (
-        <div className="error-message">
-          {(errors as any).serverError.message}
-        </div>
+      <div className={styles.errorMessage}>
+        {(errors as any).serverError.message}
+      </div>
       )}
       <form onSubmit={handleSubmit(onFormSubmit)}>
-        <div className="date-input">
+        <div className={styles.dateInput}>
           <label htmlFor="workout-date">Workout Date:</label>
           <input
             type="date"
             id="workout-date"
-            className="exercise-input-field"
+            className={styles.exerciseInputField}
             {...register("date")}
           />
         </div>
-        <div className="instructor-checkbox">
+        <div className={styles.instructorCheckbox}>
           <label htmlFor="with-instructor">
             <input
               type="checkbox"
@@ -192,28 +192,28 @@ function WorkoutForm({
             With Instructor
           </label>
         </div>
-        <div className="exercise-input">
+        <div className={styles.exerciseInput}>
           <Controller
             name="currentExercise.name"
             control={control}
             render={({ field }) => {
               const selectedExerciseOption = field.value
-                ? { label: field.value, value: field.value }
-                : null;
+          ? { label: field.value, value: field.value }
+          : null;
               return (
-                <CreatableSelect
-                  isClearable
-                  placeholder="Select or create an exercise"
-                  options={exerciseSelectOptions}
-                  onChange={(val) => {
-                    field.onChange(val ? val.value : "");
-                    handlePopulateRepsAndWeight(val);
-                  }}
-                  value={selectedExerciseOption}
-                  className="react-select-container"
-                  classNamePrefix="react-select"
-                  formatCreateLabel={(inputValue) => `Create "${inputValue}"`}
-                />
+          <CreatableSelect
+            isClearable
+            placeholder="Select or create an exercise"
+            options={exerciseSelectOptions}
+            onChange={(val) => {
+              field.onChange(val ? val.value : "");
+              handlePopulateRepsAndWeight(val);
+            }}
+            value={selectedExerciseOption}
+            className={styles.reactSelectContainer}
+            classNamePrefix="reactSelect"
+            formatCreateLabel={(inputValue) => `Create "${inputValue}"`}
+          />
               );
             }}
           />
@@ -221,25 +221,25 @@ function WorkoutForm({
             type="number"
             placeholder="Reps"
             min="1"
-            className="exercise-input-field"
+            className={styles.exerciseInputField}
             {...register("currentExercise.reps")}
           />
-          <div className="weight-input-container">
-            <div className="weight-input-wrapper">
+          <div className={styles.weightInputContainer}>
+            <div className={styles.weightInputWrapper}>
               <input
-                type="number"
-                placeholder="Weight (lbs)"
-                min="0"
-                step="0.5"
-                className="exercise-input-field weight-input"
-                {...register("currentExercise.weight")}
+          type="number"
+          placeholder="Weight (lbs)"
+          min="0"
+          step="0.5"
+          className={`${styles.exerciseInputField} ${styles.weightInput}`}
+          {...register("currentExercise.weight")}
               />
-              <span className="weight-suffix">
-                {currentExercise.weight
-                  ? `${(Number(currentExercise.weight) * 0.453592).toFixed(
-                      1,
-                    )} kg`
-                  : "0 kg"}
+              <span className={styles.weightSuffix}>
+          {currentExercise.weight
+            ? `${(Number(currentExercise.weight) * 0.453592).toFixed(
+                1
+              )} kg`
+            : "0 kg"}
               </span>
             </div>
           </div>
@@ -252,34 +252,34 @@ function WorkoutForm({
               isSavingExercise ||
               isSubmitting
             }
-            className="add-exercise-btn"
+            className={styles.addExerciseBtn}
           >
             {isSavingExercise ? "Adding..." : "Add Exercise"}
           </button>
         </div>
 
-        <div className="exercise-list">
+        <div className={styles.exerciseList}>
           <h3>Current Exercises:</h3>
           {fields.length === 0 ? (
             <p>No exercises added yet</p>
           ) : (
             <ul>
               {fields.map((field, index) => (
-                <li key={field.id} className="exercise-item">
-                  <div className="exercise-info">
-                    {exercises[index].name} - {exercises[index].reps} reps
-                    {exercises[index].weight
-                      ? ` - ${exercises[index].weight} lbs`
-                      : ""}
-                  </div>
-                  <button
-                    type="button"
-                    className="remove-exercise-btn"
-                    onClick={() => remove(index)}
-                  >
-                    ×
-                  </button>
-                </li>
+          <li key={field.id} className={styles.exerciseItem}>
+            <div className={styles.exerciseInfo}>
+              {exercises[index].name} - {exercises[index].reps} reps
+              {exercises[index].weight
+                ? ` - ${exercises[index].weight} lbs`
+                : ""}
+            </div>
+            <button
+              type="button"
+              className={styles.removeExerciseBtn}
+              onClick={() => remove(index)}
+            >
+              ×
+            </button>
+          </li>
               ))}
             </ul>
           )}
@@ -288,13 +288,13 @@ function WorkoutForm({
         <button
           type="submit"
           disabled={fields.length === 0 || isSubmitting}
-          className="save-workout-btn"
+          className={styles.saveWorkoutBtn}
         >
           {isSubmitting
             ? "Saving..."
             : existingWorkout
-              ? "Update Workout"
-              : "Save Workout"}
+            ? "Update Workout"
+            : "Save Workout"}
         </button>
       </form>
     </div>
