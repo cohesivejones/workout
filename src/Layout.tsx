@@ -31,8 +31,12 @@ const Header = () => {
           <h1 style={{ margin: 0 }}>Workout Tracker</h1>
         </Link>
         <nav className="main-nav">
-          <Link to="/" className="nav-link">Workouts</Link>
-          <Link to="/exercises" className="nav-link">Exercises</Link>
+          <Link to="/" className="nav-link">
+            Workouts
+          </Link>
+          <Link to="/exercises" className="nav-link">
+            Exercises
+          </Link>
         </nav>
       </div>
 

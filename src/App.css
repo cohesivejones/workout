@@ -35,7 +35,7 @@
 }
 
 .nav-link:after {
-  content: '';
+  content: "";
   position: absolute;
   width: 0;
   height: 2px;
@@ -137,24 +137,24 @@ li {
   .workout-container {
     flex-direction: column;
   }
-  
+
   .App-header {
     flex-direction: column;
     padding: 15px;
     gap: 15px;
   }
-  
+
   .header-left {
     flex-direction: column;
     gap: 15px;
     width: 100%;
   }
-  
+
   .main-nav {
     width: 100%;
     justify-content: center;
   }
-  
+
   .user-info {
     width: 100%;
     justify-content: center;

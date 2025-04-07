@@ -1,25 +1,25 @@
-.page-header {
+.pageHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
 }
 
-.page-actions {
+.pageActions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 16px;
 }
 
-.view-toggle {
+.viewToggle {
   display: flex;
   border: 1px solid #ddd;
   border-radius: 4px;
   overflow: hidden;
 }
 
-.view-toggle button {
+.viewToggle button {
   padding: 8px 16px;
   background-color: #fff;
   border: none;
@@ -28,16 +28,16 @@
   transition: background-color 0.2s;
 }
 
-.view-toggle button:first-child {
+.viewToggle button:first-child {
   border-right: 1px solid #ddd;
 }
 
-.view-toggle button.active {
-  background-color: #007bff;
+.active {
+  background-color: #007bff !important;
   color: white;
 }
 
-.view-toggle button:hover:not(.active) {
+.viewToggle button:hover:not(.active) {
   background-color: #f1f1f1;
 }
 
@@ -56,7 +56,7 @@
   background-color: #0069d9;
 }
 
-.error-message {
+.errorMessage {
   color: #dc3545;
   margin-bottom: 16px;
   padding: 8px;
@@ -74,11 +74,11 @@
 }
 
 /* Pain Score Styles */
-.pain-score-section {
+.painScoreSection {
   margin-bottom: 20px;
 }
 
-.cancel-button-container {
+.cancelButtonContainer {
   display: flex;
   justify-content: center;
   margin-top: 0;
@@ -88,7 +88,7 @@
   margin-right: auto;
 }
 
-.cancel-edit-btn {
+.cancelEditBtn {
   background-color: #6c757d;
   color: white;
   border: none;
@@ -99,11 +99,11 @@
   width: 100%;
 }
 
-.cancel-edit-btn:hover {
+.cancelEditBtn:hover {
   background-color: #5a6268;
 }
 
-.section-header {
+.sectionHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -113,11 +113,11 @@
   border-radius: 8px 8px 0 0;
 }
 
-.section-header h3 {
+.sectionHeader h3 {
   margin: 0;
 }
 
-.add-pain-score-btn {
+.addPainScoreBtn {
   display: inline-block;
   background: #4caf50;
   color: white;
@@ -127,86 +127,87 @@
   font-size: 14px;
 }
 
-.add-pain-score-btn:hover {
+.addPainScoreBtn:hover {
   background: #45a049;
   text-decoration: none;
   color: white;
 }
 
-.pain-score-cards {
+.painScoreCards {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 16px;
 }
 
-.pain-score-card {
+.painScoreCard {
   background-color: white;
   border-radius: 8px;
   padding: 16px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.pain-score-header {
+.painScoreHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 8px;
 }
 
-.pain-score-header h4 {
+.painScoreHeader h4 {
   margin: 0;
 }
 
-.pain-score-value {
+.painScoreValue {
   font-size: 0.9rem;
 }
 
-.pain-score-notes {
+.painScoreNotes {
   margin-top: 8px;
   margin-bottom: 12px;
   font-size: 0.9rem;
   color: #6c757d;
 }
 
-.pain-score-actions {
+.painScoreActions {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
 }
 
-.pain-score-actions .edit-btn,
-.pain-score-actions .delete-btn {
+.editBtn {
   background: none;
   border: none;
   cursor: pointer;
   font-size: 0.9rem;
   padding: 4px 8px;
-}
-
-.pain-score-actions .edit-btn {
   color: #007bff;
 }
 
-.pain-score-actions .edit-btn:hover {
+.editBtn:hover {
   color: #0056b3;
 }
 
-.pain-score-actions .delete-btn {
+.deleteBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 4px 8px;
   color: #dc3545;
 }
 
-.pain-score-actions .delete-btn:hover {
+.deleteBtn:hover {
   color: #c82333;
 }
 
 @media (max-width: 768px) {
-  .page-header {
+  .pageHeader {
     flex-direction: column;
     align-items: flex-start;
     gap: 16px;
   }
 
-  .page-actions {
+  .pageActions {
     width: 100%;
     justify-content: space-between;
   }

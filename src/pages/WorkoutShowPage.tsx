@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { fetchWorkout, deleteWorkout } from "../api";
 import { Workout } from "../types";
-import "./WorkoutShowPage.css";
+import styles from "./WorkoutShowPage.module.css";
 import { format } from "date-fns";
 import classNames from "classnames";
 import { toHomePath, toWorkoutEditPath } from "../utils/paths";
@@ -50,57 +50,62 @@ const WorkoutShowPage: React.FC = () => {
   };
 
   if (loading) {
-    return <div className="loading">Loading workout details...</div>;
+    return <div className={styles.loading}>Loading workout details...</div>;
   }
 
   if (error) {
-    return <div className="error-message">{error}</div>;
+    return <div className={styles.errorMessage}>{error}</div>;
   }
 
   if (!workout) {
-    return <div className="error-message">Workout not found</div>;
+    return <div className={styles.errorMessage}>Workout not found</div>;
   }
 
   return (
-    <div className="workout-show-page">
-      <div className="page-header">
+    <div className={styles.workoutShowPage}>
+      <div className={styles.pageHeader}>
         <h2>Workout Details</h2>
-        <div className="page-actions">
-          <Link to={toHomePath()} className="button secondary">
+        <div className={styles.pageActions}>
+          <Link
+            to={toHomePath()}
+            className={`${styles.button} ${styles.secondary}`}
+          >
             Back to List
           </Link>
         </div>
       </div>
 
       <div
-        className={classNames("workout-detail-card", {
-          "with-instructor": workout.withInstructor,
+        className={classNames(styles.workoutDetailCard, {
+          [styles.withInstructor]: workout.withInstructor,
         })}
       >
-        <div className="workout-detail-header">
+        <div className={styles.workoutDetailHeader}>
           <h3>
             {format(`${workout.date}T12:00:00.000`, "MMM d, yyyy (eeee)")}
           </h3>
           {workout.withInstructor && (
-            <div className="instructor-badge">With Instructor</div>
+            <div className={styles.instructorBadge}>With Instructor</div>
           )}
         </div>
 
-        <div className="workout-detail-content">
+        <div className={styles.workoutDetailContent}>
           <h4>Exercises:</h4>
           {workout.exercises.length === 0 ? (
             <p>No exercises recorded for this workout.</p>
           ) : (
-            <ul className="exercise-detail-list">
+            <ul className={styles.exerciseDetailList}>
               {workout.exercises.map((exercise, index) => (
-                <li key={index} className="exercise-detail-item">
-                  <div className="exercise-detail-name">{exercise.name}</div>
-                  <div className="exercise-detail-stats">
-                    <span className="exercise-detail-reps">
+                <li key={index} className={styles.exerciseDetailItem}>
+                  <div className={styles.exerciseDetailName}>
+                    {exercise.name}
+                  </div>
+                  <div className={styles.exerciseDetailStats}>
+                    <span className={styles.exerciseDetailReps}>
                       {exercise.reps} reps
                     </span>
                     {exercise.weight && (
-                      <span className="exercise-detail-weight">
+                      <span className={styles.exerciseDetailWeight}>
                         {exercise.weight} lbs
                       </span>
                     )}
@@ -111,14 +116,17 @@ const WorkoutShowPage: React.FC = () => {
           )}
         </div>
 
-        <div className="workout-detail-actions">
-          <Link to={toWorkoutEditPath(workout)} className="button primary">
+        <div className={styles.workoutDetailActions}>
+          <Link
+            to={toWorkoutEditPath(workout)}
+            className={`${styles.button} ${styles.primary}`}
+          >
             Edit Workout
           </Link>
           <button
             onClick={handleDelete}
             disabled={isDeleting}
-            className="button danger"
+            className={`${styles.button} ${styles.danger}`}
           >
             {isDeleting ? "Deleting..." : "Delete Workout"}
           </button>

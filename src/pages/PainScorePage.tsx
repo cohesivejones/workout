@@ -4,7 +4,7 @@ import PainScoreForm from "../components/PainScoreForm";
 import { createPainScore, updatePainScore, fetchPainScore } from "../api";
 import { PainScore } from "../types";
 import { useUserContext } from "../contexts/useUserContext";
-import "./PainScorePage.css";
+import styles from "./PainScorePage.module.css";
 
 function PainScorePage(): React.ReactElement {
   const { id } = useParams<{ id?: string }>();
@@ -66,12 +66,12 @@ function PainScorePage(): React.ReactElement {
   };
 
   if (loading) {
-    return <div className="loading">Loading...</div>;
+    return <div className={styles.loading}>Loading...</div>;
   }
 
   return (
-    <div className="pain-score-page">
-      {error && <div className="error-message">{error}</div>}
+    <div className={styles.painScorePage}>
+      {error && <div className={styles.errorMessage}>{error}</div>}
 
       <PainScoreForm
         onSubmit={handlePainScoreSubmit}
@@ -80,8 +80,8 @@ function PainScorePage(): React.ReactElement {
         selectedDate={selectedDate || undefined}
       />
 
-      <div className="cancel-button-container">
-        <button className="cancel-edit-btn" onClick={handleCancel}>
+      <div className={styles.cancelButtonContainer}>
+        <button className={styles.cancelEditBtn} onClick={handleCancel}>
           Cancel
         </button>
       </div>

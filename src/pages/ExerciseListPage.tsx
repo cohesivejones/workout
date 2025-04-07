@@ -3,7 +3,7 @@ import type { ReactElement } from "react";
 import { fetchExercises, updateExercise } from "../api";
 import { Exercise } from "../types";
 import { useUserContext } from "../contexts/useUserContext";
-import "./ExerciseListPage.css";
+import styles from "./ExerciseListPage.module.css";
 
 function ExerciseListPage(): ReactElement {
   const [exercises, setExercises] = useState<Exercise[]>([]);
@@ -45,15 +45,18 @@ function ExerciseListPage(): ReactElement {
 
     try {
       setIsSubmitting(true);
-      const updatedExercise = await updateExercise(editingExercise.id, newName.trim());
-      
-      // Update the exercises list with the updated exercise
-      setExercises(prevExercises => 
-        prevExercises.map(ex => 
-          ex.id === updatedExercise.id ? updatedExercise : ex
-        )
+      const updatedExercise = await updateExercise(
+        editingExercise.id,
+        newName.trim(),
       );
-      
+
+      // Update the exercises list with the updated exercise
+      setExercises((prevExercises) =>
+        prevExercises.map((ex) =>
+          ex.id === updatedExercise.id ? updatedExercise : ex,
+        ),
+      );
+
       // Reset editing state
       setEditingExercise(null);
       setNewName("");
@@ -66,44 +69,46 @@ function ExerciseListPage(): ReactElement {
   };
 
   if (loading) {
-    return <div className="loading">Loading...</div>;
+    return <div className={styles.loading}>Loading...</div>;
   }
 
   return (
-    <div className="exercise-list-page">
-      <div className="page-header">
+    <div className={styles.exerciseListPage}>
+      <div className={styles.pageHeader}>
         <h2>Exercises</h2>
       </div>
-      
-      {error && <div className="error-message">{error}</div>}
-      
-      <div className="exercise-list">
+
+      {error && <div className={styles.errorMessage}>{error}</div>}
+
+      <div className={styles.exerciseList}>
         {exercises.length === 0 ? (
-          <p className="no-exercises">No exercises found. Add exercises when creating a workout.</p>
+          <p className={styles.noExercises}>
+            No exercises found. Add exercises when creating a workout.
+          </p>
         ) : (
-          <div className="exercise-cards">
+          <div className={styles.exerciseCards}>
             {exercises.map((exercise) => (
-              <div key={exercise.id} className="exercise-card">
+              <div key={exercise.id} className={styles.exerciseCard}>
                 {editingExercise?.id === exercise.id ? (
-                  <div className="exercise-edit-form">
+                  <div className={styles.exerciseEditForm}>
                     <input
                       type="text"
                       value={newName}
                       onChange={(e) => setNewName(e.target.value)}
-                      className="exercise-name-input"
+                      className={styles.exerciseNameInput}
                       placeholder="Exercise name"
                     />
-                    <div className="exercise-edit-actions">
-                      <button 
-                        onClick={handleSaveEdit} 
+                    <div className={styles.exerciseEditActions}>
+                      <button
+                        onClick={handleSaveEdit}
                         disabled={!newName.trim() || isSubmitting}
-                        className="save-btn"
+                        className={styles.saveBtn}
                       >
                         {isSubmitting ? "Saving..." : "Save"}
                       </button>
-                      <button 
+                      <button
                         onClick={handleCancelEdit}
-                        className="cancel-btn"
+                        className={styles.cancelBtn}
                         disabled={isSubmitting}
                       >
                         Cancel
@@ -112,11 +117,11 @@ function ExerciseListPage(): ReactElement {
                   </div>
                 ) : (
                   <>
-                    <div className="exercise-name">{exercise.name}</div>
-                    <div className="exercise-actions">
-                      <button 
+                    <div className={styles.exerciseName}>{exercise.name}</div>
+                    <div className={styles.exerciseActions}>
+                      <button
                         onClick={() => handleEditClick(exercise)}
-                        className="edit-btn"
+                        className={styles.editBtn}
                       >
                         Edit
                       </button>
