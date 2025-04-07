@@ -1,4 +1,4 @@
-.pain-score-form {
+.painScoreForm {
   max-width: 500px;
   margin: 0 auto;
   text-align: left;
@@ -9,29 +9,29 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.pain-score-form h2 {
+.painScoreForm h2 {
   margin-top: 0;
   margin-bottom: 15px;
   color: #333;
 }
 
-.pain-score-form form {
+.painScoreForm form {
   display: flex;
   flex-direction: column;
 }
 
-.date-input {
+.dateInput {
   display: flex;
   flex-direction: column;
   gap: 5px;
   margin-bottom: 20px;
 }
 
-.date-input label {
+.dateInput label {
   font-weight: 500;
 }
 
-.date-input input {
+.dateInput input {
   width: 100%;
   padding: 8px;
   border: 1px solid #ddd;
@@ -39,7 +39,7 @@
   box-sizing: border-box;
 }
 
-.pain-score-select {
+.painScoreSelect {
   width: 100%;
   padding: 8px;
   border: 1px solid #ddd;
@@ -47,29 +47,29 @@
   box-sizing: border-box;
 }
 
-.pain-score-input {
+.painScoreInput {
   display: flex;
   flex-direction: column;
   gap: 5px;
   margin-bottom: 20px;
 }
 
-.pain-score-input label {
+.painScoreInput label {
   font-weight: 500;
 }
 
-.notes-input {
+.notesInput {
   display: flex;
   flex-direction: column;
   gap: 5px;
   margin-bottom: 20px;
 }
 
-.notes-input label {
+.notesInput label {
   font-weight: 500;
 }
 
-.notes-input textarea {
+.notesInput textarea {
   width: 100%;
   padding: 8px;
   border: 1px solid #ddd;
@@ -79,7 +79,7 @@
   box-sizing: border-box;
 }
 
-.save-pain-score-btn {
+.savePainScoreBtn {
   width: 100%;
   padding: 10px;
   background-color: #4caf50;
@@ -91,46 +91,46 @@
   margin-top: 10px;
 }
 
-.save-pain-score-btn:hover {
+.savePainScoreBtn:hover {
   background-color: #45a049;
 }
 
-.save-pain-score-btn:disabled {
+.savePainScoreBtn:disabled {
   background-color: #cccccc;
   cursor: not-allowed;
 }
 
-.error-message {
+.errorMessage {
   color: #dc3545;
   margin-bottom: 10px;
 }
 
-.pain-score-legend {
+.painScoreLegend {
   margin-top: 15px;
   font-size: 0.9em;
   color: #666;
 }
 
-.pain-score-legend h3 {
+.painScoreLegend h3 {
   margin-top: 0;
   margin-bottom: 10px;
   font-size: 1em;
   color: #333;
 }
 
-.pain-score-legend ul {
+.painScoreLegend ul {
   list-style-type: none;
   padding-left: 0;
   margin: 0;
 }
 
-.pain-score-legend li {
+.painScoreLegend li {
   margin-bottom: 5px;
   padding: 5px;
   border-radius: 4px;
 }
 
-.pain-score-legend li.selected {
+.painScoreLegend li.selected {
   background-color: #e9f5ff;
   font-weight: 500;
 }

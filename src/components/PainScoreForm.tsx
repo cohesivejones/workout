@@ -1,7 +1,7 @@
 import React from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { PainScore } from "../types";
-import "./PainScoreForm.css";
+import styles from "./PainScoreForm.module.css";
 import classNames from "classnames";
 
 interface PainScoreFormProps {
@@ -39,7 +39,7 @@ function PainScoreForm({
   selectedDate,
 }: PainScoreFormProps): React.ReactElement {
   const [selectedScore, setSelectedScore] = React.useState<number | null>(
-    existingPainScore?.score ?? null,
+    existingPainScore?.score ?? null
   );
 
   // Use react-hook-form
@@ -96,13 +96,13 @@ function PainScoreForm({
   };
 
   return (
-    <div className="pain-score-form">
+    <div className={styles.painScoreForm}>
       <h2>{existingPainScore ? "Edit Pain Score" : "Add Pain Score"}</h2>
       {errors.root && (
-        <div className="error-message">{errors.root.message}</div>
+        <div className={styles.errorMessage}>{errors.root.message}</div>
       )}
       <form onSubmit={handleSubmit(onFormSubmit)}>
-        <div className="date-input">
+        <div className={styles.dateInput}>
           <label htmlFor="pain-score-date">Date:</label>
           <input
             type="date"
@@ -110,15 +110,15 @@ function PainScoreForm({
             {...register("date", { required: "Date is required" })}
           />
           {errors.date && (
-            <span className="error-message">{errors.date.message}</span>
+            <span className={styles.errorMessage}>{errors.date.message}</span>
           )}
         </div>
 
-        <div className="pain-score-input">
+        <div className={styles.painScoreInput}>
           <label htmlFor="pain-score">Pain Score (0-10):</label>
           <select
             id="pain-score"
-            className="pain-score-select"
+            className={styles.painScoreSelect}
             {...register("score", { required: "Pain score is required" })}
           >
             <option value="">Select pain score</option>
@@ -129,11 +129,11 @@ function PainScoreForm({
             ))}
           </select>
           {errors.score && (
-            <span className="error-message">{errors.score.message}</span>
+            <span className={styles.errorMessage}>{errors.score.message}</span>
           )}
         </div>
 
-        <div className="notes-input">
+        <div className={styles.notesInput}>
           <label htmlFor="pain-score-notes">Notes (optional):</label>
           <textarea
             id="pain-score-notes"
@@ -145,24 +145,24 @@ function PainScoreForm({
         <button
           type="submit"
           disabled={isSubmitting}
-          className="save-pain-score-btn"
+          className={styles.savePainScoreBtn}
         >
           {isSubmitting
             ? "Saving..."
             : existingPainScore
-              ? "Update Pain Score"
-              : "Save Pain Score"}
+            ? "Update Pain Score"
+            : "Save Pain Score"}
         </button>
       </form>
 
-      <div className="pain-score-legend">
+      <div className={styles.painScoreLegend}>
         <h3>Pain Score Legend:</h3>
         <ul>
           {painScoreDescriptions.map((description, index) => (
             <li
               key={index}
               className={classNames({
-                selected: selectedScore === index,
+                [styles.selected]: selectedScore === index,
               })}
             >
               {description}
