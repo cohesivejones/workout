@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect } from "react";
-import axios from "axios";
+import { getCurrentUser, login as apiLogin, logout as apiLogout } from "../api";
 
 type Props = {
   children: React.ReactNode;
@@ -28,15 +28,9 @@ export const UserContextProvider = ({ children }: Props) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        // Try to get current user from API
-        const response = await axios.get(
-          `${process.env.VITE_API_URL}/auth/me`,
-          {
-            withCredentials: true,
-          },
-        );
-
-        setUser(response.data);
+        // Try to get current user from API using our helper
+        const userData = await getCurrentUser();
+        setUser(userData);
       } catch (error) {
         // If not authenticated, clear user
         setUser(null);
@@ -52,22 +46,11 @@ export const UserContextProvider = ({ children }: Props) => {
     try {
       setLoading(true);
 
-      // Call login API
-      const response = await axios.post(
-        `${process.env.VITE_API_URL}/auth/login`,
-        { email, password },
-        { withCredentials: true },
-      );
-
+      // Call login API using our helper
+      const response = await apiLogin(email, password);
+      
       // Set user from response
-      setUser(response.data.user);
-
-      // Store token in localStorage for API requests
-      localStorage.setItem("token", response.data.token);
-
-      // Configure axios to use token for future requests
-      axios.defaults.headers.common["Authorization"] =
-        `Bearer ${response.data.token}`;
+      setUser(response.user);
     } catch (error) {
       console.error("Login failed:", error);
       throw error;
@@ -80,21 +63,11 @@ export const UserContextProvider = ({ children }: Props) => {
     try {
       setLoading(true);
 
-      // Call logout API
-      await axios.post(
-        `${process.env.VITE_API_URL}/auth/logout`,
-        {},
-        { withCredentials: true },
-      );
-
+      // Call logout API using our helper
+      await apiLogout();
+      
       // Clear user state
       setUser(null);
-
-      // Remove token from localStorage
-      localStorage.removeItem("token");
-
-      // Remove Authorization header
-      delete axios.defaults.headers.common["Authorization"];
     } catch (error) {
       console.error("Logout failed:", error);
     } finally {
