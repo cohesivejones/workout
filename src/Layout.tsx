@@ -1,4 +1,6 @@
 import { Outlet, Link } from "react-router-dom";
+import { useState, useRef, useEffect } from "react";
+import { FaBars } from "react-icons/fa"; // Hamburger icon
 import { UserContextProvider } from "./contexts/UserContextProvider";
 import { useUserContext } from "./contexts/useUserContext";
 import LoginPage from "./pages/LoginPage";
@@ -6,9 +8,28 @@ import styles from "./App.module.css";
 
 const Header = () => {
   const { user, logout } = useUserContext();
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setDropdownOpen(false);
+      }
+    };
+    
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const handleLogout = async () => {
     await logout();
+    setDropdownOpen(false);
+  };
+
+  const toggleDropdown = () => {
+    setDropdownOpen(!dropdownOpen);
   };
 
   return (
@@ -41,15 +62,33 @@ const Header = () => {
       </div>
 
       {user && (
-      <div className={styles.userInfo}>
-        <span>{user.name}</span>
-        <Link to="/change-password" className={styles.changePasswordLink}>
-        Change Password
-        </Link>
-        <button onClick={handleLogout} className={styles.logoutButton}>
-        Logout
-        </button>
-      </div>
+        <div className={styles.userDropdown} ref={dropdownRef}>
+          <button 
+            className={styles.dropdownToggle} 
+            onClick={toggleDropdown}
+          >
+            <span>{user.name}</span>
+            <FaBars className={styles.hamburgerIcon} />
+          </button>
+          
+          {dropdownOpen && (
+            <div className={styles.dropdownMenu}>
+              <Link 
+                to="/change-password" 
+                className={styles.dropdownItem}
+                onClick={() => setDropdownOpen(false)}
+              >
+                Change Password
+              </Link>
+              <button 
+                onClick={handleLogout} 
+                className={styles.dropdownItem}
+              >
+                Logout
+              </button>
+            </div>
+          )}
+        </div>
       )}
     </header>
   );

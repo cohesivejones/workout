@@ -49,40 +49,66 @@
   width: 100%;
 }
 
-.userInfo {
+/* User dropdown styles */
+.userDropdown {
+  position: relative;
+}
+
+.dropdownToggle {
   display: flex;
   align-items: center;
-  gap: 10px;
-}
-
-.changePasswordLink {
-  color: white;
-  text-decoration: none;
-  padding: 5px 10px;
-  background-color: #007bff;
-  border-radius: 4px;
-  font-size: 14px;
-  transition: background-color 0.2s;
-}
-
-.changePasswordLink:hover {
-  background-color: #0069d9;
-  text-decoration: none;
-}
-
-.logoutButton {
-  background-color: #dc3545;
-  color: white;
+  gap: 8px;
+  background: none;
   border: none;
-  border-radius: 4px;
+  color: white;
+  cursor: pointer;
   padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+.dropdownToggle:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.hamburgerIcon {
+  font-size: 18px;
+  margin-left: 5px;
+}
+
+.dropdownMenu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: white;
+  border-radius: 4px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  min-width: 180px;
+  z-index: 10;
+  margin-top: 5px;
+  overflow: hidden;
+}
+
+.dropdownItem {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 10px 15px;
+  color: #333;
+  text-decoration: none;
+  background: none;
+  border: none;
   cursor: pointer;
   font-size: 14px;
-  transition: background-color 0.2s;
 }
 
-.logoutButton:hover {
-  background-color: #c82333;
+.dropdownItem:hover {
+  background-color: #f5f5f5;
+}
+
+/* Add a divider between items */
+.dropdownItem + .dropdownItem {
+  border-top: 1px solid #eee;
 }
 
 .appMain {
@@ -155,8 +181,15 @@ li {
     justify-content: center;
   }
 
-  .userInfo {
+  .userDropdown {
     width: 100%;
+    display: flex;
     justify-content: center;
+  }
+  
+  .dropdownMenu {
+    position: absolute;
+    width: 90%;
+    max-width: 300px;
   }
 }
