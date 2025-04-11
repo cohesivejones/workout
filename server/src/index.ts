@@ -212,19 +212,25 @@ app.get("/exercises/recent", async (req: Request, res: Response) => {
     // Find the most recent workout that contains this exercise
     const workoutExerciseRepository = dataSource.getRepository(WorkoutExercise);
 
-    // Use a raw query to get the most recent workout exercise
-    const result = await workoutExerciseRepository
-      .createQueryBuilder("we")
-      .innerJoin("we.workout", "w")
-      .innerJoin("we.exercise", "e")
-      .where("e.id = :exerciseId", { exerciseId: Number(exerciseId) })
-      .andWhere("e.userId = :userId", { userId: Number(userId) })
-      .orderBy("w.date", "DESC")
-      .select(["we.reps", "we.weight"])
-      .limit(1)
-      .getRawOne();
+    // Use an optimized query that first finds the most recent workout date for this exercise,
+    // then directly fetches the workout exercise data for that date
+    const result = await workoutExerciseRepository.query(`
+      WITH latest_workout AS (
+        SELECT w.id
+        FROM workouts w
+        JOIN workout_exercises we ON w.id = we.workout_id
+        WHERE we.exercise_id = $1
+        AND w."userId" = $2
+        ORDER BY w.date DESC
+        LIMIT 1
+      )
+      SELECT we.reps, we.weight
+      FROM workout_exercises we
+      WHERE we.workout_id = (SELECT id FROM latest_workout)
+      AND we.exercise_id = $1
+    `, [Number(exerciseId), Number(userId)]);
 
-    if (!result) {
+    if (!result || result.length === 0) {
       return res.status(404).json({
         error: "No workout found with this exercise",
       });
@@ -232,8 +238,8 @@ app.get("/exercises/recent", async (req: Request, res: Response) => {
 
     // Return the exercise data
     res.json({
-      reps: result.we_reps,
-      weight: result.we_weight,
+      reps: result[0].reps,
+      weight: result[0].weight,
     });
   } catch (err) {
     console.error(err);
