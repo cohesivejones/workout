@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
+import { FaEdit, FaTrash, FaPlus } from "react-icons/fa";
 import { PainScore, Workout } from "../types";
 import {
   toPainScoreNewPath,
@@ -113,10 +114,10 @@ export const ListView = ({
       <h3>Activity Timeline</h3>
       <div className={styles.actionButtons}>
         <Link to={toWorkoutNewPath()} className={styles.addBtn + " " + styles.workoutBtn}>
-        New Workout
+          <FaPlus className={styles.addIcon} /> New Workout
         </Link>
         <Link to={toPainScoreNewPath()} className={styles.addBtn + " " + styles.painScoreBtn}>
-        New Pain Score
+          <FaPlus className={styles.addIcon} /> New Pain Score
         </Link>
       </div>
       </div>
@@ -147,8 +148,9 @@ export const ListView = ({
                     <Link
                     to={toWorkoutEditPath(workout)}
                     className={styles.editBtn}
+                    title="Edit workout"
                     >
-                    Edit
+                    <FaEdit />
                     </Link>
                     <button
                     onClick={() => handleDeleteWorkout(workout.id)}
@@ -157,11 +159,12 @@ export const ListView = ({
                       isDeleting.id === workout.id
                     }
                     className={styles.deleteBtn}
+                    title="Delete workout"
                     >
                     {isDeleting?.type === "workout" &&
                     isDeleting.id === workout.id
                       ? "..."
-                      : "×"}
+                      : <FaTrash />}
                     </button>
                   </div>
                   </div>
@@ -201,8 +204,9 @@ export const ListView = ({
                     <Link
                     to={toPainScoreEditPath(painScore)}
                     className={styles.editBtn}
+                    title="Edit pain score"
                     >
-                    Edit
+                    <FaEdit />
                     </Link>
                     <button
                     onClick={() => handleDeletePainScore(painScore.id)}
@@ -211,11 +215,12 @@ export const ListView = ({
                       isDeleting.id === painScore.id
                     }
                     className={styles.deleteBtn}
+                    title="Delete pain score"
                     >
                     {isDeleting?.type === "painScore" &&
                     isDeleting.id === painScore.id
                       ? "..."
-                      : "×"}
+                      : <FaTrash />}
                     </button>
                   </div>
                   </div>

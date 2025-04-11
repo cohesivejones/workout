@@ -89,6 +89,14 @@
   cursor: pointer;
   font-weight: 500;
   margin-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.buttonIcon {
+  margin-right: 8px;
+  font-size: 14px;
 }
 
 .savePainScoreBtn:hover {

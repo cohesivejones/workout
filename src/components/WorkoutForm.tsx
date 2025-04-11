@@ -1,6 +1,7 @@
 import * as React from "react";
 import { WorkoutFormProps, WorkoutExercise } from "../types";
 import CreatableSelect from "react-select/creatable";
+import { FaPlus, FaTrash, FaSave } from "react-icons/fa";
 import styles from "./WorkoutForm.module.css";
 import { useUserContext } from "../contexts/useUserContext";
 import { fetchRecentExerciseData } from "../api";
@@ -253,8 +254,13 @@ function WorkoutForm({
               isSubmitting
             }
             className={styles.addExerciseBtn}
+            title="Add exercise to workout"
           >
-            {isSavingExercise ? "Adding..." : "Add Exercise"}
+            {isSavingExercise ? "Adding..." : (
+              <>
+                <FaPlus className={styles.buttonIcon} /> Add Exercise
+              </>
+            )}
           </button>
         </div>
 
@@ -276,8 +282,9 @@ function WorkoutForm({
               type="button"
               className={styles.removeExerciseBtn}
               onClick={() => remove(index)}
+              title="Remove exercise"
             >
-              ×
+              <FaTrash />
             </button>
           </li>
               ))}
@@ -289,12 +296,14 @@ function WorkoutForm({
           type="submit"
           disabled={fields.length === 0 || isSubmitting}
           className={styles.saveWorkoutBtn}
+          title={existingWorkout ? "Update workout" : "Save workout"}
         >
-          {isSubmitting
-            ? "Saving..."
-            : existingWorkout
-            ? "Update Workout"
-            : "Save Workout"}
+          {isSubmitting ? "Saving..." : (
+            <>
+              <FaSave className={styles.buttonIcon} /> 
+              {existingWorkout ? "Update Workout" : "Save Workout"}
+            </>
+          )}
         </button>
       </form>
     </div>
