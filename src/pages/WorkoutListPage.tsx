@@ -60,7 +60,7 @@ function WorkoutListPage(): ReactElement {
   return (
     <div>
       <div className={styles.pageHeader}>
-        <h2>Workouts & Pain Scores</h2>
+        <h2>Activity Timeline</h2>
         <div className={styles.pageActions}>
           <div className={styles.viewToggle}>
             <button

@@ -14,11 +14,14 @@ const Header = () => {
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setDropdownOpen(false);
       }
     };
-    
+
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
@@ -35,55 +38,49 @@ const Header = () => {
   return (
     <header className={styles.appHeader}>
       <div className={styles.headerLeft}>
-      <Link
-        to="/"
-        style={{
-        display: "flex",
-        alignItems: "center",
-        textDecoration: "none",
-        color: "white",
-        }}
-      >
-        <img
-        src="/dumbbell.svg"
-        alt="Dumbbell"
-        style={{ height: "30px", marginRight: "10px", filter: "invert(1)" }}
-        />
-        <h1 style={{ margin: 0 }}>Workout Tracker</h1>
-      </Link>
-      <nav className={styles.mainNav}>
-        <Link to="/" className={styles.navLink}>
-        Workouts
+        <Link
+          to="/"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            textDecoration: "none",
+            color: "white",
+          }}
+        >
+          <img
+            src="/dumbbell.svg"
+            alt="Dumbbell"
+            style={{ height: "30px", marginRight: "10px", filter: "invert(1)" }}
+          />
+          <h1 style={{ margin: 0 }}>Workout Tracker</h1>
         </Link>
-        <Link to="/exercises" className={styles.navLink}>
-        Exercises
-        </Link>
-      </nav>
+        <nav className={styles.mainNav}>
+          <Link to="/" className={styles.navLink}>
+            Workouts
+          </Link>
+          <Link to="/exercises" className={styles.navLink}>
+            Exercises
+          </Link>
+        </nav>
       </div>
 
       {user && (
         <div className={styles.userDropdown} ref={dropdownRef}>
-          <button 
-            className={styles.dropdownToggle} 
-            onClick={toggleDropdown}
-          >
+          <button className={styles.dropdownToggle} onClick={toggleDropdown}>
             <span>{user.name}</span>
             <FaBars className={styles.hamburgerIcon} />
           </button>
-          
+
           {dropdownOpen && (
             <div className={styles.dropdownMenu}>
-              <Link 
-                to="/change-password" 
+              <Link
+                to="/change-password"
                 className={styles.dropdownItem}
                 onClick={() => setDropdownOpen(false)}
               >
                 Change Password
               </Link>
-              <button 
-                onClick={handleLogout} 
-                className={styles.dropdownItem}
-              >
+              <button onClick={handleLogout} className={styles.dropdownItem}>
                 Logout
               </button>
             </div>

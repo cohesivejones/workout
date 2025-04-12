@@ -94,23 +94,25 @@ export const deletePainScore = (painScoreId: number): Promise<{ id: number }> =>
   api.delete(`/pain-scores/${painScoreId}`);
 
 // Auth API functions
-export const getCurrentUser = (): Promise<User> => 
-  api.get('/auth/me');
+export const getCurrentUser = (): Promise<User> => api.get("/auth/me");
 
-export const login = (email: string, password: string): Promise<AuthResponse> => {
-  return api.post('/auth/login', { email, password }).then((response: any) => {
+export const login = (
+  email: string,
+  password: string,
+): Promise<AuthResponse> => {
+  return api.post("/auth/login", { email, password }).then((response: any) => {
     // After successful login, store token
     localStorage.setItem("token", response.token);
-    
+
     // Configure axios for future requests
     api.defaults.headers.common["Authorization"] = `Bearer ${response.token}`;
-    
+
     return response as AuthResponse;
   });
 };
 
 export const logout = (): Promise<void> => {
-  return api.post('/auth/logout', {}).then(() => {
+  return api.post("/auth/logout", {}).then(() => {
     // Clear auth data
     localStorage.removeItem("token");
     delete api.defaults.headers.common["Authorization"];

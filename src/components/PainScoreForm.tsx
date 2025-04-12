@@ -1,6 +1,5 @@
 import React from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
-import { FaSave } from "react-icons/fa";
 import { PainScore } from "../types";
 import styles from "./PainScoreForm.module.css";
 import classNames from "classnames";
@@ -40,7 +39,7 @@ function PainScoreForm({
   selectedDate,
 }: PainScoreFormProps): React.ReactElement {
   const [selectedScore, setSelectedScore] = React.useState<number | null>(
-    existingPainScore?.score ?? null
+    existingPainScore?.score ?? null,
   );
 
   // Use react-hook-form
@@ -149,11 +148,10 @@ function PainScoreForm({
           className={styles.savePainScoreBtn}
           title={existingPainScore ? "Update pain score" : "Save pain score"}
         >
-          {isSubmitting ? "Saving..." : (
-            <>
-              <FaSave className={styles.buttonIcon} /> 
-              {existingPainScore ? "Update Pain Score" : "Save Pain Score"}
-            </>
+          {isSubmitting ? (
+            "Saving..."
+          ) : (
+            <>{existingPainScore ? "Update Pain Score" : "Save Pain Score"}</>
           )}
         </button>
       </form>

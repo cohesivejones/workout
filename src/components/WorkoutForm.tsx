@@ -1,7 +1,6 @@
 import * as React from "react";
 import { WorkoutFormProps, WorkoutExercise } from "../types";
 import CreatableSelect from "react-select/creatable";
-import { FaPlus, FaTrash, FaSave } from "react-icons/fa";
 import styles from "./WorkoutForm.module.css";
 import { useUserContext } from "../contexts/useUserContext";
 import { fetchRecentExerciseData } from "../api";
@@ -139,7 +138,7 @@ function WorkoutForm({
   };
 
   const handlePopulateRepsAndWeight = async (
-    val: SingleValue<{ label: string; value: string }>
+    val: SingleValue<{ label: string; value: string }>,
   ) => {
     if (val === null) {
       setValue("currentExercise.reps", "");
@@ -154,7 +153,7 @@ function WorkoutForm({
       setValue("currentExercise.reps", String(recentData.reps));
       setValue(
         "currentExercise.weight",
-        recentData.weight ? String(recentData.weight) : ""
+        recentData.weight ? String(recentData.weight) : "",
       );
     } catch (err) {
       // fail silently
@@ -169,9 +168,9 @@ function WorkoutForm({
     <div className={styles.workoutForm}>
       <h2>{existingWorkout ? "Edit Workout" : "New Workout"}</h2>
       {(errors as any).serverError && (
-      <div className={styles.errorMessage}>
-        {(errors as any).serverError.message}
-      </div>
+        <div className={styles.errorMessage}>
+          {(errors as any).serverError.message}
+        </div>
       )}
       <form onSubmit={handleSubmit(onFormSubmit)}>
         <div className={styles.dateInput}>
@@ -199,22 +198,22 @@ function WorkoutForm({
             control={control}
             render={({ field }) => {
               const selectedExerciseOption = field.value
-          ? { label: field.value, value: field.value }
-          : null;
+                ? { label: field.value, value: field.value }
+                : null;
               return (
-          <CreatableSelect
-            isClearable
-            placeholder="Select or create an exercise"
-            options={exerciseSelectOptions}
-            onChange={(val) => {
-              field.onChange(val ? val.value : "");
-              handlePopulateRepsAndWeight(val);
-            }}
-            value={selectedExerciseOption}
-            className={styles.reactSelectContainer}
-            classNamePrefix="reactSelect"
-            formatCreateLabel={(inputValue) => `Create "${inputValue}"`}
-          />
+                <CreatableSelect
+                  isClearable
+                  placeholder="Select or create an exercise"
+                  options={exerciseSelectOptions}
+                  onChange={(val) => {
+                    field.onChange(val ? val.value : "");
+                    handlePopulateRepsAndWeight(val);
+                  }}
+                  value={selectedExerciseOption}
+                  className={styles.reactSelectContainer}
+                  classNamePrefix="reactSelect"
+                  formatCreateLabel={(inputValue) => `Create "${inputValue}"`}
+                />
               );
             }}
           />
@@ -228,19 +227,19 @@ function WorkoutForm({
           <div className={styles.weightInputContainer}>
             <div className={styles.weightInputWrapper}>
               <input
-          type="number"
-          placeholder="Weight (lbs)"
-          min="0"
-          step="0.5"
-          className={`${styles.exerciseInputField} ${styles.weightInput}`}
-          {...register("currentExercise.weight")}
+                type="number"
+                placeholder="Weight (lbs)"
+                min="0"
+                step="0.5"
+                className={`${styles.exerciseInputField} ${styles.weightInput}`}
+                {...register("currentExercise.weight")}
               />
               <span className={styles.weightSuffix}>
-          {currentExercise.weight
-            ? `${(Number(currentExercise.weight) * 0.453592).toFixed(
-                1
-              )} kg`
-            : "0 kg"}
+                {currentExercise.weight
+                  ? `${(Number(currentExercise.weight) * 0.453592).toFixed(
+                      1,
+                    )} kg`
+                  : "0 kg"}
               </span>
             </div>
           </div>
@@ -256,11 +255,7 @@ function WorkoutForm({
             className={styles.addExerciseBtn}
             title="Add exercise to workout"
           >
-            {isSavingExercise ? "Adding..." : (
-              <>
-                <FaPlus className={styles.buttonIcon} /> Add Exercise
-              </>
-            )}
+            {isSavingExercise ? "Adding..." : <>Add Exercise</>}
           </button>
         </div>
 
@@ -271,22 +266,22 @@ function WorkoutForm({
           ) : (
             <ul>
               {fields.map((field, index) => (
-          <li key={field.id} className={styles.exerciseItem}>
-            <div className={styles.exerciseInfo}>
-              {exercises[index].name} - {exercises[index].reps} reps
-              {exercises[index].weight
-                ? ` - ${exercises[index].weight} lbs`
-                : ""}
-            </div>
-            <button
-              type="button"
-              className={styles.removeExerciseBtn}
-              onClick={() => remove(index)}
-              title="Remove exercise"
-            >
-              <FaTrash />
-            </button>
-          </li>
+                <li key={field.id} className={styles.exerciseItem}>
+                  <div className={styles.exerciseInfo}>
+                    {exercises[index].name} - {exercises[index].reps} reps
+                    {exercises[index].weight
+                      ? ` - ${exercises[index].weight} lbs`
+                      : ""}
+                  </div>
+                  <button
+                    type="button"
+                    className={styles.removeExerciseBtn}
+                    onClick={() => remove(index)}
+                    title="Remove exercise"
+                  >
+                    x
+                  </button>
+                </li>
               ))}
             </ul>
           )}
@@ -298,11 +293,10 @@ function WorkoutForm({
           className={styles.saveWorkoutBtn}
           title={existingWorkout ? "Update workout" : "Save workout"}
         >
-          {isSubmitting ? "Saving..." : (
-            <>
-              <FaSave className={styles.buttonIcon} /> 
-              {existingWorkout ? "Update Workout" : "Save Workout"}
-            </>
+          {isSubmitting ? (
+            "Saving..."
+          ) : (
+            <>{existingWorkout ? "Update Workout" : "Save Workout"}</>
           )}
         </button>
       </form>

@@ -37,7 +37,7 @@ export default function AddWorkoutPage() {
       setError(
         err instanceof Error
           ? err.message
-          : "Failed to add workout. Please try again."
+          : "Failed to add workout. Please try again.",
       );
       return false;
     }
@@ -58,7 +58,7 @@ export default function AddWorkoutPage() {
       setError(
         err instanceof Error
           ? err.message
-          : "Failed to save exercise. Please try again."
+          : "Failed to save exercise. Please try again.",
       );
       return false;
     }
@@ -68,9 +68,9 @@ export default function AddWorkoutPage() {
     <div className={styles.container}>
       {error && <div className={styles.errorMessage}>{error}</div>}
       <WorkoutForm
-      onSubmit={addWorkout}
-      savedExercises={savedExercises}
-      onSaveExercise={addExerciseToSaved}
+        onSubmit={addWorkout}
+        savedExercises={savedExercises}
+        onSaveExercise={addExerciseToSaved}
       />
     </div>
   );

@@ -29,20 +29,26 @@ const CalendarView: React.FC<CalendarViewProps> = ({
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
 
   // Group workouts and pain scores by date
-  const workoutsByDate = workouts.reduce((acc, workout) => {
-    const dateStr = workout.date.split("T")[0]; // Handle ISO date format
-    if (!acc[dateStr]) {
-      acc[dateStr] = [];
-    }
-    acc[dateStr].push(workout);
-    return acc;
-  }, {} as Record<string, Workout[]>);
+  const workoutsByDate = workouts.reduce(
+    (acc, workout) => {
+      const dateStr = workout.date.split("T")[0]; // Handle ISO date format
+      if (!acc[dateStr]) {
+        acc[dateStr] = [];
+      }
+      acc[dateStr].push(workout);
+      return acc;
+    },
+    {} as Record<string, Workout[]>,
+  );
 
-  const painScoresByDate = painScores.reduce((acc, painScore) => {
-    const dateStr = painScore.date.split("T")[0]; // Handle ISO date format
-    acc[dateStr] = painScore;
-    return acc;
-  }, {} as Record<string, PainScore>);
+  const painScoresByDate = painScores.reduce(
+    (acc, painScore) => {
+      const dateStr = painScore.date.split("T")[0]; // Handle ISO date format
+      acc[dateStr] = painScore;
+      return acc;
+    },
+    {} as Record<string, PainScore>,
+  );
 
   // Function to get color based on pain score
   const getPainScoreColor = (score: number): string => {
@@ -62,7 +68,9 @@ const CalendarView: React.FC<CalendarViewProps> = ({
         >
           &lt;
         </button>
-        <h2 className={styles.monthTitle}>{format(currentMonth, "MMMM yyyy")}</h2>
+        <h2 className={styles.monthTitle}>
+          {format(currentMonth, "MMMM yyyy")}
+        </h2>
         <button
           className={styles.navButton}
           onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
@@ -79,7 +87,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({
       <div className={styles.calendarDays}>
         {days.map((day) => (
           <div className={styles.calendarDayName} key={day}>
-        {day}
+            {day}
           </div>
         ))}
       </div>
@@ -106,16 +114,16 @@ const CalendarView: React.FC<CalendarViewProps> = ({
         const painScore = painScoresByDate[dateStr];
 
         days.push(
-            <div
+          <div
             className={classNames(styles.calendarCell, {
               [styles.disabled]: !isSameMonth(day, monthStart),
               [styles.today]: isToday(day),
             })}
-            >
+          >
             <div className={styles.calendarDate}>{formattedDate}</div>
 
             {painScore && (
-                <button
+              <button
                 className={styles.calendarPainScore}
                 style={{ backgroundColor: getPainScoreColor(painScore.score) }}
                 onClick={(e) => {
@@ -124,15 +132,15 @@ const CalendarView: React.FC<CalendarViewProps> = ({
                 }}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  navigate(toPainScoreEditPath(painScore));
+                    e.preventDefault();
+                    e.stopPropagation();
+                    navigate(toPainScoreEditPath(painScore));
                   }
                 }}
                 aria-label={`Edit pain score ${painScore.score} for ${dateStr}`}
-                >
+              >
                 Pain: {painScore.score}
-                </button>
+              </button>
             )}
 
             <div className={styles.calendarWorkouts}>
@@ -141,28 +149,28 @@ const CalendarView: React.FC<CalendarViewProps> = ({
                   to={toWorkoutPath(workout)}
                   key={workout.id}
                   className={classNames(styles.calendarWorkout, {
-                  [styles.withInstructor]: workout.withInstructor,
+                    [styles.withInstructor]: workout.withInstructor,
                   })}
                   onClick={(e) => e.stopPropagation()}
                 >
                   <div className={styles.workoutExercises}>
-                  {workout.exercises.map((exercise, idx) => (
-                    <div key={idx} className={styles.workoutExercise}>
-                    {exercise.name}
-                    </div>
-                  ))}
+                    {workout.exercises.map((exercise, idx) => (
+                      <div key={idx} className={styles.workoutExercise}>
+                        {exercise.name}
+                      </div>
+                    ))}
                   </div>
                 </Link>
               ))}
             </div>
-          </div>
+          </div>,
         );
         day = new Date(day.getTime() + 24 * 60 * 60 * 1000); // Add one day
       }
       rows.push(
         <div className={styles.calendarRow} key={day.toString()}>
           {days}
-        </div>
+        </div>,
       );
       days = [];
     }

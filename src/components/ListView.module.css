@@ -38,24 +38,24 @@
   font-size: 12px;
 }
 
-.workoutBtn {
+.primaryBtn {
   background: #007bff;
 }
 
-.workoutBtn:hover {
+.primaryBtn:hover {
   background: #0069d9;
   text-decoration: none;
   color: white;
 }
 
-.painScoreBtn {
-  background: #4caf50;
+.secondaryBtn {
+  border: 1px solid #007bff;
+  color: #007bff;
 }
 
-.painScoreBtn:hover {
-  background: #45a049;
+.secondaryBtn:hover {
+  background-color: #e6f7ff;
   text-decoration: none;
-  color: white;
 }
 
 .listItems {

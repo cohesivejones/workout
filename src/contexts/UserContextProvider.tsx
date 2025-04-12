@@ -48,7 +48,7 @@ export const UserContextProvider = ({ children }: Props) => {
 
       // Call login API using our helper
       const response = await apiLogin(email, password);
-      
+
       // Set user from response
       setUser(response.user);
     } catch (error) {
@@ -65,7 +65,7 @@ export const UserContextProvider = ({ children }: Props) => {
 
       // Call logout API using our helper
       await apiLogout();
-      
+
       // Clear user state
       setUser(null);
     } catch (error) {

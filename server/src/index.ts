@@ -214,7 +214,8 @@ app.get("/exercises/recent", async (req: Request, res: Response) => {
 
     // Use an optimized query that first finds the most recent workout date for this exercise,
     // then directly fetches the workout exercise data for that date
-    const result = await workoutExerciseRepository.query(`
+    const result = await workoutExerciseRepository.query(
+      `
       WITH latest_workout AS (
         SELECT w.id
         FROM workouts w
@@ -228,7 +229,9 @@ app.get("/exercises/recent", async (req: Request, res: Response) => {
       FROM workout_exercises we
       WHERE we.workout_id = (SELECT id FROM latest_workout)
       AND we.exercise_id = $1
-    `, [Number(exerciseId), Number(userId)]);
+    `,
+      [Number(exerciseId), Number(userId)],
+    );
 
     if (!result || result.length === 0) {
       return res.status(404).json({
