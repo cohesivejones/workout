@@ -10,6 +10,8 @@ import {
   LoginRequest,
   LoginResponse,
 } from "./types";
+import OpenAI from "openai";
+import { Between } from "typeorm";
 import * as dotenv from "dotenv";
 import dataSource from "./data-source";
 import {
@@ -26,8 +28,10 @@ import "reflect-metadata";
 
 dotenv.config();
 
-// JWT secret key
-const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
+// Initialize OpenAI client
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 // Initialize TypeORM connection
 dataSource
@@ -46,7 +50,7 @@ app.use(
   cors({
     origin: process.env.CLIENT_URL || "http://localhost:3000",
     credentials: true,
-  }),
+  })
 );
 app.use(express.json());
 app.use(cookieParser());
@@ -172,7 +176,7 @@ app.post(
       console.error(err);
       res.status(500).json({ error: "Server error" });
     }
-  },
+  }
 );
 
 // Get all exercises
@@ -230,7 +234,7 @@ app.get("/exercises/recent", async (req: Request, res: Response) => {
       WHERE we.workout_id = (SELECT id FROM latest_workout)
       AND we.exercise_id = $1
     `,
-      [Number(exerciseId), Number(userId)],
+      [Number(exerciseId), Number(userId)]
     );
 
     if (!result || result.length === 0) {
@@ -782,6 +786,120 @@ app.delete("/pain-scores/:id", async (req: Request, res: Response) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error" });
+  }
+});
+
+// Diagnostician Routes
+
+// Get diagnostic data (last two months of workouts and pain scores)
+app.get("/diagnostics/data", async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.query;
+    if (!userId) {
+      return res.status(400).json({ error: "User ID is required" });
+    }
+
+    // Calculate date range (last two months)
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setMonth(startDate.getMonth() - 2);
+
+    // Format dates for SQL query
+    const startDateStr = startDate.toISOString().split("T")[0];
+    const endDateStr = endDate.toISOString().split("T")[0];
+
+    // Fetch workouts and pain scores within date range
+    const workoutRepository = dataSource.getRepository(Workout);
+    const painScoreRepository = dataSource.getRepository(PainScore);
+
+    const [workouts, painScores] = await Promise.all([
+      workoutRepository.find({
+        where: {
+          userId: Number(userId),
+          date: Between(startDateStr, endDateStr),
+        },
+        relations: {
+          workoutExercises: {
+            exercise: true,
+          },
+        },
+        order: { date: "ASC" },
+      }),
+      painScoreRepository.find({
+        where: {
+          userId: Number(userId),
+          date: Between(startDateStr, endDateStr),
+        },
+        order: { date: "ASC" },
+      }),
+    ]);
+
+    // Transform data for response
+    const diagnosticData = {
+      workouts: workouts.map((workout) => ({
+        id: workout.id,
+        date: workout.date,
+        exercises: workout.workoutExercises.map((we) => ({
+          name: we.exercise.name,
+          reps: we.reps,
+          weight: we.weight,
+        })),
+      })),
+      painScores: painScores,
+      dateRange: {
+        start: startDateStr,
+        end: endDateStr,
+      },
+    };
+
+    res.json(diagnosticData);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// Analyze diagnostic data using OpenAI
+app.post("/diagnostics/analyze", async (req: Request, res: Response) => {
+  try {
+    const { diagnosticData } = req.body;
+
+    if (!diagnosticData) {
+      return res.status(400).json({ error: "Diagnostic data is required" });
+    }
+
+    // Create system and user prompts
+    const systemPrompt = `You are a fitness and health analysis assistant. Your task is to analyze workout and pain data to identify potential correlations between specific exercises and reported pain. Focus on patterns where pain scores increase after certain exercises are performed. Consider frequency, intensity, and timing of exercises relative to pain reports.`;
+
+    const userPrompt = `I'm providing two months of workout and pain data. Please analyze this data to identify which exercises might be causing recurring pain.
+    
+    Workout Data:
+    ${JSON.stringify(diagnosticData.workouts, null, 2)}
+    
+    Pain Score Data:
+    ${JSON.stringify(diagnosticData.painScores, null, 2)}
+    
+    Date Range: ${diagnosticData.dateRange.start} to ${
+      diagnosticData.dateRange.end
+    }
+    
+    Please provide a detailed analysis of potential correlations between specific exercises and pain, with recommendations for exercises that might need modification or should be avoided.`;
+
+    // Call OpenAI API
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt },
+      ],
+      temperature: 0.7,
+    });
+
+    // Return the analysis
+    res.json({ analysis: response.choices[0].message.content });
+  } catch (err) {
+    console.error("OpenAI API error:", err);
+    res.status(500).json({ error: "Failed to analyze diagnostic data" });
   }
 });
 

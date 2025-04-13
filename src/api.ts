@@ -118,3 +118,29 @@ export const logout = (): Promise<void> => {
     delete api.defaults.headers.common["Authorization"];
   });
 };
+
+// Diagnostician API functions
+export interface DiagnosticData {
+  workouts: {
+    id: number;
+    date: string;
+    exercises: {
+      name: string;
+      reps: number;
+      weight?: number | null;
+    }[];
+  }[];
+  painScores: PainScore[];
+  dateRange: {
+    start: string;
+    end: string;
+  };
+}
+
+// Fetch diagnostic data (last two months of workouts and pain scores)
+export const fetchDiagnosticData = (userId: number): Promise<DiagnosticData> =>
+  api.get(`/diagnostics/data?userId=${userId}`);
+
+// Send data to server for OpenAI analysis
+export const analyzeDiagnosticData = (diagnosticData: DiagnosticData): Promise<{ analysis: string }> =>
+  api.post('/diagnostics/analyze', { diagnosticData });

@@ -1,0 +1,65 @@
+.diagnosticianPage {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.pageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.diagnosticContent {
+  background-color: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.actionSection {
+  margin: 30px 0;
+  display: flex;
+  justify-content: center;
+}
+
+.errorMessage {
+  color: #dc3545;
+  margin-bottom: 16px;
+  padding: 8px;
+  background-color: #f8d7da;
+  border-radius: 4px;
+}
+
+.analysisResults {
+  margin-top: 30px;
+  border-top: 1px solid #e0e0e0;
+  padding-top: 20px;
+}
+
+.analysisContent {
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  padding: 15px;
+  white-space: pre-wrap;
+  line-height: 1.5;
+}
+
+/* Loading state */
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  font-size: 18px;
+  color: #6c757d;
+}
+
+@media (max-width: 768px) {
+  .pageHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+}

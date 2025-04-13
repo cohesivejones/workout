@@ -61,6 +61,9 @@ const Header = () => {
           <Link to="/exercises" className={styles.navLink}>
             Exercises
           </Link>
+          <Link to="/diagnostician" className={styles.navLink}>
+            Diagnostician
+          </Link>
         </nav>
       </div>
 
