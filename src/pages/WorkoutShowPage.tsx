@@ -3,6 +3,8 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { fetchWorkout, deleteWorkout } from "../api";
 import { Workout } from "../types";
 import styles from "./WorkoutShowPage.module.css";
+import buttonStyles from "../styles/common/buttons.module.css";
+import linkStyles from "../styles/common/links.module.css";
 import { format } from "date-fns";
 import classNames from "classnames";
 import { toHomePath, toWorkoutEditPath } from "../utils/paths";
@@ -68,7 +70,8 @@ const WorkoutShowPage: React.FC = () => {
         <div className={styles.pageActions}>
           <Link
             to={toHomePath()}
-            className={`${styles.button} ${styles.secondary}`}
+            className={classNames(styles.button, buttonStyles.tertiaryBtn)}
+            style={{ display: 'inline-block', textAlign: 'center' }}
           >
             Back to List
           </Link>
@@ -119,14 +122,15 @@ const WorkoutShowPage: React.FC = () => {
         <div className={styles.workoutDetailActions}>
           <Link
             to={toWorkoutEditPath(workout)}
-            className={`${styles.button} ${styles.primary}`}
+            className={classNames(styles.button, buttonStyles.primaryBtn)}
+            style={{ display: 'inline-block', textAlign: 'center' }}
           >
             Edit Workout
           </Link>
           <button
             onClick={handleDelete}
             disabled={isDeleting}
-            className={`${styles.button} ${styles.danger}`}
+            className={classNames(styles.button, buttonStyles.secondaryBtn)}
           >
             {isDeleting ? "Deleting..." : "Delete Workout"}
           </button>
