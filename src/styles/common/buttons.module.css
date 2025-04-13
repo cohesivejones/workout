@@ -61,7 +61,9 @@
 }
 
 /* Icon Button Styles */
-.primaryIconBtn, .secondaryIconBtn, .tertiaryIconBtn {
+.primaryIconBtn,
+.secondaryIconBtn,
+.tertiaryIconBtn {
   width: 32px;
   height: 32px;
   display: flex;
@@ -122,11 +124,11 @@
 }
 
 /* Disabled Button Styles */
-.primaryBtn:disabled, 
-.secondaryBtn:disabled, 
+.primaryBtn:disabled,
+.secondaryBtn:disabled,
 .tertiaryBtn:disabled,
-.primaryIconBtn:disabled, 
-.secondaryIconBtn:disabled, 
+.primaryIconBtn:disabled,
+.secondaryIconBtn:disabled,
 .tertiaryIconBtn:disabled {
   background-color: #cccccc !important;
   border-color: #cccccc !important;

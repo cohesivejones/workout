@@ -9,29 +9,60 @@
 
 .calendarHeader {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
   padding: 16px;
   background-color: #f8f9fa;
   border-bottom: 1px solid #ddd;
+  gap: 10px;
 }
 
-.calendarHeader button {
+.navButtons {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.navButton {
   background-color: #fff;
   border: 1px solid #ddd;
   border-radius: 4px;
-  padding: 8px 12px;
+  padding: 6px;
   cursor: pointer;
-  font-size: 16px;
+  min-width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.calendarHeader button:hover {
+.navButton svg {
+  font-size: 24px;
+  color: #555;
+}
+
+.todayButton {
+  background-color: #007bff;
+  color: white;
+  border: 1px solid #0069d9;
+  border-radius: 4px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.navButton:hover {
   background-color: #f1f1f1;
+}
+
+.todayButton:hover {
+  background-color: #0069d9;
 }
 
 .calendarHeader h2 {
   margin: 0;
   font-size: 1.5rem;
+  text-align: center;
 }
 
 .calendarDays {
@@ -174,6 +205,115 @@
   color: #c82333;
 }
 
+/* Vertical day view styles for mobile */
+.verticalDaysList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.verticalDay {
+  background-color: #fff;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.verticalDay.today {
+  border-left: 4px solid #007bff;
+}
+
+.verticalDayHeader {
+  background-color: #f8f9fa;
+  padding: 12px 16px;
+  border-bottom: 1px solid #ddd;
+}
+
+.verticalDayName {
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.verticalDayDate {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.verticalPainScore {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 12px 16px;
+  padding: 8px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  width: calc(100% - 32px);
+  text-align: center;
+}
+
+.verticalPainScore:hover {
+  opacity: 0.9;
+  transform: scale(1.02);
+}
+
+.verticalWorkouts {
+  padding: 0 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.verticalWorkout {
+  background-color: #e9ecef;
+  border-radius: 4px;
+  padding: 12px;
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  border-left: 3px solid transparent;
+}
+
+.verticalWorkout.withInstructor {
+  background-color: #e6f7ff;
+  border-left: 3px solid #1890ff;
+}
+
+.verticalWorkoutExercises {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.verticalWorkoutExercise {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.exerciseName {
+  font-weight: 500;
+}
+
+.exerciseDetails {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.noWorkouts {
+  padding: 12px;
+  color: #999;
+  text-align: center;
+  font-style: italic;
+}
+
+/* Media query for mobile view */
 @media (max-width: 768px) {
   .calendarCell {
     min-height: 80px;
@@ -184,4 +324,6 @@
     padding: 2px 4px;
     font-size: 0.7rem;
   }
+
+  /* These styles will only apply when NOT in mobile view (the component will use verticalDay instead) */
 }

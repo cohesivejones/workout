@@ -89,21 +89,21 @@
     flex-wrap: wrap;
     gap: 10px;
   }
-  
+
   .painScaleOption {
     width: 18%;
   }
-  
+
   .painScaleNumber {
     font-size: 0.9rem;
   }
-  
+
   .painScaleDescriptionContainer {
     flex-direction: column;
     text-align: center;
     padding: 10px;
   }
-  
+
   .selectedFaceContainer {
     margin-bottom: 10px;
   }

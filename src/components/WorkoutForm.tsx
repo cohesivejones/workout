@@ -255,7 +255,10 @@ function WorkoutForm({
               isSavingExercise ||
               isSubmitting
             }
-            className={classNames(styles.addExerciseBtn, buttonStyles.secondaryBtn)}
+            className={classNames(
+              styles.addExerciseBtn,
+              buttonStyles.secondaryBtn,
+            )}
             title="Add exercise to workout"
           >
             {isSavingExercise ? "Adding..." : <>Add Exercise</>}
@@ -278,7 +281,10 @@ function WorkoutForm({
                   </div>
                   <button
                     type="button"
-                    className={classNames(styles.removeExerciseBtn, buttonStyles.secondaryBtn)}
+                    className={classNames(
+                      styles.removeExerciseBtn,
+                      buttonStyles.secondaryBtn,
+                    )}
                     onClick={() => remove(index)}
                     title="Remove exercise"
                   >
@@ -294,7 +300,10 @@ function WorkoutForm({
           <button
             type="submit"
             disabled={fields.length === 0 || isSubmitting}
-            className={classNames(styles.saveWorkoutBtn, buttonStyles.primaryBtn)}
+            className={classNames(
+              styles.saveWorkoutBtn,
+              buttonStyles.primaryBtn,
+            )}
             title={existingWorkout ? "Update workout" : "Save workout"}
           >
             {isSubmitting ? (
@@ -303,12 +312,15 @@ function WorkoutForm({
               <>{existingWorkout ? "Update Workout" : "Save Workout"}</>
             )}
           </button>
-          
+
           {onCancel && (
             <button
               type="button"
               onClick={onCancel}
-              className={classNames(styles.cancelBtn, buttonStyles.secondaryBtn)}
+              className={classNames(
+                styles.cancelBtn,
+                buttonStyles.secondaryBtn,
+              )}
               disabled={isSubmitting}
             >
               Cancel

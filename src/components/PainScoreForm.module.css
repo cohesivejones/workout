@@ -81,7 +81,8 @@
   margin-top: 10px;
 }
 
-.savePainScoreBtn, .cancelBtn {
+.savePainScoreBtn,
+.cancelBtn {
   width: 100%;
   padding: 10px;
   font-weight: 500;
@@ -95,7 +96,8 @@
   font-size: 14px;
 }
 
-.savePainScoreBtn:disabled, .cancelBtn:disabled {
+.savePainScoreBtn:disabled,
+.cancelBtn:disabled {
   background-color: #cccccc !important;
   border-color: #cccccc !important;
   color: #666666 !important;

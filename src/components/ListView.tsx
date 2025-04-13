@@ -154,7 +154,10 @@ export const ListView = ({
                     <div className={styles.listCardActions}>
                       <Link
                         to={toWorkoutEditPath(workout)}
-                        className={classNames(styles.editBtn, buttonStyles.tertiaryIconBtn)}
+                        className={classNames(
+                          styles.editBtn,
+                          buttonStyles.tertiaryIconBtn,
+                        )}
                         title="Edit workout"
                       >
                         <MdOutlineEdit />
@@ -165,7 +168,10 @@ export const ListView = ({
                           isDeleting?.type === "workout" &&
                           isDeleting.id === workout.id
                         }
-                        className={classNames(styles.deleteBtn, buttonStyles.secondaryIconBtn)}
+                        className={classNames(
+                          styles.deleteBtn,
+                          buttonStyles.secondaryIconBtn,
+                        )}
                         title="Delete workout"
                       >
                         {isDeleting?.type === "workout" &&
@@ -181,10 +187,14 @@ export const ListView = ({
                         .filter((ex) => ex)
                         .map((exercise, idx) => (
                           <div key={idx} className={styles.exerciseItem}>
-                            <span className={styles.exerciseName}>{exercise.name}</span>
+                            <span className={styles.exerciseName}>
+                              {exercise.name}
+                            </span>
                             <span className={styles.exerciseDetails}>
                               {exercise.reps} reps
-                              {exercise.weight ? ` - ${exercise.weight} lbs` : ""}
+                              {exercise.weight
+                                ? ` - ${exercise.weight} lbs`
+                                : ""}
                             </span>
                           </div>
                         ))}
@@ -213,7 +223,10 @@ export const ListView = ({
                     <div className={styles.listCardActions}>
                       <Link
                         to={toPainScoreEditPath(painScore)}
-                        className={classNames(styles.editBtn, buttonStyles.tertiaryIconBtn)}
+                        className={classNames(
+                          styles.editBtn,
+                          buttonStyles.tertiaryIconBtn,
+                        )}
                         title="Edit pain score"
                       >
                         <MdOutlineEdit />
@@ -224,7 +237,10 @@ export const ListView = ({
                           isDeleting?.type === "painScore" &&
                           isDeleting.id === painScore.id
                         }
-                        className={classNames(styles.deleteBtn, buttonStyles.secondaryIconBtn)}
+                        className={classNames(
+                          styles.deleteBtn,
+                          buttonStyles.secondaryIconBtn,
+                        )}
                         title="Delete pain score"
                       >
                         {isDeleting?.type === "painScore" &&
@@ -238,13 +254,16 @@ export const ListView = ({
                     <div className={styles.painScoreInfo}>
                       <span className={styles.painScoreLabel}>Pain Level:</span>
                       <span className={styles.painScoreValue}>
-                        {painScore.score} - {getPainScoreDescription(painScore.score)}
+                        {painScore.score} -{" "}
+                        {getPainScoreDescription(painScore.score)}
                       </span>
                     </div>
                     {painScore.notes && (
                       <div className={styles.painScoreInfo}>
                         <span className={styles.painScoreLabel}>Notes:</span>
-                        <span className={styles.painScoreValue}>{painScore.notes}</span>
+                        <span className={styles.painScoreValue}>
+                          {painScore.notes}
+                        </span>
                       </div>
                     )}
                   </div>

@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { MdChevronLeft, MdChevronRight } from "react-icons/md";
 import styles from "./CalendarView.module.css";
 import { Workout, PainScore } from "../types";
 import classNames from "classnames";
@@ -27,6 +28,26 @@ const CalendarView: React.FC<CalendarViewProps> = ({
 }) => {
   const navigate = useNavigate();
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
+  const [currentWeek, setCurrentWeek] = useState<Date>(new Date());
+  const [isMobileView, setIsMobileView] = useState<boolean>(false);
+
+  // Check screen size on mount and when window resizes
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsMobileView(window.innerWidth < 768);
+    };
+
+    // Initial check
+    checkScreenSize();
+
+    // Add resize listener
+    window.addEventListener("resize", checkScreenSize);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener("resize", checkScreenSize);
+    };
+  }, []);
 
   // Group workouts and pain scores by date
   const workoutsByDate = workouts.reduce(
@@ -59,24 +80,35 @@ const CalendarView: React.FC<CalendarViewProps> = ({
     return "#f44336"; // Red for extreme pain
   };
 
-  const renderHeader = () => {
+  const renderMonthHeader = () => {
     return (
       <div className={styles.calendarHeader}>
-        <button
-          className={styles.navButton}
-          onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-        >
-          &lt;
-        </button>
+        <div className={styles.navButtons}>
+          <button
+            className={styles.navButton}
+            onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
+            aria-label="Previous month"
+          >
+            <MdChevronLeft />
+          </button>
+          <button
+            className={styles.todayButton}
+            onClick={() => setCurrentMonth(new Date())}
+            aria-label="Go to today"
+          >
+            Today
+          </button>
+          <button
+            className={styles.navButton}
+            onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
+            aria-label="Next month"
+          >
+            <MdChevronRight />
+          </button>
+        </div>
         <h2 className={styles.monthTitle}>
           {format(currentMonth, "MMMM yyyy")}
         </h2>
-        <button
-          className={styles.navButton}
-          onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-        >
-          &gt;
-        </button>
       </div>
     );
   };
@@ -94,7 +126,52 @@ const CalendarView: React.FC<CalendarViewProps> = ({
     );
   };
 
-  const renderCells = () => {
+  const renderWeekHeader = () => {
+    return (
+      <div className={styles.calendarHeader}>
+        <div className={styles.navButtons}>
+          <button
+            className={styles.navButton}
+            onClick={() => {
+              const prevWeek = new Date(currentWeek);
+              prevWeek.setDate(prevWeek.getDate() - 7);
+              setCurrentWeek(prevWeek);
+            }}
+            aria-label="Previous week"
+          >
+            <MdChevronLeft />
+          </button>
+          <button
+            className={styles.todayButton}
+            onClick={() => setCurrentWeek(new Date())}
+            aria-label="Go to today"
+          >
+            Today
+          </button>
+          <button
+            className={styles.navButton}
+            onClick={() => {
+              const nextWeek = new Date(currentWeek);
+              nextWeek.setDate(nextWeek.getDate() + 7);
+              setCurrentWeek(nextWeek);
+            }}
+            aria-label="Next week"
+          >
+            <MdChevronRight />
+          </button>
+        </div>
+        <h2 className={styles.monthTitle}>
+          {format(currentWeek, "MMMM d")} -{" "}
+          {format(
+            new Date(currentWeek.getTime() + 6 * 24 * 60 * 60 * 1000),
+            "MMMM d, yyyy",
+          )}
+        </h2>
+      </div>
+    );
+  };
+
+  const renderGridCells = () => {
     const monthStart = startOfMonth(currentMonth);
     const monthEnd = endOfMonth(monthStart);
     const startDate = startOfWeek(monthStart);
@@ -115,6 +192,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({
 
         days.push(
           <div
+            key={day.toString()}
             className={classNames(styles.calendarCell, {
               [styles.disabled]: !isSameMonth(day, monthStart),
               [styles.today]: isToday(day),
@@ -177,11 +255,93 @@ const CalendarView: React.FC<CalendarViewProps> = ({
     return <div className={styles.calendarBody}>{rows}</div>;
   };
 
+  const renderVerticalDays = () => {
+    // Start from the beginning of the current week
+    const startDate = startOfWeek(currentWeek);
+    const days = [];
+
+    // Generate 7 days (a full week)
+    for (let i = 0; i < 7; i++) {
+      const day = new Date(startDate.getTime() + i * 24 * 60 * 60 * 1000);
+      const dateStr = format(day, "yyyy-MM-dd");
+      const dayWorkouts = workoutsByDate[dateStr] || [];
+      const painScore = painScoresByDate[dateStr];
+
+      days.push(
+        <div
+          key={dateStr}
+          className={classNames(styles.verticalDay, {
+            [styles.today]: isToday(day),
+          })}
+        >
+          <div className={styles.verticalDayHeader}>
+            <div className={styles.verticalDayName}>{format(day, "EEEE")}</div>
+            <div className={styles.verticalDayDate}>
+              {format(day, "MMMM d, yyyy")}
+            </div>
+          </div>
+
+          {painScore && (
+            <button
+              className={styles.verticalPainScore}
+              style={{ backgroundColor: getPainScoreColor(painScore.score) }}
+              onClick={() => navigate(toPainScoreEditPath(painScore))}
+              aria-label={`Edit pain score ${painScore.score} for ${dateStr}`}
+            >
+              Pain: {painScore.score}
+            </button>
+          )}
+
+          <div className={styles.verticalWorkouts}>
+            {dayWorkouts.length > 0 ? (
+              dayWorkouts.map((workout) => (
+                <Link
+                  to={toWorkoutPath(workout)}
+                  key={workout.id}
+                  className={classNames(styles.verticalWorkout, {
+                    [styles.withInstructor]: workout.withInstructor,
+                  })}
+                >
+                  <div className={styles.verticalWorkoutExercises}>
+                    {workout.exercises.map((exercise, idx) => (
+                      <div key={idx} className={styles.verticalWorkoutExercise}>
+                        <span className={styles.exerciseName}>
+                          {exercise.name}
+                        </span>
+                        <span className={styles.exerciseDetails}>
+                          {exercise.reps} reps
+                          {exercise.weight ? ` - ${exercise.weight} lbs` : ""}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </Link>
+              ))
+            ) : (
+              <div className={styles.noWorkouts}>No workouts</div>
+            )}
+          </div>
+        </div>,
+      );
+    }
+
+    return <div className={styles.verticalDaysList}>{days}</div>;
+  };
+
   return (
     <div className={styles.calendar}>
-      {renderHeader()}
-      {renderDays()}
-      {renderCells()}
+      {isMobileView ? (
+        <>
+          {renderWeekHeader()}
+          {renderVerticalDays()}
+        </>
+      ) : (
+        <>
+          {renderMonthHeader()}
+          {renderDays()}
+          {renderGridCells()}
+        </>
+      )}
     </div>
   );
 };

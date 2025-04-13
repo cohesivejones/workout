@@ -84,7 +84,7 @@
 }
 
 .listCardType::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: 0;
   left: 0;
@@ -227,7 +227,7 @@
     margin-right: 80px; /* Make room for the action buttons */
     padding-bottom: 0;
   }
-  
+
   .listCardType::after {
     display: none; /* Hide the underline on mobile */
   }
@@ -239,21 +239,24 @@
     width: auto;
     justify-content: flex-end;
   }
-  
+
   /* Maintain alignment on mobile */
-  .exerciseItem, .painScoreInfo {
+  .exerciseItem,
+  .painScoreInfo {
     flex-direction: column;
     align-items: flex-start;
     gap: 2px;
   }
-  
-  .exerciseName, .painScoreLabel {
+
+  .exerciseName,
+  .painScoreLabel {
     width: 100%;
     margin-bottom: 2px;
     font-weight: 600;
   }
-  
-  .exerciseDetails, .painScoreValue {
+
+  .exerciseDetails,
+  .painScoreValue {
     padding-left: 8px;
   }
 }

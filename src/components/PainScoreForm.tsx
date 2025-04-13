@@ -146,7 +146,10 @@ function PainScoreForm({
           <button
             type="submit"
             disabled={isSubmitting}
-            className={classNames(styles.savePainScoreBtn, buttonStyles.primaryBtn)}
+            className={classNames(
+              styles.savePainScoreBtn,
+              buttonStyles.primaryBtn,
+            )}
             title={existingPainScore ? "Update pain score" : "Save pain score"}
           >
             {isSubmitting ? (
@@ -155,12 +158,15 @@ function PainScoreForm({
               <>{existingPainScore ? "Update Pain Score" : "Save Pain Score"}</>
             )}
           </button>
-          
+
           {onCancel && (
             <button
               type="button"
               onClick={onCancel}
-              className={classNames(styles.cancelBtn, buttonStyles.secondaryBtn)}
+              className={classNames(
+                styles.cancelBtn,
+                buttonStyles.secondaryBtn,
+              )}
               disabled={isSubmitting}
             >
               Cancel
@@ -168,7 +174,7 @@ function PainScoreForm({
           )}
         </div>
       </form>
-      
+
       {/* Pain score legend is now integrated into the PainScaleSelector component */}
     </div>
   );

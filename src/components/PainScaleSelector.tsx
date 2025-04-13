@@ -93,7 +93,7 @@ const PainScaleSelector: React.FC<PainScaleSelectorProps> = ({
               </div>
             ))}
           </div>
-          
+
           {selectedScore !== null && (
             <div className={styles.painScaleDescriptionContainer}>
               <div className={styles.selectedFaceContainer}>
@@ -104,7 +104,7 @@ const PainScaleSelector: React.FC<PainScaleSelectorProps> = ({
               </div>
             </div>
           )}
-          
+
           {error && <div className={styles.errorMessage}>{error}</div>}
         </div>
       )}
