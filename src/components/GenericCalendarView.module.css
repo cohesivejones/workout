@@ -1,0 +1,207 @@
+.calendar {
+  width: 100%;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.calendarHeader {
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #ddd;
+  gap: 10px;
+}
+
+.navButtons {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.navButton {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 6px;
+  cursor: pointer;
+  min-width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.navButton svg {
+  font-size: 24px;
+  color: #555;
+}
+
+.todayButton {
+  background-color: #007bff;
+  color: white;
+  border: 1px solid #0069d9;
+  border-radius: 4px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.navButton:hover {
+  background-color: #f1f1f1;
+}
+
+.todayButton:hover {
+  background-color: #0069d9;
+}
+
+.calendarHeader h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  text-align: center;
+}
+
+.calendarDays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #ddd;
+}
+
+.calendarDayName {
+  text-align: center;
+  padding: 8px;
+  font-weight: bold;
+}
+
+.calendarBody {
+  display: flex;
+  flex-direction: column;
+}
+
+.calendarRow {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  border-bottom: 1px solid #ddd;
+}
+
+.calendarRow:last-child {
+  border-bottom: none;
+}
+
+.calendarCell {
+  min-height: 100px;
+  padding: 8px;
+  border-right: 1px solid #ddd;
+  position: relative;
+  cursor: pointer;
+}
+
+.calendarCell:last-child {
+  border-right: none;
+}
+
+.calendarCell.disabled {
+  color: #ccc;
+  background-color: #f9f9f9;
+  cursor: default;
+}
+
+.calendarCell.today {
+  background-color: #f0f7ff;
+}
+
+.calendarDate {
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.calendarItems {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 80px;
+  overflow-y: auto;
+}
+
+.calendarItems a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.calendarItems a:hover {
+  text-decoration: underline;
+  color: #1890ff;
+}
+
+/* Vertical day view styles for mobile */
+.verticalDaysList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.verticalDay {
+  background-color: #fff;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.verticalDay.today {
+  border-left: 4px solid #007bff;
+}
+
+.verticalDayHeader {
+  background-color: #f8f9fa;
+  padding: 12px 16px;
+  border-bottom: 1px solid #ddd;
+}
+
+.verticalDayName {
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.verticalDayDate {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.verticalItems {
+  padding: 0 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.verticalItems a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.verticalItems a:hover {
+  text-decoration: none;
+  color: inherit;
+}
+
+.noItems {
+  padding: 12px;
+  color: #999;
+  text-align: center;
+  font-style: italic;
+}
+
+/* Media query for mobile view */
+@media (max-width: 768px) {
+  .calendarCell {
+    min-height: 80px;
+    padding: 4px;
+  }
+}
