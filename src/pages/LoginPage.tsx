@@ -1,5 +1,6 @@
 import { useForm } from "react-hook-form";
 import { useUserContext } from "../contexts/useUserContext";
+import classNames from "classnames";
 import styles from "./LoginPage.module.css";
 
 type FormValues = {
@@ -79,7 +80,7 @@ function LoginPage() {
 
         <button
           type="submit"
-          className={styles.loginButton}
+          className={classNames(styles.loginButton, styles.primaryBtn)}
           disabled={isSubmitting || loading}
         >
           {isSubmitting || loading ? "Logging in..." : "Login"}

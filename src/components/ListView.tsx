@@ -152,7 +152,7 @@ export const ListView = ({
                     <div className={styles.listCardActions}>
                       <Link
                         to={toWorkoutEditPath(workout)}
-                        className={styles.editBtn}
+                        className={classNames(styles.editBtn, styles.tertiaryIconBtn)}
                         title="Edit workout"
                       >
                         <MdOutlineEdit />
@@ -163,7 +163,7 @@ export const ListView = ({
                           isDeleting?.type === "workout" &&
                           isDeleting.id === workout.id
                         }
-                        className={styles.deleteBtn}
+                        className={classNames(styles.deleteBtn, styles.secondaryIconBtn)}
                         title="Delete workout"
                       >
                         {isDeleting?.type === "workout" &&
@@ -208,7 +208,7 @@ export const ListView = ({
                     <div className={styles.listCardActions}>
                       <Link
                         to={toPainScoreEditPath(painScore)}
-                        className={styles.editBtn}
+                        className={classNames(styles.editBtn, styles.tertiaryIconBtn)}
                         title="Edit pain score"
                       >
                         <MdOutlineEdit />
@@ -219,7 +219,7 @@ export const ListView = ({
                           isDeleting?.type === "painScore" &&
                           isDeleting.id === painScore.id
                         }
-                        className={styles.deleteBtn}
+                        className={classNames(styles.deleteBtn, styles.secondaryIconBtn)}
                         title="Delete pain score"
                       >
                         {isDeleting?.type === "painScore" &&

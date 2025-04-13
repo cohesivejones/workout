@@ -3,6 +3,7 @@ import type { ReactElement } from "react";
 import { fetchExercises, updateExercise } from "../api";
 import { Exercise } from "../types";
 import { useUserContext } from "../contexts/useUserContext";
+import classNames from "classnames";
 import styles from "./ExerciseListPage.module.css";
 
 function ExerciseListPage(): ReactElement {
@@ -102,13 +103,13 @@ function ExerciseListPage(): ReactElement {
                       <button
                         onClick={handleSaveEdit}
                         disabled={!newName.trim() || isSubmitting}
-                        className={styles.saveBtn}
+                        className={classNames(styles.saveBtn, styles.primaryBtn)}
                       >
                         {isSubmitting ? "Saving..." : "Save"}
                       </button>
                       <button
                         onClick={handleCancelEdit}
-                        className={styles.cancelBtn}
+                        className={classNames(styles.cancelBtn, styles.secondaryBtn)}
                         disabled={isSubmitting}
                       >
                         Cancel
@@ -121,7 +122,7 @@ function ExerciseListPage(): ReactElement {
                     <div className={styles.exerciseActions}>
                       <button
                         onClick={() => handleEditClick(exercise)}
-                        className={styles.editBtn}
+                        className={classNames(styles.editBtn, styles.tertiaryBtn)}
                       >
                         Edit
                       </button>

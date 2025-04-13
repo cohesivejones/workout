@@ -30,7 +30,6 @@
   border-radius: 4px;
   padding: 4px 10px;
   font-size: 14px;
-  color: white;
 }
 
 .addIcon {
@@ -38,17 +37,28 @@
   font-size: 12px;
 }
 
+/* Primary Button Styles */
 .primaryBtn {
   background: #007bff;
+  color: white;
+  border: 1px solid #007bff;
 }
 
 .primaryBtn:hover {
   background: #0069d9;
+  border-color: #0069d9;
   text-decoration: none;
   color: white;
 }
 
+.primaryBtn:focus {
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
+  outline: none;
+}
+
+/* Secondary Button Styles */
 .secondaryBtn {
+  background-color: white;
   border: 1px solid #007bff;
   color: #007bff;
 }
@@ -56,6 +66,153 @@
 .secondaryBtn:hover {
   background-color: #e6f7ff;
   text-decoration: none;
+  color: #0069d9;
+  border-color: #0069d9;
+}
+
+.secondaryBtn:focus {
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
+  outline: none;
+}
+
+/* Tertiary Button Styles */
+.tertiaryBtn {
+  background-color: white;
+  border: none;
+  color: #007bff;
+}
+
+.tertiaryBtn:hover {
+  background-color: #f0f8ff;
+  text-decoration: none;
+  color: #0069d9;
+}
+
+.tertiaryBtn:focus {
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
+  outline: none;
+}
+
+/* Icon Button Styles */
+.primaryIconBtn, .secondaryIconBtn, .tertiaryIconBtn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.primaryIconBtn {
+  background: #007bff;
+  color: white;
+  border: 1px solid #007bff;
+}
+
+.primaryIconBtn:hover {
+  background: #0069d9;
+  border-color: #0069d9;
+}
+
+.primaryIconBtn:focus {
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
+  outline: none;
+}
+
+.secondaryIconBtn {
+  background-color: white;
+  border: 1px solid #007bff;
+  color: #007bff;
+}
+
+.secondaryIconBtn:hover {
+  background-color: #e6f7ff;
+  color: #0069d9;
+  border-color: #0069d9;
+}
+
+.secondaryIconBtn:focus {
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
+  outline: none;
+}
+
+.tertiaryIconBtn {
+  background-color: white;
+  border: none;
+  color: #007bff;
+}
+
+.tertiaryIconBtn:hover {
+  background-color: #f0f8ff;
+  color: #0069d9;
+}
+
+.tertiaryIconBtn:focus {
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
+  outline: none;
+}
+
+/* Link Styles */
+.primaryLink, .secondaryLink, .tertiaryLink {
+  text-decoration: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.primaryLink {
+  background: #007bff;
+  color: white;
+  border: 1px solid #007bff;
+}
+
+.primaryLink:hover {
+  background: #0069d9;
+  border-color: #0069d9;
+  text-decoration: none;
+  color: white;
+}
+
+.primaryLink:focus {
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
+  outline: none;
+}
+
+.secondaryLink {
+  background-color: white;
+  border: 1px solid #007bff;
+  color: #007bff;
+}
+
+.secondaryLink:hover {
+  background-color: #e6f7ff;
+  text-decoration: none;
+  color: #0069d9;
+  border-color: #0069d9;
+}
+
+.secondaryLink:focus {
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
+  outline: none;
+}
+
+.tertiaryLink {
+  background-color: white;
+  border: none;
+  color: #007bff;
+}
+
+.tertiaryLink:hover {
+  background-color: #f0f8ff;
+  text-decoration: none;
+  color: #0069d9;
+}
+
+.tertiaryLink:focus {
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
+  outline: none;
 }
 
 .listItems {
@@ -104,8 +261,6 @@
 }
 
 .editBtn {
-  background: #4caf50;
-  color: white;
   text-decoration: none;
   border-radius: 4px;
   width: 32px;
@@ -114,18 +269,26 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  background-color: white;
+  border: none;
+  color: #007bff;
 }
 
 .editBtn:hover {
-  background: #45a049;
+  background-color: #f0f8ff;
   text-decoration: none;
-  color: white;
+  color: #0069d9;
+}
+
+.editBtn:focus {
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
+  outline: none;
 }
 
 .deleteBtn {
-  background: #ff4444;
-  color: white;
-  border: none;
+  background-color: white;
+  border: 1px solid #007bff;
+  color: #007bff;
   border-radius: 4px;
   width: 32px;
   height: 32px;
@@ -138,7 +301,14 @@
 }
 
 .deleteBtn:hover {
-  background: #cc0000;
+  background-color: #e6f7ff;
+  color: #0069d9;
+  border-color: #0069d9;
+}
+
+.deleteBtn:focus {
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
+  outline: none;
 }
 
 .deleteBtn:disabled {

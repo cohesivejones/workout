@@ -65,18 +65,85 @@
   margin-top: auto;
 }
 
+/* Button Styles */
+.primaryBtn {
+  background: #007bff;
+  color: white;
+  border: 1px solid #007bff;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.primaryBtn:hover {
+  background: #0069d9;
+  border-color: #0069d9;
+  text-decoration: none;
+  color: white;
+}
+
+.primaryBtn:focus {
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
+  outline: none;
+}
+
+.secondaryBtn {
+  background-color: white;
+  border: 1px solid #007bff;
+  color: #007bff;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.secondaryBtn:hover {
+  background-color: #e6f7ff;
+  text-decoration: none;
+  color: #0069d9;
+  border-color: #0069d9;
+}
+
+.secondaryBtn:focus {
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
+  outline: none;
+}
+
+.tertiaryBtn {
+  background-color: white;
+  border: none;
+  color: #007bff;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.tertiaryBtn:hover {
+  background-color: #f0f8ff;
+  text-decoration: none;
+  color: #0069d9;
+}
+
+.tertiaryBtn:focus {
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
+  outline: none;
+}
+
 .editBtn {
-  background: none;
+  background-color: white;
   border: none;
   color: #007bff;
   cursor: pointer;
   font-size: 0.9rem;
   padding: 4px 8px;
+  border-radius: 4px;
 }
 
 .editBtn:hover {
-  color: #0056b3;
-  text-decoration: underline;
+  background-color: #f0f8ff;
+  color: #0069d9;
+  text-decoration: none;
+}
+
+.editBtn:focus {
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
+  outline: none;
 }
 
 .exerciseEditForm {
@@ -109,21 +176,40 @@
 }
 
 .saveBtn {
-  background-color: #28a745;
+  background: #007bff;
   color: white;
+  border: 1px solid #007bff;
+  padding: 6px 12px;
+  font-size: 0.9rem;
 }
 
 .saveBtn:hover:not(:disabled) {
-  background-color: #218838;
+  background: #0069d9;
+  border-color: #0069d9;
+}
+
+.saveBtn:focus:not(:disabled) {
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
+  outline: none;
 }
 
 .cancelBtn {
-  background-color: #6c757d;
-  color: white;
+  background-color: white;
+  border: 1px solid #007bff;
+  color: #007bff;
+  padding: 6px 12px;
+  font-size: 0.9rem;
 }
 
 .cancelBtn:hover:not(:disabled) {
-  background-color: #5a6268;
+  background-color: #e6f7ff;
+  color: #0069d9;
+  border-color: #0069d9;
+}
+
+.cancelBtn:focus:not(:disabled) {
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
+  outline: none;
 }
 
 .saveBtn:disabled,

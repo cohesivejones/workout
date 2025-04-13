@@ -9,6 +9,7 @@ interface PainScoreFormProps {
   existingPainScore?: PainScore;
   userId: number;
   selectedDate?: string;
+  onCancel?: () => void;
 }
 
 interface FormValues {
@@ -37,6 +38,7 @@ function PainScoreForm({
   existingPainScore,
   userId,
   selectedDate,
+  onCancel,
 }: PainScoreFormProps): React.ReactElement {
   const [selectedScore, setSelectedScore] = React.useState<number | null>(
     existingPainScore?.score ?? null,
@@ -142,18 +144,31 @@ function PainScoreForm({
           />
         </div>
 
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className={styles.savePainScoreBtn}
-          title={existingPainScore ? "Update pain score" : "Save pain score"}
-        >
-          {isSubmitting ? (
-            "Saving..."
-          ) : (
-            <>{existingPainScore ? "Update Pain Score" : "Save Pain Score"}</>
+        <div className={styles.formButtons}>
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className={classNames(styles.savePainScoreBtn, styles.primaryBtn)}
+            title={existingPainScore ? "Update pain score" : "Save pain score"}
+          >
+            {isSubmitting ? (
+              "Saving..."
+            ) : (
+              <>{existingPainScore ? "Update Pain Score" : "Save Pain Score"}</>
+            )}
+          </button>
+          
+          {onCancel && (
+            <button
+              type="button"
+              onClick={onCancel}
+              className={classNames(styles.cancelBtn, styles.secondaryBtn)}
+              disabled={isSubmitting}
+            >
+              Cancel
+            </button>
           )}
-        </button>
+        </div>
       </form>
 
       <div className={styles.painScoreLegend}>

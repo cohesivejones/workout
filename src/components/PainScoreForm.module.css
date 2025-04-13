@@ -79,16 +79,77 @@
   box-sizing: border-box;
 }
 
-.savePainScoreBtn {
-  width: 100%;
-  padding: 10px;
-  background-color: #4caf50;
+/* Button Styles */
+.primaryBtn {
+  background: #007bff;
   color: white;
-  border: none;
+  border: 1px solid #007bff;
   border-radius: 4px;
   cursor: pointer;
-  font-weight: 500;
+}
+
+.primaryBtn:hover {
+  background: #0069d9;
+  border-color: #0069d9;
+  text-decoration: none;
+  color: white;
+}
+
+.primaryBtn:focus {
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
+  outline: none;
+}
+
+.secondaryBtn {
+  background-color: white;
+  border: 1px solid #007bff;
+  color: #007bff;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.secondaryBtn:hover {
+  background-color: #e6f7ff;
+  text-decoration: none;
+  color: #0069d9;
+  border-color: #0069d9;
+}
+
+.secondaryBtn:focus {
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
+  outline: none;
+}
+
+.tertiaryBtn {
+  background-color: white;
+  border: none;
+  color: #007bff;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.tertiaryBtn:hover {
+  background-color: #f0f8ff;
+  text-decoration: none;
+  color: #0069d9;
+}
+
+.tertiaryBtn:focus {
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
+  outline: none;
+}
+
+.formButtons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   margin-top: 10px;
+}
+
+.savePainScoreBtn, .cancelBtn {
+  width: 100%;
+  padding: 10px;
+  font-weight: 500;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -99,12 +160,10 @@
   font-size: 14px;
 }
 
-.savePainScoreBtn:hover {
-  background-color: #45a049;
-}
-
-.savePainScoreBtn:disabled {
-  background-color: #cccccc;
+.savePainScoreBtn:disabled, .cancelBtn:disabled {
+  background-color: #cccccc !important;
+  border-color: #cccccc !important;
+  color: #666666 !important;
   cursor: not-allowed;
 }
 

@@ -30,23 +30,38 @@
   font-size: 16px;
 }
 
-.loginButton {
-  padding: 12px;
-  background-color: #007bff;
+/* Primary Button Style */
+.primaryBtn {
+  background: #007bff;
   color: white;
-  border: none;
+  border: 1px solid #007bff;
   border-radius: 4px;
-  font-size: 16px;
   cursor: pointer;
-  transition: background-color 0.2s;
 }
 
-.loginButton:hover {
-  background-color: #0069d9;
+.primaryBtn:hover {
+  background: #0069d9;
+  border-color: #0069d9;
+  text-decoration: none;
+  color: white;
+}
+
+.primaryBtn:focus {
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
+  outline: none;
+}
+
+.loginButton {
+  padding: 12px;
+  font-size: 16px;
+  transition: background-color 0.2s;
+  width: 100%;
 }
 
 .loginButton:disabled {
-  background-color: #cccccc;
+  background-color: #cccccc !important;
+  border-color: #cccccc !important;
+  color: #666666 !important;
   cursor: not-allowed;
 }
 

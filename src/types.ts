@@ -41,6 +41,7 @@ export interface WorkoutFormProps {
   savedExercises: Exercise[];
   onSaveExercise: (exerciseName: string) => Promise<boolean>;
   existingWorkout?: Workout;
+  onCancel?: () => void;
 }
 
 export interface WorkoutListProps {

@@ -64,6 +64,10 @@ export default function AddWorkoutPage() {
     }
   };
 
+  const handleCancel = () => {
+    navigate("/");
+  };
+
   return (
     <div className={styles.container}>
       {error && <div className={styles.errorMessage}>{error}</div>}
@@ -71,6 +75,7 @@ export default function AddWorkoutPage() {
         onSubmit={addWorkout}
         savedExercises={savedExercises}
         onSaveExercise={addExerciseToSaved}
+        onCancel={handleCancel}
       />
     </div>
   );

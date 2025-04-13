@@ -56,7 +56,7 @@ const Header = () => {
         </Link>
         <nav className={styles.mainNav}>
           <Link to="/" className={styles.navLink}>
-            Workouts
+            Timeline
           </Link>
           <Link to="/exercises" className={styles.navLink}>
             Exercises

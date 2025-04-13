@@ -1,6 +1,7 @@
 import * as React from "react";
 import { WorkoutFormProps, WorkoutExercise } from "../types";
 import CreatableSelect from "react-select/creatable";
+import classNames from "classnames";
 import styles from "./WorkoutForm.module.css";
 import { useUserContext } from "../contexts/useUserContext";
 import { fetchRecentExerciseData } from "../api";
@@ -28,6 +29,7 @@ function WorkoutForm({
   savedExercises,
   onSaveExercise,
   existingWorkout,
+  onCancel,
 }: WorkoutFormProps): React.ReactElement {
   const { user } = useUserContext();
   const [isSavingExercise, setIsSavingExercise] =
@@ -252,7 +254,7 @@ function WorkoutForm({
               isSavingExercise ||
               isSubmitting
             }
-            className={styles.addExerciseBtn}
+            className={classNames(styles.addExerciseBtn, styles.secondaryBtn)}
             title="Add exercise to workout"
           >
             {isSavingExercise ? "Adding..." : <>Add Exercise</>}
@@ -275,7 +277,7 @@ function WorkoutForm({
                   </div>
                   <button
                     type="button"
-                    className={styles.removeExerciseBtn}
+                    className={classNames(styles.removeExerciseBtn, styles.secondaryBtn)}
                     onClick={() => remove(index)}
                     title="Remove exercise"
                   >
@@ -287,18 +289,31 @@ function WorkoutForm({
           )}
         </div>
 
-        <button
-          type="submit"
-          disabled={fields.length === 0 || isSubmitting}
-          className={styles.saveWorkoutBtn}
-          title={existingWorkout ? "Update workout" : "Save workout"}
-        >
-          {isSubmitting ? (
-            "Saving..."
-          ) : (
-            <>{existingWorkout ? "Update Workout" : "Save Workout"}</>
+        <div className={styles.formButtons}>
+          <button
+            type="submit"
+            disabled={fields.length === 0 || isSubmitting}
+            className={classNames(styles.saveWorkoutBtn, styles.primaryBtn)}
+            title={existingWorkout ? "Update workout" : "Save workout"}
+          >
+            {isSubmitting ? (
+              "Saving..."
+            ) : (
+              <>{existingWorkout ? "Update Workout" : "Save Workout"}</>
+            )}
+          </button>
+          
+          {onCancel && (
+            <button
+              type="button"
+              onClick={onCancel}
+              className={classNames(styles.cancelBtn, styles.secondaryBtn)}
+              disabled={isSubmitting}
+            >
+              Cancel
+            </button>
           )}
-        </button>
+        </div>
       </form>
     </div>
   );

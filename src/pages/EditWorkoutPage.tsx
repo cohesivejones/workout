@@ -105,6 +105,10 @@ export default function EditWorkoutPage() {
     return <div className={styles.errorMessage}>{error}</div>;
   }
 
+  const handleCancel = () => {
+    navigate("/");
+  };
+
   if (!workout) {
     return <div className={styles.errorMessage}>Workout not found</div>;
   }
@@ -116,6 +120,7 @@ export default function EditWorkoutPage() {
         savedExercises={savedExercises}
         onSaveExercise={addExerciseToSaved}
         existingWorkout={workout}
+        onCancel={handleCancel}
       />
     </div>
   );
