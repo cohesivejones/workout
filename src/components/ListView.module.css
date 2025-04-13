@@ -164,9 +164,17 @@
 
 @media (max-width: 768px) {
   .listCardHeader {
+    position: relative;
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
+  }
+
+  .listCardHeader h3 {
+    order: -1; /* Ensure date is at the top */
+    width: 100%;
+    margin-right: 80px; /* Make room for the action buttons */
+    font-size: 1.1rem; /* Slightly smaller font for mobile */
   }
 
   .listCardType {
@@ -174,7 +182,10 @@
   }
 
   .listCardActions {
-    width: 100%;
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: auto;
     justify-content: flex-end;
   }
 }
