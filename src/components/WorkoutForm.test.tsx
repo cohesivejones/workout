@@ -177,7 +177,7 @@ describe("WorkoutForm", () => {
     expect(screen.getByText("Squats - 15 reps")).toBeInTheDocument();
 
     // Get the remove buttons
-    const removeButtons = screen.getAllByText("×");
+    const removeButtons = screen.getAllByTitle("Remove exercise");
     expect(removeButtons).toHaveLength(2);
 
     // Click the first remove button

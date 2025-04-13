@@ -13,7 +13,6 @@ import { deletePainScore, deleteWorkout } from "../api";
 import classNames from "classnames";
 import styles from "./ListView.module.css";
 import buttonStyles from "../styles/common/buttons.module.css";
-import linkStyles from "../styles/common/links.module.css";
 
 interface ListViewProps {
   painScores: PainScore[];
@@ -148,7 +147,7 @@ export const ListView = ({
                     <h3>
                       {format(
                         `${workout.date}T12:00:00.000`,
-                        "MMM d, yyyy (eeee)",
+                        "MMM d, yyyy (eeee)"
                       )}
                     </h3>
                     <div className={styles.listCardActions}>
@@ -156,7 +155,7 @@ export const ListView = ({
                         to={toWorkoutEditPath(workout)}
                         className={classNames(
                           styles.editBtn,
-                          buttonStyles.tertiaryIconBtn,
+                          buttonStyles.tertiaryIconBtn
                         )}
                         title="Edit workout"
                       >
@@ -170,7 +169,7 @@ export const ListView = ({
                         }
                         className={classNames(
                           styles.deleteBtn,
-                          buttonStyles.secondaryIconBtn,
+                          buttonStyles.secondaryIconBtn
                         )}
                         title="Delete workout"
                       >
@@ -217,7 +216,7 @@ export const ListView = ({
                     <h3>
                       {format(
                         `${painScore.date}T12:00:00.000`,
-                        "MMM d, yyyy (eeee)",
+                        "MMM d, yyyy (eeee)"
                       )}
                     </h3>
                     <div className={styles.listCardActions}>
@@ -225,7 +224,7 @@ export const ListView = ({
                         to={toPainScoreEditPath(painScore)}
                         className={classNames(
                           styles.editBtn,
-                          buttonStyles.tertiaryIconBtn,
+                          buttonStyles.tertiaryIconBtn
                         )}
                         title="Edit pain score"
                       >
@@ -239,7 +238,7 @@ export const ListView = ({
                         }
                         className={classNames(
                           styles.deleteBtn,
-                          buttonStyles.secondaryIconBtn,
+                          buttonStyles.secondaryIconBtn
                         )}
                         title="Delete pain score"
                       >

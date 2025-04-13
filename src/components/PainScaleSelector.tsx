@@ -19,10 +19,7 @@ const painScoreDescriptions = [
   "10: Unspeakable pain. Bedridden and possibly delirious. Very few people will ever experience this level of pain",
 ];
 
-// Get the short description (first part before the colon)
-const getShortDescription = (description: string) => {
-  return description.split(":")[0];
-};
+// No longer needed as we only use the detailed description
 
 // Get the detailed description (part after the colon)
 const getDetailedDescription = (description: string) => {

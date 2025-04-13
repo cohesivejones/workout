@@ -4,7 +4,6 @@ import { fetchWorkout, deleteWorkout } from "../api";
 import { Workout } from "../types";
 import styles from "./WorkoutShowPage.module.css";
 import buttonStyles from "../styles/common/buttons.module.css";
-import linkStyles from "../styles/common/links.module.css";
 import { format } from "date-fns";
 import classNames from "classnames";
 import { toHomePath, toWorkoutEditPath } from "../utils/paths";

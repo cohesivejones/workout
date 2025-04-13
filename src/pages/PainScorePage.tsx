@@ -4,9 +4,7 @@ import PainScoreForm from "../components/PainScoreForm";
 import { createPainScore, updatePainScore, fetchPainScore } from "../api";
 import { PainScore } from "../types";
 import { useUserContext } from "../contexts/useUserContext";
-import classNames from "classnames";
 import styles from "./PainScorePage.module.css";
-import buttonStyles from "../styles/common/buttons.module.css";
 
 function PainScorePage(): React.ReactElement {
   const { id } = useParams<{ id?: string }>();
