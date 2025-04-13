@@ -39,14 +39,6 @@
   box-sizing: border-box;
 }
 
-.painScoreSelect {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  box-sizing: border-box;
-}
-
 .painScoreInput {
   display: flex;
   flex-direction: column;
@@ -56,6 +48,7 @@
 
 .painScoreInput label {
   font-weight: 500;
+  margin-bottom: 5px;
 }
 
 .notesInput {

@@ -4,6 +4,7 @@ import { PainScore } from "../types";
 import styles from "./PainScoreForm.module.css";
 import classNames from "classnames";
 import buttonStyles from "../styles/common/buttons.module.css";
+import PainScaleSelector from "./PainScaleSelector";
 
 interface PainScoreFormProps {
   onSubmit: (painScore: Omit<PainScore, "id">) => Promise<boolean>;
@@ -50,6 +51,8 @@ function PainScoreForm({
     register,
     handleSubmit,
     watch,
+    control,
+    setValue,
     formState: { errors, isSubmitting },
     setError,
   } = useForm<FormValues>({
@@ -119,21 +122,15 @@ function PainScoreForm({
 
         <div className={styles.painScoreInput}>
           <label htmlFor="pain-score">Pain Score (0-10):</label>
-          <select
-            id="pain-score"
-            className={styles.painScoreSelect}
-            {...register("score", { required: "Pain score is required" })}
-          >
-            <option value="">Select pain score</option>
-            {painScoreDescriptions.map((description, index) => (
-              <option key={index} value={index}>
-                {description}
-              </option>
-            ))}
-          </select>
-          {errors.score && (
-            <span className={styles.errorMessage}>{errors.score.message}</span>
-          )}
+          <PainScaleSelector
+            name="score"
+            control={control}
+            value={selectedScore}
+            onChange={(value) => {
+              setValue("score", value.toString());
+            }}
+            error={errors.score?.message}
+          />
         </div>
 
         <div className={styles.notesInput}>
@@ -171,22 +168,8 @@ function PainScoreForm({
           )}
         </div>
       </form>
-
-      <div className={styles.painScoreLegend}>
-        <h3>Pain Score Legend:</h3>
-        <ul>
-          {painScoreDescriptions.map((description, index) => (
-            <li
-              key={index}
-              className={classNames({
-                [styles.selected]: selectedScore === index,
-              })}
-            >
-              {description}
-            </li>
-          ))}
-        </ul>
-      </div>
+      
+      {/* Pain score legend is now integrated into the PainScaleSelector component */}
     </div>
   );
 }

@@ -1,0 +1,110 @@
+.painScaleContainer {
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+/* Removed image container styles as we're now using SVG faces directly */
+
+.painScaleSelector {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+}
+
+.painScaleOption {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  width: 9%;
+  position: relative;
+}
+
+.painScaleNumber {
+  font-weight: 600;
+  margin-bottom: 5px;
+  font-size: 1rem;
+}
+
+.painScaleFace {
+  width: 100%;
+  height: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: transform 0.2s;
+  padding: 2px;
+  border-radius: 50%;
+}
+
+.painScaleOption:hover .painScaleFace {
+  transform: scale(1.1);
+}
+
+.painScaleOption.selected .painScaleFace {
+  transform: scale(1.25);
+}
+
+.painScaleDescriptionContainer {
+  margin-top: 10px;
+  padding: 15px;
+  background-color: #f0f8ff;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.selectedFaceContainer {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.painScaleDescription {
+  font-size: 0.9rem;
+  color: #333;
+  flex: 1;
+}
+
+.errorMessage {
+  color: #dc3545;
+  margin-top: 5px;
+  font-size: 0.9rem;
+}
+
+/* Accessibility focus styles */
+.painScaleOption:focus {
+  outline: none;
+}
+
+.painScaleOption:focus .painScaleFace {
+  transform: scale(1.15);
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+  .painScaleSelector {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  
+  .painScaleOption {
+    width: 18%;
+  }
+  
+  .painScaleNumber {
+    font-size: 0.9rem;
+  }
+  
+  .painScaleDescriptionContainer {
+    flex-direction: column;
+    text-align: center;
+    padding: 10px;
+  }
+  
+  .selectedFaceContainer {
+    margin-bottom: 10px;
+  }
+}
