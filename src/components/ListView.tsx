@@ -144,13 +144,13 @@ export const ListView = ({
                   })}
                 >
                   <div className={styles.listCardHeader}>
+                    <div className={styles.listCardType}>Workout</div>
                     <h3>
                       {format(
                         `${workout.date}T12:00:00.000`,
                         "MMM d, yyyy (eeee)",
                       )}
                     </h3>
-                    <div className={styles.listCardType}>Workout</div>
                     <div className={styles.listCardActions}>
                       <Link
                         to={toWorkoutEditPath(workout)}
@@ -176,16 +176,19 @@ export const ListView = ({
                     </div>
                   </div>
                   <div className={styles.listCardContent}>
-                    <ul>
+                    <div className={styles.exercisesList}>
                       {(workout.exercises || [])
                         .filter((ex) => ex)
                         .map((exercise, idx) => (
-                          <li key={idx}>
-                            {exercise.name} - {exercise.reps} reps
-                            {exercise.weight ? ` - ${exercise.weight} lbs` : ""}
-                          </li>
+                          <div key={idx} className={styles.exerciseItem}>
+                            <span className={styles.exerciseName}>{exercise.name}</span>
+                            <span className={styles.exerciseDetails}>
+                              {exercise.reps} reps
+                              {exercise.weight ? ` - ${exercise.weight} lbs` : ""}
+                            </span>
+                          </div>
                         ))}
-                    </ul>
+                    </div>
                   </div>
                 </div>
               );
@@ -200,13 +203,13 @@ export const ListView = ({
                   }}
                 >
                   <div className={styles.listCardHeader}>
+                    <div className={styles.listCardType}>Pain Score</div>
                     <h3>
                       {format(
                         `${painScore.date}T12:00:00.000`,
                         "MMM d, yyyy (eeee)",
                       )}
                     </h3>
-                    <div className={styles.listCardType}>Pain Score</div>
                     <div className={styles.listCardActions}>
                       <Link
                         to={toPainScoreEditPath(painScore)}
@@ -232,13 +235,16 @@ export const ListView = ({
                     </div>
                   </div>
                   <div className={styles.listCardContent}>
-                    <div className={styles.painScoreLevel}>
-                      <strong>Pain Level: {painScore.score}</strong> -{" "}
-                      {getPainScoreDescription(painScore.score)}
+                    <div className={styles.painScoreInfo}>
+                      <span className={styles.painScoreLabel}>Pain Level:</span>
+                      <span className={styles.painScoreValue}>
+                        {painScore.score} - {getPainScoreDescription(painScore.score)}
+                      </span>
                     </div>
                     {painScore.notes && (
-                      <div className={styles.painScoreNotes}>
-                        <strong>Notes:</strong> {painScore.notes}
+                      <div className={styles.painScoreInfo}>
+                        <span className={styles.painScoreLabel}>Notes:</span>
+                        <span className={styles.painScoreValue}>{painScore.notes}</span>
                       </div>
                     )}
                   </div>

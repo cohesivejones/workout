@@ -71,11 +71,33 @@
 }
 
 .listCardType {
-  background-color: #e9ecef;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #666;
+  width: 100px; /* Fixed width for consistent alignment */
+  text-align: left;
   margin-right: 10px;
+  flex-shrink: 0; /* Prevent shrinking */
+  padding-bottom: 4px;
+  position: relative; /* For the pseudo-element */
+}
+
+.listCardType::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: auto; /* Only as wide as the content */
+  height: 2px;
+  background-color: #ddd;
+  /* For "Workout" */
+  width: 65px;
+}
+
+/* Special width for "Pain Score" text */
+.painScoreCard .listCardType::after {
+  width: 85px; /* Adjusted for "Pain Score" text */
 }
 
 .listCardActions {
@@ -144,22 +166,43 @@
   margin-top: 10px;
 }
 
-.listCardContent ul {
-  margin: 0;
-  padding-left: 20px;
+/* Exercise list styles */
+.exercisesList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.listCardContent li {
-  margin-bottom: 5px;
+.exerciseItem {
+  display: flex;
+  align-items: baseline;
 }
 
-.painScoreLevel {
+.exerciseName {
+  width: 120px; /* Fixed width for consistent alignment */
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.exerciseDetails {
+  color: #555;
+}
+
+/* Pain score styles */
+.painScoreInfo {
+  display: flex;
+  align-items: baseline;
   margin-bottom: 8px;
 }
 
-.painScoreNotes {
-  color: #666;
-  font-style: italic;
+.painScoreLabel {
+  width: 120px; /* Same width as exerciseName for alignment */
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.painScoreValue {
+  color: #555;
 }
 
 @media (max-width: 768px) {
@@ -171,14 +214,22 @@
   }
 
   .listCardHeader h3 {
-    order: -1; /* Ensure date is at the top */
+    order: 0; /* Reset order */
     width: 100%;
-    margin-right: 80px; /* Make room for the action buttons */
+    margin-right: 0;
     font-size: 1.1rem; /* Slightly smaller font for mobile */
   }
 
   .listCardType {
-    margin-right: 0;
+    order: -1; /* Ensure type is at the top */
+    width: auto; /* Full width on mobile */
+    text-align: left;
+    margin-right: 80px; /* Make room for the action buttons */
+    padding-bottom: 0;
+  }
+  
+  .listCardType::after {
+    display: none; /* Hide the underline on mobile */
   }
 
   .listCardActions {
@@ -187,5 +238,22 @@
     right: 0;
     width: auto;
     justify-content: flex-end;
+  }
+  
+  /* Maintain alignment on mobile */
+  .exerciseItem, .painScoreInfo {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+  
+  .exerciseName, .painScoreLabel {
+    width: 100%;
+    margin-bottom: 2px;
+    font-weight: 600;
+  }
+  
+  .exerciseDetails, .painScoreValue {
+    padding-left: 8px;
   }
 }
