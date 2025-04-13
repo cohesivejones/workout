@@ -3,6 +3,7 @@ import { WorkoutFormProps, WorkoutExercise } from "../types";
 import CreatableSelect from "react-select/creatable";
 import classNames from "classnames";
 import styles from "./WorkoutForm.module.css";
+import buttonStyles from "../styles/common/buttons.module.css";
 import { useUserContext } from "../contexts/useUserContext";
 import { fetchRecentExerciseData } from "../api";
 import {
@@ -254,7 +255,7 @@ function WorkoutForm({
               isSavingExercise ||
               isSubmitting
             }
-            className={classNames(styles.addExerciseBtn, styles.secondaryBtn)}
+            className={classNames(styles.addExerciseBtn, buttonStyles.secondaryBtn)}
             title="Add exercise to workout"
           >
             {isSavingExercise ? "Adding..." : <>Add Exercise</>}
@@ -277,7 +278,7 @@ function WorkoutForm({
                   </div>
                   <button
                     type="button"
-                    className={classNames(styles.removeExerciseBtn, styles.secondaryBtn)}
+                    className={classNames(styles.removeExerciseBtn, buttonStyles.secondaryBtn)}
                     onClick={() => remove(index)}
                     title="Remove exercise"
                   >
@@ -293,7 +294,7 @@ function WorkoutForm({
           <button
             type="submit"
             disabled={fields.length === 0 || isSubmitting}
-            className={classNames(styles.saveWorkoutBtn, styles.primaryBtn)}
+            className={classNames(styles.saveWorkoutBtn, buttonStyles.primaryBtn)}
             title={existingWorkout ? "Update workout" : "Save workout"}
           >
             {isSubmitting ? (
@@ -307,7 +308,7 @@ function WorkoutForm({
             <button
               type="button"
               onClick={onCancel}
-              className={classNames(styles.cancelBtn, styles.secondaryBtn)}
+              className={classNames(styles.cancelBtn, buttonStyles.secondaryBtn)}
               disabled={isSubmitting}
             >
               Cancel

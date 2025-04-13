@@ -30,26 +30,7 @@
   font-size: 16px;
 }
 
-/* Primary Button Style */
-.primaryBtn {
-  background: #007bff;
-  color: white;
-  border: 1px solid #007bff;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.primaryBtn:hover {
-  background: #0069d9;
-  border-color: #0069d9;
-  text-decoration: none;
-  color: white;
-}
-
-.primaryBtn:focus {
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
-  outline: none;
-}
+/* Button styles are now imported from common styles */
 
 .loginButton {
   padding: 12px;

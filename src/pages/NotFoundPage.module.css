@@ -20,28 +20,7 @@
   color: #555;
 }
 
-/* Primary Link Style */
-.primaryLink {
-  background: #007bff;
-  color: white;
-  border: 1px solid #007bff;
-  text-decoration: none;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 14px;
-}
-
-.primaryLink:hover {
-  background: #0069d9;
-  border-color: #0069d9;
-  text-decoration: none;
-  color: white;
-}
-
-.primaryLink:focus {
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
-  outline: none;
-}
+/* Link styles are now imported from common styles */
 
 .homeLink {
   display: inline-block;

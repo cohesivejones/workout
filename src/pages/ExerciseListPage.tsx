@@ -5,6 +5,7 @@ import { Exercise } from "../types";
 import { useUserContext } from "../contexts/useUserContext";
 import classNames from "classnames";
 import styles from "./ExerciseListPage.module.css";
+import buttonStyles from "../styles/common/buttons.module.css";
 
 function ExerciseListPage(): ReactElement {
   const [exercises, setExercises] = useState<Exercise[]>([]);
@@ -103,13 +104,13 @@ function ExerciseListPage(): ReactElement {
                       <button
                         onClick={handleSaveEdit}
                         disabled={!newName.trim() || isSubmitting}
-                        className={classNames(styles.saveBtn, styles.primaryBtn)}
+                        className={classNames(styles.saveBtn, buttonStyles.primaryBtn)}
                       >
                         {isSubmitting ? "Saving..." : "Save"}
                       </button>
                       <button
                         onClick={handleCancelEdit}
-                        className={classNames(styles.cancelBtn, styles.secondaryBtn)}
+                        className={classNames(styles.cancelBtn, buttonStyles.secondaryBtn)}
                         disabled={isSubmitting}
                       >
                         Cancel
@@ -122,7 +123,7 @@ function ExerciseListPage(): ReactElement {
                     <div className={styles.exerciseActions}>
                       <button
                         onClick={() => handleEditClick(exercise)}
-                        className={classNames(styles.editBtn, styles.tertiaryBtn)}
+                        className={classNames(styles.editBtn, buttonStyles.tertiaryBtn)}
                       >
                         Edit
                       </button>

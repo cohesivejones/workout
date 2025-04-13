@@ -3,6 +3,7 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import { PainScore } from "../types";
 import styles from "./PainScoreForm.module.css";
 import classNames from "classnames";
+import buttonStyles from "../styles/common/buttons.module.css";
 
 interface PainScoreFormProps {
   onSubmit: (painScore: Omit<PainScore, "id">) => Promise<boolean>;
@@ -148,7 +149,7 @@ function PainScoreForm({
           <button
             type="submit"
             disabled={isSubmitting}
-            className={classNames(styles.savePainScoreBtn, styles.primaryBtn)}
+            className={classNames(styles.savePainScoreBtn, buttonStyles.primaryBtn)}
             title={existingPainScore ? "Update pain score" : "Save pain score"}
           >
             {isSubmitting ? (
@@ -162,7 +163,7 @@ function PainScoreForm({
             <button
               type="button"
               onClick={onCancel}
-              className={classNames(styles.cancelBtn, styles.secondaryBtn)}
+              className={classNames(styles.cancelBtn, buttonStyles.secondaryBtn)}
               disabled={isSubmitting}
             >
               Cancel

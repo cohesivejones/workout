@@ -1,0 +1,135 @@
+/* Primary Button Style */
+.primaryBtn {
+  background: #007bff;
+  color: white;
+  border: 1px solid #007bff;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.primaryBtn:hover {
+  background: #0069d9;
+  border-color: #0069d9;
+  text-decoration: none;
+  color: white;
+}
+
+.primaryBtn:focus {
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
+  outline: none;
+}
+
+/* Secondary Button Style */
+.secondaryBtn {
+  background-color: white;
+  border: 1px solid #007bff;
+  color: #007bff;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.secondaryBtn:hover {
+  background-color: #e6f7ff;
+  text-decoration: none;
+  color: #0069d9;
+  border-color: #0069d9;
+}
+
+.secondaryBtn:focus {
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
+  outline: none;
+}
+
+/* Tertiary Button Style */
+.tertiaryBtn {
+  background-color: white;
+  border: none;
+  color: #007bff;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.tertiaryBtn:hover {
+  background-color: #f0f8ff;
+  text-decoration: none;
+  color: #0069d9;
+}
+
+.tertiaryBtn:focus {
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
+  outline: none;
+}
+
+/* Icon Button Styles */
+.primaryIconBtn, .secondaryIconBtn, .tertiaryIconBtn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.primaryIconBtn {
+  background: #007bff;
+  color: white;
+  border: 1px solid #007bff;
+}
+
+.primaryIconBtn:hover {
+  background: #0069d9;
+  border-color: #0069d9;
+}
+
+.primaryIconBtn:focus {
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
+  outline: none;
+}
+
+.secondaryIconBtn {
+  background-color: white;
+  border: 1px solid #007bff;
+  color: #007bff;
+}
+
+.secondaryIconBtn:hover {
+  background-color: #e6f7ff;
+  color: #0069d9;
+  border-color: #0069d9;
+}
+
+.secondaryIconBtn:focus {
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
+  outline: none;
+}
+
+.tertiaryIconBtn {
+  background-color: white;
+  border: none;
+  color: #007bff;
+}
+
+.tertiaryIconBtn:hover {
+  background-color: #f0f8ff;
+  color: #0069d9;
+}
+
+.tertiaryIconBtn:focus {
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
+  outline: none;
+}
+
+/* Disabled Button Styles */
+.primaryBtn:disabled, 
+.secondaryBtn:disabled, 
+.tertiaryBtn:disabled,
+.primaryIconBtn:disabled, 
+.secondaryIconBtn:disabled, 
+.tertiaryIconBtn:disabled {
+  background-color: #cccccc !important;
+  border-color: #cccccc !important;
+  color: #666666 !important;
+  cursor: not-allowed;
+}

@@ -31,65 +31,7 @@
   color: #6c757d;
 }
 
-/* Button Styles */
-.primaryBtn {
-  background: #007bff;
-  color: white;
-  border: 1px solid #007bff;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.primaryBtn:hover {
-  background: #0069d9;
-  border-color: #0069d9;
-  text-decoration: none;
-  color: white;
-}
-
-.primaryBtn:focus {
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
-  outline: none;
-}
-
-.secondaryBtn {
-  background-color: white;
-  border: 1px solid #007bff;
-  color: #007bff;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.secondaryBtn:hover {
-  background-color: #e6f7ff;
-  text-decoration: none;
-  color: #0069d9;
-  border-color: #0069d9;
-}
-
-.secondaryBtn:focus {
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
-  outline: none;
-}
-
-.tertiaryBtn {
-  background-color: white;
-  border: none;
-  color: #007bff;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.tertiaryBtn:hover {
-  background-color: #f0f8ff;
-  text-decoration: none;
-  color: #0069d9;
-}
-
-.tertiaryBtn:focus {
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
-  outline: none;
-}
+/* Button styles are now imported from common styles */
 
 .cancelButtonContainer {
   display: flex;

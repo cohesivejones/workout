@@ -12,6 +12,8 @@ import {
 import { deletePainScore, deleteWorkout } from "../api";
 import classNames from "classnames";
 import styles from "./ListView.module.css";
+import buttonStyles from "../styles/common/buttons.module.css";
+import linkStyles from "../styles/common/links.module.css";
 
 interface ListViewProps {
   painScores: PainScore[];
@@ -114,13 +116,13 @@ export const ListView = ({
         <div className={styles.actionButtons}>
           <Link
             to={toWorkoutNewPath()}
-            className={classNames(styles.addBtn, styles.primaryBtn)}
+            className={classNames(styles.addBtn, buttonStyles.primaryBtn)}
           >
             New Workout
           </Link>
           <Link
             to={toPainScoreNewPath()}
-            className={classNames(styles.addBtn, styles.secondaryBtn)}
+            className={classNames(styles.addBtn, buttonStyles.secondaryBtn)}
           >
             New Pain Score
           </Link>
@@ -152,7 +154,7 @@ export const ListView = ({
                     <div className={styles.listCardActions}>
                       <Link
                         to={toWorkoutEditPath(workout)}
-                        className={classNames(styles.editBtn, styles.tertiaryIconBtn)}
+                        className={classNames(styles.editBtn, buttonStyles.tertiaryIconBtn)}
                         title="Edit workout"
                       >
                         <MdOutlineEdit />
@@ -163,7 +165,7 @@ export const ListView = ({
                           isDeleting?.type === "workout" &&
                           isDeleting.id === workout.id
                         }
-                        className={classNames(styles.deleteBtn, styles.secondaryIconBtn)}
+                        className={classNames(styles.deleteBtn, buttonStyles.secondaryIconBtn)}
                         title="Delete workout"
                       >
                         {isDeleting?.type === "workout" &&
@@ -208,7 +210,7 @@ export const ListView = ({
                     <div className={styles.listCardActions}>
                       <Link
                         to={toPainScoreEditPath(painScore)}
-                        className={classNames(styles.editBtn, styles.tertiaryIconBtn)}
+                        className={classNames(styles.editBtn, buttonStyles.tertiaryIconBtn)}
                         title="Edit pain score"
                       >
                         <MdOutlineEdit />
@@ -219,7 +221,7 @@ export const ListView = ({
                           isDeleting?.type === "painScore" &&
                           isDeleting.id === painScore.id
                         }
-                        className={classNames(styles.deleteBtn, styles.secondaryIconBtn)}
+                        className={classNames(styles.deleteBtn, buttonStyles.secondaryIconBtn)}
                         title="Delete pain score"
                       >
                         {isDeleting?.type === "painScore" &&

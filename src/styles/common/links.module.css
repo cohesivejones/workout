@@ -1,0 +1,65 @@
+/* Link Styles */
+.primaryLink, .secondaryLink, .tertiaryLink {
+  text-decoration: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Primary Link Style */
+.primaryLink {
+  background: #007bff;
+  color: white;
+  border: 1px solid #007bff;
+}
+
+.primaryLink:hover {
+  background: #0069d9;
+  border-color: #0069d9;
+  text-decoration: none;
+  color: white;
+}
+
+.primaryLink:focus {
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
+  outline: none;
+}
+
+/* Secondary Link Style */
+.secondaryLink {
+  background-color: white;
+  border: 1px solid #007bff;
+  color: #007bff;
+}
+
+.secondaryLink:hover {
+  background-color: #e6f7ff;
+  text-decoration: none;
+  color: #0069d9;
+  border-color: #0069d9;
+}
+
+.secondaryLink:focus {
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
+  outline: none;
+}
+
+/* Tertiary Link Style */
+.tertiaryLink {
+  background-color: white;
+  border: none;
+  color: #007bff;
+}
+
+.tertiaryLink:hover {
+  background-color: #f0f8ff;
+  text-decoration: none;
+  color: #0069d9;
+}
+
+.tertiaryLink:focus {
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
+  outline: none;
+}
