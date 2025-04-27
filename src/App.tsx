@@ -4,6 +4,7 @@ import AddWorkoutPage from "./pages/NewWorkoutPage";
 import EditWorkoutPage from "./pages/EditWorkoutPage";
 import WorkoutShowPage from "./pages/WorkoutShowPage";
 import PainScorePage from "./pages/PainScorePage";
+import SleepScorePage from "./pages/SleepScorePage";
 import ExerciseListPage from "./pages/ExerciseListPage";
 import ChangePasswordPage from "./pages/ChangePasswordPage";
 import DiagnosticianPage from "./pages/DiagnosticianPage";
@@ -21,6 +22,8 @@ function App() {
           <Route path="/workouts/:id" element={<WorkoutShowPage />} />
           <Route path="/pain-scores/new" element={<PainScorePage />} />
           <Route path="/pain-scores/:id/edit" element={<PainScorePage />} />
+          <Route path="/sleep-scores/new" element={<SleepScorePage />} />
+          <Route path="/sleep-scores/:id/edit" element={<SleepScorePage />} />
           <Route path="/exercises" element={<ExerciseListPage />} />
           <Route path="/change-password" element={<ChangePasswordPage />} />
           <Route path="/diagnostician" element={<DiagnosticianPage />} />

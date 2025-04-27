@@ -47,6 +47,23 @@ describe("CalendarView", () => {
     },
   ];
 
+  const mockSleepScores = [
+    {
+      id: 1,
+      userId: 1,
+      date: "2025-04-11",
+      score: 4,
+      notes: "Slept well",
+    },
+    {
+      id: 2,
+      userId: 1,
+      date: "2025-04-07",
+      score: 2,
+      notes: null,
+    },
+  ];
+
   beforeEach(() => {
     jest.clearAllMocks();
     // Mock window.innerWidth to simulate desktop view
@@ -63,7 +80,7 @@ describe("CalendarView", () => {
   it("renders calendar with workouts and pain scores", () => {
     render(
       <MemoryRouter>
-        <CalendarView workouts={mockWorkouts} painScores={mockPainScores} />
+        <CalendarView workouts={mockWorkouts} painScores={mockPainScores} sleepScores={mockSleepScores} />
       </MemoryRouter>
     );
 
@@ -92,7 +109,7 @@ describe("CalendarView", () => {
   it("navigates to pain score edit page when pain score is clicked", () => {
     render(
       <MemoryRouter>
-        <CalendarView workouts={mockWorkouts} painScores={mockPainScores} />
+        <CalendarView workouts={mockWorkouts} painScores={mockPainScores} sleepScores={mockSleepScores} />
       </MemoryRouter>
     );
 
@@ -107,7 +124,7 @@ describe("CalendarView", () => {
   it("changes month when navigation buttons are clicked", () => {
     render(
       <MemoryRouter>
-        <CalendarView workouts={mockWorkouts} painScores={mockPainScores} />
+        <CalendarView workouts={mockWorkouts} painScores={mockPainScores} sleepScores={mockSleepScores} />
       </MemoryRouter>
     );
 
@@ -137,7 +154,7 @@ describe("CalendarView", () => {
 
     render(
       <MemoryRouter>
-        <CalendarView workouts={mockWorkouts} painScores={mockPainScores} />
+        <CalendarView workouts={mockWorkouts} painScores={mockPainScores} sleepScores={mockSleepScores} />
       </MemoryRouter>
     );
 
@@ -161,7 +178,7 @@ describe("CalendarView", () => {
     // Render with desktop width first
     const { rerender } = render(
       <MemoryRouter>
-        <CalendarView workouts={mockWorkouts} painScores={mockPainScores} />
+        <CalendarView workouts={mockWorkouts} painScores={mockPainScores} sleepScores={mockSleepScores} />
       </MemoryRouter>
     );
 
@@ -185,12 +202,14 @@ describe("CalendarView", () => {
     // Re-render to apply the state change
     rerender(
       <MemoryRouter>
-        <CalendarView workouts={mockWorkouts} painScores={mockPainScores} />
+        <CalendarView workouts={mockWorkouts} painScores={mockPainScores} sleepScores={mockSleepScores} />
       </MemoryRouter>
     );
 
-    // Check that week view is displayed
-    expect(screen.getByText(/April \d+ - April \d+, 2025/)).toBeInTheDocument();
+    // Check that week view is displayed by looking for the month title heading
+    const monthTitle = screen.getByRole('heading', { level: 2 });
+    expect(monthTitle).toBeInTheDocument();
+    expect(monthTitle.textContent).toMatch(/April \d+.*\d+, 2025/);
     expect(screen.getByText("Sunday")).toBeInTheDocument();
     expect(screen.getByText("Monday")).toBeInTheDocument();
     expect(screen.getByText("Tuesday")).toBeInTheDocument();
@@ -203,7 +222,7 @@ describe("CalendarView", () => {
   it("renders empty calendar when no items", () => {
     render(
       <MemoryRouter>
-        <CalendarView workouts={[]} painScores={[]} />
+        <CalendarView workouts={[]} painScores={[]} sleepScores={[]} />
       </MemoryRouter>
     );
 

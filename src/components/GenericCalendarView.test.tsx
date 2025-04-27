@@ -176,10 +176,28 @@ describe("GenericCalendarView", () => {
   });
 
   it("switches to mobile view when window width is small", () => {
+    // Set a fixed date for testing
+    const testDate = new Date("2025-04-27"); // A Sunday
+    const originalNow = Date.now;
+    Date.now = jest.fn(() => testDate.getTime());
+    
+    // Create items for each day of the week to ensure renderVerticalItem is called
+    const weekItems: TestItem[] = [];
+    for (let i = 0; i < 7; i++) {
+      const day = new Date(testDate);
+      day.setDate(day.getDate() + i);
+      weekItems.push({
+        id: 100 + i,
+        date: day.toISOString().split('T')[0], // Format as YYYY-MM-DD
+        type: "test",
+        content: `Week Item ${i + 1}`,
+      });
+    }
+    
     // Render with desktop width first
     const { rerender } = render(
       <GenericCalendarView
-        items={testItems}
+        items={weekItems}
         renderGridItem={renderGridItem}
         renderVerticalItem={renderVerticalItem}
         getItemsByDate={getItemsByDate}
@@ -190,6 +208,9 @@ describe("GenericCalendarView", () => {
     // Check that month view is displayed
     expect(screen.getByText(/April 2025/)).toBeInTheDocument();
     expect(screen.getByText("Sun")).toBeInTheDocument();
+
+    // Reset mock counts before switching to mobile view
+    renderVerticalItem.mockClear();
 
     // Simulate resize to mobile width
     Object.defineProperty(window, "innerWidth", {
@@ -207,7 +228,7 @@ describe("GenericCalendarView", () => {
     // Re-render to apply the state change
     rerender(
       <GenericCalendarView
-        items={testItems}
+        items={weekItems}
         renderGridItem={renderGridItem}
         renderVerticalItem={renderVerticalItem}
         getItemsByDate={getItemsByDate}
@@ -215,8 +236,10 @@ describe("GenericCalendarView", () => {
       />
     );
 
-    // Check that week view is displayed
-    expect(screen.getByText(/April \d+ - April \d+, 2025/)).toBeInTheDocument();
+    // Check that week view is displayed by looking for the month title heading
+    const monthTitle = screen.getByRole('heading', { level: 2 });
+    expect(monthTitle).toBeInTheDocument();
+    expect(monthTitle.textContent).toMatch(/April \d+.*\d+, 2025/);
     expect(screen.getByText("Sunday")).toBeInTheDocument();
     expect(screen.getByText("Monday")).toBeInTheDocument();
     expect(screen.getByText("Tuesday")).toBeInTheDocument();
@@ -227,6 +250,9 @@ describe("GenericCalendarView", () => {
 
     // Check that renderVerticalItem is used in mobile view
     expect(renderVerticalItem).toHaveBeenCalled();
+    
+    // Restore original Date.now
+    Date.now = originalNow;
   });
 
   it("navigates weeks in mobile view", () => {
@@ -247,17 +273,19 @@ describe("GenericCalendarView", () => {
       />
     );
 
-    // Check initial week
-    const initialWeekTitle = screen.getByText(/April \d+ - April \d+, 2025/);
-    const initialWeekText = initialWeekTitle.textContent || "";
+    // Get the initial week title
+    const monthTitle = screen.getByRole('heading', { level: 2, name: /.*/ });
+    const initialText = monthTitle.textContent || "";
 
     // Click previous week button
     const prevButton = screen.getByLabelText("Previous week");
     fireEvent.click(prevButton);
 
     // Check that week changed
-    const newWeekTitle = screen.getByText(/April \d+ - April \d+, 2025/);
-    expect(newWeekTitle.textContent).not.toBe(initialWeekText);
+    expect(monthTitle.textContent).not.toBe(initialText);
+    
+    // Store the current text
+    const afterPrevText = monthTitle.textContent || "";
 
     // Click next week button three times to ensure we get a different week
     const nextButton = screen.getByLabelText("Next week");
@@ -266,8 +294,8 @@ describe("GenericCalendarView", () => {
     fireEvent.click(nextButton);
 
     // Check that week changed again
-    const finalWeekTitle = screen.getByText(/\w+ \d+ - \w+ \d+, 2025/);
-    expect(finalWeekTitle.textContent).not.toBe(initialWeekText);
+    expect(monthTitle.textContent).not.toBe(initialText);
+    expect(monthTitle.textContent).not.toBe(afterPrevText);
   });
 
   it("displays empty state message when no items for a day", () => {

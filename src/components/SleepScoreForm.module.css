@@ -1,0 +1,84 @@
+.sleepScoreForm {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.sleepScoreForm h2 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  color: #333;
+  font-size: 24px;
+}
+
+.dateInput {
+  margin-bottom: 20px;
+}
+
+.dateInput label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.dateInput input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+.sleepScoreInput {
+  margin-bottom: 20px;
+}
+
+.sleepScoreInput label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.notesInput {
+  margin-bottom: 20px;
+}
+
+.notesInput label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.notesInput textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+  min-height: 100px;
+  resize: vertical;
+}
+
+.formButtons {
+  display: flex;
+  justify-content: flex-start;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.saveSleepScoreBtn {
+  min-width: 150px;
+}
+
+.cancelBtn {
+  min-width: 100px;
+}
+
+.errorMessage {
+  color: #d32f2f;
+  margin-top: 5px;
+  font-size: 14px;
+}

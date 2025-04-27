@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import type { ReactElement } from "react";
 import CalendarView from "../components/CalendarView";
-import { fetchWorkouts, fetchPainScores, deletePainScore } from "../api";
-import { Workout, PainScore } from "../types";
+import { fetchWorkouts, fetchPainScores, deletePainScore, fetchSleepScores, deleteSleepScore } from "../api";
+import { Workout, PainScore, SleepScore } from "../types";
 import classNames from "classnames";
 import styles from "./WorkoutListPage.module.css";
 import { useUserContext } from "../contexts/useUserContext";
@@ -11,6 +11,7 @@ import { ListView } from "../components/ListView";
 function WorkoutListPage(): ReactElement {
   const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [painScores, setPainScores] = useState<PainScore[]>([]);
+  const [sleepScores, setSleepScores] = useState<SleepScore[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"calendar" | "list">("calendar");
@@ -20,12 +21,14 @@ function WorkoutListPage(): ReactElement {
     const loadData = async () => {
       if (!user) return;
       try {
-        const [workoutsData, painScoresData] = await Promise.all([
+        const [workoutsData, painScoresData, sleepScoresData] = await Promise.all([
           fetchWorkouts(user.id),
           fetchPainScores(user.id),
+          fetchSleepScores(user.id),
         ]);
         setWorkouts(workoutsData);
         setPainScores(painScoresData);
+        setSleepScores(sleepScoresData);
         setLoading(false);
       } catch (err) {
         console.error("Failed to load data:", err);
@@ -49,6 +52,17 @@ function WorkoutListPage(): ReactElement {
         setPainScores((prev) => prev.filter((ps) => ps.id !== painScoreId));
       } catch (err) {
         console.error("Failed to delete pain score:", err);
+      }
+    }
+  };
+
+  const handleSleepScoreDelete = async (sleepScoreId: number) => {
+    if (window.confirm("Are you sure you want to delete this sleep score?")) {
+      try {
+        await deleteSleepScore(sleepScoreId);
+        setSleepScores((prev) => prev.filter((ss) => ss.id !== sleepScoreId));
+      } catch (err) {
+        console.error("Failed to delete sleep score:", err);
       }
     }
   };
@@ -85,13 +99,15 @@ function WorkoutListPage(): ReactElement {
       {error && <div className={styles.errorMessage}>{error}</div>}
 
       {viewMode === "calendar" ? (
-        <CalendarView workouts={workouts} painScores={painScores} />
+        <CalendarView workouts={workouts} painScores={painScores} sleepScores={sleepScores} />
       ) : (
         <ListView
           workouts={workouts}
           painScores={painScores}
+          sleepScores={sleepScores}
           handleWorkoutDeleted={handleWorkoutDeleted}
           handlePainScoreDelete={handlePainScoreDelete}
+          handleSleepScoreDelete={handleSleepScoreDelete}
         />
       )}
     </div>

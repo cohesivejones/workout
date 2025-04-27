@@ -1,4 +1,4 @@
-import { Workout, PainScore } from "../types";
+import { Workout, PainScore, SleepScore } from "../types";
 
 export function toHomePath() {
   return "/";
@@ -22,4 +22,12 @@ export function toPainScoreNewPath(date?: string) {
 
 export function toPainScoreEditPath(painScore: PainScore) {
   return `/pain-scores/${painScore.id}/edit`;
+}
+
+export function toSleepScoreNewPath(date?: string) {
+  return date ? `/sleep-scores/new?date=${date}` : "/sleep-scores/new";
+}
+
+export function toSleepScoreEditPath(sleepScore: SleepScore) {
+  return `/sleep-scores/${sleepScore.id}/edit`;
 }

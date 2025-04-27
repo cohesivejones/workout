@@ -4,6 +4,7 @@ import {
   WorkoutExercise,
   User,
   PainScore,
+  SleepScore,
 } from "./entities";
 
 // Authentication interfaces
@@ -56,6 +57,22 @@ export interface PainScoreResponse {
 }
 
 export interface CreatePainScoreRequest {
+  userId: number;
+  date: string;
+  score: number;
+  notes?: string | null;
+}
+
+// Sleep score interfaces
+export interface SleepScoreResponse {
+  id: number;
+  userId: number;
+  date: string;
+  score: number;
+  notes: string | null;
+}
+
+export interface CreateSleepScoreRequest {
   userId: number;
   date: string;
   score: number;
