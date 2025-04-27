@@ -7,6 +7,8 @@ import {
   CreateWorkoutRequest,
   PainScoreResponse,
   CreatePainScoreRequest,
+  SleepScoreResponse,
+  CreateSleepScoreRequest,
   LoginRequest,
   LoginResponse,
 } from "./types";
@@ -20,6 +22,7 @@ import {
   WorkoutExercise,
   User,
   PainScore,
+  SleepScore,
 } from "./entities";
 import { authenticateToken, generateToken } from "./middleware/auth";
 
@@ -789,6 +792,171 @@ app.delete("/pain-scores/:id", async (req: Request, res: Response) => {
   }
 });
 
+// Sleep Score Routes
+
+// Get all sleep scores for a user
+app.get("/sleep-scores", async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.query;
+    if (!userId)
+      return res.status(400).json({
+        error: "User ID is required",
+      });
+
+    const sleepScoreRepository = dataSource.getRepository(SleepScore);
+    const sleepScores = await sleepScoreRepository.find({
+      where: { userId: Number(userId) },
+      order: {
+        date: "DESC",
+      },
+    });
+
+    res.json(sleepScores);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// Get a single sleep score by ID
+app.get("/sleep-scores/:id", async (req: Request, res: Response) => {
+  try {
+    const sleepScoreId = parseInt(req.params.id);
+    const sleepScoreRepository = dataSource.getRepository(SleepScore);
+
+    const sleepScore = await sleepScoreRepository.findOne({
+      where: { id: sleepScoreId },
+    });
+
+    if (!sleepScore) {
+      return res.status(404).json({ error: "Sleep score not found" });
+    }
+
+    res.json(sleepScore);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// Add new sleep score
+app.post("/sleep-scores", async (req: Request, res: Response) => {
+  try {
+    const { userId, date, score, notes } = req.body as CreateSleepScoreRequest;
+
+    // Validate score is between 1 and 5
+    if (score < 1 || score > 5) {
+      return res
+        .status(400)
+        .json({ error: "Sleep score must be between 1 and 5" });
+    }
+
+    // Create new sleep score
+    const sleepScoreRepository = dataSource.getRepository(SleepScore);
+    const sleepScore = sleepScoreRepository.create({
+      userId,
+      date,
+      score,
+      notes: notes || null,
+    });
+
+    // Save sleep score
+    await sleepScoreRepository.save(sleepScore);
+    res.json(sleepScore);
+  } catch (err) {
+    console.error(err);
+    const error = err as DatabaseError;
+
+    // Check for unique constraint violation
+    if (
+      error.code === "23505" &&
+      error.constraint === "UQ_sleep_scores_userId_date"
+    ) {
+      res
+        .status(400)
+        .json({ error: "A sleep score already exists for this date" });
+    } else {
+      res.status(500).json({ error: error.message || "Server error" });
+    }
+  }
+});
+
+// Update sleep score
+app.put("/sleep-scores/:id", async (req: Request, res: Response) => {
+  try {
+    const sleepScoreId = parseInt(req.params.id);
+    const { date, score, notes } = req.body as Omit<
+      CreateSleepScoreRequest,
+      "userId"
+    >;
+
+    // Validate score is between 1 and 5
+    if (score < 1 || score > 5) {
+      return res
+        .status(400)
+        .json({ error: "Sleep score must be between 1 and 5" });
+    }
+
+    // Find sleep score
+    const sleepScoreRepository = dataSource.getRepository(SleepScore);
+    const sleepScore = await sleepScoreRepository.findOne({
+      where: { id: sleepScoreId },
+    });
+
+    if (!sleepScore) {
+      return res.status(404).json({ error: "Sleep score not found" });
+    }
+
+    // Update sleep score properties
+    sleepScore.date = date;
+    sleepScore.score = score;
+    sleepScore.notes = notes || null;
+
+    // Save updated sleep score
+    await sleepScoreRepository.save(sleepScore);
+    res.json(sleepScore);
+  } catch (err) {
+    console.error(err);
+    const error = err as DatabaseError;
+
+    // Check for unique constraint violation
+    if (
+      error.code === "23505" &&
+      error.constraint === "UQ_sleep_scores_userId_date"
+    ) {
+      res
+        .status(400)
+        .json({ error: "A sleep score already exists for this date" });
+    } else {
+      res.status(500).json({ error: error.message || "Server error" });
+    }
+  }
+});
+
+// Delete sleep score
+app.delete("/sleep-scores/:id", async (req: Request, res: Response) => {
+  try {
+    const sleepScoreId = parseInt(req.params.id);
+    const sleepScoreRepository = dataSource.getRepository(SleepScore);
+
+    // Find sleep score
+    const sleepScore = await sleepScoreRepository.findOne({
+      where: { id: sleepScoreId },
+    });
+
+    if (!sleepScore) {
+      return res.status(404).json({ error: "Sleep score not found" });
+    }
+
+    // Delete sleep score
+    await sleepScoreRepository.remove(sleepScore);
+    res.json({ id: sleepScoreId });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 // Diagnostician Routes
 
 // Get diagnostic data (last two months of workouts and pain scores)
@@ -808,11 +976,12 @@ app.get("/diagnostics/data", async (req: Request, res: Response) => {
     const startDateStr = startDate.toISOString().split("T")[0];
     const endDateStr = endDate.toISOString().split("T")[0];
 
-    // Fetch workouts and pain scores within date range
+    // Fetch workouts, pain scores, and sleep scores within date range
     const workoutRepository = dataSource.getRepository(Workout);
     const painScoreRepository = dataSource.getRepository(PainScore);
+    const sleepScoreRepository = dataSource.getRepository(SleepScore);
 
-    const [workouts, painScores] = await Promise.all([
+    const [workouts, painScores, sleepScores] = await Promise.all([
       workoutRepository.find({
         where: {
           userId: Number(userId),
@@ -826,6 +995,13 @@ app.get("/diagnostics/data", async (req: Request, res: Response) => {
         order: { date: "ASC" },
       }),
       painScoreRepository.find({
+        where: {
+          userId: Number(userId),
+          date: Between(startDateStr, endDateStr),
+        },
+        order: { date: "ASC" },
+      }),
+      sleepScoreRepository.find({
         where: {
           userId: Number(userId),
           date: Between(startDateStr, endDateStr),
@@ -846,6 +1022,7 @@ app.get("/diagnostics/data", async (req: Request, res: Response) => {
         })),
       })),
       painScores: painScores,
+      sleepScores: sleepScores,
       dateRange: {
         start: startDateStr,
         end: endDateStr,
@@ -871,7 +1048,7 @@ app.post("/diagnostics/analyze", async (req: Request, res: Response) => {
     // Create system and user prompts
     const systemPrompt = `You are a fitness and health analysis assistant. Your task is to analyze workout and pain data to identify potential correlations between specific exercises and reported pain. Focus on patterns where pain scores increase after certain exercises are performed. Consider frequency, intensity, and timing of exercises relative to pain reports.`;
 
-    const userPrompt = `I'm providing two months of workout and pain data. Please analyze this data to identify which exercises might be causing recurring pain.
+    const userPrompt = `I'm providing two months of workout, pain, and sleep data. Please analyze this data to identify which exercises might be causing recurring pain and how sleep quality might be affecting pain levels.
     
     Workout Data:
     ${JSON.stringify(diagnosticData.workouts, null, 2)}
@@ -879,11 +1056,14 @@ app.post("/diagnostics/analyze", async (req: Request, res: Response) => {
     Pain Score Data:
     ${JSON.stringify(diagnosticData.painScores, null, 2)}
     
+    Sleep Score Data:
+    ${JSON.stringify(diagnosticData.sleepScores, null, 2)}
+    
     Date Range: ${diagnosticData.dateRange.start} to ${
       diagnosticData.dateRange.end
     }
     
-    Please provide a detailed analysis of potential correlations between specific exercises and pain, with recommendations for exercises that might need modification or should be avoided.`;
+    Please provide a detailed analysis of potential correlations between specific exercises, sleep quality, and pain, with recommendations for exercises that might need modification or should be avoided.`;
 
     // Call OpenAI API
     const response = await openai.chat.completions.create({

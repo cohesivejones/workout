@@ -100,6 +100,11 @@
   width: 85px; /* Adjusted for "Pain Score" text */
 }
 
+/* Special width for "Sleep Score" text */
+.sleepScoreCard .listCardType::after {
+  width: 90px; /* Adjusted for "Sleep Score" text */
+}
+
 .listCardActions {
   display: flex;
   gap: 8px;
@@ -205,6 +210,37 @@
   color: #555;
 }
 
+/* Sleep score styles */
+.sleepScoreInfo {
+  display: flex;
+  align-items: baseline;
+  margin-bottom: 8px;
+}
+
+.sleepScoreLabel {
+  width: 120px; /* Same width as exerciseName for alignment */
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.sleepScoreValue {
+  color: #555;
+}
+
+.sleepScoreNote {
+  background-color: #f9f9f9;
+  padding: 8px 12px;
+  border-radius: 4px;
+  margin: 8px 0;
+  border-left: 3px solid #8bc34a;
+  font-style: italic;
+  color: #666;
+}
+
+.sleepScoreNoteText {
+  font-size: 0.9rem;
+}
+
 @media (max-width: 768px) {
   .listCardHeader {
     position: relative;
@@ -242,21 +278,24 @@
 
   /* Maintain alignment on mobile */
   .exerciseItem,
-  .painScoreInfo {
+  .painScoreInfo,
+  .sleepScoreInfo {
     flex-direction: column;
     align-items: flex-start;
     gap: 2px;
   }
 
   .exerciseName,
-  .painScoreLabel {
+  .painScoreLabel,
+  .sleepScoreLabel {
     width: 100%;
     margin-bottom: 2px;
     font-weight: 600;
   }
 
   .exerciseDetails,
-  .painScoreValue {
+  .painScoreValue,
+  .sleepScoreValue {
     padding-left: 8px;
   }
 }

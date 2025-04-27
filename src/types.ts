@@ -15,6 +15,14 @@ export interface PainScore {
   notes?: string | null;
 }
 
+export interface SleepScore {
+  id: number;
+  userId: number;
+  date: string;
+  score: number;
+  notes?: string | null;
+}
+
 export interface WorkoutExercise {
   id?: number;
   name: string;

@@ -50,8 +50,26 @@ describe("ListView", () => {
     },
   ];
 
+  const mockSleepScores = [
+    {
+      id: 1,
+      userId: 1,
+      date: "2025-04-11",
+      score: 4,
+      notes: "Slept well",
+    },
+    {
+      id: 2,
+      userId: 1,
+      date: "2025-04-07",
+      score: 2,
+      notes: null,
+    },
+  ];
+
   const mockHandleWorkoutDeleted = jest.fn();
   const mockHandlePainScoreDelete = jest.fn();
+  const mockHandleSleepScoreDelete = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -70,8 +88,10 @@ describe("ListView", () => {
         <ListView
           workouts={mockWorkouts}
           painScores={mockPainScores}
+          sleepScores={mockSleepScores}
           handleWorkoutDeleted={mockHandleWorkoutDeleted}
           handlePainScoreDelete={mockHandlePainScoreDelete}
+          handleSleepScoreDelete={mockHandleSleepScoreDelete}
         />
       </MemoryRouter>
     );
@@ -84,10 +104,12 @@ describe("ListView", () => {
 
     // Check that items are in the correct order (newest first)
     const dates = screen.getAllByText(/Apr \d+, 2025/);
-    expect(dates[0].textContent).toContain("Apr 12");
-    expect(dates[1].textContent).toContain("Apr 10");
-    expect(dates[2].textContent).toContain("Apr 8");
-    expect(dates[3].textContent).toContain("Apr 5");
+    expect(dates[0].textContent).toContain("Apr 12"); // Pain score
+    expect(dates[1].textContent).toContain("Apr 11"); // Sleep score
+    expect(dates[2].textContent).toContain("Apr 10"); // Workout
+    expect(dates[3].textContent).toContain("Apr 8");  // Pain score
+    expect(dates[4].textContent).toContain("Apr 7");  // Sleep score
+    expect(dates[5].textContent).toContain("Apr 5");  // Workout
 
     // Check workout details
     expect(screen.getByText("Push-ups")).toBeInTheDocument();
@@ -113,13 +135,15 @@ describe("ListView", () => {
         <ListView
           workouts={[]}
           painScores={[]}
+          sleepScores={[]}
           handleWorkoutDeleted={mockHandleWorkoutDeleted}
           handlePainScoreDelete={mockHandlePainScoreDelete}
+          handleSleepScoreDelete={mockHandleSleepScoreDelete}
         />
       </MemoryRouter>
     );
 
-    expect(screen.getByText("No workouts or pain scores recorded yet.")).toBeInTheDocument();
+    expect(screen.getByText("No workouts, pain scores, or sleep scores recorded yet.")).toBeInTheDocument();
   });
 
   it("handles workout deletion", async () => {
@@ -131,8 +155,10 @@ describe("ListView", () => {
         <ListView
           workouts={mockWorkouts}
           painScores={mockPainScores}
+          sleepScores={mockSleepScores}
           handleWorkoutDeleted={mockHandleWorkoutDeleted}
           handlePainScoreDelete={mockHandlePainScoreDelete}
+          handleSleepScoreDelete={mockHandleSleepScoreDelete}
         />
       </MemoryRouter>
     );
@@ -167,8 +193,10 @@ describe("ListView", () => {
         <ListView
           workouts={mockWorkouts}
           painScores={mockPainScores}
+          sleepScores={mockSleepScores}
           handleWorkoutDeleted={mockHandleWorkoutDeleted}
           handlePainScoreDelete={mockHandlePainScoreDelete}
+          handleSleepScoreDelete={mockHandleSleepScoreDelete}
         />
       </MemoryRouter>
     );
@@ -211,8 +239,10 @@ describe("ListView", () => {
         <ListView
           workouts={mockWorkouts}
           painScores={mockPainScores}
+          sleepScores={mockSleepScores}
           handleWorkoutDeleted={mockHandleWorkoutDeleted}
           handlePainScoreDelete={mockHandlePainScoreDelete}
+          handleSleepScoreDelete={mockHandleSleepScoreDelete}
         />
       </MemoryRouter>
     );
@@ -254,8 +284,10 @@ describe("ListView", () => {
         <ListView
           workouts={mockWorkouts}
           painScores={mockPainScores}
+          sleepScores={mockSleepScores}
           handleWorkoutDeleted={mockHandleWorkoutDeleted}
           handlePainScoreDelete={mockHandlePainScoreDelete}
+          handleSleepScoreDelete={mockHandleSleepScoreDelete}
         />
       </MemoryRouter>
     );
@@ -289,8 +321,10 @@ describe("ListView", () => {
         <ListView
           workouts={mockWorkouts}
           painScores={mockPainScores}
+          sleepScores={mockSleepScores}
           handleWorkoutDeleted={mockHandleWorkoutDeleted}
           handlePainScoreDelete={mockHandlePainScoreDelete}
+          handleSleepScoreDelete={mockHandleSleepScoreDelete}
         />
       </MemoryRouter>
     );

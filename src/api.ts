@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Workout, Exercise, PainScore, User } from "./types";
+import { Workout, Exercise, PainScore, SleepScore, User } from "./types";
 
 // Auth types
 export interface AuthResponse {
@@ -93,6 +93,25 @@ export const updatePainScore = (
 export const deletePainScore = (painScoreId: number): Promise<{ id: number }> =>
   api.delete(`/pain-scores/${painScoreId}`);
 
+// Sleep Score API functions
+export const fetchSleepScores = (userId: number): Promise<SleepScore[]> =>
+  api.get(`/sleep-scores?userId=${userId}`);
+
+export const fetchSleepScore = (sleepScoreId: number): Promise<SleepScore> =>
+  api.get(`/sleep-scores/${sleepScoreId}`);
+
+export const createSleepScore = (
+  sleepScore: Omit<SleepScore, "id">,
+): Promise<SleepScore> => api.post("/sleep-scores", sleepScore);
+
+export const updateSleepScore = (
+  sleepScoreId: number,
+  sleepScore: Omit<SleepScore, "id">,
+): Promise<SleepScore> => api.put(`/sleep-scores/${sleepScoreId}`, sleepScore);
+
+export const deleteSleepScore = (sleepScoreId: number): Promise<{ id: number }> =>
+  api.delete(`/sleep-scores/${sleepScoreId}`);
+
 // Auth API functions
 export const getCurrentUser = (): Promise<User> => api.get("/auth/me");
 
@@ -131,6 +150,7 @@ export interface DiagnosticData {
     }[];
   }[];
   painScores: PainScore[];
+  sleepScores: SleepScore[];
   dateRange: {
     start: string;
     end: string;
