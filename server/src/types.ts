@@ -32,6 +32,8 @@ export interface WorkoutResponse {
     name: string;
     reps: number;
     weight?: number | null;
+    new_reps?: boolean;
+    new_weight?: boolean;
   }>;
 }
 

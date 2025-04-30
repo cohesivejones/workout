@@ -6,7 +6,7 @@ import { PainScore } from "../types";
 jest.mock("./PainScaleSelector", () => {
   return {
     __esModule: true,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+     
     default: ({ onChange, error }: any) => (
       <div data-testid="mock-pain-scale-selector">
         <select

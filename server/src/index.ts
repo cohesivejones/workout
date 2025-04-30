@@ -5,12 +5,9 @@ import {
   DatabaseError,
   WorkoutResponse,
   CreateWorkoutRequest,
-  PainScoreResponse,
   CreatePainScoreRequest,
-  SleepScoreResponse,
   CreateSleepScoreRequest,
   LoginRequest,
-  LoginResponse,
 } from "./types";
 import OpenAI from "openai";
 import { Between } from "typeorm";
@@ -348,6 +345,8 @@ app.get("/workouts", async (req: Request, res: Response) => {
         name: we.exercise.name,
         reps: we.reps,
         weight: we.weight,
+        new_reps: we.new_reps,
+        new_weight: we.new_weight,
       })),
     }));
 
@@ -387,6 +386,8 @@ app.get("/workouts/:id", async (req: Request, res: Response) => {
         name: we.exercise.name,
         reps: we.reps,
         weight: we.weight,
+        new_reps: we.new_reps,
+        new_weight: we.new_weight,
       })),
     };
 
@@ -450,7 +451,34 @@ app.post("/workouts", async (req: Request, res: Response) => {
         exercise,
       });
 
+      // Save the workout exercise to get an ID
       await workoutExerciseRepository.save(workoutExercise);
+
+      // Find the most recent previous workout exercise for this exercise
+      const previousWorkoutExercise = await workoutExerciseRepository.query(`
+        SELECT we.reps, we.weight
+        FROM workout_exercises we
+        JOIN workouts w ON we.workout_id = w.id
+        WHERE we.exercise_id = $1
+        AND w."userId" = $2
+        AND w.date < $3
+        ORDER BY w.date DESC
+        LIMIT 1
+      `, [exercise.id, userId, date]);
+
+      // Set flags based on comparison
+      if (previousWorkoutExercise.length > 0) {
+        workoutExercise.new_reps = workoutExercise.reps !== previousWorkoutExercise[0].reps;
+        workoutExercise.new_weight = workoutExercise.weight !== previousWorkoutExercise[0].weight;
+      } else {
+        // First time this exercise appears in a workout
+        workoutExercise.new_reps = false;
+        workoutExercise.new_weight = false;
+      }
+
+      // Save the updated flags
+      await workoutExerciseRepository.save(workoutExercise);
+      
       workout.workoutExercises.push(workoutExercise);
       createdWorkoutExercises.push(workoutExercise);
     }
@@ -467,6 +495,8 @@ app.post("/workouts", async (req: Request, res: Response) => {
         name: we.exercise.name,
         reps: we.reps,
         weight: we.weight,
+        new_reps: we.new_reps,
+        new_weight: we.new_weight,
       })),
     };
 
@@ -555,7 +585,34 @@ app.put("/workouts/:id", async (req: Request, res: Response) => {
         exercise: exercise,
       });
 
+      // Save the workout exercise to get an ID
       await workoutExerciseRepository.save(workoutExercise);
+
+      // Find the most recent previous workout exercise for this exercise
+      const previousWorkoutExercise = await workoutExerciseRepository.query(`
+        SELECT we.reps, we.weight
+        FROM workout_exercises we
+        JOIN workouts w ON we.workout_id = w.id
+        WHERE we.exercise_id = $1
+        AND w."userId" = $2
+        AND w.date < $3
+        ORDER BY w.date DESC
+        LIMIT 1
+      `, [exercise.id, workout.userId, date]);
+
+      // Set flags based on comparison
+      if (previousWorkoutExercise.length > 0) {
+        workoutExercise.new_reps = workoutExercise.reps !== previousWorkoutExercise[0].reps;
+        workoutExercise.new_weight = workoutExercise.weight !== previousWorkoutExercise[0].weight;
+      } else {
+        // First time this exercise appears in a workout
+        workoutExercise.new_reps = false;
+        workoutExercise.new_weight = false;
+      }
+
+      // Save the updated flags
+      await workoutExerciseRepository.save(workoutExercise);
+      
       newWorkoutExercises.push(workoutExercise);
     }
 
@@ -571,6 +628,8 @@ app.put("/workouts/:id", async (req: Request, res: Response) => {
         name: we.exercise.name,
         reps: we.reps,
         weight: we.weight,
+        new_reps: we.new_reps,
+        new_weight: we.new_weight,
       })),
     };
 
