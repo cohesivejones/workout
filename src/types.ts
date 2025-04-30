@@ -28,6 +28,8 @@ export interface WorkoutExercise {
   name: string;
   reps: number;
   weight?: number | null;
+  new_reps?: boolean;
+  new_weight?: boolean;
 }
 
 export interface Exercise {

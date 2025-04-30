@@ -20,8 +20,8 @@ describe("ListView", () => {
       date: "2025-04-10",
       withInstructor: true,
       exercises: [
-        { id: 1, name: "Push-ups", reps: 10 },
-        { id: 2, name: "Squats", reps: 15, weight: 20 },
+        { id: 1, name: "Push-ups", reps: 10, new_reps: true },
+        { id: 2, name: "Squats", reps: 15, weight: 20, new_weight: true },
       ],
     },
     {
@@ -343,5 +343,40 @@ describe("ListView", () => {
 
     // Check that the handler was not called
     expect(mockHandleWorkoutDeleted).not.toHaveBeenCalled();
+  });
+
+  it("displays NEW REPS and NEW WEIGHT badges when flags are set", () => {
+    render(
+      <MemoryRouter>
+        <ListView
+          workouts={mockWorkouts}
+          painScores={mockPainScores}
+          sleepScores={mockSleepScores}
+          handleWorkoutDeleted={mockHandleWorkoutDeleted}
+          handlePainScoreDelete={mockHandlePainScoreDelete}
+          handleSleepScoreDelete={mockHandleSleepScoreDelete}
+        />
+      </MemoryRouter>
+    );
+
+    // Check that the NEW REPS badge is displayed for Push-ups
+    const newRepsBadges = screen.getAllByText("NEW REPS");
+    expect(newRepsBadges.length).toBe(1);
+    
+    // Check that the NEW WEIGHT badge is displayed for Squats
+    const newWeightBadges = screen.getAllByText("NEW WEIGHT");
+    expect(newWeightBadges.length).toBe(1);
+    
+    // Verify that the badges are associated with the correct exercises
+    const pushUpsItem = screen.getByText("Push-ups").closest(".exerciseItem");
+    const squatsItem = screen.getByText("Squats").closest(".exerciseItem");
+    const lungesItem = screen.getByText("Lunges").closest(".exerciseItem");
+    
+    expect(pushUpsItem).toContainElement(newRepsBadges[0]);
+    expect(squatsItem).toContainElement(newWeightBadges[0]);
+    
+    // Verify that Lunges doesn't have any badges
+    expect(lungesItem).not.toHaveTextContent("NEW REPS");
+    expect(lungesItem).not.toHaveTextContent("NEW WEIGHT");
   });
 });
