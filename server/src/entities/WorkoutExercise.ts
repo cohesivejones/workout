@@ -16,6 +16,12 @@ export class WorkoutExercise {
   @Column({ type: "float", nullable: true })
   weight: number | null;
 
+  @Column({ default: false })
+  new_reps: boolean;
+
+  @Column({ default: false })
+  new_weight: boolean;
+
   @ManyToOne(() => Workout, (workout) => workout.workoutExercises, {
     onDelete: "CASCADE",
   })
