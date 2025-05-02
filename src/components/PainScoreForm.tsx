@@ -5,6 +5,7 @@ import styles from "./PainScoreForm.module.css";
 import classNames from "classnames";
 import buttonStyles from "../styles/common/buttons.module.css";
 import PainScaleSelector from "./PainScaleSelector";
+import FormContainer from "./common/FormContainer";
 
 interface PainScoreFormProps {
   onSubmit: (painScore: Omit<PainScore, "id">) => Promise<boolean>;
@@ -89,12 +90,12 @@ function PainScoreForm({
   };
 
   return (
-    <div className={styles.painScoreForm}>
-      <h2>{existingPainScore ? "Edit Pain Score" : "Add Pain Score"}</h2>
-      {errors.root && (
-        <div className={styles.errorMessage}>{errors.root.message}</div>
-      )}
-      <form onSubmit={handleSubmit(onFormSubmit)}>
+    <FormContainer
+      title={existingPainScore ? "Edit Pain Score" : "Add Pain Score"}
+      errorMessage={errors.root?.message}
+      onSubmit={handleSubmit(onFormSubmit)}
+      className={styles.painScoreForm}
+    >
         <div className={styles.dateInput}>
           <label htmlFor="pain-score-date">Date:</label>
           <input
@@ -160,10 +161,8 @@ function PainScoreForm({
             </button>
           )}
         </div>
-      </form>
-
       {/* Pain score legend is now integrated into the PainScaleSelector component */}
-    </div>
+    </FormContainer>
   );
 }
 

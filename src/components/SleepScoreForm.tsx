@@ -5,6 +5,7 @@ import styles from "./SleepScoreForm.module.css";
 import classNames from "classnames";
 import buttonStyles from "../styles/common/buttons.module.css";
 import SleepScaleSelector from "./SleepScaleSelector";
+import FormContainer from "./common/FormContainer";
 
 interface SleepScoreFormProps {
   onSubmit: (sleepScore: Omit<SleepScore, "id">) => Promise<boolean>;
@@ -87,12 +88,12 @@ function SleepScoreForm({
   };
 
   return (
-    <div className={styles.sleepScoreForm}>
-      <h2>{existingSleepScore ? "Edit Sleep Score" : "Add Sleep Score"}</h2>
-      {errors.root && (
-        <div className={styles.errorMessage}>{errors.root.message}</div>
-      )}
-      <form onSubmit={handleSubmit(onFormSubmit)}>
+    <FormContainer
+      title={existingSleepScore ? "Edit Sleep Score" : "Add Sleep Score"}
+      errorMessage={errors.root?.message}
+      onSubmit={handleSubmit(onFormSubmit)}
+      className={styles.sleepScoreForm}
+    >
         <div className={styles.dateInput}>
           <label htmlFor="sleep-score-date">Date:</label>
           <input
@@ -158,8 +159,7 @@ function SleepScoreForm({
             </button>
           )}
         </div>
-      </form>
-    </div>
+    </FormContainer>
   );
 }
 
