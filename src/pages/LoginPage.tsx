@@ -3,6 +3,7 @@ import { useUserContext } from "../contexts/useUserContext";
 import classNames from "classnames";
 import styles from "./LoginPage.module.css";
 import buttonStyles from "../styles/common/buttons.module.css";
+import FormContainer from "../components/common/FormContainer";
 
 type FormValues = {
   email: string;
@@ -33,15 +34,13 @@ function LoginPage() {
   };
 
   return (
-    <div className={styles.loginContainer}>
-      <h2>Login</h2>
+    <FormContainer
+      title="Login"
+      errorMessage={errors.root?.message}
+      onSubmit={handleSubmit(onSubmit)}
+      className={styles.loginContainer}
+    >
       <p>Enter your email and password to login</p>
-
-      {errors.root && (
-        <div className={styles.errorMessage}>{errors.root.message}</div>
-      )}
-
-      <form onSubmit={handleSubmit(onSubmit)} className={styles.loginForm}>
         <div className={styles.formGroup}>
           <label htmlFor="email">Email</label>
           <input
@@ -86,15 +85,13 @@ function LoginPage() {
         >
           {isSubmitting || loading ? "Logging in..." : "Login"}
         </button>
-      </form>
-
       <div className={styles.loginNote}>
         <p className={styles.loginNoteLink}>
           After logging in, you can{" "}
           <a href="/change-password">change your password</a>.
         </p>
       </div>
-    </div>
+    </FormContainer>
   );
 }
 

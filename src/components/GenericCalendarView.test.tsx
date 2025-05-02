@@ -11,19 +11,19 @@ describe("GenericCalendarView", () => {
   const testItems: TestItem[] = [
     {
       id: 1,
-      date: "2025-04-10",
+      date: "2025-05-10",
       type: "test",
       content: "Test Item 1",
     },
     {
       id: 2,
-      date: "2025-04-15",
+      date: "2025-05-15",
       type: "test",
       content: "Test Item 2",
     },
     {
       id: 3,
-      date: "2025-04-20",
+      date: "2025-05-20",
       type: "test",
       content: "Test Item 3",
     },
@@ -79,7 +79,7 @@ describe("GenericCalendarView", () => {
     );
 
     // Check that month view is displayed
-    expect(screen.getByText(/April 2025/)).toBeInTheDocument();
+    expect(screen.getByText(/May 2025/)).toBeInTheDocument();
     
     // Check that day names are displayed
     expect(screen.getByText("Sun")).toBeInTheDocument();
@@ -109,9 +109,9 @@ describe("GenericCalendarView", () => {
     expect(renderGridItem).toHaveBeenCalledTimes(3);
     
     // Check that the items were rendered with the correct data
-    expect(renderGridItem).toHaveBeenCalledWith(testItems[0], "2025-04-10");
-    expect(renderGridItem).toHaveBeenCalledWith(testItems[1], "2025-04-15");
-    expect(renderGridItem).toHaveBeenCalledWith(testItems[2], "2025-04-20");
+    expect(renderGridItem).toHaveBeenCalledWith(testItems[0], "2025-05-10");
+    expect(renderGridItem).toHaveBeenCalledWith(testItems[1], "2025-05-15");
+    expect(renderGridItem).toHaveBeenCalledWith(testItems[2], "2025-05-20");
   });
 
   it("changes month when navigation buttons are clicked", () => {
@@ -126,28 +126,28 @@ describe("GenericCalendarView", () => {
     );
 
     // Check initial month
-    expect(screen.getByText(/April 2025/)).toBeInTheDocument();
+    expect(screen.getByText(/May 2025/)).toBeInTheDocument();
 
     // Click previous month button
     const prevButton = screen.getByLabelText("Previous month");
     fireEvent.click(prevButton);
 
-    // Check that month changed to March
-    expect(screen.getByText(/March 2025/)).toBeInTheDocument();
+    // Check that month changed to April
+    expect(screen.getByText(/April 2025/)).toBeInTheDocument();
 
-    // Click next month button twice to go to May
+    // Click next month button twice to go to June
     const nextButton = screen.getByLabelText("Next month");
     fireEvent.click(nextButton);
     fireEvent.click(nextButton);
 
-    // Check that month changed to May
-    expect(screen.getByText(/May 2025/)).toBeInTheDocument();
+    // Check that month changed to June
+    expect(screen.getByText(/June 2025/)).toBeInTheDocument();
   });
 
   it("goes to today when Today button is clicked", () => {
     // Mock Date.now to return a specific date
     const originalNow = Date.now;
-    Date.now = jest.fn(() => new Date("2025-04-13").getTime());
+    Date.now = jest.fn(() => new Date("2025-05-02").getTime());
 
     render(
       <GenericCalendarView
@@ -162,14 +162,14 @@ describe("GenericCalendarView", () => {
     // Navigate to a different month
     const prevButton = screen.getByLabelText("Previous month");
     fireEvent.click(prevButton);
-    expect(screen.getByText(/March 2025/)).toBeInTheDocument();
+    expect(screen.getByText(/April 2025/)).toBeInTheDocument();
 
     // Click Today button
     const todayButton = screen.getByLabelText("Go to today");
     fireEvent.click(todayButton);
 
-    // Check that month changed back to April
-    expect(screen.getByText(/April 2025/)).toBeInTheDocument();
+    // Check that month changed back to May
+    expect(screen.getByText(/May 2025/)).toBeInTheDocument();
 
     // Restore original Date.now
     Date.now = originalNow;
@@ -177,7 +177,7 @@ describe("GenericCalendarView", () => {
 
   it("switches to mobile view when window width is small", () => {
     // Set a fixed date for testing
-    const testDate = new Date("2025-04-27"); // A Sunday
+    const testDate = new Date("2025-05-02"); // A Friday
     const originalNow = Date.now;
     Date.now = jest.fn(() => testDate.getTime());
     
@@ -206,7 +206,7 @@ describe("GenericCalendarView", () => {
     );
 
     // Check that month view is displayed
-    expect(screen.getByText(/April 2025/)).toBeInTheDocument();
+    expect(screen.getByText(/May 2025/)).toBeInTheDocument();
     expect(screen.getByText("Sun")).toBeInTheDocument();
 
     // Reset mock counts before switching to mobile view
@@ -239,7 +239,7 @@ describe("GenericCalendarView", () => {
     // Check that week view is displayed by looking for the month title heading
     const monthTitle = screen.getByRole('heading', { level: 2 });
     expect(monthTitle).toBeInTheDocument();
-    expect(monthTitle.textContent).toMatch(/April \d+.*\d+, 2025/);
+    expect(monthTitle.textContent).toMatch(/May \d+.*\d+, 2025/);
     expect(screen.getByText("Sunday")).toBeInTheDocument();
     expect(screen.getByText("Monday")).toBeInTheDocument();
     expect(screen.getByText("Tuesday")).toBeInTheDocument();

@@ -3,6 +3,7 @@ import { useState } from "react";
 import axios from "axios";
 import { useUserContext } from "../contexts/useUserContext";
 import styles from "./ChangePasswordPage.module.css";
+import FormContainer from "../components/common/FormContainer";
 
 type FormValues = {
   currentPassword: string;
@@ -83,30 +84,25 @@ function ChangePasswordPage() {
 
   if (!user) {
     return (
-      <div className={styles.changePasswordContainer}>
-        <h2>Change Password</h2>
+      <FormContainer
+        title="Change Password"
+        className={styles.changePasswordContainer}
+        asForm={false}
+      >
         <p>You must be logged in to change your password.</p>
-      </div>
+      </FormContainer>
     );
   }
 
   return (
-    <div className={styles.changePasswordContainer}>
-      <h2>Change Password</h2>
+    <FormContainer
+      title="Change Password"
+      errorMessage={errors.root?.message}
+      successMessage={successMessage}
+      onSubmit={handleSubmit(onSubmit)}
+      className={styles.changePasswordContainer}
+    >
       <p>Update your password below</p>
-
-      {errors.root && (
-        <div className={styles.errorMessage}>{errors.root.message}</div>
-      )}
-
-      {successMessage && (
-        <div className={styles.successMessage}>{successMessage}</div>
-      )}
-
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className={styles.changePasswordForm}
-      >
         <div className={styles.formGroup}>
           <label htmlFor="currentPassword">Current Password</label>
           <input
@@ -171,8 +167,7 @@ function ChangePasswordPage() {
         >
           {isSubmitting ? "Changing Password..." : "Change Password"}
         </button>
-      </form>
-    </div>
+    </FormContainer>
   );
 }
 

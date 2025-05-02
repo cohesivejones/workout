@@ -1,11 +1,4 @@
-.loginContainer {
-  max-width: 400px;
-  margin: 0 auto;
-  padding: 20px;
-  background-color: #f5f5f5;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
+/* Form-specific styles */
 
 .loginForm {
   display: flex;
@@ -46,14 +39,7 @@
   cursor: not-allowed;
 }
 
-.errorMessage {
-  color: #dc3545;
-  margin-bottom: 15px;
-  padding: 10px;
-  background-color: #f8d7da;
-  border-radius: 4px;
-}
-
+/* Field-level error message */
 .fieldError {
   color: #dc3545;
   font-size: 0.875rem;

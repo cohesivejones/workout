@@ -1,84 +1,84 @@
-.sleepScoreForm {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.sleepScoreForm h2 {
-  margin-top: 0;
-  margin-bottom: 20px;
-  color: #333;
-  font-size: 24px;
-}
+/* Form-specific styles */
 
 .dateInput {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
   margin-bottom: 20px;
 }
 
 .dateInput label {
-  display: block;
-  margin-bottom: 8px;
   font-weight: 500;
 }
 
 .dateInput input {
   width: 100%;
-  padding: 10px;
+  padding: 8px;
   border: 1px solid #ddd;
   border-radius: 4px;
-  font-size: 16px;
+  box-sizing: border-box;
 }
 
 .sleepScoreInput {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
   margin-bottom: 20px;
 }
 
 .sleepScoreInput label {
-  display: block;
-  margin-bottom: 8px;
   font-weight: 500;
+  margin-bottom: 5px;
 }
 
 .notesInput {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
   margin-bottom: 20px;
 }
 
 .notesInput label {
-  display: block;
-  margin-bottom: 8px;
   font-weight: 500;
 }
 
 .notesInput textarea {
   width: 100%;
-  padding: 10px;
+  padding: 8px;
   border: 1px solid #ddd;
   border-radius: 4px;
-  font-size: 16px;
-  min-height: 100px;
+  min-height: 80px;
   resize: vertical;
+  box-sizing: border-box;
 }
 
 .formButtons {
   display: flex;
-  justify-content: flex-start;
+  flex-direction: column;
   gap: 10px;
-  margin-top: 20px;
+  margin-top: 10px;
 }
 
-.saveSleepScoreBtn {
-  min-width: 150px;
-}
-
+.saveSleepScoreBtn,
 .cancelBtn {
-  min-width: 100px;
+  width: 100%;
+  padding: 10px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
+.saveSleepScoreBtn:disabled,
+.cancelBtn:disabled {
+  background-color: #cccccc !important;
+  border-color: #cccccc !important;
+  color: #666666 !important;
+  cursor: not-allowed;
+}
+
+/* Field-level error message */
 .errorMessage {
-  color: #d32f2f;
-  margin-top: 5px;
-  font-size: 14px;
+  color: #dc3545;
+  margin-bottom: 10px;
 }

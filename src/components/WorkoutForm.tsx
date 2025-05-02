@@ -278,6 +278,16 @@ function WorkoutForm({
                     {exercises[index].weight
                       ? ` - ${exercises[index].weight} lbs`
                       : ""}
+                    {(exercises[index].new_reps || exercises[index].new_weight) && (
+                      <div className={styles.badgeContainer}>
+                        {exercises[index].new_reps && (
+                          <span className={styles.newBadge}>NEW REPS</span>
+                        )}
+                        {exercises[index].new_weight && (
+                          <span className={styles.newBadge}>NEW WEIGHT</span>
+                        )}
+                      </div>
+                    )}
                   </div>
                   <button
                     type="button"
