@@ -1,8 +1,8 @@
 .sleepScoreForm {
-  max-width: 800px;
+  max-width: 500px;
   margin: 0 auto;
   padding: 20px;
-  background-color: #fff;
+  background-color: #f5f5f5;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
@@ -64,17 +64,26 @@
 
 .formButtons {
   display: flex;
-  justify-content: flex-start;
+  flex-direction: column;
   gap: 10px;
-  margin-top: 20px;
+  margin-top: 10px;
 }
 
-.saveSleepScoreBtn {
-  min-width: 150px;
-}
-
+.saveSleepScoreBtn,
 .cancelBtn {
-  min-width: 100px;
+  width: 100%;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.saveSleepScoreBtn:disabled,
+.cancelBtn:disabled {
+  background-color: #cccccc !important;
+  border-color: #cccccc !important;
+  color: #666666 !important;
+  cursor: not-allowed;
 }
 
 .errorMessage {
