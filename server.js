@@ -13,7 +13,7 @@ app.use(express.static(path.join(__dirname, "dist")));
 
 // Handle API requests by proxying to the backend server
 app.use("/api", (req, res) => {
-  res.redirect(`${process.env.API_URL}${req.url}`);
+  res.redirect(`${process.env.VITE_API_URL}${req.url}`);
 });
 
 // Send all other requests to the React app
