@@ -345,6 +345,131 @@ describe("ListView", () => {
     expect(mockHandleWorkoutDeleted).not.toHaveBeenCalled();
   });
 
+  it("displays filter controls", () => {
+    render(
+      <MemoryRouter>
+        <ListView
+          workouts={mockWorkouts}
+          painScores={mockPainScores}
+          sleepScores={mockSleepScores}
+          handleWorkoutDeleted={mockHandleWorkoutDeleted}
+          handlePainScoreDelete={mockHandlePainScoreDelete}
+          handleSleepScoreDelete={mockHandleSleepScoreDelete}
+        />
+      </MemoryRouter>
+    );
+
+    // Check that filter controls are rendered
+    expect(screen.getByText("Filter by Type:")).toBeInTheDocument();
+    
+    // Check that all checkboxes are rendered and checked by default
+    const workoutsCheckbox = screen.getByLabelText("Workouts") as HTMLInputElement;
+    const painScoresCheckbox = screen.getByLabelText("Pain Scores") as HTMLInputElement;
+    const sleepScoresCheckbox = screen.getByLabelText("Sleep Scores") as HTMLInputElement;
+    
+    expect(workoutsCheckbox).toBeInTheDocument();
+    expect(painScoresCheckbox).toBeInTheDocument();
+    expect(sleepScoresCheckbox).toBeInTheDocument();
+    
+    expect(workoutsCheckbox.checked).toBe(true);
+    expect(painScoresCheckbox.checked).toBe(true);
+    expect(sleepScoresCheckbox.checked).toBe(true);
+    
+    // Check that Show All button is rendered
+    expect(screen.getByText("Show All")).toBeInTheDocument();
+  });
+
+  it("filters items when checkboxes are clicked", () => {
+    render(
+      <MemoryRouter>
+        <ListView
+          workouts={mockWorkouts}
+          painScores={mockPainScores}
+          sleepScores={mockSleepScores}
+          handleWorkoutDeleted={mockHandleWorkoutDeleted}
+          handlePainScoreDelete={mockHandlePainScoreDelete}
+          handleSleepScoreDelete={mockHandleSleepScoreDelete}
+        />
+      </MemoryRouter>
+    );
+
+    // Initially all items should be visible
+    expect(screen.getAllByText("Workout").length).toBe(2); // 2 workout cards
+    expect(screen.getAllByText("Pain Score").length).toBe(2); // 2 pain score cards
+    expect(screen.getAllByText("Sleep Score").length).toBe(2); // 2 sleep score cards
+
+    // Uncheck workouts
+    const workoutsCheckbox = screen.getByLabelText("Workouts") as HTMLInputElement;
+    fireEvent.click(workoutsCheckbox);
+    
+    // Now only pain scores and sleep scores should be visible
+    expect(screen.queryAllByText("Workout").length).toBe(0);
+    expect(screen.getAllByText("Pain Score").length).toBe(2);
+    expect(screen.getAllByText("Sleep Score").length).toBe(2);
+
+    // Uncheck pain scores
+    const painScoresCheckbox = screen.getByLabelText("Pain Scores") as HTMLInputElement;
+    fireEvent.click(painScoresCheckbox);
+    
+    // Now only sleep scores should be visible
+    expect(screen.queryAllByText("Workout").length).toBe(0);
+    expect(screen.queryAllByText("Pain Score").length).toBe(0);
+    expect(screen.getAllByText("Sleep Score").length).toBe(2);
+
+    // Uncheck sleep scores
+    const sleepScoresCheckbox = screen.getByLabelText("Sleep Scores") as HTMLInputElement;
+    fireEvent.click(sleepScoresCheckbox);
+    
+    // Now no items should be visible, but the empty state message should be shown
+    expect(screen.queryAllByText("Workout").length).toBe(0);
+    expect(screen.queryAllByText("Pain Score").length).toBe(0);
+    expect(screen.queryAllByText("Sleep Score").length).toBe(0);
+    expect(screen.getByText("No workouts, pain scores, or sleep scores recorded yet.")).toBeInTheDocument();
+  });
+
+  it("resets filters when Show All button is clicked", () => {
+    render(
+      <MemoryRouter>
+        <ListView
+          workouts={mockWorkouts}
+          painScores={mockPainScores}
+          sleepScores={mockSleepScores}
+          handleWorkoutDeleted={mockHandleWorkoutDeleted}
+          handlePainScoreDelete={mockHandlePainScoreDelete}
+          handleSleepScoreDelete={mockHandleSleepScoreDelete}
+        />
+      </MemoryRouter>
+    );
+
+    // Uncheck all checkboxes
+    const workoutsCheckbox = screen.getByLabelText("Workouts") as HTMLInputElement;
+    const painScoresCheckbox = screen.getByLabelText("Pain Scores") as HTMLInputElement;
+    const sleepScoresCheckbox = screen.getByLabelText("Sleep Scores") as HTMLInputElement;
+    
+    fireEvent.click(workoutsCheckbox);
+    fireEvent.click(painScoresCheckbox);
+    fireEvent.click(sleepScoresCheckbox);
+    
+    // Verify no items are visible
+    expect(screen.queryAllByText("Workout").length).toBe(0);
+    expect(screen.queryAllByText("Pain Score").length).toBe(0);
+    expect(screen.queryAllByText("Sleep Score").length).toBe(0);
+    
+    // Click Show All button
+    const showAllButton = screen.getByText("Show All");
+    fireEvent.click(showAllButton);
+    
+    // Now all items should be visible again
+    expect(screen.getAllByText("Workout").length).toBe(2);
+    expect(screen.getAllByText("Pain Score").length).toBe(2);
+    expect(screen.getAllByText("Sleep Score").length).toBe(2);
+    
+    // And all checkboxes should be checked
+    expect(workoutsCheckbox.checked).toBe(true);
+    expect(painScoresCheckbox.checked).toBe(true);
+    expect(sleepScoresCheckbox.checked).toBe(true);
+  });
+
   it("displays NEW REPS and NEW WEIGHT badges when flags are set", () => {
     render(
       <MemoryRouter>

@@ -5,12 +5,51 @@
 
 .sectionHeader {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
   margin-bottom: 16px;
   padding: 16px;
   background-color: #f8f9fa;
   border-radius: 8px 8px 0 0;
+  gap: 16px;
+}
+
+.filterControls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.filterLabel {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.filterCheckboxes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+}
+
+.filterCheckbox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.filterCheckbox input {
+  margin: 0;
+}
+
+.showAllBtn {
+  font-size: 0.85rem;
+  padding: 4px 10px;
+  height: auto;
 }
 
 .sectionHeader h3 {
@@ -21,6 +60,7 @@
 .actionButtons {
   display: flex;
   gap: 8px;
+  justify-content: flex-end;
 }
 
 .addBtn {
@@ -260,6 +300,25 @@
 }
 
 @media (max-width: 768px) {
+  .sectionHeader {
+    padding: 12px;
+  }
+  
+  .filterControls {
+    padding-bottom: 8px;
+  }
+  
+  .filterCheckboxes {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .showAllBtn {
+    margin-top: 4px;
+    align-self: flex-start;
+  }
+  
   .listCardHeader {
     position: relative;
     flex-direction: column;

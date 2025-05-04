@@ -1,4 +1,4 @@
-import React from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { MdOutlineEdit } from "react-icons/md";
@@ -38,13 +38,17 @@ export const ListView = ({
   workouts,
   handleWorkoutDeleted,
 }: ListViewProps) => {
-  const [isDeleting, setIsDeleting] = React.useState<{
+  const [showWorkouts, setShowWorkouts] = useState(true);
+  const [showPainScores, setShowPainScores] = useState(true);
+  const [showSleepScores, setShowSleepScores] = useState(true);
+  
+  const [isDeleting, setIsDeleting] = useState<{
     type: string;
     id: number;
   } | null>(null);
 
   // Combine workouts, pain scores, and sleep scores into a single array
-  const items: ListItem[] = [
+  const allItems: ListItem[] = [
     ...workouts.map((workout) => ({ type: "workout" as const, data: workout })),
     ...painScores.map((painScore) => ({
       type: "painScore" as const,
@@ -55,6 +59,14 @@ export const ListView = ({
       data: sleepScore,
     })),
   ];
+
+  // Filter items based on filter state
+  const items = allItems.filter(item => {
+    if (item.type === "workout" && !showWorkouts) return false;
+    if (item.type === "painScore" && !showPainScores) return false;
+    if (item.type === "sleepScore" && !showSleepScores) return false;
+    return true;
+  });
 
   // Sort by date in descending order (newest first)
   items.sort((a, b) => {
@@ -160,9 +172,51 @@ export const ListView = ({
     }
   };
 
+  // Reset all filters to show everything
+  const showAll = () => {
+    setShowWorkouts(true);
+    setShowPainScores(true);
+    setShowSleepScores(true);
+  };
+
   return (
     <div className={styles.chronologicalList}>
       <div className={styles.sectionHeader}>
+        <div className={styles.filterControls}>
+          <div className={styles.filterLabel}>Filter by Type:</div>
+          <div className={styles.filterCheckboxes}>
+            <label className={styles.filterCheckbox}>
+              <input
+                type="checkbox"
+                checked={showWorkouts}
+                onChange={(e) => setShowWorkouts(e.target.checked)}
+              />
+              Workouts
+            </label>
+            <label className={styles.filterCheckbox}>
+              <input
+                type="checkbox"
+                checked={showPainScores}
+                onChange={(e) => setShowPainScores(e.target.checked)}
+              />
+              Pain Scores
+            </label>
+            <label className={styles.filterCheckbox}>
+              <input
+                type="checkbox"
+                checked={showSleepScores}
+                onChange={(e) => setShowSleepScores(e.target.checked)}
+              />
+              Sleep Scores
+            </label>
+            <button 
+              onClick={showAll}
+              className={classNames(buttonStyles.secondaryBtn, styles.showAllBtn)}
+            >
+              Show All
+            </button>
+          </div>
+        </div>
         <div className={styles.actionButtons}>
           <Link
             to={toWorkoutNewPath()}
