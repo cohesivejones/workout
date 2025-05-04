@@ -72,8 +72,11 @@ app.post("/auth/login", async (req: Request, res: Response) => {
 
     const userRepository = dataSource.getRepository(User);
 
-    // Find user by email
-    let user = await userRepository.findOne({ where: { email } });
+    // Convert email to lowercase before lookup
+    const normalizedEmail = email.toLowerCase();
+
+    // Find user by normalized email
+    let user = await userRepository.findOne({ where: { email: normalizedEmail } });
 
     if (!user) {
       return res.status(401).json({ error: "Invalid email or password" });
