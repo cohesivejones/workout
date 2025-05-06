@@ -223,7 +223,6 @@ describe("WorkoutForm", () => {
     // Check that onSubmit was called with the correct data
     await waitFor(() => {
       expect(mockOnSubmit).toHaveBeenCalledWith({
-        userId: 1,
         date: today,
         withInstructor: true,
         exercises: [

@@ -19,7 +19,7 @@ function DiagnosticianPage(): React.ReactElement {
     
     try {
       // Fetch diagnostic data
-      const diagnosticData = await fetchDiagnosticData(user.id);
+      const diagnosticData = await fetchDiagnosticData();
       
       // Send to server for OpenAI analysis
       const result = await analyzeDiagnosticData(diagnosticData);

@@ -29,10 +29,8 @@ jest.mock("./PainScaleSelector", () => {
 describe("PainScoreForm", () => {
   const mockOnSubmit = jest.fn().mockResolvedValue(true);
   const mockOnCancel = jest.fn();
-  const userId = 1;
   const defaultProps = {
     onSubmit: mockOnSubmit,
-    userId,
     onCancel: mockOnCancel,
   };
 
@@ -58,7 +56,6 @@ describe("PainScoreForm", () => {
   it("renders the form with correct initial state for existing pain score", () => {
     const existingPainScore: PainScore = {
       id: 1,
-      userId,
       date: "2025-04-10",
       score: 3,
       notes: "Test notes",
@@ -103,7 +100,6 @@ describe("PainScoreForm", () => {
     // Check that onSubmit was called with the correct data
     await waitFor(() => {
       expect(mockOnSubmit).toHaveBeenCalledWith({
-        userId,
         date: "2025-04-15",
         score: 4,
         notes: "Some test notes",
@@ -128,7 +124,6 @@ describe("PainScoreForm", () => {
     render(
       <PainScoreForm
         onSubmit={mockFailedSubmit}
-        userId={userId}
         onCancel={mockOnCancel}
       />
     );
@@ -153,7 +148,6 @@ describe("PainScoreForm", () => {
     render(
       <PainScoreForm
         onSubmit={mockErrorSubmit}
-        userId={userId}
         onCancel={mockOnCancel}
       />
     );
@@ -183,7 +177,6 @@ describe("PainScoreForm", () => {
     render(
       <PainScoreForm
         onSubmit={mockDelayedSubmit}
-        userId={userId}
         onCancel={mockOnCancel}
       />
     );

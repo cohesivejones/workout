@@ -10,7 +10,6 @@ import FormContainer from "./common/FormContainer";
 interface PainScoreFormProps {
   onSubmit: (painScore: Omit<PainScore, "id">) => Promise<boolean>;
   existingPainScore?: PainScore;
-  userId: number;
   selectedDate?: string;
   onCancel?: () => void;
 }
@@ -26,7 +25,6 @@ interface FormValues {
 function PainScoreForm({
   onSubmit,
   existingPainScore,
-  userId,
   selectedDate,
   onCancel,
 }: PainScoreFormProps): React.ReactElement {
@@ -69,7 +67,6 @@ function PainScoreForm({
 
     try {
       const success = await onSubmit({
-        userId,
         date: data.date,
         score: parseInt(data.score),
         notes: data.notes || null,

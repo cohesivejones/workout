@@ -10,7 +10,6 @@ import FormContainer from "./common/FormContainer";
 interface SleepScoreFormProps {
   onSubmit: (sleepScore: Omit<SleepScore, "id">) => Promise<boolean>;
   existingSleepScore?: SleepScore;
-  userId: number;
   selectedDate?: string;
   onCancel?: () => void;
 }
@@ -24,7 +23,6 @@ interface FormValues {
 function SleepScoreForm({
   onSubmit,
   existingSleepScore,
-  userId,
   selectedDate,
   onCancel,
 }: SleepScoreFormProps): React.ReactElement {
@@ -67,7 +65,6 @@ function SleepScoreForm({
 
     try {
       const success = await onSubmit({
-        userId,
         date: data.date,
         score: parseInt(data.score),
         notes: data.notes || null,

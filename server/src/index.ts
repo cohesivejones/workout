@@ -183,17 +183,12 @@ app.post(
 );
 
 // Get all exercises
-app.get("/exercises", async (req: Request, res: Response) => {
-  const { userId } = req.query;
-  if (!userId)
-    return res.status(400).json({
-      error: "User ID is required",
-    });
-
+app.get("/exercises", authenticateToken, async (req: Request, res: Response) => {
   try {
+    const userId = req.user!.id;
     const exerciseRepository = dataSource.getRepository(Exercise);
     const exercises = await exerciseRepository.find({
-      where: { userId: Number(userId) },
+      where: { userId },
       order: {
         name: "ASC",
       },
@@ -206,12 +201,13 @@ app.get("/exercises", async (req: Request, res: Response) => {
 });
 
 // Get most recent workout exercise data
-app.get("/exercises/recent", async (req: Request, res: Response) => {
-  const { userId, exerciseId } = req.query;
+app.get("/exercises/recent", authenticateToken, async (req: Request, res: Response) => {
+  const { exerciseId } = req.query;
+  const userId = req.user!.id;
 
-  if (!userId || !exerciseId) {
+  if (!exerciseId) {
     return res.status(400).json({
-      error: "User ID and exercise ID are required",
+      error: "Exercise ID is required",
     });
   }
 
@@ -258,9 +254,10 @@ app.get("/exercises/recent", async (req: Request, res: Response) => {
 });
 
 // Add new exercise
-app.post("/exercises", async (req: Request, res: Response) => {
+app.post("/exercises", authenticateToken, async (req: Request, res: Response) => {
   try {
-    const { name, userId } = req.body;
+    const { name } = req.body;
+    const userId = req.user!.id;
     const exerciseRepository = dataSource.getRepository(Exercise);
 
     // Check if exercise exists
@@ -283,7 +280,7 @@ app.post("/exercises", async (req: Request, res: Response) => {
 });
 
 // Update exercise
-app.put("/exercises/:id", async (req: Request, res: Response) => {
+app.put("/exercises/:id", authenticateToken, async (req: Request, res: Response) => {
   try {
     const exerciseId = parseInt(req.params.id);
     const { name } = req.body;
@@ -316,13 +313,9 @@ app.put("/exercises/:id", async (req: Request, res: Response) => {
 });
 
 // Get all workouts with exercises
-app.get("/workouts", async (req: Request, res: Response) => {
+app.get("/workouts", authenticateToken, async (req: Request, res: Response) => {
   try {
-    const { userId } = req.query;
-    if (!userId)
-      return res.status(400).json({
-        error: "User ID is required",
-      });
+    const userId = req.user!.id;
 
     const workoutRepository = dataSource.getRepository(Workout);
 
@@ -361,7 +354,7 @@ app.get("/workouts", async (req: Request, res: Response) => {
 });
 
 // Get a single workout by ID
-app.get("/workouts/:id", async (req: Request, res: Response) => {
+app.get("/workouts/:id", authenticateToken, async (req: Request, res: Response) => {
   try {
     const workoutId = parseInt(req.params.id);
     const workoutRepository = dataSource.getRepository(Workout);
@@ -402,15 +395,16 @@ app.get("/workouts/:id", async (req: Request, res: Response) => {
 });
 
 // Add new workout
-app.post("/workouts", async (req: Request, res: Response) => {
+app.post("/workouts", authenticateToken, async (req: Request, res: Response) => {
   const queryRunner = dataSource.createQueryRunner();
 
   try {
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
-    const { date, withInstructor, exercises, userId } =
+    const { date, withInstructor, exercises } =
       req.body as CreateWorkoutRequest;
+    const userId = req.user!.id;
 
     // Create new workout
     const workoutRepository = queryRunner.manager.getRepository(Workout);
@@ -521,7 +515,7 @@ app.post("/workouts", async (req: Request, res: Response) => {
 });
 
 // Update workout
-app.put("/workouts/:id", async (req: Request, res: Response) => {
+app.put("/workouts/:id", authenticateToken, async (req: Request, res: Response) => {
   const queryRunner = dataSource.createQueryRunner();
 
   try {
@@ -654,7 +648,7 @@ app.put("/workouts/:id", async (req: Request, res: Response) => {
 });
 
 // Delete workout
-app.delete("/workouts/:id", async (req: Request, res: Response) => {
+app.delete("/workouts/:id", authenticateToken, async (req: Request, res: Response) => {
   const queryRunner = dataSource.createQueryRunner();
 
   try {
@@ -692,13 +686,9 @@ app.delete("/workouts/:id", async (req: Request, res: Response) => {
 // Pain Score Routes
 
 // Get all pain scores for a user
-app.get("/pain-scores", async (req: Request, res: Response) => {
+app.get("/pain-scores", authenticateToken, async (req: Request, res: Response) => {
   try {
-    const { userId } = req.query;
-    if (!userId)
-      return res.status(400).json({
-        error: "User ID is required",
-      });
+    const userId = req.user!.id;
 
     const painScoreRepository = dataSource.getRepository(PainScore);
     const painScores = await painScoreRepository.find({
@@ -716,7 +706,7 @@ app.get("/pain-scores", async (req: Request, res: Response) => {
 });
 
 // Get a single pain score by ID
-app.get("/pain-scores/:id", async (req: Request, res: Response) => {
+app.get("/pain-scores/:id", authenticateToken, async (req: Request, res: Response) => {
   try {
     const painScoreId = parseInt(req.params.id);
     const painScoreRepository = dataSource.getRepository(PainScore);
@@ -737,9 +727,10 @@ app.get("/pain-scores/:id", async (req: Request, res: Response) => {
 });
 
 // Add new pain score
-app.post("/pain-scores", async (req: Request, res: Response) => {
+app.post("/pain-scores", authenticateToken, async (req: Request, res: Response) => {
   try {
-    const { userId, date, score, notes } = req.body as CreatePainScoreRequest;
+    const { date, score, notes } = req.body as CreatePainScoreRequest;
+    const userId = req.user!.id;
 
     // Validate score is between 0 and 10
     if (score < 0 || score > 10) {
@@ -779,7 +770,7 @@ app.post("/pain-scores", async (req: Request, res: Response) => {
 });
 
 // Update pain score
-app.put("/pain-scores/:id", async (req: Request, res: Response) => {
+app.put("/pain-scores/:id", authenticateToken, async (req: Request, res: Response) => {
   try {
     const painScoreId = parseInt(req.params.id);
     const { date, score, notes } = req.body as Omit<
@@ -831,7 +822,7 @@ app.put("/pain-scores/:id", async (req: Request, res: Response) => {
 });
 
 // Delete pain score
-app.delete("/pain-scores/:id", async (req: Request, res: Response) => {
+app.delete("/pain-scores/:id", authenticateToken, async (req: Request, res: Response) => {
   try {
     const painScoreId = parseInt(req.params.id);
     const painScoreRepository = dataSource.getRepository(PainScore);
@@ -857,13 +848,9 @@ app.delete("/pain-scores/:id", async (req: Request, res: Response) => {
 // Sleep Score Routes
 
 // Get all sleep scores for a user
-app.get("/sleep-scores", async (req: Request, res: Response) => {
+app.get("/sleep-scores", authenticateToken, async (req: Request, res: Response) => {
   try {
-    const { userId } = req.query;
-    if (!userId)
-      return res.status(400).json({
-        error: "User ID is required",
-      });
+    const userId = req.user!.id;
 
     const sleepScoreRepository = dataSource.getRepository(SleepScore);
     const sleepScores = await sleepScoreRepository.find({
@@ -881,7 +868,7 @@ app.get("/sleep-scores", async (req: Request, res: Response) => {
 });
 
 // Get a single sleep score by ID
-app.get("/sleep-scores/:id", async (req: Request, res: Response) => {
+app.get("/sleep-scores/:id", authenticateToken, async (req: Request, res: Response) => {
   try {
     const sleepScoreId = parseInt(req.params.id);
     const sleepScoreRepository = dataSource.getRepository(SleepScore);
@@ -902,9 +889,10 @@ app.get("/sleep-scores/:id", async (req: Request, res: Response) => {
 });
 
 // Add new sleep score
-app.post("/sleep-scores", async (req: Request, res: Response) => {
+app.post("/sleep-scores", authenticateToken, async (req: Request, res: Response) => {
   try {
-    const { userId, date, score, notes } = req.body as CreateSleepScoreRequest;
+    const { date, score, notes } = req.body as CreateSleepScoreRequest;
+    const userId = req.user!.id;
 
     // Validate score is between 1 and 5
     if (score < 1 || score > 5) {
@@ -944,7 +932,7 @@ app.post("/sleep-scores", async (req: Request, res: Response) => {
 });
 
 // Update sleep score
-app.put("/sleep-scores/:id", async (req: Request, res: Response) => {
+app.put("/sleep-scores/:id", authenticateToken, async (req: Request, res: Response) => {
   try {
     const sleepScoreId = parseInt(req.params.id);
     const { date, score, notes } = req.body as Omit<
@@ -996,7 +984,7 @@ app.put("/sleep-scores/:id", async (req: Request, res: Response) => {
 });
 
 // Delete sleep score
-app.delete("/sleep-scores/:id", async (req: Request, res: Response) => {
+app.delete("/sleep-scores/:id", authenticateToken, async (req: Request, res: Response) => {
   try {
     const sleepScoreId = parseInt(req.params.id);
     const sleepScoreRepository = dataSource.getRepository(SleepScore);
@@ -1022,12 +1010,9 @@ app.delete("/sleep-scores/:id", async (req: Request, res: Response) => {
 // Diagnostician Routes
 
 // Get diagnostic data (last two months of workouts and pain scores)
-app.get("/diagnostics/data", async (req: Request, res: Response) => {
+app.get("/diagnostics/data", authenticateToken, async (req: Request, res: Response) => {
   try {
-    const { userId } = req.query;
-    if (!userId) {
-      return res.status(400).json({ error: "User ID is required" });
-    }
+    const userId = req.user!.id;
 
     // Calculate date range (last two months)
     const endDate = new Date();
@@ -1099,7 +1084,7 @@ app.get("/diagnostics/data", async (req: Request, res: Response) => {
 });
 
 // Analyze diagnostic data using OpenAI
-app.post("/diagnostics/analyze", async (req: Request, res: Response) => {
+app.post("/diagnostics/analyze", authenticateToken, async (req: Request, res: Response) => {
   try {
     const { diagnosticData } = req.body;
 

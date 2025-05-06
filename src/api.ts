@@ -28,19 +28,18 @@ api.interceptors.response.use(
   },
 );
 
-export const fetchWorkouts = (userId: number): Promise<Workout[]> =>
-  api.get(`/workouts?userId=${userId}`);
+export const fetchWorkouts = (): Promise<Workout[]> =>
+  api.get(`/workouts`);
 
-export const fetchExercises = (userId: number): Promise<Exercise[]> =>
-  api.get(`/exercises?userId=${userId}`);
+export const fetchExercises = (): Promise<Exercise[]> =>
+  api.get(`/exercises`);
 
 export const createWorkout = (workout: Workout): Promise<Workout> =>
   api.post("/workouts", workout);
 
 export const createExercise = (
   exerciseName: string,
-  userId: number,
-): Promise<Exercise> => api.post("/exercises", { name: exerciseName, userId });
+): Promise<Exercise> => api.post("/exercises", { name: exerciseName });
 
 export const updateExercise = (
   exerciseId: number,
@@ -65,18 +64,17 @@ export interface RecentExerciseData {
 }
 
 export const fetchRecentExerciseData = (
-  userId: number,
   exerciseId: number,
 ): Promise<RecentExerciseData> =>
   api.get(
-    `/exercises/recent?userId=${userId}&exerciseId=${encodeURIComponent(
+    `/exercises/recent?exerciseId=${encodeURIComponent(
       exerciseId,
     )}`,
   );
 
 // Pain Score API functions
-export const fetchPainScores = (userId: number): Promise<PainScore[]> =>
-  api.get(`/pain-scores?userId=${userId}`);
+export const fetchPainScores = (): Promise<PainScore[]> =>
+  api.get(`/pain-scores`);
 
 export const fetchPainScore = (painScoreId: number): Promise<PainScore> =>
   api.get(`/pain-scores/${painScoreId}`);
@@ -94,8 +92,8 @@ export const deletePainScore = (painScoreId: number): Promise<{ id: number }> =>
   api.delete(`/pain-scores/${painScoreId}`);
 
 // Sleep Score API functions
-export const fetchSleepScores = (userId: number): Promise<SleepScore[]> =>
-  api.get(`/sleep-scores?userId=${userId}`);
+export const fetchSleepScores = (): Promise<SleepScore[]> =>
+  api.get(`/sleep-scores`);
 
 export const fetchSleepScore = (sleepScoreId: number): Promise<SleepScore> =>
   api.get(`/sleep-scores/${sleepScoreId}`);
@@ -158,8 +156,8 @@ export interface DiagnosticData {
 }
 
 // Fetch diagnostic data (last two months of workouts and pain scores)
-export const fetchDiagnosticData = (userId: number): Promise<DiagnosticData> =>
-  api.get(`/diagnostics/data?userId=${userId}`);
+export const fetchDiagnosticData = (): Promise<DiagnosticData> =>
+  api.get(`/diagnostics/data`);
 
 // Send data to server for OpenAI analysis
 export const analyzeDiagnosticData = (diagnosticData: DiagnosticData): Promise<{ analysis: string }> =>

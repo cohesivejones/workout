@@ -76,7 +76,6 @@ function SleepScorePage(): React.ReactElement {
       <SleepScoreForm
         onSubmit={handleSleepScoreSubmit}
         existingSleepScore={sleepScore || undefined}
-        userId={user?.id || 0}
         selectedDate={selectedDate || undefined}
         onCancel={handleCancel}
       />

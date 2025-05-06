@@ -39,7 +39,6 @@ export interface WorkoutResponse {
 
 // Interface for workout creation request
 export interface CreateWorkoutRequest {
-  userId: number;
   date: string;
   withInstructor: boolean;
   exercises: Array<{
@@ -59,7 +58,6 @@ export interface PainScoreResponse {
 }
 
 export interface CreatePainScoreRequest {
-  userId: number;
   date: string;
   score: number;
   notes?: string | null;
@@ -75,7 +73,6 @@ export interface SleepScoreResponse {
 }
 
 export interface CreateSleepScoreRequest {
-  userId: number;
   date: string;
   score: number;
   notes?: string | null;

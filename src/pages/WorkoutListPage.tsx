@@ -22,9 +22,9 @@ function WorkoutListPage(): ReactElement {
       if (!user) return;
       try {
         const [workoutsData, painScoresData, sleepScoresData] = await Promise.all([
-          fetchWorkouts(user.id),
-          fetchPainScores(user.id),
-          fetchSleepScores(user.id),
+          fetchWorkouts(),
+          fetchPainScores(),
+          fetchSleepScores(),
         ]);
         setWorkouts(workoutsData);
         setPainScores(painScoresData);

@@ -76,7 +76,6 @@ function PainScorePage(): React.ReactElement {
       <PainScoreForm
         onSubmit={handlePainScoreSubmit}
         existingPainScore={painScore || undefined}
-        userId={user?.id || 0}
         selectedDate={selectedDate || undefined}
         onCancel={handleCancel}
       />

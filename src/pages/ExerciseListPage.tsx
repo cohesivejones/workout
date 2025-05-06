@@ -20,7 +20,7 @@ function ExerciseListPage(): ReactElement {
     const loadExercises = async () => {
       if (!user) return;
       try {
-        const exercisesData = await fetchExercises(user.id);
+        const exercisesData = await fetchExercises();
         setExercises(exercisesData);
         setLoading(false);
       } catch (err) {
