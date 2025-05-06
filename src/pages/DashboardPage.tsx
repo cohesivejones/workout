@@ -59,16 +59,22 @@ function DashboardPage() {
                 <XAxis 
                   dataKey="date" 
                   tickFormatter={(date) => format(new Date(date), 'MM/dd')}
+                  tick={{ fontSize: 12 }}
                 />
                 <YAxis 
-                  label={{ value: 'Weight (lbs)', angle: -90, position: 'insideLeft' }} 
+                  label={{ value: 'Weight (lbs)', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle', fontSize: 12 } }} 
                   domain={['dataMin - 10', 'dataMax + 10']}
+                  tick={{ fontSize: 12 }}
+                  width={50}
                 />
                 <Tooltip 
                   formatter={(value) => [`${value} lbs`, 'Weight']}
                   labelFormatter={(date) => format(new Date(date), 'MMM d, yyyy')}
+                  contentStyle={{ fontSize: '12px', padding: '8px' }}
+                  wrapperStyle={{ zIndex: 1000 }}
+                  isAnimationActive={false}
                 />
-                <Legend />
+                <Legend wrapperStyle={{ fontSize: '12px', marginTop: '5px' }} />
                 <Line 
                   type="monotone" 
                   dataKey="weight" 
