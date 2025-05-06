@@ -5,11 +5,11 @@ import CalendarView from "../components/CalendarView";
 import { fetchWorkouts, fetchPainScores, deletePainScore, fetchSleepScores, deleteSleepScore } from "../api";
 import { Workout, PainScore, SleepScore } from "../types";
 import classNames from "classnames";
-import styles from "./WorkoutListPage.module.css";
+import styles from "./TimelinePage.module.css";
 import { useUserContext } from "../contexts/useUserContext";
 import { ListView } from "../components/ListView";
 
-function WorkoutListPage(): ReactElement {
+function TimelinePage(): ReactElement {
   const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [painScores, setPainScores] = useState<PainScore[]>([]);
   const [sleepScores, setSleepScores] = useState<SleepScore[]>([]);
@@ -118,4 +118,4 @@ function WorkoutListPage(): ReactElement {
   );
 }
 
-export default WorkoutListPage;
+export default TimelinePage;
