@@ -11,8 +11,34 @@
 
 .chartsContainer {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
   gap: 20px;
+}
+
+/* Media query for mobile devices */
+@media (max-width: 768px) {
+  .chartsContainer {
+    grid-template-columns: 1fr;
+  }
+  
+  .chartCard {
+    padding: 15px 10px;
+    overflow-x: hidden;
+  }
+  
+  .chartCard h3 {
+    font-size: 1.2rem;
+    margin-top: 0;
+    margin-bottom: 10px;
+  }
+  
+  .pageHeader h2 {
+    font-size: 1.5rem;
+  }
+  
+  .subtitle {
+    font-size: 0.9rem;
+  }
 }
 
 .chartCard {

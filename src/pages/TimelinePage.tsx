@@ -1,21 +1,25 @@
 import { useState, useEffect } from "react";
 import type { ReactElement } from "react";
+import { useSearchParams } from "react-router-dom";
 import CalendarView from "../components/CalendarView";
 import { fetchWorkouts, fetchPainScores, deletePainScore, fetchSleepScores, deleteSleepScore } from "../api";
 import { Workout, PainScore, SleepScore } from "../types";
 import classNames from "classnames";
-import styles from "./WorkoutListPage.module.css";
+import styles from "./TimelinePage.module.css";
 import { useUserContext } from "../contexts/useUserContext";
 import { ListView } from "../components/ListView";
 
-function WorkoutListPage(): ReactElement {
+function TimelinePage(): ReactElement {
   const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [painScores, setPainScores] = useState<PainScore[]>([]);
   const [sleepScores, setSleepScores] = useState<SleepScore[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<"calendar" | "list">("calendar");
+  const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useUserContext();
+  
+  // Get view mode from URL or default to "calendar"
+  const viewMode = searchParams.get("view") === "list" ? "list" : "calendar";
 
   useEffect(() => {
     const loadData = async () => {
@@ -81,7 +85,7 @@ function WorkoutListPage(): ReactElement {
               className={classNames({
                 [styles.active]: viewMode === "calendar",
               })}
-              onClick={() => setViewMode("calendar")}
+              onClick={() => setSearchParams({ view: "calendar" })}
             >
               Calendar
             </button>
@@ -89,7 +93,7 @@ function WorkoutListPage(): ReactElement {
               className={classNames({
                 [styles.active]: viewMode === "list",
               })}
-              onClick={() => setViewMode("list")}
+              onClick={() => setSearchParams({ view: "list" })}
             >
               List
             </button>
@@ -114,4 +118,4 @@ function WorkoutListPage(): ReactElement {
   );
 }
 
-export default WorkoutListPage;
+export default TimelinePage;

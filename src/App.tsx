@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import WorkoutListPage from "./pages/WorkoutListPage";
+import TimelinePage from "./pages/TimelinePage";
 import AddWorkoutPage from "./pages/NewWorkoutPage";
 import EditWorkoutPage from "./pages/EditWorkoutPage";
 import WorkoutShowPage from "./pages/WorkoutShowPage";
@@ -17,7 +17,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route element={<Layout />}>
-          <Route index path="/" element={<WorkoutListPage />} />
+          <Route index path="/" element={<TimelinePage />} />
           <Route path="/workouts/new" element={<AddWorkoutPage />} />
           <Route path="/workouts/:id/edit" element={<EditWorkoutPage />} />
           <Route path="/workouts/:id" element={<WorkoutShowPage />} />
