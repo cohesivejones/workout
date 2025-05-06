@@ -9,7 +9,7 @@ export interface UserListProps {
 
 export interface PainScore {
   id: number;
-  userId: number;
+  userId?: number;
   date: string;
   score: number;
   notes?: string | null;
@@ -17,7 +17,7 @@ export interface PainScore {
 
 export interface SleepScore {
   id: number;
-  userId: number;
+  userId?: number;
   date: string;
   score: number;
   notes?: string | null;
@@ -41,7 +41,7 @@ export interface Exercise {
 export interface Workout {
   id: number;
   date: string;
-  userId: number;
+  userId?: number;
   withInstructor: boolean;
   exercises: WorkoutExercise[];
 }

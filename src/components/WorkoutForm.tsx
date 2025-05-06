@@ -76,7 +76,6 @@ function WorkoutForm({
 
     try {
       const success = await onSubmit({
-        userId: user.id,
         date: data.date,
         withInstructor: data.withInstructor,
         exercises: data.exercises.map((ex) => ({
@@ -152,7 +151,7 @@ function WorkoutForm({
     if (!exerciseId) return;
     if (!user) return;
     try {
-      const recentData = await fetchRecentExerciseData(user.id, exerciseId);
+      const recentData = await fetchRecentExerciseData(exerciseId);
       setValue("currentExercise.reps", String(recentData.reps));
       setValue(
         "currentExercise.weight",

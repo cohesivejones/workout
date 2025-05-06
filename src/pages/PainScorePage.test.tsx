@@ -20,13 +20,12 @@ jest.mock("../contexts/useUserContext", () => ({
 jest.mock("../components/PainScoreForm", () => {
   return {
     __esModule: true,
-    default: ({ onSubmit, existingPainScore, userId }: any) => (
+    default: ({ onSubmit, existingPainScore }: any) => (
       <div data-testid="mock-pain-score-form">
         <button
           data-testid="mock-submit-button"
           onClick={() =>
             onSubmit({
-              userId,
               date: "2025-04-15",
               score: 4,
               notes: "Test notes",
@@ -64,7 +63,6 @@ describe("PainScorePage", () => {
     (Api.updatePainScore as jest.Mock).mockResolvedValue({ id: 456 });
     (Api.fetchPainScore as jest.Mock).mockResolvedValue({
       id: 456,
-      userId: 1,
       date: "2025-04-10",
       score: 3,
       notes: "Existing notes",
@@ -123,7 +121,6 @@ describe("PainScorePage", () => {
     // Check that the API was called with the correct data
     await waitFor(() => {
       expect(Api.createPainScore).toHaveBeenCalledWith({
-        userId: 1,
         date: "2025-04-15",
         score: 4,
         notes: "Test notes",
@@ -151,7 +148,6 @@ describe("PainScorePage", () => {
     // Check that the API was called with the correct data
     await waitFor(() => {
       expect(Api.updatePainScore).toHaveBeenCalledWith(456, {
-        userId: 1,
         date: "2025-04-15",
         score: 4,
         notes: "Test notes",

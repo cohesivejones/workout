@@ -58,6 +58,9 @@ const Header = () => {
           <Link to="/" className={styles.navLink}>
             Timeline
           </Link>
+          <Link to="/dashboard" className={styles.navLink}>
+            Dashboard
+          </Link>
           <Link to="/exercises" className={styles.navLink}>
             Exercises
           </Link>

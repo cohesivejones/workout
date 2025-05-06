@@ -16,7 +16,7 @@ export default function AddWorkoutPage() {
     const loadExercises = async () => {
       try {
         if (!user) return;
-        const exercisesData = await fetchExercises(user.id);
+        const exercisesData = await fetchExercises();
         setSavedExercises(exercisesData);
       } catch (err) {
         console.error("Failed to load exercises:", err);
@@ -48,7 +48,7 @@ export default function AddWorkoutPage() {
       if (!user) return false;
       setError(null);
       if (!savedExercises.find((e) => e.name === exerciseName)) {
-        const result = await createExercise(exerciseName, user.id);
+        const result = await createExercise(exerciseName);
         setSavedExercises((prev) => [...prev, result].sort());
         return true;
       }

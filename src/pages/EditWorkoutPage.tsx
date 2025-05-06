@@ -31,7 +31,7 @@ export default function EditWorkoutPage() {
         setError(null);
 
         // Load workouts and find the one we're editing
-        const workoutsData = await fetchWorkouts(user.id);
+        const workoutsData = await fetchWorkouts();
         const foundWorkout = workoutsData.find((w) => w.id === workoutId);
 
         if (!foundWorkout) {
@@ -43,7 +43,7 @@ export default function EditWorkoutPage() {
         setWorkout(foundWorkout);
 
         // Load exercises
-        const exercisesData = await fetchExercises(user.id);
+        const exercisesData = await fetchExercises();
         setSavedExercises(exercisesData);
 
         setLoading(false);
@@ -81,7 +81,7 @@ export default function EditWorkoutPage() {
       if (!user) return false;
       setError(null);
       if (!savedExercises.find((e) => e.name === exerciseName)) {
-        const result = await createExercise(exerciseName, user.id);
+        const result = await createExercise(exerciseName);
         setSavedExercises((prev) => [...prev, result].sort());
         return true;
       }
