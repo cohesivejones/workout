@@ -1130,6 +1130,73 @@ app.post("/diagnostics/analyze", authenticateToken, async (req: Request, res: Re
   }
 });
 
+// Dashboard API endpoint - Get exercise weight progression over 12 weeks
+app.get("/dashboard/weight-progression", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user!.id;
+    
+    // Calculate date range (12 weeks from today)
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(endDate.getDate() - 84); // 12 weeks = 84 days
+    
+    // Format dates for SQL query
+    const startDateStr = startDate.toISOString().split("T")[0];
+    const endDateStr = endDate.toISOString().split("T")[0];
+    
+    const workoutRepository = dataSource.getRepository(Workout);
+    
+    // Get all workouts in the date range
+    const workouts = await workoutRepository.find({
+      where: {
+        userId: Number(userId),
+        date: Between(startDateStr, endDateStr),
+      },
+      relations: {
+        workoutExercises: {
+          exercise: true,
+        },
+      },
+      order: { date: "ASC" },
+    });
+    
+    // Process data for the dashboard
+    // Group by exercise and create time series data
+    const exerciseProgressionData: Record<string, Array<{date: string, weight: number | null}>> = {};
+    
+    workouts.forEach(workout => {
+      workout.workoutExercises.forEach(we => {
+        const exerciseName = we.exercise.name;
+        
+        // Skip exercises without weight data
+        if (we.weight === null || we.weight === undefined) return;
+        
+        // Initialize array for this exercise if it doesn't exist
+        if (!exerciseProgressionData[exerciseName]) {
+          exerciseProgressionData[exerciseName] = [];
+        }
+        
+        // Add data point
+        exerciseProgressionData[exerciseName].push({
+          date: workout.date,
+          weight: we.weight
+        });
+      });
+    });
+    
+    // Convert to array format for easier consumption by frontend
+    const result = Object.entries(exerciseProgressionData).map(([name, dataPoints]) => ({
+      exerciseName: name,
+      dataPoints: dataPoints
+    }));
+    
+    res.json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

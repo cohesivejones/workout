@@ -8,6 +8,7 @@ import SleepScorePage from "./pages/SleepScorePage";
 import ExerciseListPage from "./pages/ExerciseListPage";
 import ChangePasswordPage from "./pages/ChangePasswordPage";
 import DiagnosticianPage from "./pages/DiagnosticianPage";
+import DashboardPage from "./pages/DashboardPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import { Layout } from "./Layout";
 
@@ -27,6 +28,7 @@ function App() {
           <Route path="/exercises" element={<ExerciseListPage />} />
           <Route path="/change-password" element={<ChangePasswordPage />} />
           <Route path="/diagnostician" element={<DiagnosticianPage />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>

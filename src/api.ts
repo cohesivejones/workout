@@ -162,3 +162,18 @@ export const fetchDiagnosticData = (): Promise<DiagnosticData> =>
 // Send data to server for OpenAI analysis
 export const analyzeDiagnosticData = (diagnosticData: DiagnosticData): Promise<{ analysis: string }> =>
   api.post('/diagnostics/analyze', { diagnosticData });
+
+// Dashboard data types
+export interface ExerciseWeightDataPoint {
+  date: string;
+  weight: number | null;
+}
+
+export interface ExerciseWeightProgression {
+  exerciseName: string;
+  dataPoints: ExerciseWeightDataPoint[];
+}
+
+// Fetch exercise weight progression data for dashboard
+export const fetchWeightProgressionData = (): Promise<ExerciseWeightProgression[]> =>
+  api.get('/dashboard/weight-progression');
