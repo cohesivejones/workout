@@ -1197,6 +1197,80 @@ app.get("/dashboard/weight-progression", authenticateToken, async (req: Request,
   }
 });
 
+// Dashboard API endpoint - Get pain score progression over 12 weeks
+app.get("/dashboard/pain-progression", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user!.id;
+    
+    // Calculate date range (12 weeks from today)
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(endDate.getDate() - 84); // 12 weeks = 84 days
+    
+    // Format dates for SQL query
+    const startDateStr = startDate.toISOString().split("T")[0];
+    const endDateStr = endDate.toISOString().split("T")[0];
+    
+    // Fetch pain scores within date range
+    const painScoreRepository = dataSource.getRepository(PainScore);
+    const painScores = await painScoreRepository.find({
+      where: {
+        userId: Number(userId),
+        date: Between(startDateStr, endDateStr),
+      },
+      order: { date: "ASC" },
+    });
+    
+    // Format data for response
+    const dataPoints = painScores.map(ps => ({
+      date: ps.date,
+      score: ps.score
+    }));
+    
+    res.json({ dataPoints });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// Dashboard API endpoint - Get sleep score progression over 12 weeks
+app.get("/dashboard/sleep-progression", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user!.id;
+    
+    // Calculate date range (12 weeks from today)
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(endDate.getDate() - 84); // 12 weeks = 84 days
+    
+    // Format dates for SQL query
+    const startDateStr = startDate.toISOString().split("T")[0];
+    const endDateStr = endDate.toISOString().split("T")[0];
+    
+    // Fetch sleep scores within date range
+    const sleepScoreRepository = dataSource.getRepository(SleepScore);
+    const sleepScores = await sleepScoreRepository.find({
+      where: {
+        userId: Number(userId),
+        date: Between(startDateStr, endDateStr),
+      },
+      order: { date: "ASC" },
+    });
+    
+    // Format data for response
+    const dataPoints = sleepScores.map(ss => ({
+      date: ss.date,
+      score: ss.score
+    }));
+    
+    res.json({ dataPoints });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

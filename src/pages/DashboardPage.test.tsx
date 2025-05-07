@@ -5,6 +5,8 @@ import * as Api from "../api";
 // Mock the API functions
 jest.mock("../api", () => ({
   fetchWeightProgressionData: jest.fn(),
+  fetchPainProgressionData: jest.fn(),
+  fetchSleepProgressionData: jest.fn(),
 }));
 
 // Mock the Recharts components
@@ -42,6 +44,22 @@ describe("DashboardPage", () => {
       ],
     },
   ];
+
+  const mockPainData = {
+    dataPoints: [
+      { date: "2025-02-15", score: 3 },
+      { date: "2025-02-22", score: 4 },
+      { date: "2025-03-01", score: 2 },
+    ]
+  };
+
+  const mockSleepData = {
+    dataPoints: [
+      { date: "2025-02-15", score: 4 },
+      { date: "2025-02-22", score: 3 },
+      { date: "2025-03-01", score: 5 },
+    ]
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -121,5 +139,44 @@ describe("DashboardPage", () => {
       expect(screen.getAllByTestId("x-axis").length).toBe(2);
       expect(screen.getAllByTestId("y-axis").length).toBe(2);
     });
+  });
+
+  it("renders pain and sleep score charts when data is loaded successfully", async () => {
+    // Mock successful API responses
+    (Api.fetchWeightProgressionData as jest.Mock).mockResolvedValue(mockProgressionData);
+    (Api.fetchPainProgressionData as jest.Mock).mockResolvedValue(mockPainData);
+    (Api.fetchSleepProgressionData as jest.Mock).mockResolvedValue(mockSleepData);
+
+    render(<DashboardPage />);
+
+    // Wait for data to load
+    await waitFor(() => {
+      expect(screen.queryByText(/Loading.../i)).not.toBeInTheDocument();
+    });
+
+    // Check that pain and sleep score sections are displayed
+    expect(screen.getByText("Pain Score Progression")).toBeInTheDocument();
+    expect(screen.getByText("Sleep Quality Progression")).toBeInTheDocument();
+    
+    // Check that charts are rendered
+    const charts = screen.getAllByTestId("line-chart");
+    expect(charts.length).toBe(4); // 2 exercise charts + pain + sleep
+  });
+
+  it("does not render pain and sleep charts when no data is available", async () => {
+    // Mock API responses with empty data for pain and sleep
+    (Api.fetchWeightProgressionData as jest.Mock).mockResolvedValue(mockProgressionData);
+    (Api.fetchPainProgressionData as jest.Mock).mockResolvedValue({ dataPoints: [] });
+    (Api.fetchSleepProgressionData as jest.Mock).mockResolvedValue({ dataPoints: [] });
+
+    render(<DashboardPage />);
+
+    await waitFor(() => {
+      expect(screen.queryByText(/Loading.../i)).not.toBeInTheDocument();
+    });
+
+    // Check that pain and sleep sections are not displayed
+    expect(screen.queryByText("Pain Score Progression")).not.toBeInTheDocument();
+    expect(screen.queryByText("Sleep Quality Progression")).not.toBeInTheDocument();
   });
 });
