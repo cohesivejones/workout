@@ -174,6 +174,32 @@ export interface ExerciseWeightProgression {
   dataPoints: ExerciseWeightDataPoint[];
 }
 
+export interface PainScoreDataPoint {
+  date: string;
+  score: number;
+}
+
+export interface PainScoreProgression {
+  dataPoints: PainScoreDataPoint[];
+}
+
+export interface SleepScoreDataPoint {
+  date: string;
+  score: number;
+}
+
+export interface SleepScoreProgression {
+  dataPoints: SleepScoreDataPoint[];
+}
+
 // Fetch exercise weight progression data for dashboard
 export const fetchWeightProgressionData = (): Promise<ExerciseWeightProgression[]> =>
   api.get('/dashboard/weight-progression');
+
+// Fetch pain score progression data for dashboard
+export const fetchPainProgressionData = (): Promise<PainScoreProgression> =>
+  api.get('/dashboard/pain-progression');
+
+// Fetch sleep score progression data for dashboard
+export const fetchSleepProgressionData = (): Promise<SleepScoreProgression> =>
+  api.get('/dashboard/sleep-progression');
