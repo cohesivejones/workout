@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { 
   fetchWeightProgressionData, 
   fetchPainProgressionData, 
@@ -8,8 +8,70 @@ import {
   SleepScoreProgression
 } from "../api";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
-import { format } from "date-fns";
+import { format, eachDayOfInterval } from "date-fns";
 import styles from "./DashboardPage.module.css";
+
+// Utility function to get standard 12-week date range
+const getStandardDateRange = () => {
+  const endDate = new Date();
+  const startDate = new Date();
+  startDate.setDate(endDate.getDate() - 84); // 12 weeks = 84 days
+  
+  // Format dates as ISO strings (YYYY-MM-DD)
+  const startDateStr = startDate.toISOString().split('T')[0];
+  const endDateStr = endDate.toISOString().split('T')[0];
+  
+  return { 
+    startDate, 
+    endDate,
+    startDateStr,
+    endDateStr
+  };
+};
+
+// Utility function to convert a date to a week number (1-12)
+const getWeekNumber = (dateStr: string, startDate: Date): number => {
+  const date = new Date(dateStr);
+  const diffTime = Math.abs(date.getTime() - startDate.getTime());
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  const weekNumber = Math.floor(diffDays / 7) + 1;
+  
+  // Ensure week number is between 1 and 12
+  return Math.min(Math.max(weekNumber, 1), 12);
+};
+
+// Utility function to normalize data to the standard date range
+const normalizeDataToStandardRange = <T extends { date: string }>(
+  dataPoints: T[], 
+  valueKey: keyof T
+): T[] => {
+  const { startDate, endDate } = getStandardDateRange();
+  
+  // Create a map of existing data points by date
+  const dataMap = new Map<string, T>();
+  dataPoints.forEach(point => {
+    dataMap.set(point.date, point);
+  });
+  
+  // Generate a complete series with all dates in the range
+  const allDatesInRange = eachDayOfInterval({ start: startDate, end: endDate })
+    .map(date => date.toISOString().split('T')[0]);
+  
+  // Create normalized data with all dates in range
+  const normalizedData = allDatesInRange.map(dateStr => {
+    if (dataMap.has(dateStr)) {
+      return dataMap.get(dateStr) as T;
+    } else {
+      // Create a placeholder with null value for the specified key
+      return { 
+        date: dateStr,
+        [valueKey]: null
+      } as unknown as T;
+    }
+  });
+  
+  return normalizedData;
+};
 
 function DashboardPage() {
   const [progressionData, setProgressionData] = useState<ExerciseWeightProgression[]>([]);
@@ -19,8 +81,9 @@ function DashboardPage() {
   const [painLoading, setPainLoading] = useState<boolean>(true);
   const [sleepLoading, setSleepLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [painError, setPainError] = useState<string | null>(null);
-  const [sleepError, setSleepError] = useState<string | null>(null);
+  
+  // Get standard date range for x-axis
+  const dateRange = useMemo(() => getStandardDateRange(), []);
 
   useEffect(() => {
     const loadData = async () => {
@@ -31,9 +94,27 @@ function DashboardPage() {
           fetchSleepProgressionData()
         ]);
         
-        setProgressionData(weightData);
-        setPainData(painData);
-        setSleepData(sleepData);
+        // Normalize weight progression data
+        const normalizedWeightData = weightData.map(exercise => ({
+          ...exercise,
+          dataPoints: normalizeDataToStandardRange(exercise.dataPoints, 'weight' as keyof typeof exercise.dataPoints[0])
+        }));
+        
+        // Normalize pain data if it exists and has data points
+        const normalizedPainData = painData && painData.dataPoints.length > 0 ? {
+          ...painData,
+          dataPoints: normalizeDataToStandardRange(painData.dataPoints, 'score' as keyof typeof painData.dataPoints[0])
+        } : painData;
+        
+        // Normalize sleep data if it exists and has data points
+        const normalizedSleepData = sleepData && sleepData.dataPoints.length > 0 ? {
+          ...sleepData,
+          dataPoints: normalizeDataToStandardRange(sleepData.dataPoints, 'score' as keyof typeof sleepData.dataPoints[0])
+        } : sleepData;
+        
+        setProgressionData(normalizedWeightData);
+        setPainData(normalizedPainData);
+        setSleepData(normalizedSleepData);
         
         setLoading(false);
         setPainLoading(false);
@@ -83,8 +164,16 @@ function DashboardPage() {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis 
                   dataKey="date" 
-                  tickFormatter={(date) => format(new Date(date), 'MM/dd')}
+                  tickFormatter={(date) => `Week ${getWeekNumber(date, dateRange.startDate)}`}
                   tick={{ fontSize: 12 }}
+                  domain={[dateRange.startDateStr, dateRange.endDateStr]}
+                  type="category"
+                  allowDataOverflow={true}
+                  ticks={Array.from({ length: 12 }, (_, i) => {
+                    const weekDate = new Date(dateRange.startDate);
+                    weekDate.setDate(weekDate.getDate() + i * 7);
+                    return weekDate.toISOString().split('T')[0];
+                  })}
                 />
                 <YAxis 
                   label={{ value: 'Weight (lbs)', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle', fontSize: 12 } }} 
@@ -128,8 +217,16 @@ function DashboardPage() {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis 
                   dataKey="date" 
-                  tickFormatter={(date) => format(new Date(date), 'MM/dd')}
+                  tickFormatter={(date) => `Week ${getWeekNumber(date, dateRange.startDate)}`}
                   tick={{ fontSize: 12 }}
+                  domain={[dateRange.startDateStr, dateRange.endDateStr]}
+                  type="category"
+                  allowDataOverflow={true}
+                  ticks={Array.from({ length: 12 }, (_, i) => {
+                    const weekDate = new Date(dateRange.startDate);
+                    weekDate.setDate(weekDate.getDate() + i * 7);
+                    return weekDate.toISOString().split('T')[0];
+                  })}
                 />
                 <YAxis 
                   label={{ value: 'Pain Score (0-10)', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle', fontSize: 12 } }} 
@@ -173,8 +270,16 @@ function DashboardPage() {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis 
                   dataKey="date" 
-                  tickFormatter={(date) => format(new Date(date), 'MM/dd')}
+                  tickFormatter={(date) => `Week ${getWeekNumber(date, dateRange.startDate)}`}
                   tick={{ fontSize: 12 }}
+                  domain={[dateRange.startDateStr, dateRange.endDateStr]}
+                  type="category"
+                  allowDataOverflow={true}
+                  ticks={Array.from({ length: 12 }, (_, i) => {
+                    const weekDate = new Date(dateRange.startDate);
+                    weekDate.setDate(weekDate.getDate() + i * 7);
+                    return weekDate.toISOString().split('T')[0];
+                  })}
                 />
                 <YAxis 
                   label={{ value: 'Sleep Score (1-5)', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle', fontSize: 12 } }} 

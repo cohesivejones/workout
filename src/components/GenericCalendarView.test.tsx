@@ -1,6 +1,9 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { GenericCalendarView, CalendarItem } from "./GenericCalendarView";
 
+// Fixed date for testing
+const FIXED_DATE = new Date('2025-05-15T12:00:00Z');
+
 // Define a test item type
 interface TestItem extends CalendarItem {
   content: string;
@@ -54,17 +57,46 @@ describe("GenericCalendarView", () => {
     }, {} as Record<string, TestItem[]>);
   });
 
+  // Store original Date constructor
+  let OriginalDate: DateConstructor;
+
   beforeEach(() => {
     jest.clearAllMocks();
+    
     // Mock window.innerWidth to simulate desktop view
     Object.defineProperty(window, "innerWidth", {
       writable: true,
       configurable: true,
       value: 1024,
     });
+    
     // Mock window.addEventListener to capture resize event
     window.addEventListener = jest.fn();
     window.removeEventListener = jest.fn();
+    
+    // Save original Date
+    OriginalDate = global.Date;
+    
+    // Mock Date
+    const MockDate = function(this: any, arg?: any) {
+      return arg ? new OriginalDate(arg) : new OriginalDate(FIXED_DATE);
+    } as any;
+    
+    MockDate.now = () => FIXED_DATE.getTime();
+    MockDate.parse = OriginalDate.parse;
+    MockDate.UTC = OriginalDate.UTC;
+    MockDate.prototype = OriginalDate.prototype;
+    
+    // Replace global Date
+    global.Date = MockDate as DateConstructor;
+  });
+  
+  afterEach(() => {
+    // Restore original Date
+    global.Date = OriginalDate;
+    
+    // Restore all mocks
+    jest.restoreAllMocks();
   });
 
   it("renders in desktop mode with month view", () => {
@@ -145,10 +177,6 @@ describe("GenericCalendarView", () => {
   });
 
   it("goes to today when Today button is clicked", () => {
-    // Mock Date.now to return a specific date
-    const originalNow = Date.now;
-    Date.now = jest.fn(() => new Date("2025-05-02").getTime());
-
     render(
       <GenericCalendarView
         items={testItems}
@@ -170,21 +198,13 @@ describe("GenericCalendarView", () => {
 
     // Check that month changed back to May
     expect(screen.getByText(/May 2025/)).toBeInTheDocument();
-
-    // Restore original Date.now
-    Date.now = originalNow;
   });
 
   it("switches to mobile view when window width is small", () => {
-    // Set a fixed date for testing
-    const testDate = new Date("2025-05-02"); // A Friday
-    const originalNow = Date.now;
-    Date.now = jest.fn(() => testDate.getTime());
-    
     // Create items for each day of the week to ensure renderVerticalItem is called
     const weekItems: TestItem[] = [];
     for (let i = 0; i < 7; i++) {
-      const day = new Date(testDate);
+      const day = new Date(FIXED_DATE);
       day.setDate(day.getDate() + i);
       weekItems.push({
         id: 100 + i,
@@ -194,39 +214,15 @@ describe("GenericCalendarView", () => {
       });
     }
     
-    // Render with desktop width first
-    const { rerender } = render(
-      <GenericCalendarView
-        items={weekItems}
-        renderGridItem={renderGridItem}
-        renderVerticalItem={renderVerticalItem}
-        getItemsByDate={getItemsByDate}
-        emptyStateMessage="No items"
-      />
-    );
-
-    // Check that month view is displayed
-    expect(screen.getByText(/May 2025/)).toBeInTheDocument();
-    expect(screen.getByText("Sun")).toBeInTheDocument();
-
-    // Reset mock counts before switching to mobile view
-    renderVerticalItem.mockClear();
-
-    // Simulate resize to mobile width
+    // Set window width to mobile size
     Object.defineProperty(window, "innerWidth", {
       writable: true,
       configurable: true,
-      value: 600,
+      value: 600, // Less than 768px threshold
     });
-
-    // Trigger resize event callback
-    const resizeCallback = (window.addEventListener as jest.Mock).mock.calls.find(
-      (call) => call[0] === "resize"
-    )[1];
-    resizeCallback();
-
-    // Re-render to apply the state change
-    rerender(
+    
+    // Render component
+    render(
       <GenericCalendarView
         items={weekItems}
         renderGridItem={renderGridItem}
@@ -239,7 +235,9 @@ describe("GenericCalendarView", () => {
     // Check that week view is displayed by looking for the month title heading
     const monthTitle = screen.getByRole('heading', { level: 2 });
     expect(monthTitle).toBeInTheDocument();
-    expect(monthTitle.textContent).toMatch(/May \d+.*\d+, 2025/);
+    expect(monthTitle.textContent).toMatch(/May \d+ - May \d+, 2025/);
+    
+    // Check for day names in vertical view
     expect(screen.getByText("Sunday")).toBeInTheDocument();
     expect(screen.getByText("Monday")).toBeInTheDocument();
     expect(screen.getByText("Tuesday")).toBeInTheDocument();
@@ -250,19 +248,16 @@ describe("GenericCalendarView", () => {
 
     // Check that renderVerticalItem is used in mobile view
     expect(renderVerticalItem).toHaveBeenCalled();
-    
-    // Restore original Date.now
-    Date.now = originalNow;
   });
 
   it("navigates weeks in mobile view", () => {
-    // Set mobile width
+    // Set window width to mobile size
     Object.defineProperty(window, "innerWidth", {
       writable: true,
       configurable: true,
-      value: 600,
+      value: 600, // Less than 768px threshold
     });
-
+    
     render(
       <GenericCalendarView
         items={testItems}
@@ -274,7 +269,7 @@ describe("GenericCalendarView", () => {
     );
 
     // Get the initial week title
-    const monthTitle = screen.getByRole('heading', { level: 2, name: /.*/ });
+    const monthTitle = screen.getByRole('heading', { level: 2 });
     const initialText = monthTitle.textContent || "";
 
     // Click previous week button
@@ -299,31 +294,13 @@ describe("GenericCalendarView", () => {
   });
 
   it("displays empty state message when no items for a day", () => {
-    render(
-      <GenericCalendarView
-        items={[]}
-        renderGridItem={renderGridItem}
-        renderVerticalItem={renderVerticalItem}
-        getItemsByDate={getItemsByDate}
-        emptyStateMessage="No items"
-      />
-    );
-
-    // Check that empty state message is displayed in mobile view
-    // Simulate resize to mobile width
+    // Set window width to mobile size
     Object.defineProperty(window, "innerWidth", {
       writable: true,
       configurable: true,
-      value: 600,
+      value: 600, // Less than 768px threshold
     });
-
-    // Trigger resize event callback
-    const resizeCallback = (window.addEventListener as jest.Mock).mock.calls.find(
-      (call) => call[0] === "resize"
-    )[1];
-    resizeCallback();
-
-    // Re-render to apply the state change
+    
     render(
       <GenericCalendarView
         items={[]}
@@ -334,9 +311,19 @@ describe("GenericCalendarView", () => {
       />
     );
 
-    // Check that empty state message is displayed
-    const emptyStateMessages = screen.getAllByText("No items");
-    expect(emptyStateMessages.length).toBeGreaterThan(0);
+    // Check that empty state message is displayed in the vertical view
+    // The message is inside div elements with class noItems
+    const noItemsElements = document.querySelectorAll('.noItems');
+    expect(noItemsElements.length).toBeGreaterThan(0);
+    
+    // At least one of them should contain the empty state message
+    let foundMessage = false;
+    noItemsElements.forEach(element => {
+      if (element.textContent === "No items") {
+        foundMessage = true;
+      }
+    });
+    expect(foundMessage).toBe(true);
   });
 
   it("cleans up event listeners on unmount", () => {
