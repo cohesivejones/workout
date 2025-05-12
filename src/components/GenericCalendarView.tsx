@@ -28,6 +28,8 @@ export interface GenericCalendarViewProps<T extends CalendarItem> {
   renderVerticalItem: (item: T, dateStr: string) => ReactNode;
   getItemsByDate: (items: T[]) => Record<string, T[]>;
   emptyStateMessage?: string;
+  // For testing purposes only
+  initialMobileView?: boolean;
 }
 
 // Generic calendar component
@@ -37,10 +39,11 @@ export function GenericCalendarView<T extends CalendarItem>({
   renderVerticalItem,
   getItemsByDate,
   emptyStateMessage = "No items",
+  initialMobileView = false,
 }: GenericCalendarViewProps<T>) {
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [currentWeek, setCurrentWeek] = useState<Date>(new Date());
-  const [isMobileView, setIsMobileView] = useState<boolean>(false);
+  const [isMobileView, setIsMobileView] = useState<boolean>(initialMobileView);
 
   // Check screen size on mount and when window resizes
   useEffect(() => {
