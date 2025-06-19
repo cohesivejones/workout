@@ -66,6 +66,10 @@ describe("CalendarView", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // Mock Date to always return May 2025
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2025-05-15'));
+    
     // Mock window.innerWidth to simulate desktop view
     Object.defineProperty(window, "innerWidth", {
       writable: true,
@@ -75,6 +79,10 @@ describe("CalendarView", () => {
     // Mock window.addEventListener to capture resize event
     window.addEventListener = jest.fn();
     window.removeEventListener = jest.fn();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
   });
 
   it("renders calendar with workouts and pain scores", () => {

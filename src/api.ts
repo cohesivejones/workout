@@ -167,6 +167,9 @@ export const analyzeDiagnosticData = (diagnosticData: DiagnosticData): Promise<{
 export interface ExerciseWeightDataPoint {
   date: string;
   weight: number | null;
+  reps: number;
+  new_reps?: boolean;
+  new_weight?: boolean;
 }
 
 export interface ExerciseWeightProgression {
