@@ -251,19 +251,11 @@ function DashboardPage() {
             <div className={styles.prLegend}>
               <div className={styles.legendItem}>
                 <div className={styles.legendDot} style={{ backgroundColor: '#8884d8' }}></div>
-                <span>Normal workout</span>
+                <span>Previous Rep</span>
               </div>
               <div className={styles.legendItem}>
                 <div className={styles.legendDot} style={{ backgroundColor: '#ffd700' }}></div>
                 <span>New Rep PR</span>
-              </div>
-              <div className={styles.legendItem}>
-                <div className={styles.legendDot} style={{ backgroundColor: '#4caf50' }}></div>
-                <span>New Weight PR</span>
-              </div>
-              <div className={styles.legendItem}>
-                <div className={styles.legendDot} style={{ backgroundColor: '#ff6b35' }}></div>
-                <span>Both PRs</span>
               </div>
             </div>
           </div>

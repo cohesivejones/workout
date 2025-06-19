@@ -246,16 +246,12 @@ describe("DashboardPage", () => {
       });
 
       // Check that PR legend items are displayed for each exercise
-      const normalWorkoutLabels = screen.getAllByText("Normal workout");
+      const previousRepLabels = screen.getAllByText("Previous Rep");
       const newRepPRLabels = screen.getAllByText("New Rep PR");
-      const newWeightPRLabels = screen.getAllByText("New Weight PR");
-      const bothPRsLabels = screen.getAllByText("Both PRs");
 
       // Should have one legend per exercise chart (2 exercises)
-      expect(normalWorkoutLabels).toHaveLength(2);
+      expect(previousRepLabels).toHaveLength(2);
       expect(newRepPRLabels).toHaveLength(2);
-      expect(newWeightPRLabels).toHaveLength(2);
-      expect(bothPRsLabels).toHaveLength(2);
     });
 
     it("displays correct legend colors for PR indicators", async () => {
@@ -268,19 +264,17 @@ describe("DashboardPage", () => {
       // Get all legend dots and verify their colors
       const legendDots = document.querySelectorAll('[class*="legendDot"]');
       
-      // Should have 8 legend dots total (4 per exercise chart)
-      expect(legendDots).toHaveLength(8);
+      // Should have 4 legend dots total (2 per exercise chart)
+      expect(legendDots).toHaveLength(4);
 
       // Check that we have the expected colors
       const colors = Array.from(legendDots).map(dot => 
         (dot as HTMLElement).style.backgroundColor
       );
       
-      // Should contain our PR indicator colors
-      expect(colors).toContain('rgb(136, 132, 216)'); // #8884d8 - Normal workout
+      // Should contain our simplified PR indicator colors
+      expect(colors).toContain('rgb(136, 132, 216)'); // #8884d8 - Previous Rep
       expect(colors).toContain('rgb(255, 215, 0)');   // #ffd700 - New Rep PR
-      expect(colors).toContain('rgb(76, 175, 80)');   // #4caf50 - New Weight PR
-      expect(colors).toContain('rgb(255, 107, 53)');  // #ff6b35 - Both PRs
     });
   });
 
@@ -361,10 +355,8 @@ describe("DashboardPage", () => {
       expect(screen.getByText("Mixed PRs Exercise")).toBeInTheDocument();
       
       // Verify PR legend is present
-      expect(screen.getByText("Normal workout")).toBeInTheDocument();
+      expect(screen.getByText("Previous Rep")).toBeInTheDocument();
       expect(screen.getByText("New Rep PR")).toBeInTheDocument();
-      expect(screen.getByText("New Weight PR")).toBeInTheDocument();
-      expect(screen.getByText("Both PRs")).toBeInTheDocument();
     });
 
     it("handles data points without PR flags gracefully", async () => {
@@ -388,7 +380,7 @@ describe("DashboardPage", () => {
 
       // Should still render the exercise and legend
       expect(screen.getByText("Legacy Data Exercise")).toBeInTheDocument();
-      expect(screen.getByText("Normal workout")).toBeInTheDocument();
+      expect(screen.getByText("Previous Rep")).toBeInTheDocument();
     });
   });
 });
