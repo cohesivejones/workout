@@ -1162,7 +1162,13 @@ app.get("/dashboard/weight-progression", authenticateToken, async (req: Request,
     
     // Process data for the dashboard
     // Group by exercise and create time series data
-    const exerciseProgressionData: Record<string, Array<{date: string, weight: number | null}>> = {};
+    const exerciseProgressionData: Record<string, Array<{
+      date: string, 
+      weight: number | null, 
+      reps: number,
+      new_reps?: boolean,
+      new_weight?: boolean
+    }>> = {};
     
     workouts.forEach(workout => {
       workout.workoutExercises.forEach(we => {
@@ -1176,10 +1182,13 @@ app.get("/dashboard/weight-progression", authenticateToken, async (req: Request,
           exerciseProgressionData[exerciseName] = [];
         }
         
-        // Add data point
+        // Add data point with all relevant information
         exerciseProgressionData[exerciseName].push({
           date: workout.date,
-          weight: we.weight
+          weight: we.weight,
+          reps: we.reps,
+          new_reps: we.new_reps,
+          new_weight: we.new_weight
         });
       });
     });

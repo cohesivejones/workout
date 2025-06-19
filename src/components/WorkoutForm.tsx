@@ -95,10 +95,10 @@ function WorkoutForm({
           },
         });
       }
-    } catch (err) {
-      setError("serverError" as any, {
+    } catch (error) {
+      setError("root", {
         type: "server",
-        message: err instanceof Error ? err.message : "An error occurred",
+        message: error instanceof Error ? error.message : "An error occurred",
       });
     }
   };
@@ -128,10 +128,10 @@ function WorkoutForm({
             weight: "",
           });
         }
-      } catch (err) {
-        setError("serverError" as any, {
+      } catch (error) {
+        setError("root", {
           type: "server",
-          message: err instanceof Error ? err.message : "An error occurred",
+          message: error instanceof Error ? error.message : "An error occurred",
         });
       } finally {
         setIsSavingExercise(false);
@@ -157,7 +157,7 @@ function WorkoutForm({
         "currentExercise.weight",
         recentData.weight ? String(recentData.weight) : "",
       );
-    } catch (err) {
+    } catch {
       // fail silently
     }
   };
@@ -169,9 +169,9 @@ function WorkoutForm({
   return (
     <div className={styles.workoutForm}>
       <h2>{existingWorkout ? "Edit Workout" : "New Workout"}</h2>
-      {(errors as any).serverError && (
+      {errors.root && (
         <div className={styles.errorMessage}>
-          {(errors as any).serverError.message}
+          {errors.root.message}
         </div>
       )}
       <form onSubmit={handleSubmit(onFormSubmit)}>

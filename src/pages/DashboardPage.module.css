@@ -71,3 +71,39 @@
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
+
+.prLegend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #e0e0e0;
+  font-size: 12px;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legendDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Mobile adjustments for legend */
+@media (max-width: 768px) {
+  .prLegend {
+    gap: 10px;
+    font-size: 11px;
+  }
+  
+  .legendDot {
+    width: 6px;
+    height: 6px;
+  }
+}

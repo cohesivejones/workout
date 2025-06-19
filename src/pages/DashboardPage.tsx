@@ -73,6 +73,54 @@ const normalizeDataToStandardRange = <T extends { date: string }>(
   return normalizedData;
 };
 
+// Custom dot component for rendering PR indicators
+const CustomDot = (props: { cx?: number; cy?: number; payload?: { weight: number | null; new_reps?: boolean; new_weight?: boolean } }) => {
+  const { cx, cy, payload } = props;
+  
+  if (!payload || payload.weight === null) {
+    return null;
+  }
+  
+  // Determine color and size based on PR flags
+  let fill = '#8884d8'; // Default blue
+  let r = 4; // Default radius
+  
+  if (payload.new_reps && payload.new_weight) {
+    fill = '#ff6b35'; // Orange for both PRs
+    r = 6;
+  } else if (payload.new_reps) {
+    fill = '#ffd700'; // Gold for new reps
+    r = 6;
+  } else if (payload.new_weight) {
+    fill = '#4caf50'; // Green for new weight
+    r = 6;
+  }
+  
+  return <circle cx={cx} cy={cy} r={r} fill={fill} stroke={fill} strokeWidth={2} />;
+};
+
+// Custom tooltip formatter
+const formatTooltip = (value: number | string, name: string, props: { payload?: { weight: number; reps: number; new_reps?: boolean; new_weight?: boolean } }) => {
+  if (name === 'Weight' && props.payload) {
+    const { weight, reps, new_reps, new_weight } = props.payload;
+    
+    const tooltipContent = [`${weight} lbs • ${reps} reps`, 'Weight & Reps'];
+    
+    // Add PR indicators
+    const prIndicators = [];
+    if (new_reps) prIndicators.push('🎉 New Rep PR!');
+    if (new_weight) prIndicators.push('⭐ New Weight PR!');
+    
+    if (prIndicators.length > 0) {
+      tooltipContent[0] += ` • ${prIndicators.join(' • ')}`;
+    }
+    
+    return tooltipContent;
+  }
+  
+  return [`${value} lbs`, 'Weight'];
+};
+
 function DashboardPage() {
   const [progressionData, setProgressionData] = useState<ExerciseWeightProgression[]>([]);
   const [painData, setPainData] = useState<PainScoreProgression | null>(null);
@@ -182,7 +230,7 @@ function DashboardPage() {
                   width={50}
                 />
                 <Tooltip 
-                  formatter={(value) => [`${value} lbs`, 'Weight']}
+                  formatter={formatTooltip}
                   labelFormatter={(date) => format(new Date(date), 'MMM d, yyyy')}
                   contentStyle={{ fontSize: '12px', padding: '8px' }}
                   wrapperStyle={{ zIndex: 1000 }}
@@ -196,9 +244,28 @@ function DashboardPage() {
                   activeDot={{ r: 8 }} 
                   connectNulls={true}
                   name="Weight"
+                  dot={<CustomDot />}
                 />
               </LineChart>
             </ResponsiveContainer>
+            <div className={styles.prLegend}>
+              <div className={styles.legendItem}>
+                <div className={styles.legendDot} style={{ backgroundColor: '#8884d8' }}></div>
+                <span>Normal workout</span>
+              </div>
+              <div className={styles.legendItem}>
+                <div className={styles.legendDot} style={{ backgroundColor: '#ffd700' }}></div>
+                <span>New Rep PR</span>
+              </div>
+              <div className={styles.legendItem}>
+                <div className={styles.legendDot} style={{ backgroundColor: '#4caf50' }}></div>
+                <span>New Weight PR</span>
+              </div>
+              <div className={styles.legendItem}>
+                <div className={styles.legendDot} style={{ backgroundColor: '#ff6b35' }}></div>
+                <span>Both PRs</span>
+              </div>
+            </div>
           </div>
         ))}
       </div>

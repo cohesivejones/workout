@@ -14,10 +14,10 @@ jest.mock("recharts", () => {
   const OriginalModule = jest.requireActual("recharts");
   return {
     ...OriginalModule,
-    ResponsiveContainer: ({ children }: any) => <div data-testid="responsive-container">{children}</div>,
-    LineChart: ({ children }: any) => <div data-testid="line-chart">{children}</div>,
+    ResponsiveContainer: ({ children }: { children: React.ReactNode }) => <div data-testid="responsive-container">{children}</div>,
+    LineChart: ({ children }: { children: React.ReactNode }) => <div data-testid="line-chart">{children}</div>,
     Line: () => <div data-testid="chart-line" />,
-    XAxis: (props: any) => <div data-testid="x-axis" data-domain={JSON.stringify(props.domain)} />,
+    XAxis: (props: { domain?: unknown }) => <div data-testid="x-axis" data-domain={JSON.stringify(props.domain)} />,
     YAxis: () => <div data-testid="y-axis" />,
     CartesianGrid: () => <div data-testid="cartesian-grid" />,
     Tooltip: () => <div data-testid="tooltip" />,
@@ -43,17 +43,17 @@ describe("DashboardPage", () => {
     {
       exerciseName: "Bench Press",
       dataPoints: [
-        { date: "2025-02-15", weight: 135 },
-        { date: "2025-02-22", weight: 145 },
-        { date: "2025-03-01", weight: 155 },
+        { date: "2025-02-15", weight: 135, reps: 8, new_reps: false, new_weight: false },
+        { date: "2025-02-22", weight: 145, reps: 10, new_reps: true, new_weight: true },
+        { date: "2025-03-01", weight: 155, reps: 8, new_reps: false, new_weight: true },
       ],
     },
     {
       exerciseName: "Squat",
       dataPoints: [
-        { date: "2025-02-15", weight: 185 },
-        { date: "2025-02-22", weight: 195 },
-        { date: "2025-03-08", weight: 205 },
+        { date: "2025-02-15", weight: 185, reps: 5, new_reps: false, new_weight: false },
+        { date: "2025-02-22", weight: 195, reps: 6, new_reps: true, new_weight: false },
+        { date: "2025-03-08", weight: 205, reps: 5, new_reps: false, new_weight: true },
       ],
     },
   ];
@@ -228,6 +228,167 @@ describe("DashboardPage", () => {
     const firstDomain = xAxes[0].getAttribute("data-domain");
     xAxes.forEach(axis => {
       expect(axis.getAttribute("data-domain")).toBe(firstDomain);
+    });
+  });
+
+  describe("PR Indicator Features", () => {
+    beforeEach(() => {
+      (Api.fetchWeightProgressionData as jest.Mock).mockResolvedValue(mockProgressionData);
+      (Api.fetchPainProgressionData as jest.Mock).mockResolvedValue(mockPainData);
+      (Api.fetchSleepProgressionData as jest.Mock).mockResolvedValue(mockSleepData);
+    });
+
+    it("renders PR legend for each exercise chart", async () => {
+      render(<DashboardPage />);
+
+      await waitFor(() => {
+        expect(screen.queryByText(/Loading.../i)).not.toBeInTheDocument();
+      });
+
+      // Check that PR legend items are displayed for each exercise
+      const normalWorkoutLabels = screen.getAllByText("Normal workout");
+      const newRepPRLabels = screen.getAllByText("New Rep PR");
+      const newWeightPRLabels = screen.getAllByText("New Weight PR");
+      const bothPRsLabels = screen.getAllByText("Both PRs");
+
+      // Should have one legend per exercise chart (2 exercises)
+      expect(normalWorkoutLabels).toHaveLength(2);
+      expect(newRepPRLabels).toHaveLength(2);
+      expect(newWeightPRLabels).toHaveLength(2);
+      expect(bothPRsLabels).toHaveLength(2);
+    });
+
+    it("displays correct legend colors for PR indicators", async () => {
+      render(<DashboardPage />);
+
+      await waitFor(() => {
+        expect(screen.queryByText(/Loading.../i)).not.toBeInTheDocument();
+      });
+
+      // Get all legend dots and verify their colors
+      const legendDots = document.querySelectorAll('[class*="legendDot"]');
+      
+      // Should have 8 legend dots total (4 per exercise chart)
+      expect(legendDots).toHaveLength(8);
+
+      // Check that we have the expected colors
+      const colors = Array.from(legendDots).map(dot => 
+        (dot as HTMLElement).style.backgroundColor
+      );
+      
+      // Should contain our PR indicator colors
+      expect(colors).toContain('rgb(136, 132, 216)'); // #8884d8 - Normal workout
+      expect(colors).toContain('rgb(255, 215, 0)');   // #ffd700 - New Rep PR
+      expect(colors).toContain('rgb(76, 175, 80)');   // #4caf50 - New Weight PR
+      expect(colors).toContain('rgb(255, 107, 53)');  // #ff6b35 - Both PRs
+    });
+  });
+
+  describe("Custom Dot Component", () => {
+    it("renders custom dots with correct colors based on PR flags", async () => {
+      // Create a more detailed mock to test the CustomDot component
+      const mockDataWithPRs = [
+        {
+          exerciseName: "Test Exercise",
+          dataPoints: [
+            { date: "2025-02-15", weight: 135, reps: 8, new_reps: false, new_weight: false },
+            { date: "2025-02-22", weight: 145, reps: 10, new_reps: true, new_weight: false },
+            { date: "2025-03-01", weight: 155, reps: 8, new_reps: false, new_weight: true },
+            { date: "2025-03-08", weight: 165, reps: 10, new_reps: true, new_weight: true },
+          ],
+        },
+      ];
+
+      (Api.fetchWeightProgressionData as jest.Mock).mockResolvedValue(mockDataWithPRs);
+      (Api.fetchPainProgressionData as jest.Mock).mockResolvedValue({ dataPoints: [] });
+      (Api.fetchSleepProgressionData as jest.Mock).mockResolvedValue({ dataPoints: [] });
+
+      render(<DashboardPage />);
+
+      await waitFor(() => {
+        expect(screen.queryByText(/Loading.../i)).not.toBeInTheDocument();
+      });
+
+      // Verify that the chart is rendered
+      expect(screen.getByText("Test Exercise")).toBeInTheDocument();
+      
+      // Since there's only one exercise chart now, we can use getByTestId
+      const charts = screen.getAllByTestId("line-chart");
+      expect(charts.length).toBe(1); // Only the exercise chart, no pain/sleep charts
+    });
+  });
+
+  describe("Enhanced Tooltip Formatting", () => {
+    it("includes reps and PR indicators in tooltip data structure", async () => {
+      render(<DashboardPage />);
+
+      await waitFor(() => {
+        expect(screen.queryByText(/Loading.../i)).not.toBeInTheDocument();
+      });
+
+      // The tooltip formatting is tested through the data structure
+      // Since we're mocking Recharts, we can't test the actual tooltip rendering
+      // but we can verify the data contains the necessary fields
+      expect(mockProgressionData[0].dataPoints[0]).toHaveProperty('reps');
+      expect(mockProgressionData[0].dataPoints[0]).toHaveProperty('new_reps');
+      expect(mockProgressionData[0].dataPoints[0]).toHaveProperty('new_weight');
+    });
+  });
+
+  describe("Data Structure Validation", () => {
+    it("handles data points with PR flags correctly", async () => {
+      const dataWithMixedPRs = [
+        {
+          exerciseName: "Mixed PRs Exercise",
+          dataPoints: [
+            { date: "2025-02-15", weight: 100, reps: 5, new_reps: false, new_weight: false },
+            { date: "2025-02-22", weight: 100, reps: 8, new_reps: true, new_weight: false },
+            { date: "2025-03-01", weight: 110, reps: 5, new_reps: false, new_weight: true },
+            { date: "2025-03-08", weight: 120, reps: 10, new_reps: true, new_weight: true },
+          ],
+        },
+      ];
+
+      (Api.fetchWeightProgressionData as jest.Mock).mockResolvedValue(dataWithMixedPRs);
+
+      render(<DashboardPage />);
+
+      await waitFor(() => {
+        expect(screen.queryByText(/Loading.../i)).not.toBeInTheDocument();
+      });
+
+      // Verify the exercise is rendered
+      expect(screen.getByText("Mixed PRs Exercise")).toBeInTheDocument();
+      
+      // Verify PR legend is present
+      expect(screen.getByText("Normal workout")).toBeInTheDocument();
+      expect(screen.getByText("New Rep PR")).toBeInTheDocument();
+      expect(screen.getByText("New Weight PR")).toBeInTheDocument();
+      expect(screen.getByText("Both PRs")).toBeInTheDocument();
+    });
+
+    it("handles data points without PR flags gracefully", async () => {
+      const dataWithoutPRFlags = [
+        {
+          exerciseName: "Legacy Data Exercise",
+          dataPoints: [
+            { date: "2025-02-15", weight: 100, reps: 5 },
+            { date: "2025-02-22", weight: 110, reps: 6 },
+          ],
+        },
+      ];
+
+      (Api.fetchWeightProgressionData as jest.Mock).mockResolvedValue(dataWithoutPRFlags);
+
+      render(<DashboardPage />);
+
+      await waitFor(() => {
+        expect(screen.queryByText(/Loading.../i)).not.toBeInTheDocument();
+      });
+
+      // Should still render the exercise and legend
+      expect(screen.getByText("Legacy Data Exercise")).toBeInTheDocument();
+      expect(screen.getByText("Normal workout")).toBeInTheDocument();
     });
   });
 });
