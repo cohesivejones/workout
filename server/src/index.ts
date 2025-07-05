@@ -1310,41 +1310,21 @@ app.post("/workouts/generate", authenticateToken, async (req: Request, res: Resp
       order: { date: "DESC" },
     });
 
-    // Process workout data for the prompt
-    const exerciseFrequency: Record<string, { count: number; totalReps: number; totalWeight: number; avgReps: number; avgWeight: number }> = {};
-    
-    workouts.forEach(workout => {
-      workout.workoutExercises.forEach(we => {
-        const exerciseName = we.exercise.name;
-        if (!exerciseFrequency[exerciseName]) {
-          exerciseFrequency[exerciseName] = { count: 0, totalReps: 0, totalWeight: 0, avgReps: 0, avgWeight: 0 };
-        }
-        exerciseFrequency[exerciseName].count++;
-        exerciseFrequency[exerciseName].totalReps += we.reps;
-        exerciseFrequency[exerciseName].totalWeight += we.weight || 0;
-      });
-    });
-
-    // Calculate averages
-    Object.keys(exerciseFrequency).forEach(exerciseName => {
-      const data = exerciseFrequency[exerciseName];
-      data.avgReps = Math.round(data.totalReps / data.count);
-      data.avgWeight = data.totalWeight > 0 ? Math.round(data.totalWeight / data.count) : 0;
-    });
-
-    // Format exercise data for the prompt
-    const exerciseList = Object.entries(exerciseFrequency)
-      .sort((a, b) => b[1].count - a[1].count) // Sort by frequency
-      .map(([name, data]) => {
-        const weightInfo = data.avgWeight > 0 ? ` (avg: ${data.avgWeight} lbs, ${data.avgReps} reps)` : ` (avg: ${data.avgReps} reps)`;
-        return `- ${name}: performed ${data.count} times${weightInfo}`;
-      })
-      .join('\n');
+    // Format workout data as structured JSON for the prompt
+    const workoutData = workouts.map(workout => ({
+      date_of_workout: workout.date,
+      exercises: workout.workoutExercises.map(we => ({
+        name: we.exercise.name,
+        reps: we.reps,
+        sets: 3, // Assume all sets are 3 as requested
+        ...(we.weight && { weight: we.weight }) // Include weight if available
+      }))
+    }));
 
     // Create the prompt
     const basePrompt = "Generally I do 6 full body exercises every workout covering legs core and upper body, generate a workout for me based on the following exercises over the last month";
     
-    let fullPrompt = `${basePrompt}:\n\n${exerciseList}`;
+    let fullPrompt = `${basePrompt}:\n\n${JSON.stringify(workoutData, null, 2)}`;
     
     if (additionalNotes && additionalNotes.trim()) {
       fullPrompt += `\n\nAdditional notes: ${additionalNotes.trim()}`;
