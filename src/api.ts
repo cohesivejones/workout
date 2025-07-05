@@ -206,3 +206,15 @@ export const fetchPainProgressionData = (): Promise<PainScoreProgression> =>
 // Fetch sleep score progression data for dashboard
 export const fetchSleepProgressionData = (): Promise<SleepScoreProgression> =>
   api.get('/dashboard/sleep-progression');
+
+// Generate workout API functions
+export interface GenerateWorkoutRequest {
+  additionalNotes?: string;
+}
+
+export interface GenerateWorkoutResponse {
+  generatedWorkout: string;
+}
+
+export const generateWorkout = (request: GenerateWorkoutRequest): Promise<GenerateWorkoutResponse> =>
+  api.post('/workouts/generate', request);

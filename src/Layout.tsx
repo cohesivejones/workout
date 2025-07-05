@@ -64,6 +64,9 @@ const Header = () => {
           <Link to="/exercises" className={styles.navLink}>
             Exercises
           </Link>
+          <Link to="/workouts/generate" className={styles.navLink}>
+            Generate Workout
+          </Link>
           <Link to="/diagnostician" className={styles.navLink}>
             Diagnostician
           </Link>

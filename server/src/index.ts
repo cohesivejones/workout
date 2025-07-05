@@ -1280,6 +1280,99 @@ app.get("/dashboard/sleep-progression", authenticateToken, async (req: Request, 
   }
 });
 
+// Generate workout using AI
+app.post("/workouts/generate", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const { additionalNotes } = req.body;
+    const userId = req.user!.id;
+
+    // Calculate date range (last 30 days)
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(endDate.getDate() - 30);
+
+    // Format dates for SQL query
+    const startDateStr = startDate.toISOString().split("T")[0];
+    const endDateStr = endDate.toISOString().split("T")[0];
+
+    // Fetch workouts from the last month
+    const workoutRepository = dataSource.getRepository(Workout);
+    const workouts = await workoutRepository.find({
+      where: {
+        userId: Number(userId),
+        date: Between(startDateStr, endDateStr),
+      },
+      relations: {
+        workoutExercises: {
+          exercise: true,
+        },
+      },
+      order: { date: "DESC" },
+    });
+
+    // Process workout data for the prompt
+    const exerciseFrequency: Record<string, { count: number; totalReps: number; totalWeight: number; avgReps: number; avgWeight: number }> = {};
+    
+    workouts.forEach(workout => {
+      workout.workoutExercises.forEach(we => {
+        const exerciseName = we.exercise.name;
+        if (!exerciseFrequency[exerciseName]) {
+          exerciseFrequency[exerciseName] = { count: 0, totalReps: 0, totalWeight: 0, avgReps: 0, avgWeight: 0 };
+        }
+        exerciseFrequency[exerciseName].count++;
+        exerciseFrequency[exerciseName].totalReps += we.reps;
+        exerciseFrequency[exerciseName].totalWeight += we.weight || 0;
+      });
+    });
+
+    // Calculate averages
+    Object.keys(exerciseFrequency).forEach(exerciseName => {
+      const data = exerciseFrequency[exerciseName];
+      data.avgReps = Math.round(data.totalReps / data.count);
+      data.avgWeight = data.totalWeight > 0 ? Math.round(data.totalWeight / data.count) : 0;
+    });
+
+    // Format exercise data for the prompt
+    const exerciseList = Object.entries(exerciseFrequency)
+      .sort((a, b) => b[1].count - a[1].count) // Sort by frequency
+      .map(([name, data]) => {
+        const weightInfo = data.avgWeight > 0 ? ` (avg: ${data.avgWeight} lbs, ${data.avgReps} reps)` : ` (avg: ${data.avgReps} reps)`;
+        return `- ${name}: performed ${data.count} times${weightInfo}`;
+      })
+      .join('\n');
+
+    // Create the prompt
+    const basePrompt = "Generally I do 6 full body exercises every workout covering legs core and upper body, generate a workout for me based on the following exercises over the last month";
+    
+    let fullPrompt = `${basePrompt}:\n\n${exerciseList}`;
+    
+    if (additionalNotes && additionalNotes.trim()) {
+      fullPrompt += `\n\nAdditional notes: ${additionalNotes.trim()}`;
+    }
+
+    fullPrompt += "\n\nPlease generate a balanced full-body workout with 6 exercises, including suggested reps and weights based on my recent performance. Focus on covering legs, core, and upper body as requested.";
+
+    // Call OpenAI API
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        { 
+          role: "system", 
+          content: "You are a fitness trainer assistant. Generate practical workout routines based on the user's exercise history. Provide specific rep ranges and weight suggestions when possible. Format your response clearly with exercise names, reps, and weights." 
+        },
+        { role: "user", content: fullPrompt },
+      ],
+      temperature: 0.7,
+    });
+
+    // Return the generated workout
+    res.json({ generatedWorkout: response.choices[0].message.content });
+  } catch (err) {
+    console.error("Generate workout error:", err);
+    res.status(500).json({ error: "Failed to generate workout" });
+  }
+});
+
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
