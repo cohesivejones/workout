@@ -3,7 +3,7 @@
 # Exit on error
 set -e
 
-echo "Starting deployment process..."
+echo "Starting single-node deployment process..."
 
 # 1. Kill all Node.js processes
 echo "Killing all Node.js processes..."
@@ -25,8 +25,9 @@ npm run db:migrate
 echo "Building the application..."
 npm run build
 
-# 6. Run the app (this will start both frontend and backend)
-echo "Starting the application..."
+# 6. Start the consolidated single-node server
+echo "Starting the consolidated server..."
 nohup npm start > /dev/null 2>&1 &
 
-echo "Deployment completed successfully!"
+echo "Single-node deployment completed successfully!"
+echo "Application is running on port ${PORT:-3000}"

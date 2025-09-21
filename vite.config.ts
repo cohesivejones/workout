@@ -10,6 +10,8 @@ export default defineConfig(({ mode }) => {
     plugins: [react(), EnvironmentPlugin("all")],
     server: {
       port: 3000,
+      host: true, // Allow external connections
+      allowedHosts: ["turtle", "localhost", "127.0.0.1"], // Allow specific hosts
       proxy: {
         "/api": {
           target: env.VITE_API_URL,
