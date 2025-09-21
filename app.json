@@ -1,0 +1,45 @@
+{
+  "name": "Workout Tracker",
+  "description": "A full-stack React application for tracking workouts with AI-powered insights",
+  "repository": "https://github.com/cohesivejones/workout",
+  "logo": "https://node-js-sample.herokuapp.com/node.png",
+  "keywords": ["node", "express", "react", "typescript", "postgresql", "heroku"],
+  "image": "heroku/nodejs",
+  "addons": [
+    {
+      "plan": "heroku-postgresql:mini"
+    }
+  ],
+  "env": {
+    "NODE_ENV": {
+      "description": "Environment mode",
+      "value": "production"
+    },
+    "JWT_SECRET": {
+      "description": "Secret key for JWT token signing",
+      "generator": "secret"
+    },
+    "OPENAI_API_KEY": {
+      "description": "OpenAI API key for workout generation and diagnostics",
+      "required": false
+    },
+    "CORS_ORIGIN": {
+      "description": "Allowed CORS origins (comma-separated)",
+      "value": "https://your-app-name.herokuapp.com"
+    }
+  },
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "basic"
+    }
+  },
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    }
+  ],
+  "scripts": {
+    "postdeploy": "npm run db:migrate"
+  }
+}
