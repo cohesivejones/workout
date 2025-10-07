@@ -25,7 +25,7 @@
     },
     "CORS_ORIGIN": {
       "description": "Allowed CORS origins (comma-separated)",
-      "value": "https://your-app-name.herokuapp.com"
+      "value": "https://shielded-springs-18850.herokuapp.com"
     }
   },
   "formation": {
