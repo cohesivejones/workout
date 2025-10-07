@@ -6,7 +6,7 @@ export class MakeUniquenessConstraintInclueUserId1741908165347
   public async up(queryRunner: QueryRunner): Promise<void> {
     queryRunner.query(`
             ALTER TABLE workouts
-            DROP CONSTRAINT workouts_date_key,
+            DROP CONSTRAINT "UQ_workouts_date",
             ADD CONSTRAINT workouts_date_user_id_key UNIQUE (date, "userId");
         `);
   }
@@ -15,7 +15,7 @@ export class MakeUniquenessConstraintInclueUserId1741908165347
     queryRunner.query(`
             ALTER TABLE workouts
             DROP CONSTRAINT workouts_date_user_id_key,
-            ADD CONSTRAINT workouts_date_key UNIQUE (date);
+            ADD CONSTRAINT "UQ_workouts_date" UNIQUE (date);
         `);
   }
 }
