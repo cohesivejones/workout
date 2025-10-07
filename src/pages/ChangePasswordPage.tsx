@@ -41,7 +41,7 @@ function ChangePasswordPage() {
 
       // Call change password API
       await axios.post(
-        `${process.env.VITE_API_URL}/auth/change-password`,
+        `/api/auth/change-password`,
         {
           currentPassword: data.currentPassword,
           newPassword: data.newPassword,
