@@ -492,11 +492,22 @@ app.post("/workouts", authenticateToken, async (req: Request, res: Response) => 
         workoutExercise.new_time = false;
       }
 
-      // Save the updated flags
-      await workoutExerciseRepository.save(workoutExercise);
+      // Save the updated flags and reload with relations
+      const savedWorkoutExercise = await workoutExerciseRepository.save(workoutExercise);
       
-      workout.workoutExercises.push(workoutExercise);
-      createdWorkoutExercises.push(workoutExercise);
+      // Reload with exercise relation to ensure we have all data
+      const reloadedWorkoutExercise = await workoutExerciseRepository.findOne({
+        where: { 
+          workout_id: workout.id,
+          exercise_id: exercise.id
+        },
+        relations: ['exercise']
+      });
+      
+      if (reloadedWorkoutExercise) {
+        workout.workoutExercises.push(reloadedWorkoutExercise);
+        createdWorkoutExercises.push(reloadedWorkoutExercise);
+      }
     }
 
     await queryRunner.commitTransaction();
