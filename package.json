@@ -8,6 +8,7 @@
     "db:create": "npm run db:create --prefix server",
     "db:migrate": "npm run db:migrate --prefix server",
     "dev": "concurrently \"vite\" \"npm run dev --prefix server\"",
+    "heroku-postbuild": "npm run build",
     "lint": "eslint . --report-unused-disable-directives --max-warnings 0",
     "lint:fix": "eslint . --report-unused-disable-directives --max-warnings 0 --fix",
     "postinstall": "npm install --prefix server",
