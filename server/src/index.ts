@@ -74,10 +74,13 @@ if (process.env.NODE_ENV === 'production') {
 
 // Routes
 
+// Create API router
+const apiRouter = express.Router();
+
 // Authentication routes
 
 // Login endpoint
-app.post("/auth/login", async (req: Request, res: Response) => {
+apiRouter.post("/auth/login", async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body as LoginRequest;
 
@@ -132,14 +135,14 @@ app.post("/auth/login", async (req: Request, res: Response) => {
 });
 
 // Logout endpoint
-app.post("/auth/logout", (_req: Request, res: Response) => {
+apiRouter.post("/auth/logout", (_req: Request, res: Response) => {
   // Clear the token cookie
   res.clearCookie("token");
   res.json({ message: "Logged out successfully" });
 });
 
 // Get current user
-app.get("/auth/me", authenticateToken, (req: Request, res: Response) => {
+apiRouter.get("/auth/me", authenticateToken, (req: Request, res: Response) => {
   // User is attached to request by authenticateToken middleware
   const user = req.user!;
 
@@ -151,7 +154,7 @@ app.get("/auth/me", authenticateToken, (req: Request, res: Response) => {
 });
 
 // Change password endpoint
-app.post(
+apiRouter.post(
   "/auth/change-password",
   authenticateToken,
   async (req: Request, res: Response) => {
@@ -198,7 +201,7 @@ app.post(
 );
 
 // Get all exercises
-app.get("/exercises", authenticateToken, async (req: Request, res: Response) => {
+apiRouter.get("/exercises", authenticateToken, async (req: Request, res: Response) => {
   try {
     const userId = req.user!.id;
     const exerciseRepository = dataSource.getRepository(Exercise);
@@ -216,7 +219,7 @@ app.get("/exercises", authenticateToken, async (req: Request, res: Response) => 
 });
 
 // Get most recent workout exercise data
-app.get("/exercises/recent", authenticateToken, async (req: Request, res: Response) => {
+apiRouter.get("/exercises/recent", authenticateToken, async (req: Request, res: Response) => {
   const { exerciseId } = req.query;
   const userId = req.user!.id;
 
@@ -270,7 +273,7 @@ app.get("/exercises/recent", authenticateToken, async (req: Request, res: Respon
 });
 
 // Add new exercise
-app.post("/exercises", authenticateToken, async (req: Request, res: Response) => {
+apiRouter.post("/exercises", authenticateToken, async (req: Request, res: Response) => {
   try {
     const { name } = req.body;
     const userId = req.user!.id;
@@ -296,7 +299,7 @@ app.post("/exercises", authenticateToken, async (req: Request, res: Response) =>
 });
 
 // Update exercise
-app.put("/exercises/:id", authenticateToken, async (req: Request, res: Response) => {
+apiRouter.put("/exercises/:id", authenticateToken, async (req: Request, res: Response) => {
   try {
     const exerciseId = parseInt(req.params.id);
     const { name } = req.body;
@@ -329,7 +332,7 @@ app.put("/exercises/:id", authenticateToken, async (req: Request, res: Response)
 });
 
 // Get all workouts with exercises
-app.get("/workouts", authenticateToken, async (req: Request, res: Response) => {
+apiRouter.get("/workouts", authenticateToken, async (req: Request, res: Response) => {
   try {
     const userId = req.user!.id;
 
@@ -372,7 +375,7 @@ app.get("/workouts", authenticateToken, async (req: Request, res: Response) => {
 });
 
 // Get a single workout by ID
-app.get("/workouts/:id", authenticateToken, async (req: Request, res: Response) => {
+apiRouter.get("/workouts/:id", authenticateToken, async (req: Request, res: Response) => {
   try {
     const workoutId = parseInt(req.params.id);
     const workoutRepository = dataSource.getRepository(Workout);
@@ -415,7 +418,7 @@ app.get("/workouts/:id", authenticateToken, async (req: Request, res: Response) 
 });
 
 // Add new workout
-app.post("/workouts", authenticateToken, async (req: Request, res: Response) => {
+apiRouter.post("/workouts", authenticateToken, async (req: Request, res: Response) => {
   const queryRunner = dataSource.createQueryRunner();
 
   try {
@@ -551,7 +554,7 @@ app.post("/workouts", authenticateToken, async (req: Request, res: Response) => 
 });
 
 // Update workout
-app.put("/workouts/:id", authenticateToken, async (req: Request, res: Response) => {
+apiRouter.put("/workouts/:id", authenticateToken, async (req: Request, res: Response) => {
   const queryRunner = dataSource.createQueryRunner();
 
   try {
@@ -689,7 +692,7 @@ app.put("/workouts/:id", authenticateToken, async (req: Request, res: Response) 
 });
 
 // Delete workout
-app.delete("/workouts/:id", authenticateToken, async (req: Request, res: Response) => {
+apiRouter.delete("/workouts/:id", authenticateToken, async (req: Request, res: Response) => {
   const queryRunner = dataSource.createQueryRunner();
 
   try {
@@ -727,7 +730,7 @@ app.delete("/workouts/:id", authenticateToken, async (req: Request, res: Respons
 // Pain Score Routes
 
 // Get all pain scores for a user
-app.get("/pain-scores", authenticateToken, async (req: Request, res: Response) => {
+apiRouter.get("/pain-scores", authenticateToken, async (req: Request, res: Response) => {
   try {
     const userId = req.user!.id;
 
@@ -747,7 +750,7 @@ app.get("/pain-scores", authenticateToken, async (req: Request, res: Response) =
 });
 
 // Get a single pain score by ID
-app.get("/pain-scores/:id", authenticateToken, async (req: Request, res: Response) => {
+apiRouter.get("/pain-scores/:id", authenticateToken, async (req: Request, res: Response) => {
   try {
     const painScoreId = parseInt(req.params.id);
     const painScoreRepository = dataSource.getRepository(PainScore);
@@ -768,7 +771,7 @@ app.get("/pain-scores/:id", authenticateToken, async (req: Request, res: Respons
 });
 
 // Add new pain score
-app.post("/pain-scores", authenticateToken, async (req: Request, res: Response) => {
+apiRouter.post("/pain-scores", authenticateToken, async (req: Request, res: Response) => {
   try {
     const { date, score, notes } = req.body as CreatePainScoreRequest;
     const userId = req.user!.id;
@@ -811,7 +814,7 @@ app.post("/pain-scores", authenticateToken, async (req: Request, res: Response) 
 });
 
 // Update pain score
-app.put("/pain-scores/:id", authenticateToken, async (req: Request, res: Response) => {
+apiRouter.put("/pain-scores/:id", authenticateToken, async (req: Request, res: Response) => {
   try {
     const painScoreId = parseInt(req.params.id);
     const { date, score, notes } = req.body as Omit<
@@ -863,7 +866,7 @@ app.put("/pain-scores/:id", authenticateToken, async (req: Request, res: Respons
 });
 
 // Delete pain score
-app.delete("/pain-scores/:id", authenticateToken, async (req: Request, res: Response) => {
+apiRouter.delete("/pain-scores/:id", authenticateToken, async (req: Request, res: Response) => {
   try {
     const painScoreId = parseInt(req.params.id);
     const painScoreRepository = dataSource.getRepository(PainScore);
@@ -889,7 +892,7 @@ app.delete("/pain-scores/:id", authenticateToken, async (req: Request, res: Resp
 // Sleep Score Routes
 
 // Get all sleep scores for a user
-app.get("/sleep-scores", authenticateToken, async (req: Request, res: Response) => {
+apiRouter.get("/sleep-scores", authenticateToken, async (req: Request, res: Response) => {
   try {
     const userId = req.user!.id;
 
@@ -909,7 +912,7 @@ app.get("/sleep-scores", authenticateToken, async (req: Request, res: Response) 
 });
 
 // Get a single sleep score by ID
-app.get("/sleep-scores/:id", authenticateToken, async (req: Request, res: Response) => {
+apiRouter.get("/sleep-scores/:id", authenticateToken, async (req: Request, res: Response) => {
   try {
     const sleepScoreId = parseInt(req.params.id);
     const sleepScoreRepository = dataSource.getRepository(SleepScore);
@@ -930,7 +933,7 @@ app.get("/sleep-scores/:id", authenticateToken, async (req: Request, res: Respon
 });
 
 // Add new sleep score
-app.post("/sleep-scores", authenticateToken, async (req: Request, res: Response) => {
+apiRouter.post("/sleep-scores", authenticateToken, async (req: Request, res: Response) => {
   try {
     const { date, score, notes } = req.body as CreateSleepScoreRequest;
     const userId = req.user!.id;
@@ -973,7 +976,7 @@ app.post("/sleep-scores", authenticateToken, async (req: Request, res: Response)
 });
 
 // Update sleep score
-app.put("/sleep-scores/:id", authenticateToken, async (req: Request, res: Response) => {
+apiRouter.put("/sleep-scores/:id", authenticateToken, async (req: Request, res: Response) => {
   try {
     const sleepScoreId = parseInt(req.params.id);
     const { date, score, notes } = req.body as Omit<
@@ -1025,7 +1028,7 @@ app.put("/sleep-scores/:id", authenticateToken, async (req: Request, res: Respon
 });
 
 // Delete sleep score
-app.delete("/sleep-scores/:id", authenticateToken, async (req: Request, res: Response) => {
+apiRouter.delete("/sleep-scores/:id", authenticateToken, async (req: Request, res: Response) => {
   try {
     const sleepScoreId = parseInt(req.params.id);
     const sleepScoreRepository = dataSource.getRepository(SleepScore);
@@ -1051,7 +1054,7 @@ app.delete("/sleep-scores/:id", authenticateToken, async (req: Request, res: Res
 // Diagnostician Routes
 
 // Get diagnostic data (last two months of workouts and pain scores)
-app.get("/diagnostics/data", authenticateToken, async (req: Request, res: Response) => {
+apiRouter.get("/diagnostics/data", authenticateToken, async (req: Request, res: Response) => {
   try {
     const userId = req.user!.id;
 
@@ -1125,7 +1128,7 @@ app.get("/diagnostics/data", authenticateToken, async (req: Request, res: Respon
 });
 
 // Analyze diagnostic data using OpenAI
-app.post("/diagnostics/analyze", authenticateToken, async (req: Request, res: Response) => {
+apiRouter.post("/diagnostics/analyze", authenticateToken, async (req: Request, res: Response) => {
   try {
     const { diagnosticData } = req.body;
 
@@ -1172,7 +1175,7 @@ app.post("/diagnostics/analyze", authenticateToken, async (req: Request, res: Re
 });
 
 // Dashboard API endpoint - Get exercise weight progression over 12 weeks
-app.get("/dashboard/weight-progression", authenticateToken, async (req: Request, res: Response) => {
+apiRouter.get("/dashboard/weight-progression", authenticateToken, async (req: Request, res: Response) => {
   try {
     const userId = req.user!.id;
     
@@ -1248,7 +1251,7 @@ app.get("/dashboard/weight-progression", authenticateToken, async (req: Request,
 });
 
 // Dashboard API endpoint - Get pain score progression over 12 weeks
-app.get("/dashboard/pain-progression", authenticateToken, async (req: Request, res: Response) => {
+apiRouter.get("/dashboard/pain-progression", authenticateToken, async (req: Request, res: Response) => {
   try {
     const userId = req.user!.id;
     
@@ -1285,7 +1288,7 @@ app.get("/dashboard/pain-progression", authenticateToken, async (req: Request, r
 });
 
 // Dashboard API endpoint - Get sleep score progression over 12 weeks
-app.get("/dashboard/sleep-progression", authenticateToken, async (req: Request, res: Response) => {
+apiRouter.get("/dashboard/sleep-progression", authenticateToken, async (req: Request, res: Response) => {
   try {
     const userId = req.user!.id;
     
@@ -1322,7 +1325,7 @@ app.get("/dashboard/sleep-progression", authenticateToken, async (req: Request, 
 });
 
 // Generate workout using AI
-app.post("/workouts/generate", authenticateToken, async (req: Request, res: Response) => {
+apiRouter.post("/workouts/generate", authenticateToken, async (req: Request, res: Response) => {
   try {
     const { additionalNotes } = req.body;
     const userId = req.user!.id;
@@ -1394,11 +1397,14 @@ app.post("/workouts/generate", authenticateToken, async (req: Request, res: Resp
   }
 });
 
+// Mount API router
+app.use("/api", apiRouter);
+
 // Serve static files from the React app
 app.use(express.static(path.join(__dirname, "../../dist")));
 
 // Send all other requests to the React app
-app.get("*", (req: Request, res: Response) => {
+apiRouter.get("*", (req: Request, res: Response) => {
   res.sendFile(path.join(__dirname, "../../dist", "index.html"));
 });
 
