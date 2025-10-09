@@ -2,7 +2,6 @@ import express, { Request, Response } from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import path from "path";
-import { fileURLToPath } from "url";
 import {
   DatabaseError,
   WorkoutResponse,
@@ -28,9 +27,6 @@ import { authenticateToken, generateToken } from "./middleware/auth";
 
 // Initialize reflect-metadata
 import "reflect-metadata";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 dotenv.config();
 
@@ -1404,7 +1400,7 @@ app.use("/api", apiRouter);
 app.use(express.static(path.join(__dirname, "../../dist")));
 
 // Send all other requests to the React app
-apiRouter.get("*", (req: Request, res: Response) => {
+app.get("*", (req: Request, res: Response) => {
   res.sendFile(path.join(__dirname, "../../dist", "index.html"));
 });
 
