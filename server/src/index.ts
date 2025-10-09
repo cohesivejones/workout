@@ -1,6 +1,8 @@
 import express, { Request, Response } from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import path from "path";
+import { fileURLToPath } from "url";
 import {
   DatabaseError,
   WorkoutResponse,
@@ -12,6 +14,7 @@ import {
 import OpenAI from "openai";
 import { Between } from "typeorm";
 import * as dotenv from "dotenv";
+import * as bcrypt from "bcrypt";
 import dataSource from "./data-source";
 import {
   Exercise,
@@ -25,6 +28,9 @@ import { authenticateToken, generateToken } from "./middleware/auth";
 
 // Initialize reflect-metadata
 import "reflect-metadata";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 dotenv.config();
 
@@ -69,8 +75,6 @@ if (process.env.NODE_ENV === 'production') {
 // Routes
 
 // Authentication routes
-// Import bcrypt for password hashing
-import * as bcrypt from "bcrypt";
 
 // Login endpoint
 app.post("/auth/login", async (req: Request, res: Response) => {
@@ -1388,6 +1392,14 @@ app.post("/workouts/generate", authenticateToken, async (req: Request, res: Resp
     console.error("Generate workout error:", err);
     res.status(500).json({ error: "Failed to generate workout" });
   }
+});
+
+// Serve static files from the React app
+app.use(express.static(path.join(__dirname, "../../dist")));
+
+// Send all other requests to the React app
+app.get("*", (req: Request, res: Response) => {
+  res.sendFile(path.join(__dirname, "../../dist", "index.html"));
 });
 
 const PORT = process.env.PORT || 5001;
