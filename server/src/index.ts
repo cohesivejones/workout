@@ -239,7 +239,7 @@ app.get("/exercises/recent", authenticateToken, async (req: Request, res: Respon
         ORDER BY w.date DESC
         LIMIT 1
       )
-      SELECT we.reps, we.weight
+      SELECT we.reps, we.weight, we.time_minutes
       FROM workout_exercises we
       WHERE we.workout_id = (SELECT id FROM latest_workout)
       AND we.exercise_id = $1
@@ -257,6 +257,7 @@ app.get("/exercises/recent", authenticateToken, async (req: Request, res: Respon
     res.json({
       reps: result[0].reps,
       weight: result[0].weight,
+      time_minutes: result[0].time_minutes,
     });
   } catch (err) {
     console.error(err);
@@ -352,8 +353,10 @@ app.get("/workouts", authenticateToken, async (req: Request, res: Response) => {
         name: we.exercise.name,
         reps: we.reps,
         weight: we.weight,
+        time_minutes: we.time_minutes,
         new_reps: we.new_reps,
         new_weight: we.new_weight,
+        new_time: we.new_time,
       })),
     }));
 
@@ -393,8 +396,10 @@ app.get("/workouts/:id", authenticateToken, async (req: Request, res: Response) 
         name: we.exercise.name,
         reps: we.reps,
         weight: we.weight,
+        time_minutes: we.time_minutes,
         new_reps: we.new_reps,
         new_weight: we.new_weight,
+        new_time: we.new_time,
       })),
     };
 
@@ -455,6 +460,7 @@ app.post("/workouts", authenticateToken, async (req: Request, res: Response) => 
         exercise_id: exercise.id,
         reps: exerciseData.reps,
         weight: exerciseData.weight || null,
+        time_minutes: exerciseData.time_minutes || null,
         workout,
         exercise,
       });
@@ -464,7 +470,7 @@ app.post("/workouts", authenticateToken, async (req: Request, res: Response) => 
 
       // Find the most recent previous workout exercise for this exercise
       const previousWorkoutExercise = await workoutExerciseRepository.query(`
-        SELECT we.reps, we.weight
+        SELECT we.reps, we.weight, we.time_minutes
         FROM workout_exercises we
         JOIN workouts w ON we.workout_id = w.id
         WHERE we.exercise_id = $1
@@ -478,10 +484,12 @@ app.post("/workouts", authenticateToken, async (req: Request, res: Response) => 
       if (previousWorkoutExercise.length > 0) {
         workoutExercise.new_reps = workoutExercise.reps !== previousWorkoutExercise[0].reps;
         workoutExercise.new_weight = workoutExercise.weight !== previousWorkoutExercise[0].weight;
+        workoutExercise.new_time = workoutExercise.time_minutes !== previousWorkoutExercise[0].time_minutes;
       } else {
         // First time this exercise appears in a workout
         workoutExercise.new_reps = false;
         workoutExercise.new_weight = false;
+        workoutExercise.new_time = false;
       }
 
       // Save the updated flags
@@ -503,8 +511,10 @@ app.post("/workouts", authenticateToken, async (req: Request, res: Response) => 
         name: we.exercise.name,
         reps: we.reps,
         weight: we.weight,
+        time_minutes: we.time_minutes,
         new_reps: we.new_reps,
         new_weight: we.new_weight,
+        new_time: we.new_time,
       })),
     };
 
@@ -589,6 +599,7 @@ app.put("/workouts/:id", authenticateToken, async (req: Request, res: Response) 
         exercise_id: exercise.id,
         reps: exerciseData.reps,
         weight: exerciseData.weight || null,
+        time_minutes: exerciseData.time_minutes || null,
         workout: workout,
         exercise: exercise,
       });
@@ -598,7 +609,7 @@ app.put("/workouts/:id", authenticateToken, async (req: Request, res: Response) 
 
       // Find the most recent previous workout exercise for this exercise
       const previousWorkoutExercise = await workoutExerciseRepository.query(`
-        SELECT we.reps, we.weight
+        SELECT we.reps, we.weight, we.time_minutes
         FROM workout_exercises we
         JOIN workouts w ON we.workout_id = w.id
         WHERE we.exercise_id = $1
@@ -612,10 +623,12 @@ app.put("/workouts/:id", authenticateToken, async (req: Request, res: Response) 
       if (previousWorkoutExercise.length > 0) {
         workoutExercise.new_reps = workoutExercise.reps !== previousWorkoutExercise[0].reps;
         workoutExercise.new_weight = workoutExercise.weight !== previousWorkoutExercise[0].weight;
+        workoutExercise.new_time = workoutExercise.time_minutes !== previousWorkoutExercise[0].time_minutes;
       } else {
         // First time this exercise appears in a workout
         workoutExercise.new_reps = false;
         workoutExercise.new_weight = false;
+        workoutExercise.new_time = false;
       }
 
       // Save the updated flags
@@ -636,8 +649,10 @@ app.put("/workouts/:id", authenticateToken, async (req: Request, res: Response) 
         name: we.exercise.name,
         reps: we.reps,
         weight: we.weight,
+        time_minutes: we.time_minutes,
         new_reps: we.new_reps,
         new_weight: we.new_weight,
+        new_time: we.new_time,
       })),
     };
 

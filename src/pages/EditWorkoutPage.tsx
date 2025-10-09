@@ -55,7 +55,7 @@ export default function EditWorkoutPage() {
     };
 
     loadData();
-  }, [workoutId]);
+  }, [workoutId, user]);
 
   const handleUpdateWorkout = async (
     updatedWorkout: Omit<Workout, "id">,

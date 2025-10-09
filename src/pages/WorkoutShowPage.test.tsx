@@ -170,4 +170,38 @@ describe("WorkoutShowPage", () => {
     expect(screen.getByText("10 reps")).toBeInTheDocument();
     expect(screen.queryByText(/lbs/i)).not.toBeInTheDocument();
   });
+
+  it("renders exercises with time when time_minutes is provided", async () => {
+    // Mock the API call to return a workout with an exercise with time
+    const workoutWithTime = {
+      ...mockWorkout,
+      exercises: [
+        { id: 1, name: "Plank", reps: 3, time_minutes: 2.5 },
+        { id: 2, name: "Wall Sit", reps: 2, weight: 0, time_minutes: 1.5 },
+      ],
+    };
+    (Api.fetchWorkout as jest.Mock).mockResolvedValue(workoutWithTime);
+
+    render(
+      <MemoryRouter initialEntries={["/workouts/1"]}>
+        <Routes>
+          <Route path="/workouts/:id" element={<WorkoutShowPage />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    // Wait for the workout to load
+    await waitFor(() => {
+      expect(screen.queryByText(/Loading workout.../i)).not.toBeInTheDocument();
+    });
+
+    // Check that exercises with time are displayed correctly
+    expect(screen.getByText("Plank")).toBeInTheDocument();
+    expect(screen.getByText("3 reps")).toBeInTheDocument();
+    expect(screen.getByText("2.5 min")).toBeInTheDocument();
+    
+    expect(screen.getByText("Wall Sit")).toBeInTheDocument();
+    expect(screen.getByText("2 reps")).toBeInTheDocument();
+    expect(screen.getByText("1.5 min")).toBeInTheDocument();
+  });
 });
