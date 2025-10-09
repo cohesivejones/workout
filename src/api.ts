@@ -61,6 +61,7 @@ export const fetchWorkout = (workoutId: number): Promise<Workout> =>
 export interface RecentExerciseData {
   reps: number;
   weight: number | null;
+  time_minutes: number | null;
 }
 
 export const fetchRecentExerciseData = (
@@ -117,14 +118,15 @@ export const login = (
   email: string,
   password: string,
 ): Promise<AuthResponse> => {
-  return api.post("/auth/login", { email, password }).then((response: any) => {
+  return api.post("/auth/login", { email, password }).then((response) => {
+    const authResponse = response as unknown as AuthResponse;
     // After successful login, store token
-    localStorage.setItem("token", response.token);
+    localStorage.setItem("token", authResponse.token);
 
     // Configure axios for future requests
-    api.defaults.headers.common["Authorization"] = `Bearer ${response.token}`;
+    api.defaults.headers.common["Authorization"] = `Bearer ${authResponse.token}`;
 
-    return response as AuthResponse;
+    return authResponse;
   });
 };
 

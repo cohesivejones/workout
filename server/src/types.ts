@@ -32,8 +32,10 @@ export interface WorkoutResponse {
     name: string;
     reps: number;
     weight?: number | null;
+    time_minutes?: number | null;
     new_reps?: boolean;
     new_weight?: boolean;
+    new_time?: boolean;
   }>;
 }
 
@@ -45,6 +47,7 @@ export interface CreateWorkoutRequest {
     name: string;
     reps: number;
     weight?: number | null;
+    time_minutes?: number | null;
   }>;
 }
 

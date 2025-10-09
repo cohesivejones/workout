@@ -22,6 +22,7 @@ interface FormValues {
     name: string;
     reps: string;
     weight: string;
+    time_minutes: string;
   };
 }
 
@@ -57,6 +58,7 @@ function WorkoutForm({
         name: "",
         reps: "",
         weight: "",
+        time_minutes: "",
       },
     },
   });
@@ -92,6 +94,7 @@ function WorkoutForm({
             name: "",
             reps: "",
             weight: "",
+            time_minutes: "",
           },
         });
       }
@@ -119,6 +122,9 @@ function WorkoutForm({
             weight: currentExercise.weight
               ? Number(currentExercise.weight)
               : null,
+            time_minutes: currentExercise.time_minutes
+              ? Number(currentExercise.time_minutes)
+              : null,
           });
 
           // Reset current exercise fields
@@ -126,6 +132,7 @@ function WorkoutForm({
             name: "",
             reps: "",
             weight: "",
+            time_minutes: "",
           });
         }
       } catch (error) {
@@ -145,6 +152,7 @@ function WorkoutForm({
     if (val === null) {
       setValue("currentExercise.reps", "");
       setValue("currentExercise.weight", "");
+      setValue("currentExercise.time_minutes", "");
       return;
     }
     const exerciseId = savedExercises.find((ex) => ex.name === val.value)?.id;
@@ -156,6 +164,10 @@ function WorkoutForm({
       setValue(
         "currentExercise.weight",
         recentData.weight ? String(recentData.weight) : "",
+      );
+      setValue(
+        "currentExercise.time_minutes",
+        recentData.time_minutes ? String(recentData.time_minutes) : "",
       );
     } catch {
       // fail silently
@@ -245,6 +257,14 @@ function WorkoutForm({
               </span>
             </div>
           </div>
+          <input
+            type="number"
+            placeholder="Time (min)"
+            min="0"
+            step="0.5"
+            className={styles.exerciseInputField}
+            {...register("currentExercise.time_minutes")}
+          />
           <button
             type="button"
             onClick={addExercise}
@@ -277,13 +297,19 @@ function WorkoutForm({
                     {exercises[index].weight
                       ? ` - ${exercises[index].weight} lbs`
                       : ""}
-                    {(exercises[index].new_reps || exercises[index].new_weight) && (
+                    {exercises[index].time_minutes
+                      ? ` - ${exercises[index].time_minutes} min`
+                      : ""}
+                    {(exercises[index].new_reps || exercises[index].new_weight || exercises[index].new_time) && (
                       <div className={styles.badgeContainer}>
                         {exercises[index].new_reps && (
                           <span className={styles.newBadge}>NEW REPS</span>
                         )}
                         {exercises[index].new_weight && (
                           <span className={styles.newBadge}>NEW WEIGHT</span>
+                        )}
+                        {exercises[index].new_time && (
+                          <span className={styles.newBadge}>NEW TIME</span>
                         )}
                       </div>
                     )}

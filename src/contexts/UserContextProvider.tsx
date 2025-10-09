@@ -31,7 +31,7 @@ export const UserContextProvider = ({ children }: Props) => {
         // Try to get current user from API using our helper
         const userData = await getCurrentUser();
         setUser(userData);
-      } catch (error) {
+      } catch {
         // If not authenticated, clear user
         setUser(null);
       } finally {

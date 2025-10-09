@@ -24,7 +24,7 @@ export default function AddWorkoutPage() {
       }
     };
     loadExercises();
-  }, []);
+  }, [user]);
 
   const addWorkout = async (workout: Omit<Workout, "id">): Promise<boolean> => {
     try {
