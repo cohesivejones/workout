@@ -5,19 +5,19 @@ import * as Api from "../api";
 import * as UserContext from "../contexts/useUserContext";
 
 // Mock the API functions
-jest.mock("../api", () => ({
-  fetchPainScore: jest.fn(),
-  createPainScore: jest.fn(),
-  updatePainScore: jest.fn(),
+vi.mock("../api", () => ({
+  fetchPainScore: vi.fn(),
+  createPainScore: vi.fn(),
+  updatePainScore: vi.fn(),
 }));
 
 // Mock the UserContext
-jest.mock("../contexts/useUserContext", () => ({
-  useUserContext: jest.fn(),
+vi.mock("../contexts/useUserContext", () => ({
+  useUserContext: vi.fn(),
 }));
 
 // Mock the PainScoreForm component
-jest.mock("../components/PainScoreForm", () => {
+vi.mock("../components/PainScoreForm", () => {
   return {
     __esModule: true,
     default: ({ onSubmit, existingPainScore }: any) => (
@@ -48,20 +48,20 @@ describe("PainScorePage", () => {
   const mockUser = { id: 1, name: "Test User" };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     
     // Mock the user context to simulate a logged-in user
-    jest.spyOn(UserContext, "useUserContext").mockReturnValue({
+    vi.spyOn(UserContext, "useUserContext").mockReturnValue({
       user: mockUser,
-      login: jest.fn(),
-      logout: jest.fn(),
+      login: vi.fn(),
+      logout: vi.fn(),
       loading: false,
     });
     
     // Mock successful API responses
-    (Api.createPainScore as jest.Mock).mockResolvedValue({ id: 123 });
-    (Api.updatePainScore as jest.Mock).mockResolvedValue({ id: 456 });
-    (Api.fetchPainScore as jest.Mock).mockResolvedValue({
+    (Api.createPainScore as any).mockResolvedValue({ id: 123 });
+    (Api.updatePainScore as any).mockResolvedValue({ id: 456 });
+    (Api.fetchPainScore as any).mockResolvedValue({
       id: 456,
       date: "2025-04-10",
       score: 3,
@@ -157,7 +157,7 @@ describe("PainScorePage", () => {
 
   it("handles error when fetching pain score fails", async () => {
     // Mock the API call to fail
-    (Api.fetchPainScore as jest.Mock).mockRejectedValue(new Error("Failed to load pain score"));
+    (Api.fetchPainScore as any).mockRejectedValue(new Error("Failed to load pain score"));
 
     render(
       <MemoryRouter initialEntries={["/pain-scores/456/edit"]}>
@@ -175,7 +175,7 @@ describe("PainScorePage", () => {
 
   it("renders form without existing pain score when pain score is not found", async () => {
     // Mock the API call to return null (pain score not found)
-    (Api.fetchPainScore as jest.Mock).mockResolvedValue(null);
+    (Api.fetchPainScore as any).mockResolvedValue(null);
 
     render(
       <MemoryRouter initialEntries={["/pain-scores/999/edit"]}>

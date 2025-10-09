@@ -5,13 +5,13 @@ import * as Api from "../api";
 import * as UserContext from "../contexts/useUserContext";
 
 // Mock the API functions
-jest.mock("../api", () => ({
-  fetchWorkout: jest.fn(),
+vi.mock("../api", () => ({
+  fetchWorkout: vi.fn(),
 }));
 
 // Mock the UserContext
-jest.mock("../contexts/useUserContext", () => ({
-  useUserContext: jest.fn(),
+vi.mock("../contexts/useUserContext", () => ({
+  useUserContext: vi.fn(),
 }));
 
 describe("WorkoutShowPage", () => {
@@ -27,18 +27,18 @@ describe("WorkoutShowPage", () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     
     // Mock the user context to simulate a logged-in user
-    jest.spyOn(UserContext, "useUserContext").mockReturnValue({
+    vi.spyOn(UserContext, "useUserContext").mockReturnValue({
       user: { id: 1, name: "Test User" },
-      login: jest.fn(),
-      logout: jest.fn(),
+      login: vi.fn(),
+      logout: vi.fn(),
       loading: false,
     });
     
     // Mock the API call to return the workout
-    (Api.fetchWorkout as jest.Mock).mockResolvedValue(mockWorkout);
+    (Api.fetchWorkout as any).mockResolvedValue(mockWorkout);
   });
 
   it("renders loading state initially", () => {
@@ -88,7 +88,7 @@ describe("WorkoutShowPage", () => {
 
   it("renders error state when API call fails", async () => {
     // Mock the API call to fail
-    (Api.fetchWorkout as jest.Mock).mockRejectedValue(new Error("Failed to load workout"));
+    (Api.fetchWorkout as any).mockRejectedValue(new Error("Failed to load workout"));
 
     render(
       <MemoryRouter initialEntries={["/workouts/1"]}>
@@ -106,7 +106,7 @@ describe("WorkoutShowPage", () => {
 
   it("renders not found state when workout doesn't exist", async () => {
     // Mock the API call to return null (workout not found)
-    (Api.fetchWorkout as jest.Mock).mockResolvedValue(null);
+    (Api.fetchWorkout as any).mockResolvedValue(null);
 
     render(
       <MemoryRouter initialEntries={["/workouts/999"]}>
@@ -125,7 +125,7 @@ describe("WorkoutShowPage", () => {
   it("renders workout without instructor badge when withInstructor is false", async () => {
     // Mock the API call to return a workout without instructor
     const workoutWithoutInstructor = { ...mockWorkout, withInstructor: false };
-    (Api.fetchWorkout as jest.Mock).mockResolvedValue(workoutWithoutInstructor);
+    (Api.fetchWorkout as any).mockResolvedValue(workoutWithoutInstructor);
 
     render(
       <MemoryRouter initialEntries={["/workouts/1"]}>
@@ -150,7 +150,7 @@ describe("WorkoutShowPage", () => {
       ...mockWorkout,
       exercises: [{ id: 1, name: "Push-ups", reps: 10 }],
     };
-    (Api.fetchWorkout as jest.Mock).mockResolvedValue(workoutWithExerciseWithoutWeight);
+    (Api.fetchWorkout as any).mockResolvedValue(workoutWithExerciseWithoutWeight);
 
     render(
       <MemoryRouter initialEntries={["/workouts/1"]}>
@@ -180,7 +180,7 @@ describe("WorkoutShowPage", () => {
         { id: 2, name: "Wall Sit", reps: 2, weight: 0, time_minutes: 1.5 },
       ],
     };
-    (Api.fetchWorkout as jest.Mock).mockResolvedValue(workoutWithTime);
+    (Api.fetchWorkout as any).mockResolvedValue(workoutWithTime);
 
     render(
       <MemoryRouter initialEntries={["/workouts/1"]}>

@@ -5,8 +5,7 @@
     "esModuleInterop": true,
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
-    "module": "CommonJS",
-    "types": ["jest", "node", "@testing-library/jest-dom"]
+    "types": ["vitest/globals", "node", "@testing-library/jest-dom"]
   },
   "include": [
     "src/**/*.test.ts",

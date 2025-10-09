@@ -3,11 +3,14 @@ import { MemoryRouter } from "react-router-dom";
 import CalendarView from "./CalendarView";
 
 // Mock react-router-dom's useNavigate
-const mockNavigate = jest.fn();
-jest.mock("react-router-dom", () => ({
-  ...jest.requireActual("react-router-dom"),
-  useNavigate: () => mockNavigate,
-}));
+const mockNavigate = vi.fn();
+vi.mock("react-router-dom", async () => {
+  const actual = await vi.importActual("react-router-dom");
+  return {
+    ...actual,
+    useNavigate: () => mockNavigate,
+  };
+});
 
 describe("CalendarView", () => {
   const mockWorkouts = [
@@ -65,10 +68,10 @@ describe("CalendarView", () => {
   ];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     // Mock Date to always return May 2025
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date('2025-05-15'));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2025-05-15'));
     
     // Mock window.innerWidth to simulate desktop view
     Object.defineProperty(window, "innerWidth", {
@@ -77,12 +80,12 @@ describe("CalendarView", () => {
       value: 1024,
     });
     // Mock window.addEventListener to capture resize event
-    window.addEventListener = jest.fn();
-    window.removeEventListener = jest.fn();
+    window.addEventListener = vi.fn();
+    window.removeEventListener = vi.fn();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it("renders calendar with workouts and pain scores", () => {
@@ -158,7 +161,7 @@ describe("CalendarView", () => {
   it("goes to today when Today button is clicked", () => {
     // Mock Date.now to return a specific date
     const originalNow = Date.now;
-    Date.now = jest.fn(() => new Date("2025-05-02").getTime());
+    Date.now = vi.fn(() => new Date("2025-05-02").getTime());
 
     render(
       <MemoryRouter>
@@ -202,7 +205,7 @@ describe("CalendarView", () => {
     });
 
     // Trigger resize event callback
-    const resizeCallback = (window.addEventListener as jest.Mock).mock.calls.find(
+    const resizeCallback = (window.addEventListener as any).mock.calls.find(
       (call) => call[0] === "resize"
     )[1];
     resizeCallback();

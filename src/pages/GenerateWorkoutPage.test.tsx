@@ -3,15 +3,15 @@ import GenerateWorkoutPage from "./GenerateWorkoutPage";
 import * as api from "../api";
 
 // Mock the API module
-jest.mock("../api", () => ({
-  generateWorkout: jest.fn(),
+vi.mock("../api", () => ({
+  generateWorkout: vi.fn(),
 }));
 
-const mockGenerateWorkout = api.generateWorkout as jest.MockedFunction<typeof api.generateWorkout>;
+const mockGenerateWorkout = api.generateWorkout as anyedFunction<typeof api.generateWorkout>;
 
 describe("GenerateWorkoutPage", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("renders the form with all required elements", () => {
