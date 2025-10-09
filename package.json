@@ -13,7 +13,7 @@
     "lint:fix": "eslint . --report-unused-disable-directives --max-warnings 0 --fix",
     "postinstall": "npm install --prefix server",
     "preview": "vite preview",
-    "start": "node server.js",
+    "start": "npm start --prefix server",
     "test": "jest",
     "test:watch": "jest --watch"
   },
