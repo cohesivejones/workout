@@ -1393,4 +1393,5 @@ app.post("/workouts/generate", authenticateToken, async (req: Request, res: Resp
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+  console.log(`Build timestamp: ${new Date().toISOString()}`);
 });
