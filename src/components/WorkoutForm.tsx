@@ -83,6 +83,8 @@ function WorkoutForm({
         exercises: data.exercises.map((ex) => ({
           ...ex,
           reps: Number(ex.reps),
+          weight: ex.weight ? Number(ex.weight) : null,
+          time_minutes: ex.time_minutes ? Number(ex.time_minutes) : null,
         })),
       });
 
