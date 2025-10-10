@@ -5,11 +5,12 @@ import { Workout, WorkoutFormProps } from "../types";
 import * as UserContext from "../contexts/useUserContext";
 import * as Api from "../api";
 
-jest.mock("react-select/creatable", () =>
-  // eslint-disable-next-line react/display-name
-  ({ options, value, onChange }: any) => {
+vi.mock("react-select/creatable", () => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  default: ({ options, value, onChange }: any) => {
     function handleChange(event: React.ChangeEvent<HTMLSelectElement>) {
       const option = options.find(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (option: any) => option.value === event.currentTarget.value,
       );
       onChange(option);
@@ -22,6 +23,7 @@ jest.mock("react-select/creatable", () =>
         onChange={handleChange}
       >
         <option value="">Select...</option>
+        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
         {options.map(({ label, value }: any) => (
           <option key={value} value={value}>
             {label}
@@ -30,25 +32,25 @@ jest.mock("react-select/creatable", () =>
       </select>
     );
   },
-);
+}));
 
 describe("WorkoutForm", () => {
-  const mockOnSubmit = jest.fn().mockResolvedValue(true);
-  const mockOnSaveExercise = jest.fn().mockResolvedValue(true);
+  const mockOnSubmit = vi.fn().mockResolvedValue(true);
+  const mockOnSaveExercise = vi.fn().mockResolvedValue(true);
   const mockSavedExercises = [
     { id: 1, userId: 1, name: "Push-ups" },
     { id: 2, userId: 1, name: "Squats" },
     { id: 3, userId: 1, name: "Lunges" },
   ];
-  jest.spyOn(UserContext, "useUserContext").mockReturnValue({
+  vi.spyOn(UserContext, "useUserContext").mockReturnValue({
     user: { id: 1, name: "Bob Jones" },
-    login: jest.fn(),
-    logout: jest.fn(),
+    login: vi.fn(),
+    logout: vi.fn(),
     loading: false,
   });
-  jest
-    .spyOn(Api, "fetchRecentExerciseData")
-    .mockRejectedValue(new Error("Failed to fetch recent data"));
+  vi.spyOn(Api, "fetchRecentExerciseData").mockRejectedValue(
+    new Error("Failed to fetch recent data"),
+  );
 
   const defaultProps: WorkoutFormProps = {
     onSubmit: mockOnSubmit,
@@ -57,7 +59,7 @@ describe("WorkoutForm", () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("renders the form with correct initial state for new workout", () => {
@@ -239,7 +241,7 @@ describe("WorkoutForm", () => {
 
   it("displays error message when form submission fails", async () => {
     // Override the mock to simulate an error
-    const mockOnSubmitError = jest
+    const mockOnSubmitError = vi
       .fn()
       .mockRejectedValue(new Error("Failed to save workout"));
 
@@ -270,7 +272,7 @@ describe("WorkoutForm", () => {
 
   it("displays error message when add exercise fails", async () => {
     // Override the mock to simulate an error
-    const mockOnSaveExercise = jest
+    const mockOnSaveExercise = vi
       .fn()
       .mockRejectedValue(new Error("Failed to save exercise"));
 

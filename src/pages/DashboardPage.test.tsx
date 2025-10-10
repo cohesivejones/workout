@@ -1,17 +1,18 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { render, screen, waitFor } from "@testing-library/react";
 import DashboardPage from "./DashboardPage";
 import * as Api from "../api";
 
 // Mock the API functions
-jest.mock("../api", () => ({
-  fetchWeightProgressionData: jest.fn(),
-  fetchPainProgressionData: jest.fn(),
-  fetchSleepProgressionData: jest.fn(),
+vi.mock("../api", () => ({
+  fetchWeightProgressionData: vi.fn(),
+  fetchPainProgressionData: vi.fn(),
+  fetchSleepProgressionData: vi.fn(),
 }));
 
 // Mock the Recharts components
-jest.mock("recharts", () => {
-  const OriginalModule = jest.requireActual("recharts");
+vi.mock("recharts", () => {
+  const OriginalModule = vi.importActual("recharts");
   return {
     ...OriginalModule,
     ResponsiveContainer: ({ children }: { children: React.ReactNode }) => <div data-testid="responsive-container">{children}</div>,
@@ -26,15 +27,10 @@ jest.mock("recharts", () => {
 });
 
 // Mock date-fns functions to return consistent dates for testing
-jest.mock("date-fns", () => {
-  const actual = jest.requireActual("date-fns");
+vi.mock("date-fns", async () => {
+  const actual = await vi.importActual("date-fns");
   return {
     ...actual,
-    // Mock the current date to be fixed for tests
-    parseISO: actual.parseISO,
-    format: actual.format,
-    isWithinInterval: actual.isWithinInterval,
-    eachDayOfInterval: actual.eachDayOfInterval,
   };
 });
 
@@ -75,12 +71,12 @@ describe("DashboardPage", () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("renders loading state initially", () => {
     // Mock API to not resolve immediately
-    (Api.fetchWeightProgressionData as jest.Mock).mockImplementation(
+    (Api.fetchWeightProgressionData as any).mockImplementation(
       () => new Promise(() => {})
     );
 
@@ -92,7 +88,7 @@ describe("DashboardPage", () => {
 
   it("renders charts when data is loaded successfully", async () => {
     // Mock successful API response
-    (Api.fetchWeightProgressionData as jest.Mock).mockResolvedValue(mockProgressionData);
+    (Api.fetchWeightProgressionData as any).mockResolvedValue(mockProgressionData);
 
     render(<DashboardPage />);
 
@@ -115,7 +111,7 @@ describe("DashboardPage", () => {
 
   it("renders error message when API call fails", async () => {
     // Mock API failure
-    (Api.fetchWeightProgressionData as jest.Mock).mockRejectedValue(
+    (Api.fetchWeightProgressionData as any).mockRejectedValue(
       new Error("Failed to fetch data")
     );
 
@@ -129,7 +125,7 @@ describe("DashboardPage", () => {
 
   it("renders empty state when no data is available", async () => {
     // Mock empty data response
-    (Api.fetchWeightProgressionData as jest.Mock).mockResolvedValue([]);
+    (Api.fetchWeightProgressionData as any).mockResolvedValue([]);
 
     render(<DashboardPage />);
 
@@ -142,9 +138,9 @@ describe("DashboardPage", () => {
 
   it("formats dates correctly in chart labels and uses consistent domain", async () => {
     // Mock successful API responses
-    (Api.fetchWeightProgressionData as jest.Mock).mockResolvedValue(mockProgressionData);
-    (Api.fetchPainProgressionData as jest.Mock).mockResolvedValue(mockPainData);
-    (Api.fetchSleepProgressionData as jest.Mock).mockResolvedValue(mockSleepData);
+    (Api.fetchWeightProgressionData as any).mockResolvedValue(mockProgressionData);
+    (Api.fetchPainProgressionData as any).mockResolvedValue(mockPainData);
+    (Api.fetchSleepProgressionData as any).mockResolvedValue(mockSleepData);
 
     render(<DashboardPage />);
 
@@ -164,9 +160,9 @@ describe("DashboardPage", () => {
 
   it("renders pain and sleep score charts when data is loaded successfully", async () => {
     // Mock successful API responses
-    (Api.fetchWeightProgressionData as jest.Mock).mockResolvedValue(mockProgressionData);
-    (Api.fetchPainProgressionData as jest.Mock).mockResolvedValue(mockPainData);
-    (Api.fetchSleepProgressionData as jest.Mock).mockResolvedValue(mockSleepData);
+    (Api.fetchWeightProgressionData as any).mockResolvedValue(mockProgressionData);
+    (Api.fetchPainProgressionData as any).mockResolvedValue(mockPainData);
+    (Api.fetchSleepProgressionData as any).mockResolvedValue(mockSleepData);
 
     render(<DashboardPage />);
 
@@ -193,9 +189,9 @@ describe("DashboardPage", () => {
 
   it("does not render pain and sleep charts when no data is available", async () => {
     // Mock API responses with empty data for pain and sleep
-    (Api.fetchWeightProgressionData as jest.Mock).mockResolvedValue(mockProgressionData);
-    (Api.fetchPainProgressionData as jest.Mock).mockResolvedValue({ dataPoints: [] });
-    (Api.fetchSleepProgressionData as jest.Mock).mockResolvedValue({ dataPoints: [] });
+    (Api.fetchWeightProgressionData as any).mockResolvedValue(mockProgressionData);
+    (Api.fetchPainProgressionData as any).mockResolvedValue({ dataPoints: [] });
+    (Api.fetchSleepProgressionData as any).mockResolvedValue({ dataPoints: [] });
 
     render(<DashboardPage />);
 
@@ -210,9 +206,9 @@ describe("DashboardPage", () => {
 
   it("normalizes data to have consistent date range across all charts", async () => {
     // Mock successful API responses
-    (Api.fetchWeightProgressionData as jest.Mock).mockResolvedValue(mockProgressionData);
-    (Api.fetchPainProgressionData as jest.Mock).mockResolvedValue(mockPainData);
-    (Api.fetchSleepProgressionData as jest.Mock).mockResolvedValue(mockSleepData);
+    (Api.fetchWeightProgressionData as any).mockResolvedValue(mockProgressionData);
+    (Api.fetchPainProgressionData as any).mockResolvedValue(mockPainData);
+    (Api.fetchSleepProgressionData as any).mockResolvedValue(mockSleepData);
 
     render(<DashboardPage />);
 
@@ -233,9 +229,9 @@ describe("DashboardPage", () => {
 
   describe("PR Indicator Features", () => {
     beforeEach(() => {
-      (Api.fetchWeightProgressionData as jest.Mock).mockResolvedValue(mockProgressionData);
-      (Api.fetchPainProgressionData as jest.Mock).mockResolvedValue(mockPainData);
-      (Api.fetchSleepProgressionData as jest.Mock).mockResolvedValue(mockSleepData);
+      (Api.fetchWeightProgressionData as any).mockResolvedValue(mockProgressionData);
+      (Api.fetchPainProgressionData as any).mockResolvedValue(mockPainData);
+      (Api.fetchSleepProgressionData as any).mockResolvedValue(mockSleepData);
     });
 
     it("renders PR legend for each exercise chart", async () => {
@@ -293,9 +289,9 @@ describe("DashboardPage", () => {
         },
       ];
 
-      (Api.fetchWeightProgressionData as jest.Mock).mockResolvedValue(mockDataWithPRs);
-      (Api.fetchPainProgressionData as jest.Mock).mockResolvedValue({ dataPoints: [] });
-      (Api.fetchSleepProgressionData as jest.Mock).mockResolvedValue({ dataPoints: [] });
+      (Api.fetchWeightProgressionData as any).mockResolvedValue(mockDataWithPRs);
+      (Api.fetchPainProgressionData as any).mockResolvedValue({ dataPoints: [] });
+      (Api.fetchSleepProgressionData as any).mockResolvedValue({ dataPoints: [] });
 
       render(<DashboardPage />);
 
@@ -343,7 +339,7 @@ describe("DashboardPage", () => {
         },
       ];
 
-      (Api.fetchWeightProgressionData as jest.Mock).mockResolvedValue(dataWithMixedPRs);
+      (Api.fetchWeightProgressionData as any).mockResolvedValue(dataWithMixedPRs);
 
       render(<DashboardPage />);
 
@@ -370,7 +366,7 @@ describe("DashboardPage", () => {
         },
       ];
 
-      (Api.fetchWeightProgressionData as jest.Mock).mockResolvedValue(dataWithoutPRFlags);
+      (Api.fetchWeightProgressionData as any).mockResolvedValue(dataWithoutPRFlags);
 
       render(<DashboardPage />);
 

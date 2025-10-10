@@ -36,7 +36,7 @@ describe('FormContainer', () => {
   });
 
   it('renders as a form element when asForm is true', () => {
-    const handleSubmit = jest.fn((e) => e.preventDefault());
+    const handleSubmit = vi.fn((e) => e.preventDefault());
     const { container } = render(
       <FormContainer title="Test Title" asForm={true} onSubmit={handleSubmit}>
         <button type="submit">Submit</button>

@@ -36,5 +36,19 @@ export default defineConfig(({ mode }) => {
         },
       },
     },
+    test: {
+      globals: true,
+      environment: "jsdom",
+      setupFiles: "./src/setupTests.ts",
+      css: {
+        modules: {
+          classNameStrategy: "non-scoped",
+        },
+      },
+      coverage: {
+        provider: "v8",
+        reporter: ["text", "json", "html"],
+      },
+    },
   };
 });

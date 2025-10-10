@@ -3,10 +3,11 @@ import PainScoreForm from "./PainScoreForm";
 import { PainScore } from "../types";
 
 // Mock the PainScaleSelector component
-jest.mock("./PainScaleSelector", () => {
+vi.mock("./PainScaleSelector", () => {
   return {
     __esModule: true,
      
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     default: ({ onChange, error }: any) => (
       <div data-testid="mock-pain-scale-selector">
         <select
@@ -27,15 +28,15 @@ jest.mock("./PainScaleSelector", () => {
 });
 
 describe("PainScoreForm", () => {
-  const mockOnSubmit = jest.fn().mockResolvedValue(true);
-  const mockOnCancel = jest.fn();
+  const mockOnSubmit = vi.fn().mockResolvedValue(true);
+  const mockOnCancel = vi.fn();
   const defaultProps = {
     onSubmit: mockOnSubmit,
     onCancel: mockOnCancel,
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("renders the form with correct initial state for new pain score", () => {
@@ -120,7 +121,7 @@ describe("PainScoreForm", () => {
 
   it("shows error message when submission fails", async () => {
     // Mock onSubmit to return false (failure)
-    const mockFailedSubmit = jest.fn().mockResolvedValue(false);
+    const mockFailedSubmit = vi.fn().mockResolvedValue(false);
     render(
       <PainScoreForm
         onSubmit={mockFailedSubmit}
@@ -144,7 +145,7 @@ describe("PainScoreForm", () => {
 
   it("handles exceptions during submission", async () => {
     // Mock onSubmit to throw an error
-    const mockErrorSubmit = jest.fn().mockRejectedValue(new Error("Test error"));
+    const mockErrorSubmit = vi.fn().mockRejectedValue(new Error("Test error"));
     render(
       <PainScoreForm
         onSubmit={mockErrorSubmit}
@@ -168,7 +169,7 @@ describe("PainScoreForm", () => {
 
   it("disables buttons during submission", async () => {
     // Mock onSubmit to return a promise that doesn't resolve immediately
-    const mockDelayedSubmit = jest.fn().mockImplementation(() => {
+    const mockDelayedSubmit = vi.fn().mockImplementation(() => {
       return new Promise((resolve) => {
         setTimeout(() => resolve(true), 100);
       });

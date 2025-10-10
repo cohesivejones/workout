@@ -33,20 +33,20 @@ describe("GenericCalendarView", () => {
   ];
 
   // Mock render functions
-  const renderGridItem = jest.fn((item: TestItem) => (
+  const renderGridItem = vi.fn((item: TestItem) => (
     <div key={item.id} data-testid={`grid-item-${item.id}`}>
       {item.content}
     </div>
   ));
 
-  const renderVerticalItem = jest.fn((item: TestItem) => (
+  const renderVerticalItem = vi.fn((item: TestItem) => (
     <div key={item.id} data-testid={`vertical-item-${item.id}`}>
       {item.content}
     </div>
   ));
 
   // Mock getItemsByDate function
-  const getItemsByDate = jest.fn((items: TestItem[]) => {
+  const getItemsByDate = vi.fn((items: TestItem[]) => {
     return items.reduce((acc, item) => {
       const dateStr = item.date;
       if (!acc[dateStr]) {
@@ -61,7 +61,7 @@ describe("GenericCalendarView", () => {
   let OriginalDate: DateConstructor;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     
     // Mock window.innerWidth to simulate desktop view
     Object.defineProperty(window, "innerWidth", {
@@ -71,15 +71,17 @@ describe("GenericCalendarView", () => {
     });
     
     // Mock window.addEventListener to capture resize event
-    window.addEventListener = jest.fn();
-    window.removeEventListener = jest.fn();
+    window.addEventListener = vi.fn();
+    window.removeEventListener = vi.fn();
     
     // Save original Date
     OriginalDate = global.Date;
     
     // Mock Date
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const MockDate = function(this: any, arg?: any) {
       return arg ? new OriginalDate(arg) : new OriginalDate(FIXED_DATE);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any;
     
     MockDate.now = () => FIXED_DATE.getTime();
@@ -96,7 +98,7 @@ describe("GenericCalendarView", () => {
     global.Date = OriginalDate;
     
     // Restore all mocks
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it("renders in desktop mode with month view", () => {
@@ -344,14 +346,16 @@ describe("GenericCalendarView", () => {
     unmount();
 
     // Check that removeEventListener was called with the same function
-    const addEventListenerCall = (window.addEventListener as jest.Mock).mock.calls.find(
-      (call) => call[0] === "resize"
+    const addEventListenerMock = window.addEventListener as unknown as { mock: { calls: unknown[][] } };
+    const removeEventListenerMock = window.removeEventListener as unknown as { mock: { calls: unknown[][] } };
+    const addEventListenerCall = addEventListenerMock.mock.calls.find(
+      (call: unknown[]) => call[0] === "resize"
     );
-    const removeEventListenerCall = (window.removeEventListener as jest.Mock).mock.calls.find(
-      (call) => call[0] === "resize"
+    const removeEventListenerCall = removeEventListenerMock.mock.calls.find(
+      (call: unknown[]) => call[0] === "resize"
     );
 
-    expect(removeEventListenerCall[0]).toBe("resize");
-    expect(removeEventListenerCall[1]).toBe(addEventListenerCall[1]);
+    expect(removeEventListenerCall?.[0]).toBe("resize");
+    expect(removeEventListenerCall?.[1]).toBe(addEventListenerCall?.[1]);
   });
 });

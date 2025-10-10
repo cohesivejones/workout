@@ -1,10 +1,10 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import PainScaleSelector from "./PainScaleSelector";
-import { Control, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
-// Mock the PainScaleFaces component
-jest.mock("./PainScaleFaces", () => ({
-  getPainFace: jest.fn(() => <div data-testid="mock-pain-face" />),
+// Mock the painScaleFaces.utils module
+vi.mock("./painScaleFaces.utils", () => ({
+  getPainFace: vi.fn(() => <div data-testid="mock-pain-face" />),
 }));
 
 // Create a wrapper component to provide the react-hook-form context
@@ -19,7 +19,8 @@ const TestWrapper = ({
   return (
     <PainScaleSelector
       name="score"
-      control={control as Control<any>}
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      control={control as any}
       value={value}
       onChange={onChange}
     />
@@ -28,7 +29,7 @@ const TestWrapper = ({
 
 describe("PainScaleSelector", () => {
   it("renders pain scale options", () => {
-    const handleChange = jest.fn();
+    const handleChange = vi.fn();
     render(<TestWrapper value={null} onChange={handleChange} />);
 
     // Should render 11 pain scale options (0-10)
@@ -42,7 +43,7 @@ describe("PainScaleSelector", () => {
   });
 
   it("highlights the selected pain score", () => {
-    const handleChange = jest.fn();
+    const handleChange = vi.fn();
     render(<TestWrapper value={3} onChange={handleChange} />);
 
     // The option with value 3 should have the selected class
@@ -51,7 +52,7 @@ describe("PainScaleSelector", () => {
   });
 
   it("calls onChange when a pain score is selected", () => {
-    const handleChange = jest.fn();
+    const handleChange = vi.fn();
     render(<TestWrapper value={null} onChange={handleChange} />);
 
     // Click on the option with value 5
@@ -63,7 +64,7 @@ describe("PainScaleSelector", () => {
   });
 
   it("displays the pain description when a score is selected", () => {
-    const handleChange = jest.fn();
+    const handleChange = vi.fn();
     render(<TestWrapper value={4} onChange={handleChange} />);
 
     // Check that the description container is rendered
@@ -75,7 +76,7 @@ describe("PainScaleSelector", () => {
   });
 
   it("handles keyboard navigation", () => {
-    const handleChange = jest.fn();
+    const handleChange = vi.fn();
     render(<TestWrapper value={null} onChange={handleChange} />);
 
     // Press Enter on the option with value 7
@@ -93,7 +94,7 @@ describe("PainScaleSelector", () => {
   });
 
   it("displays error message when provided", () => {
-    const handleChange = jest.fn();
+    const handleChange = vi.fn();
     
     // Create a wrapper component that includes the error prop
     const TestWrapperWithError = () => {
@@ -101,7 +102,8 @@ describe("PainScaleSelector", () => {
       return (
         <PainScaleSelector
           name="score"
-          control={control as Control<any>}
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          control={control as any}
           value={null}
           onChange={handleChange}
           error="Please select a pain score"
@@ -115,7 +117,8 @@ describe("PainScaleSelector", () => {
       return (
         <PainScaleSelector
           name="score"
-          control={control as Control<any>}
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          control={control as any}
           value={null}
           onChange={handleChange}
         />

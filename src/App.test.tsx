@@ -2,8 +2,8 @@ import { render, screen } from "@testing-library/react";
 import * as UserContext from "./contexts/useUserContext";
 
 // Mock the UserContext
-jest.mock("./contexts/useUserContext", () => ({
-  useUserContext: jest.fn(),
+vi.mock("./contexts/useUserContext", () => ({
+  useUserContext: vi.fn(),
 }));
 
 // Create a simple header component for testing
@@ -16,10 +16,10 @@ const Header = () => (
 describe("App", () => {
   beforeEach(() => {
     // Mock the user context to simulate a logged-in user
-    jest.spyOn(UserContext, "useUserContext").mockReturnValue({
+    vi.spyOn(UserContext, "useUserContext").mockReturnValue({
       user: { id: 1, name: "Test User" },
-      login: jest.fn(),
-      logout: jest.fn(),
+      login: vi.fn(),
+      logout: vi.fn(),
       loading: false,
     });
   });

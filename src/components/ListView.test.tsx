@@ -4,9 +4,9 @@ import { ListView } from "./ListView";
 import * as Api from "../api";
 
 // Mock the API functions
-jest.mock("../api", () => ({
-  deleteWorkout: jest.fn(),
-  deletePainScore: jest.fn(),
+vi.mock("../api", () => ({
+  deleteWorkout: vi.fn(),
+  deletePainScore: vi.fn(),
 }));
 
 // Mock window.confirm
@@ -67,14 +67,14 @@ describe("ListView", () => {
     },
   ];
 
-  const mockHandleWorkoutDeleted = jest.fn();
-  const mockHandlePainScoreDelete = jest.fn();
-  const mockHandleSleepScoreDelete = jest.fn();
+  const mockHandleWorkoutDeleted = vi.fn();
+  const mockHandlePainScoreDelete = vi.fn();
+  const mockHandleSleepScoreDelete = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     // Mock window.confirm to always return true
-    window.confirm = jest.fn().mockReturnValue(true);
+    window.confirm = vi.fn().mockReturnValue(true);
   });
 
   afterEach(() => {
@@ -148,7 +148,7 @@ describe("ListView", () => {
 
   it("handles workout deletion", async () => {
     // Mock successful deletion
-    (Api.deleteWorkout as jest.Mock).mockResolvedValue({});
+    (Api.deleteWorkout as ReturnType<typeof vi.fn>).mockResolvedValue({});
 
     render(
       <MemoryRouter>
@@ -186,7 +186,7 @@ describe("ListView", () => {
 
   it("handles pain score deletion", async () => {
     // Mock successful deletion
-    (Api.deletePainScore as jest.Mock).mockResolvedValue({});
+    (Api.deletePainScore as ReturnType<typeof vi.fn>).mockResolvedValue({});
 
     render(
       <MemoryRouter>
@@ -225,14 +225,14 @@ describe("ListView", () => {
   it("handles workout deletion error", async () => {
     // Mock console.error
     const originalConsoleError = console.error;
-    console.error = jest.fn();
+    console.error = vi.fn();
 
     // Mock window.alert
     const originalAlert = window.alert;
-    window.alert = jest.fn();
+    window.alert = vi.fn();
 
     // Mock failed deletion
-    (Api.deleteWorkout as jest.Mock).mockRejectedValue(new Error("Failed to delete"));
+    (Api.deleteWorkout as ReturnType<typeof vi.fn>).mockRejectedValue(new Error("Failed to delete"));
 
     render(
       <MemoryRouter>
@@ -270,14 +270,14 @@ describe("ListView", () => {
   it("handles pain score deletion error", async () => {
     // Mock console.error
     const originalConsoleError = console.error;
-    console.error = jest.fn();
+    console.error = vi.fn();
 
     // Mock window.alert
     const originalAlert = window.alert;
-    window.alert = jest.fn();
+    window.alert = vi.fn();
 
     // Mock failed deletion
-    (Api.deletePainScore as jest.Mock).mockRejectedValue(new Error("Failed to delete"));
+    (Api.deletePainScore as ReturnType<typeof vi.fn>).mockRejectedValue(new Error("Failed to delete"));
 
     render(
       <MemoryRouter>
@@ -314,7 +314,7 @@ describe("ListView", () => {
 
   it("does not delete when user cancels confirmation", async () => {
     // Override the mock to return false (user clicked "Cancel")
-    (window.confirm as jest.Mock).mockReturnValue(false);
+    (window.confirm as ReturnType<typeof vi.fn>).mockReturnValue(false);
 
     render(
       <MemoryRouter>

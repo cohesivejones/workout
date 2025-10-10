@@ -1,5 +1,5 @@
 import { render } from "@testing-library/react";
-import { getPainFace } from "./PainScaleFaces";
+import { getPainFace } from "./painScaleFaces.utils";
 
 describe("PainScaleFaces", () => {
   it("renders different faces for different pain levels", () => {
