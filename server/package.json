@@ -7,8 +7,10 @@
     "build": "tsc",
     "db:create": "ts-node scripts/create-database.ts",
     "db:migrate": "ts-node ./node_modules/typeorm/cli.js migration:run -d src/data-source.ts",
+    "db:migrate:test": "NODE_ENV=test ts-node ./node_modules/typeorm/cli.js migration:run -d src/data-source.ts",
     "db:revert": "ts-node ./node_modules/typeorm/cli.js migration:revert -d src/data-source.ts",
     "dev": "ts-node src/index.ts",
+    "dev:test": "NODE_ENV=test ts-node src/index.ts",
     "start": "node dist/index.js"
   },
   "keywords": [],

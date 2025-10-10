@@ -1,0 +1,114 @@
+name: E2E Tests
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    
+    env:
+      PGHOST: localhost
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: workout_test
+      NODE_ENV: test
+      PORT: 3001
+      VITE_API_URL: http://localhost:3001
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: workout_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Install Playwright Browsers
+      run: npx playwright install --with-deps chromium
+    
+    - name: Set up test database
+      run: |
+        cd server
+        npm run db:migrate
+    
+    - name: Start backend server
+      run: |
+        cd server
+        npm run dev > ../backend.log 2>&1 &
+        echo $! > ../server.pid
+        echo "Backend server started with PID $(cat ../server.pid)"
+    
+    - name: Start frontend server
+      run: |
+        npx vite --port 5173 > vite.log 2>&1 &
+        echo $! > vite.pid
+        echo "Frontend server started with PID $(cat vite.pid)"
+    
+    - name: Wait for servers to be ready
+      run: |
+        echo "Waiting for backend server on port 3001..."
+        timeout 60 bash -c 'until curl -f http://localhost:3001/api/exercises 2>/dev/null; do sleep 1; done' || echo "Backend started (no auth endpoint check)"
+        
+        echo "Waiting for frontend server on port 5173..."
+        for i in {1..60}; do
+          if curl -f http://localhost:5173 2>/dev/null; then
+            echo "Frontend server is ready!"
+            break
+          fi
+          if [ $i -eq 60 ]; then
+            echo "Frontend server failed to start. Logs:"
+            cat vite.log || echo "No vite.log found"
+            exit 1
+          fi
+          sleep 1
+        done
+        
+        echo "Both servers are ready!"
+    
+    - name: Run Playwright tests
+      run: npm run test:e2e
+    
+    - name: Stop servers
+      if: always()
+      run: |
+        if [ -f server.pid ]; then kill $(cat server.pid) || true; fi
+        if [ -f vite.pid ]; then kill $(cat vite.pid) || true; fi
+    
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: playwright-report
+        path: playwright-report/
+        retention-days: 30
+    
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-results
+        path: test-results/
+        retention-days: 30
