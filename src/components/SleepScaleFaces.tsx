@@ -166,6 +166,7 @@ export const SleepFace5: React.FC<SleepFaceProps> = ({
 );
 
 // Function to get the appropriate face component based on sleep level
+// eslint-disable-next-line react-refresh/only-export-components
 export const getSleepFace = (level: number, props: SleepFaceProps = {}) => {
   switch (level) {
     case 1:

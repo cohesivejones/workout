@@ -1,9 +1,9 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import PainScaleSelector from "./PainScaleSelector";
-import { Control, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
-// Mock the PainScaleFaces component
-vi.mock("./PainScaleFaces", () => ({
+// Mock the painScaleFaces.utils module
+vi.mock("./painScaleFaces.utils", () => ({
   getPainFace: vi.fn(() => <div data-testid="mock-pain-face" />),
 }));
 
@@ -19,7 +19,8 @@ const TestWrapper = ({
   return (
     <PainScaleSelector
       name="score"
-      control={control as Control<any>}
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      control={control as any}
       value={value}
       onChange={onChange}
     />
@@ -101,7 +102,8 @@ describe("PainScaleSelector", () => {
       return (
         <PainScaleSelector
           name="score"
-          control={control as Control<any>}
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          control={control as any}
           value={null}
           onChange={handleChange}
           error="Please select a pain score"
@@ -115,7 +117,8 @@ describe("PainScaleSelector", () => {
       return (
         <PainScaleSelector
           name="score"
-          control={control as Control<any>}
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          control={control as any}
           value={null}
           onChange={handleChange}
         />

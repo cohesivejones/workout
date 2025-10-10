@@ -148,7 +148,7 @@ describe("ListView", () => {
 
   it("handles workout deletion", async () => {
     // Mock successful deletion
-    (Api.deleteWorkout as any).mockResolvedValue({});
+    (Api.deleteWorkout as ReturnType<typeof vi.fn>).mockResolvedValue({});
 
     render(
       <MemoryRouter>
@@ -186,7 +186,7 @@ describe("ListView", () => {
 
   it("handles pain score deletion", async () => {
     // Mock successful deletion
-    (Api.deletePainScore as any).mockResolvedValue({});
+    (Api.deletePainScore as ReturnType<typeof vi.fn>).mockResolvedValue({});
 
     render(
       <MemoryRouter>
@@ -232,7 +232,7 @@ describe("ListView", () => {
     window.alert = vi.fn();
 
     // Mock failed deletion
-    (Api.deleteWorkout as any).mockRejectedValue(new Error("Failed to delete"));
+    (Api.deleteWorkout as ReturnType<typeof vi.fn>).mockRejectedValue(new Error("Failed to delete"));
 
     render(
       <MemoryRouter>
@@ -277,7 +277,7 @@ describe("ListView", () => {
     window.alert = vi.fn();
 
     // Mock failed deletion
-    (Api.deletePainScore as any).mockRejectedValue(new Error("Failed to delete"));
+    (Api.deletePainScore as ReturnType<typeof vi.fn>).mockRejectedValue(new Error("Failed to delete"));
 
     render(
       <MemoryRouter>
@@ -314,7 +314,7 @@ describe("ListView", () => {
 
   it("does not delete when user cancels confirmation", async () => {
     // Override the mock to return false (user clicked "Cancel")
-    (window.confirm as any).mockReturnValue(false);
+    (window.confirm as ReturnType<typeof vi.fn>).mockReturnValue(false);
 
     render(
       <MemoryRouter>

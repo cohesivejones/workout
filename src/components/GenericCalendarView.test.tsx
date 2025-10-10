@@ -78,8 +78,10 @@ describe("GenericCalendarView", () => {
     OriginalDate = global.Date;
     
     // Mock Date
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const MockDate = function(this: any, arg?: any) {
       return arg ? new OriginalDate(arg) : new OriginalDate(FIXED_DATE);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any;
     
     MockDate.now = () => FIXED_DATE.getTime();
@@ -344,14 +346,16 @@ describe("GenericCalendarView", () => {
     unmount();
 
     // Check that removeEventListener was called with the same function
-    const addEventListenerCall = (window.addEventListener as any).mock.calls.find(
-      (call) => call[0] === "resize"
+    const addEventListenerMock = window.addEventListener as unknown as { mock: { calls: unknown[][] } };
+    const removeEventListenerMock = window.removeEventListener as unknown as { mock: { calls: unknown[][] } };
+    const addEventListenerCall = addEventListenerMock.mock.calls.find(
+      (call: unknown[]) => call[0] === "resize"
     );
-    const removeEventListenerCall = (window.removeEventListener as any).mock.calls.find(
-      (call) => call[0] === "resize"
+    const removeEventListenerCall = removeEventListenerMock.mock.calls.find(
+      (call: unknown[]) => call[0] === "resize"
     );
 
-    expect(removeEventListenerCall[0]).toBe("resize");
-    expect(removeEventListenerCall[1]).toBe(addEventListenerCall[1]);
+    expect(removeEventListenerCall?.[0]).toBe("resize");
+    expect(removeEventListenerCall?.[1]).toBe(addEventListenerCall?.[1]);
   });
 });

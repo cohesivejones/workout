@@ -7,6 +7,7 @@ vi.mock("./PainScaleSelector", () => {
   return {
     __esModule: true,
      
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     default: ({ onChange, error }: any) => (
       <div data-testid="mock-pain-scale-selector">
         <select

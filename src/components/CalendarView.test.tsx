@@ -205,9 +205,10 @@ describe("CalendarView", () => {
     });
 
     // Trigger resize event callback
-    const resizeCallback = (window.addEventListener as any).mock.calls.find(
-      (call) => call[0] === "resize"
-    )[1];
+    const addEventListenerMock = window.addEventListener as unknown as { mock: { calls: unknown[][] } };
+    const resizeCallback = addEventListenerMock.mock.calls.find(
+      (call: unknown[]) => call[0] === "resize"
+    )?.[1] as () => void;
     resizeCallback();
 
     // Re-render to apply the state change

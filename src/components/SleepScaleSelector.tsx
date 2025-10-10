@@ -23,7 +23,7 @@ interface SleepScaleSelectorProps {
   value: number | null;
   onChange: (value: number) => void;
   name: string;
-  control: Control<any>;
+  control: Control<Record<string, unknown>>;
   error?: string;
 }
 

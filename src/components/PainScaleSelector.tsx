@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Controller, Control } from "react-hook-form";
 import classNames from "classnames";
 import styles from "./PainScaleSelector.module.css";
-import { getPainFace } from "./PainScaleFaces";
+import { getPainFace } from "./painScaleFaces.utils";
 
 // Pain score descriptions from the PainScoreForm component
 const painScoreDescriptions = [
@@ -31,7 +31,7 @@ interface PainScaleSelectorProps {
   value: number | null;
   onChange: (value: number) => void;
   name: string;
-  control: Control<any>;
+  control: Control<Record<string, unknown>>;
   error?: string;
 }
 

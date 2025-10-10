@@ -52,25 +52,28 @@ function ChangePasswordPage() {
       // Reset form and show success message
       reset();
       setSuccessMessage("Password changed successfully");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Change password error:", err);
+      
+      // Type guard for axios error
+      const axiosError = err as { response?: { data?: { error?: string } } };
 
       // Handle specific error messages from the API
-      if (err.response?.data?.error) {
-        if (err.response.data.error === "Current password is incorrect") {
+      if (axiosError.response?.data?.error) {
+        if (axiosError.response.data.error === "Current password is incorrect") {
           setFormError("currentPassword", {
             type: "manual",
             message: "Current password is incorrect",
           });
-        } else if (err.response.data.error.includes("New password must be")) {
+        } else if (axiosError.response.data.error.includes("New password must be")) {
           setFormError("newPassword", {
             type: "manual",
-            message: err.response.data.error,
+            message: axiosError.response.data.error,
           });
         } else {
           setFormError("root", {
             type: "manual",
-            message: err.response.data.error,
+            message: axiosError.response.data.error,
           });
         }
       } else {

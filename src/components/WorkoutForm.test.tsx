@@ -6,9 +6,11 @@ import * as UserContext from "../contexts/useUserContext";
 import * as Api from "../api";
 
 vi.mock("react-select/creatable", () => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   default: ({ options, value, onChange }: any) => {
     function handleChange(event: React.ChangeEvent<HTMLSelectElement>) {
       const option = options.find(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (option: any) => option.value === event.currentTarget.value,
       );
       onChange(option);
@@ -21,6 +23,7 @@ vi.mock("react-select/creatable", () => ({
         onChange={handleChange}
       >
         <option value="">Select...</option>
+        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
         {options.map(({ label, value }: any) => (
           <option key={value} value={value}>
             {label}

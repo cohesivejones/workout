@@ -18,6 +18,7 @@ export type UserContext = {
   loading: boolean;
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const UserContext = createContext<UserContext>({} as UserContext);
 
 export const UserContextProvider = ({ children }: Props) => {
