@@ -16,7 +16,6 @@ export default defineConfig(({ mode }) => {
         "/api": {
           target: env.VITE_API_URL,
           changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/api/, ""),
         },
       },
     },
@@ -40,6 +39,14 @@ export default defineConfig(({ mode }) => {
       globals: true,
       environment: "jsdom",
       setupFiles: "./src/setupTests.ts",
+      exclude: [
+        '**/node_modules/**',
+        '**/dist/**',
+        '**/e2e/**',
+        '**/.{idea,git,cache,output,temp}/**',
+        '**/playwright-report/**',
+        '**/test-results/**'
+      ],
       css: {
         modules: {
           classNameStrategy: "non-scoped",

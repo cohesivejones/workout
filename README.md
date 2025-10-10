@@ -156,7 +156,7 @@ chmod +x scripts/deploy.sh
 
 - **Development:**
   - ESLint
-  - Jest (testing)
+  - Vitest (testing)
   - Concurrently (dev server orchestration)
 
 ## Key Features

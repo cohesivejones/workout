@@ -28,7 +28,13 @@ import { authenticateToken, generateToken } from "./middleware/auth";
 // Initialize reflect-metadata
 import "reflect-metadata";
 
-dotenv.config();
+// Load environment variables from the appropriate .env file
+// Use path.join to resolve relative to the server directory
+const envFile = process.env.NODE_ENV === 'test' ? '.env.test' : '.env';
+// When running with ts-node, __dirname is in src/, so we need to go up one level
+// When running compiled code, __dirname is in dist/, so we also go up one level
+const envPath = path.join(__dirname, '..', envFile);
+dotenv.config({ path: envPath });
 
 // Initialize OpenAI client
 const openai = new OpenAI({
@@ -50,7 +56,7 @@ const app = express();
 // Middleware
 app.use(
   cors({
-    origin: (process.env.CORS_ORIGIN || "http://localhost:3000").split(','),
+    origin: (process.env.CORS_ORIGIN || "").split(','),
     credentials: true,
   })
 );

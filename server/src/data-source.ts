@@ -2,8 +2,12 @@ import "reflect-metadata";
 import { DataSource } from "typeorm";
 import * as entities from "./entities";
 import dotenv from "dotenv";
+import path from "path";
 
-dotenv.config();
+// Load environment variables from the appropriate .env file
+const envFile = process.env.NODE_ENV === 'test' ? '.env.test' : '.env';
+const envPath = path.join(__dirname, '..', envFile);
+dotenv.config({ path: envPath });
 
 // Parse DATABASE_URL if provided (Heroku), otherwise use individual config vars
 const dataSource = process.env.DATABASE_URL
