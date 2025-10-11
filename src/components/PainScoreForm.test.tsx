@@ -2,13 +2,17 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import PainScoreForm from './PainScoreForm';
 import { PainScore } from '../types';
 
+interface MockPainScaleSelectorProps {
+  onChange: (value: number) => void;
+  error?: string;
+}
+
 // Mock the PainScaleSelector component
 vi.mock('./PainScaleSelector', () => {
   return {
     __esModule: true,
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    default: ({ onChange, error }: any) => (
+    default: ({ onChange, error }: MockPainScaleSelectorProps) => (
       <div data-testid="mock-pain-scale-selector">
         <select
           data-testid="mock-pain-scale-select"

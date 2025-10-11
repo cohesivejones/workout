@@ -1,9 +1,16 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import PainScorePage from './PainScorePage';
 import * as Api from '../api';
 import * as UserContext from '../contexts/useUserContext';
+import { PainScore } from '../types';
+
+interface MockPainScoreFormProps {
+  onSubmit: (painScore: Omit<PainScore, 'id'>) => Promise<boolean>;
+  existingPainScore?: PainScore;
+  selectedDate?: string;
+  onCancel?: () => void;
+}
 
 // Mock the API functions
 vi.mock('../api', () => ({
@@ -21,7 +28,7 @@ vi.mock('../contexts/useUserContext', () => ({
 vi.mock('../components/PainScoreForm', () => {
   return {
     __esModule: true,
-    default: ({ onSubmit, existingPainScore }: any) => (
+    default: ({ onSubmit, existingPainScore }: MockPainScoreFormProps) => (
       <div data-testid="mock-pain-score-form">
         <button
           data-testid="mock-submit-button"
@@ -58,9 +65,9 @@ describe('PainScorePage', () => {
     });
 
     // Mock successful API responses
-    (Api.createPainScore as any).mockResolvedValue({ id: 123 });
-    (Api.updatePainScore as any).mockResolvedValue({ id: 456 });
-    (Api.fetchPainScore as any).mockResolvedValue({
+    vi.mocked(Api.createPainScore).mockResolvedValue({ id: 123 });
+    vi.mocked(Api.updatePainScore).mockResolvedValue({ id: 456 });
+    vi.mocked(Api.fetchPainScore).mockResolvedValue({
       id: 456,
       date: '2025-04-10',
       score: 3,
@@ -156,7 +163,7 @@ describe('PainScorePage', () => {
 
   it('handles error when fetching pain score fails', async () => {
     // Mock the API call to fail
-    (Api.fetchPainScore as any).mockRejectedValue(new Error('Failed to load pain score'));
+    vi.mocked(Api.fetchPainScore).mockRejectedValue(new Error('Failed to load pain score'));
 
     render(
       <MemoryRouter initialEntries={['/pain-scores/456/edit']}>
@@ -174,7 +181,7 @@ describe('PainScorePage', () => {
 
   it('renders form without existing pain score when pain score is not found', async () => {
     // Mock the API call to return null (pain score not found)
-    (Api.fetchPainScore as any).mockResolvedValue(null);
+    vi.mocked(Api.fetchPainScore).mockResolvedValue(null);
 
     render(
       <MemoryRouter initialEntries={['/pain-scores/999/edit']}>

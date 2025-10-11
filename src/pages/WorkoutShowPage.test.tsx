@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import WorkoutShowPage from './WorkoutShowPage';
@@ -39,7 +38,7 @@ describe('WorkoutShowPage', () => {
     });
 
     // Mock the API call to return the workout
-    (Api.fetchWorkout as any).mockResolvedValue(mockWorkout);
+    vi.mocked(Api.fetchWorkout).mockResolvedValue(mockWorkout);
   });
 
   it('renders loading state initially', () => {
@@ -89,7 +88,7 @@ describe('WorkoutShowPage', () => {
 
   it('renders error state when API call fails', async () => {
     // Mock the API call to fail
-    (Api.fetchWorkout as any).mockRejectedValue(new Error('Failed to load workout'));
+    vi.mocked(Api.fetchWorkout).mockRejectedValue(new Error('Failed to load workout'));
 
     render(
       <MemoryRouter initialEntries={['/workouts/1']}>
@@ -107,7 +106,7 @@ describe('WorkoutShowPage', () => {
 
   it("renders not found state when workout doesn't exist", async () => {
     // Mock the API call to return null (workout not found)
-    (Api.fetchWorkout as any).mockResolvedValue(null);
+    vi.mocked(Api.fetchWorkout).mockResolvedValue(null);
 
     render(
       <MemoryRouter initialEntries={['/workouts/999']}>
@@ -126,7 +125,7 @@ describe('WorkoutShowPage', () => {
   it('renders workout without instructor badge when withInstructor is false', async () => {
     // Mock the API call to return a workout without instructor
     const workoutWithoutInstructor = { ...mockWorkout, withInstructor: false };
-    (Api.fetchWorkout as any).mockResolvedValue(workoutWithoutInstructor);
+    vi.mocked(Api.fetchWorkout).mockResolvedValue(workoutWithoutInstructor);
 
     render(
       <MemoryRouter initialEntries={['/workouts/1']}>
@@ -151,7 +150,7 @@ describe('WorkoutShowPage', () => {
       ...mockWorkout,
       exercises: [{ id: 1, name: 'Push-ups', reps: 10 }],
     };
-    (Api.fetchWorkout as any).mockResolvedValue(workoutWithExerciseWithoutWeight);
+    vi.mocked(Api.fetchWorkout).mockResolvedValue(workoutWithExerciseWithoutWeight);
 
     render(
       <MemoryRouter initialEntries={['/workouts/1']}>
@@ -181,7 +180,7 @@ describe('WorkoutShowPage', () => {
         { id: 2, name: 'Wall Sit', reps: 2, weight: 0, time_minutes: 1.5 },
       ],
     };
-    (Api.fetchWorkout as any).mockResolvedValue(workoutWithTime);
+    vi.mocked(Api.fetchWorkout).mockResolvedValue(workoutWithTime);
 
     render(
       <MemoryRouter initialEntries={['/workouts/1']}>

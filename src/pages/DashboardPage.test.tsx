@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { render, screen, waitFor } from '@testing-library/react';
 import DashboardPage from './DashboardPage';
 import * as Api from '../api';
@@ -82,7 +81,7 @@ describe('DashboardPage', () => {
 
   it('renders loading state initially', () => {
     // Mock API to not resolve immediately
-    (Api.fetchWeightProgressionData as any).mockImplementation(() => new Promise(() => {}));
+    vi.mocked(Api.fetchWeightProgressionData).mockImplementation(() => new Promise(() => {}));
 
     render(<DashboardPage />);
 
@@ -92,7 +91,7 @@ describe('DashboardPage', () => {
 
   it('renders charts when data is loaded successfully', async () => {
     // Mock successful API response
-    (Api.fetchWeightProgressionData as any).mockResolvedValue(mockProgressionData);
+    vi.mocked(Api.fetchWeightProgressionData).mockResolvedValue(mockProgressionData);
 
     render(<DashboardPage />);
 
@@ -115,7 +114,7 @@ describe('DashboardPage', () => {
 
   it('renders error message when API call fails', async () => {
     // Mock API failure
-    (Api.fetchWeightProgressionData as any).mockRejectedValue(new Error('Failed to fetch data'));
+    vi.mocked(Api.fetchWeightProgressionData).mockRejectedValue(new Error('Failed to fetch data'));
 
     render(<DashboardPage />);
 
@@ -127,7 +126,7 @@ describe('DashboardPage', () => {
 
   it('renders empty state when no data is available', async () => {
     // Mock empty data response
-    (Api.fetchWeightProgressionData as any).mockResolvedValue([]);
+    vi.mocked(Api.fetchWeightProgressionData).mockResolvedValue([]);
 
     render(<DashboardPage />);
 
@@ -142,9 +141,9 @@ describe('DashboardPage', () => {
 
   it('formats dates correctly in chart labels and uses consistent domain', async () => {
     // Mock successful API responses
-    (Api.fetchWeightProgressionData as any).mockResolvedValue(mockProgressionData);
-    (Api.fetchPainProgressionData as any).mockResolvedValue(mockPainData);
-    (Api.fetchSleepProgressionData as any).mockResolvedValue(mockSleepData);
+    vi.mocked(Api.fetchWeightProgressionData).mockResolvedValue(mockProgressionData);
+    vi.mocked(Api.fetchPainProgressionData).mockResolvedValue(mockPainData);
+    vi.mocked(Api.fetchSleepProgressionData).mockResolvedValue(mockSleepData);
 
     render(<DashboardPage />);
 
@@ -164,9 +163,9 @@ describe('DashboardPage', () => {
 
   it('renders pain and sleep score charts when data is loaded successfully', async () => {
     // Mock successful API responses
-    (Api.fetchWeightProgressionData as any).mockResolvedValue(mockProgressionData);
-    (Api.fetchPainProgressionData as any).mockResolvedValue(mockPainData);
-    (Api.fetchSleepProgressionData as any).mockResolvedValue(mockSleepData);
+    vi.mocked(Api.fetchWeightProgressionData).mockResolvedValue(mockProgressionData);
+    vi.mocked(Api.fetchPainProgressionData).mockResolvedValue(mockPainData);
+    vi.mocked(Api.fetchSleepProgressionData).mockResolvedValue(mockSleepData);
 
     render(<DashboardPage />);
 
@@ -193,9 +192,9 @@ describe('DashboardPage', () => {
 
   it('does not render pain and sleep charts when no data is available', async () => {
     // Mock API responses with empty data for pain and sleep
-    (Api.fetchWeightProgressionData as any).mockResolvedValue(mockProgressionData);
-    (Api.fetchPainProgressionData as any).mockResolvedValue({ dataPoints: [] });
-    (Api.fetchSleepProgressionData as any).mockResolvedValue({ dataPoints: [] });
+    vi.mocked(Api.fetchWeightProgressionData).mockResolvedValue(mockProgressionData);
+    vi.mocked(Api.fetchPainProgressionData).mockResolvedValue({ dataPoints: [] });
+    vi.mocked(Api.fetchSleepProgressionData).mockResolvedValue({ dataPoints: [] });
 
     render(<DashboardPage />);
 
@@ -210,9 +209,9 @@ describe('DashboardPage', () => {
 
   it('normalizes data to have consistent date range across all charts', async () => {
     // Mock successful API responses
-    (Api.fetchWeightProgressionData as any).mockResolvedValue(mockProgressionData);
-    (Api.fetchPainProgressionData as any).mockResolvedValue(mockPainData);
-    (Api.fetchSleepProgressionData as any).mockResolvedValue(mockSleepData);
+    vi.mocked(Api.fetchWeightProgressionData).mockResolvedValue(mockProgressionData);
+    vi.mocked(Api.fetchPainProgressionData).mockResolvedValue(mockPainData);
+    vi.mocked(Api.fetchSleepProgressionData).mockResolvedValue(mockSleepData);
 
     render(<DashboardPage />);
 
@@ -233,9 +232,9 @@ describe('DashboardPage', () => {
 
   describe('PR Indicator Features', () => {
     beforeEach(() => {
-      (Api.fetchWeightProgressionData as any).mockResolvedValue(mockProgressionData);
-      (Api.fetchPainProgressionData as any).mockResolvedValue(mockPainData);
-      (Api.fetchSleepProgressionData as any).mockResolvedValue(mockSleepData);
+      vi.mocked(Api.fetchWeightProgressionData).mockResolvedValue(mockProgressionData);
+      vi.mocked(Api.fetchPainProgressionData).mockResolvedValue(mockPainData);
+      vi.mocked(Api.fetchSleepProgressionData).mockResolvedValue(mockSleepData);
     });
 
     it('renders PR legend for each exercise chart', async () => {
@@ -293,9 +292,9 @@ describe('DashboardPage', () => {
         },
       ];
 
-      (Api.fetchWeightProgressionData as any).mockResolvedValue(mockDataWithPRs);
-      (Api.fetchPainProgressionData as any).mockResolvedValue({ dataPoints: [] });
-      (Api.fetchSleepProgressionData as any).mockResolvedValue({ dataPoints: [] });
+      vi.mocked(Api.fetchWeightProgressionData).mockResolvedValue(mockDataWithPRs);
+      vi.mocked(Api.fetchPainProgressionData).mockResolvedValue({ dataPoints: [] });
+      vi.mocked(Api.fetchSleepProgressionData).mockResolvedValue({ dataPoints: [] });
 
       render(<DashboardPage />);
 
@@ -343,7 +342,7 @@ describe('DashboardPage', () => {
         },
       ];
 
-      (Api.fetchWeightProgressionData as any).mockResolvedValue(dataWithMixedPRs);
+      vi.mocked(Api.fetchWeightProgressionData).mockResolvedValue(dataWithMixedPRs);
 
       render(<DashboardPage />);
 
@@ -370,7 +369,7 @@ describe('DashboardPage', () => {
         },
       ];
 
-      (Api.fetchWeightProgressionData as any).mockResolvedValue(dataWithoutPRFlags);
+      vi.mocked(Api.fetchWeightProgressionData).mockResolvedValue(dataWithoutPRFlags);
 
       render(<DashboardPage />);
 

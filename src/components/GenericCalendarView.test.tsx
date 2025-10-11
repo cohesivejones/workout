@@ -81,11 +81,11 @@ describe('GenericCalendarView', () => {
     OriginalDate = global.Date;
 
     // Mock Date
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const MockDate = function (this: any, arg?: any) {
+    type DateConstructorArg = string | number | Date | undefined;
+    
+    const MockDate = function (this: Date, arg?: DateConstructorArg) {
       return arg ? new OriginalDate(arg) : new OriginalDate(FIXED_DATE);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any;
+    } as unknown as DateConstructor;
 
     MockDate.now = () => FIXED_DATE.getTime();
     MockDate.parse = OriginalDate.parse;
