@@ -107,9 +107,9 @@ describe("ListView", () => {
     expect(dates[0].textContent).toContain("Apr 12"); // Pain score
     expect(dates[1].textContent).toContain("Apr 11"); // Sleep score
     expect(dates[2].textContent).toContain("Apr 10"); // Workout
-    expect(dates[3].textContent).toContain("Apr 8");  // Pain score
-    expect(dates[4].textContent).toContain("Apr 7");  // Sleep score
-    expect(dates[5].textContent).toContain("Apr 5");  // Workout
+    expect(dates[3].textContent).toContain("Apr 8"); // Pain score
+    expect(dates[4].textContent).toContain("Apr 7"); // Sleep score
+    expect(dates[5].textContent).toContain("Apr 5"); // Workout
 
     // Check workout details
     expect(screen.getByText("Push-ups")).toBeInTheDocument();
@@ -143,7 +143,9 @@ describe("ListView", () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByText("No workouts, pain scores, or sleep scores recorded yet.")).toBeInTheDocument();
+    expect(
+      screen.getByText("No workouts, pain scores, or sleep scores recorded yet.")
+    ).toBeInTheDocument();
   });
 
   it("handles workout deletion", async () => {
@@ -361,20 +363,20 @@ describe("ListView", () => {
 
     // Check that filter controls are rendered
     expect(screen.getByText("Filter by Type:")).toBeInTheDocument();
-    
+
     // Check that all checkboxes are rendered and checked by default
     const workoutsCheckbox = screen.getByLabelText("Workouts") as HTMLInputElement;
     const painScoresCheckbox = screen.getByLabelText("Pain Scores") as HTMLInputElement;
     const sleepScoresCheckbox = screen.getByLabelText("Sleep Scores") as HTMLInputElement;
-    
+
     expect(workoutsCheckbox).toBeInTheDocument();
     expect(painScoresCheckbox).toBeInTheDocument();
     expect(sleepScoresCheckbox).toBeInTheDocument();
-    
+
     expect(workoutsCheckbox.checked).toBe(true);
     expect(painScoresCheckbox.checked).toBe(true);
     expect(sleepScoresCheckbox.checked).toBe(true);
-    
+
     // Check that Show All button is rendered
     expect(screen.getByText("Show All")).toBeInTheDocument();
   });
@@ -401,7 +403,7 @@ describe("ListView", () => {
     // Uncheck workouts
     const workoutsCheckbox = screen.getByLabelText("Workouts") as HTMLInputElement;
     fireEvent.click(workoutsCheckbox);
-    
+
     // Now only pain scores and sleep scores should be visible
     expect(screen.queryAllByText("Workout").length).toBe(0);
     expect(screen.getAllByText("Pain Score").length).toBe(2);
@@ -410,7 +412,7 @@ describe("ListView", () => {
     // Uncheck pain scores
     const painScoresCheckbox = screen.getByLabelText("Pain Scores") as HTMLInputElement;
     fireEvent.click(painScoresCheckbox);
-    
+
     // Now only sleep scores should be visible
     expect(screen.queryAllByText("Workout").length).toBe(0);
     expect(screen.queryAllByText("Pain Score").length).toBe(0);
@@ -419,12 +421,14 @@ describe("ListView", () => {
     // Uncheck sleep scores
     const sleepScoresCheckbox = screen.getByLabelText("Sleep Scores") as HTMLInputElement;
     fireEvent.click(sleepScoresCheckbox);
-    
+
     // Now no items should be visible, but the empty state message should be shown
     expect(screen.queryAllByText("Workout").length).toBe(0);
     expect(screen.queryAllByText("Pain Score").length).toBe(0);
     expect(screen.queryAllByText("Sleep Score").length).toBe(0);
-    expect(screen.getByText("No workouts, pain scores, or sleep scores recorded yet.")).toBeInTheDocument();
+    expect(
+      screen.getByText("No workouts, pain scores, or sleep scores recorded yet.")
+    ).toBeInTheDocument();
   });
 
   it("resets filters when Show All button is clicked", () => {
@@ -445,25 +449,25 @@ describe("ListView", () => {
     const workoutsCheckbox = screen.getByLabelText("Workouts") as HTMLInputElement;
     const painScoresCheckbox = screen.getByLabelText("Pain Scores") as HTMLInputElement;
     const sleepScoresCheckbox = screen.getByLabelText("Sleep Scores") as HTMLInputElement;
-    
+
     fireEvent.click(workoutsCheckbox);
     fireEvent.click(painScoresCheckbox);
     fireEvent.click(sleepScoresCheckbox);
-    
+
     // Verify no items are visible
     expect(screen.queryAllByText("Workout").length).toBe(0);
     expect(screen.queryAllByText("Pain Score").length).toBe(0);
     expect(screen.queryAllByText("Sleep Score").length).toBe(0);
-    
+
     // Click Show All button
     const showAllButton = screen.getByText("Show All");
     fireEvent.click(showAllButton);
-    
+
     // Now all items should be visible again
     expect(screen.getAllByText("Workout").length).toBe(2);
     expect(screen.getAllByText("Pain Score").length).toBe(2);
     expect(screen.getAllByText("Sleep Score").length).toBe(2);
-    
+
     // And all checkboxes should be checked
     expect(workoutsCheckbox.checked).toBe(true);
     expect(painScoresCheckbox.checked).toBe(true);
@@ -487,19 +491,19 @@ describe("ListView", () => {
     // Check that the NEW REPS badge is displayed for Push-ups
     const newRepsBadges = screen.getAllByText("NEW REPS");
     expect(newRepsBadges.length).toBe(1);
-    
+
     // Check that the NEW WEIGHT badge is displayed for Squats
     const newWeightBadges = screen.getAllByText("NEW WEIGHT");
     expect(newWeightBadges.length).toBe(1);
-    
+
     // Verify that the badges are associated with the correct exercises
     const pushUpsItem = screen.getByText("Push-ups").closest(".exerciseItem");
     const squatsItem = screen.getByText("Squats").closest(".exerciseItem");
     const lungesItem = screen.getByText("Lunges").closest(".exerciseItem");
-    
+
     expect(pushUpsItem).toContainElement(newRepsBadges[0]);
     expect(squatsItem).toContainElement(newWeightBadges[0]);
-    
+
     // Verify that Lunges doesn't have any badges
     expect(lungesItem).not.toHaveTextContent("NEW REPS");
     expect(lungesItem).not.toHaveTextContent("NEW WEIGHT");

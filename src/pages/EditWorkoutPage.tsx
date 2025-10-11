@@ -1,12 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import WorkoutForm from "../components/WorkoutForm";
-import {
-  fetchWorkouts,
-  updateWorkout,
-  createExercise,
-  fetchExercises,
-} from "../api";
+import { fetchWorkouts, updateWorkout, createExercise, fetchExercises } from "../api";
 import { Exercise, Workout } from "../types";
 import { useUserContext } from "../contexts/useUserContext";
 import styles from "../components/WorkoutForm.module.css";
@@ -57,9 +52,7 @@ export default function EditWorkoutPage() {
     loadData();
   }, [workoutId, user]);
 
-  const handleUpdateWorkout = async (
-    updatedWorkout: Omit<Workout, "id">,
-  ): Promise<boolean> => {
+  const handleUpdateWorkout = async (updatedWorkout: Omit<Workout, "id">): Promise<boolean> => {
     try {
       setError(null);
       await updateWorkout(workoutId, updatedWorkout);
@@ -67,11 +60,7 @@ export default function EditWorkoutPage() {
       return true;
     } catch (err) {
       console.error("Failed to update workout:", err);
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Failed to update workout. Please try again.",
-      );
+      setError(err instanceof Error ? err.message : "Failed to update workout. Please try again.");
       return false;
     }
   };
@@ -88,11 +77,7 @@ export default function EditWorkoutPage() {
       return true;
     } catch (err) {
       console.error("Failed to save exercise:", err);
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Failed to save exercise. Please try again.",
-      );
+      setError(err instanceof Error ? err.message : "Failed to save exercise. Please try again.");
       return false;
     }
   };

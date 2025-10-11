@@ -49,8 +49,12 @@ export class CreateBaseTables1709323100000 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`ALTER TABLE "workout_exercises" DROP CONSTRAINT "FK_workout_exercises_exercise"`);
-    await queryRunner.query(`ALTER TABLE "workout_exercises" DROP CONSTRAINT "FK_workout_exercises_workout"`);
+    await queryRunner.query(
+      `ALTER TABLE "workout_exercises" DROP CONSTRAINT "FK_workout_exercises_exercise"`
+    );
+    await queryRunner.query(
+      `ALTER TABLE "workout_exercises" DROP CONSTRAINT "FK_workout_exercises_workout"`
+    );
     await queryRunner.query(`DROP TABLE "workout_exercises"`);
     await queryRunner.query(`DROP TABLE "workouts"`);
     await queryRunner.query(`DROP TABLE "exercises"`);

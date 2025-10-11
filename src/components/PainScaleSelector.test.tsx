@@ -69,7 +69,7 @@ describe("PainScaleSelector", () => {
     // Check that the description container is rendered
     // Use getAllByTestId since there are multiple elements with this test ID
     expect(screen.getAllByTestId("mock-pain-face").length).toBeGreaterThan(0);
-    
+
     // The description should contain text about moderate pain
     expect(screen.getByText(/Moderate pain/i)).toBeInTheDocument();
   });
@@ -94,7 +94,7 @@ describe("PainScaleSelector", () => {
 
   it("displays error message when provided", () => {
     const handleChange = jest.fn();
-    
+
     // Create a wrapper component that includes the error prop
     const TestWrapperWithError = () => {
       const { control } = useForm();
@@ -108,7 +108,7 @@ describe("PainScaleSelector", () => {
         />
       );
     };
-    
+
     // Create a wrapper component without the error prop
     const TestWrapperWithoutError = () => {
       const { control } = useForm();
@@ -121,17 +121,17 @@ describe("PainScaleSelector", () => {
         />
       );
     };
-    
+
     // Render with error
     const { unmount } = render(<TestWrapperWithError />);
-    
+
     // Check that the error message is displayed
     expect(screen.getByText("Please select a pain score")).toBeInTheDocument();
-    
+
     // Unmount and render without error
     unmount();
     render(<TestWrapperWithoutError />);
-    
+
     // Check that the error message is no longer displayed
     expect(screen.queryByText("Please select a pain score")).not.toBeInTheDocument();
   });

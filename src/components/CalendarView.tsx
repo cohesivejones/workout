@@ -36,12 +36,18 @@ const getPainScoreColor = (score: number): string => {
 // Function to get color based on sleep score
 const getSleepScoreColor = (score: number): string => {
   switch (score) {
-    case 5: return "#4caf50"; // Green for excellent sleep
-    case 4: return "#8bc34a"; // Light green for good sleep
-    case 3: return "#ffc107"; // Yellow for fair sleep
-    case 2: return "#ff9800"; // Orange for poor sleep
-    case 1: return "#f44336"; // Red for very poor sleep
-    default: return "#ffc107"; // Default to yellow
+    case 5:
+      return "#4caf50"; // Green for excellent sleep
+    case 4:
+      return "#8bc34a"; // Light green for good sleep
+    case 3:
+      return "#ffc107"; // Yellow for fair sleep
+    case 2:
+      return "#ff9800"; // Orange for poor sleep
+    case 1:
+      return "#f44336"; // Red for very poor sleep
+    default:
+      return "#ffc107"; // Default to yellow
   }
 };
 
@@ -52,11 +58,7 @@ interface WorkoutCalendarProps {
   sleepScores: SleepScore[];
 }
 
-const CalendarView: React.FC<WorkoutCalendarProps> = ({
-  workouts,
-  painScores,
-  sleepScores,
-}) => {
+const CalendarView: React.FC<WorkoutCalendarProps> = ({ workouts, painScores, sleepScores }) => {
   const navigate = useNavigate();
 
   // Convert workouts, pain scores, and sleep scores to calendar items
@@ -65,32 +67,31 @@ const CalendarView: React.FC<WorkoutCalendarProps> = ({
     type: "workout",
   }));
 
-  const painScoreItems: PainScoreCalendarItem[] = painScores.map(
-    (painScore) => ({
-      ...painScore,
-      type: "painScore",
-    })
-  );
+  const painScoreItems: PainScoreCalendarItem[] = painScores.map((painScore) => ({
+    ...painScore,
+    type: "painScore",
+  }));
 
-  const sleepScoreItems: SleepScoreCalendarItem[] = sleepScores.map(
-    (sleepScore) => ({
-      ...sleepScore,
-      type: "sleepScore",
-    })
-  );
+  const sleepScoreItems: SleepScoreCalendarItem[] = sleepScores.map((sleepScore) => ({
+    ...sleepScore,
+    type: "sleepScore",
+  }));
 
   const allItems: AppCalendarItem[] = [...workoutItems, ...painScoreItems, ...sleepScoreItems];
 
   // Group items by date
   const getItemsByDate = (items: AppCalendarItem[]) => {
-    return items.reduce((acc, item) => {
-      const dateStr = item.date.split("T")[0]; // Handle ISO date format
-      if (!acc[dateStr]) {
-        acc[dateStr] = [];
-      }
-      acc[dateStr].push(item);
-      return acc;
-    }, {} as Record<string, AppCalendarItem[]>);
+    return items.reduce(
+      (acc, item) => {
+        const dateStr = item.date.split("T")[0]; // Handle ISO date format
+        if (!acc[dateStr]) {
+          acc[dateStr] = [];
+        }
+        acc[dateStr].push(item);
+        return acc;
+      },
+      {} as Record<string, AppCalendarItem[]>
+    );
   };
 
   // Render a grid item (for month view)

@@ -303,22 +303,22 @@
   .sectionHeader {
     padding: 12px;
   }
-  
+
   .filterControls {
     padding-bottom: 8px;
   }
-  
+
   .filterCheckboxes {
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
   }
-  
+
   .showAllBtn {
     margin-top: 4px;
     align-self: flex-start;
   }
-  
+
   .listCardHeader {
     position: relative;
     flex-direction: column;
@@ -376,7 +376,7 @@
     padding-left: 8px;
     width: 100%;
   }
-  
+
   .badgeContainer {
     width: 100%;
     justify-content: flex-end;

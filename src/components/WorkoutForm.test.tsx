@@ -9,9 +9,7 @@ jest.mock("react-select/creatable", () =>
   // eslint-disable-next-line react/display-name
   ({ options, value, onChange }: any) => {
     function handleChange(event: React.ChangeEvent<HTMLSelectElement>) {
-      const option = options.find(
-        (option: any) => option.value === event.currentTarget.value,
-      );
+      const option = options.find((option: any) => option.value === event.currentTarget.value);
       onChange(option);
     }
 
@@ -29,7 +27,7 @@ jest.mock("react-select/creatable", () =>
         ))}
       </select>
     );
-  },
+  }
 );
 
 describe("WorkoutForm", () => {
@@ -239,9 +237,7 @@ describe("WorkoutForm", () => {
 
   it("displays error message when form submission fails", async () => {
     // Override the mock to simulate an error
-    const mockOnSubmitError = jest
-      .fn()
-      .mockRejectedValue(new Error("Failed to save workout"));
+    const mockOnSubmitError = jest.fn().mockRejectedValue(new Error("Failed to save workout"));
 
     const existingWorkout: Workout = {
       id: 1,
@@ -256,23 +252,19 @@ describe("WorkoutForm", () => {
         {...defaultProps}
         onSubmit={mockOnSubmitError}
         existingWorkout={existingWorkout}
-      />,
+      />
     );
 
     // Submit the form
     const submitButton = screen.getByText("Update Workout");
     fireEvent.click(submitButton);
 
-    expect(
-      await screen.findByText("Failed to save workout"),
-    ).toBeInTheDocument();
+    expect(await screen.findByText("Failed to save workout")).toBeInTheDocument();
   });
 
   it("displays error message when add exercise fails", async () => {
     // Override the mock to simulate an error
-    const mockOnSaveExercise = jest
-      .fn()
-      .mockRejectedValue(new Error("Failed to save exercise"));
+    const mockOnSaveExercise = jest.fn().mockRejectedValue(new Error("Failed to save exercise"));
 
     const existingWorkout: Workout = {
       id: 1,
@@ -287,7 +279,7 @@ describe("WorkoutForm", () => {
         {...defaultProps}
         onSaveExercise={mockOnSaveExercise}
         existingWorkout={existingWorkout}
-      />,
+      />
     );
 
     // Add an exercise
@@ -303,8 +295,6 @@ describe("WorkoutForm", () => {
     const addButton = screen.getByText("Add Exercise");
     fireEvent.click(addButton);
 
-    expect(
-      await screen.findByText("Failed to save exercise"),
-    ).toBeInTheDocument();
+    expect(await screen.findByText("Failed to save exercise")).toBeInTheDocument();
   });
 });

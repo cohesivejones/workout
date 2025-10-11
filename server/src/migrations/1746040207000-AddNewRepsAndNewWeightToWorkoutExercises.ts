@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class AddNewRepsAndNewWeightToWorkoutExercises1746040207000
-  implements MigrationInterface
-{
+export class AddNewRepsAndNewWeightToWorkoutExercises1746040207000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
       ALTER TABLE workout_exercises

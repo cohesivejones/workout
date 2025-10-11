@@ -27,7 +27,7 @@ function SleepScoreForm({
   onCancel,
 }: SleepScoreFormProps): React.ReactElement {
   const [selectedScore, setSelectedScore] = React.useState<number | null>(
-    existingSleepScore?.score ?? null,
+    existingSleepScore?.score ?? null
   );
 
   // Use react-hook-form
@@ -91,71 +91,63 @@ function SleepScoreForm({
       onSubmit={handleSubmit(onFormSubmit)}
       className={styles.sleepScoreForm}
     >
-        <div className={styles.dateInput}>
-          <label htmlFor="sleep-score-date">Date:</label>
-          <input
-            type="date"
-            id="sleep-score-date"
-            {...register("date", { required: "Date is required" })}
-          />
-          {errors.date && (
-            <span className={styles.errorMessage}>{errors.date.message}</span>
+      <div className={styles.dateInput}>
+        <label htmlFor="sleep-score-date">Date:</label>
+        <input
+          type="date"
+          id="sleep-score-date"
+          {...register("date", { required: "Date is required" })}
+        />
+        {errors.date && <span className={styles.errorMessage}>{errors.date.message}</span>}
+      </div>
+
+      <div className={styles.sleepScoreInput}>
+        <label htmlFor="sleep-score">Sleep Score (1-5):</label>
+        <SleepScaleSelector
+          name="score"
+          control={control}
+          value={selectedScore}
+          onChange={(value) => {
+            setValue("score", value.toString());
+          }}
+          error={errors.score?.message}
+        />
+      </div>
+
+      <div className={styles.notesInput}>
+        <label htmlFor="sleep-score-notes">Notes (optional):</label>
+        <textarea
+          id="sleep-score-notes"
+          {...register("notes")}
+          placeholder="Add any additional notes about your sleep quality"
+        />
+      </div>
+
+      <div className={styles.formButtons}>
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className={classNames(styles.saveSleepScoreBtn, buttonStyles.primaryBtn)}
+          title={existingSleepScore ? "Update sleep score" : "Save sleep score"}
+        >
+          {isSubmitting ? (
+            "Saving..."
+          ) : (
+            <>{existingSleepScore ? "Update Sleep Score" : "Save Sleep Score"}</>
           )}
-        </div>
+        </button>
 
-        <div className={styles.sleepScoreInput}>
-          <label htmlFor="sleep-score">Sleep Score (1-5):</label>
-          <SleepScaleSelector
-            name="score"
-            control={control}
-            value={selectedScore}
-            onChange={(value) => {
-              setValue("score", value.toString());
-            }}
-            error={errors.score?.message}
-          />
-        </div>
-
-        <div className={styles.notesInput}>
-          <label htmlFor="sleep-score-notes">Notes (optional):</label>
-          <textarea
-            id="sleep-score-notes"
-            {...register("notes")}
-            placeholder="Add any additional notes about your sleep quality"
-          />
-        </div>
-
-        <div className={styles.formButtons}>
+        {onCancel && (
           <button
-            type="submit"
+            type="button"
+            onClick={onCancel}
+            className={classNames(styles.cancelBtn, buttonStyles.secondaryBtn)}
             disabled={isSubmitting}
-            className={classNames(
-              styles.saveSleepScoreBtn,
-              buttonStyles.primaryBtn,
-            )}
-            title={existingSleepScore ? "Update sleep score" : "Save sleep score"}
           >
-            {isSubmitting ? (
-              "Saving..."
-            ) : (
-              <>{existingSleepScore ? "Update Sleep Score" : "Save Sleep Score"}</>
-            )}
+            Cancel
           </button>
-
-          {onCancel && (
-            <button
-              type="button"
-              onClick={onCancel}
-              className={classNames(
-                styles.cancelBtn,
-                buttonStyles.secondaryBtn,
-              )}
-              disabled={isSubmitting}
-            >
-              Cancel
-            </button>
-          )}
-        </div>
+        )}
+      </div>
     </FormContainer>
   );
 }

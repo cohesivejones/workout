@@ -47,16 +47,11 @@ function ExerciseListPage(): ReactElement {
 
     try {
       setIsSubmitting(true);
-      const updatedExercise = await updateExercise(
-        editingExercise.id,
-        newName.trim(),
-      );
+      const updatedExercise = await updateExercise(editingExercise.id, newName.trim());
 
       // Update the exercises list with the updated exercise
       setExercises((prevExercises) =>
-        prevExercises.map((ex) =>
-          ex.id === updatedExercise.id ? updatedExercise : ex,
-        ),
+        prevExercises.map((ex) => (ex.id === updatedExercise.id ? updatedExercise : ex))
       );
 
       // Reset editing state
@@ -104,19 +99,13 @@ function ExerciseListPage(): ReactElement {
                       <button
                         onClick={handleSaveEdit}
                         disabled={!newName.trim() || isSubmitting}
-                        className={classNames(
-                          styles.saveBtn,
-                          buttonStyles.primaryBtn,
-                        )}
+                        className={classNames(styles.saveBtn, buttonStyles.primaryBtn)}
                       >
                         {isSubmitting ? "Saving..." : "Save"}
                       </button>
                       <button
                         onClick={handleCancelEdit}
-                        className={classNames(
-                          styles.cancelBtn,
-                          buttonStyles.secondaryBtn,
-                        )}
+                        className={classNames(styles.cancelBtn, buttonStyles.secondaryBtn)}
                         disabled={isSubmitting}
                       >
                         Cancel
@@ -129,10 +118,7 @@ function ExerciseListPage(): ReactElement {
                     <div className={styles.exerciseActions}>
                       <button
                         onClick={() => handleEditClick(exercise)}
-                        className={classNames(
-                          styles.editBtn,
-                          buttonStyles.tertiaryBtn,
-                        )}
+                        className={classNames(styles.editBtn, buttonStyles.tertiaryBtn)}
                       >
                         Edit
                       </button>

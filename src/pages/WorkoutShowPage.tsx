@@ -70,7 +70,7 @@ const WorkoutShowPage: React.FC = () => {
           <Link
             to={toHomePath()}
             className={classNames(styles.button, buttonStyles.tertiaryBtn)}
-            style={{ display: 'inline-block', textAlign: 'center' }}
+            style={{ display: "inline-block", textAlign: "center" }}
           >
             Back to List
           </Link>
@@ -83,12 +83,8 @@ const WorkoutShowPage: React.FC = () => {
         })}
       >
         <div className={styles.workoutDetailHeader}>
-          <h3>
-            {format(`${workout.date}T12:00:00.000`, "MMM d, yyyy (eeee)")}
-          </h3>
-          {workout.withInstructor && (
-            <div className={styles.instructorBadge}>With Instructor</div>
-          )}
+          <h3>{format(`${workout.date}T12:00:00.000`, "MMM d, yyyy (eeee)")}</h3>
+          {workout.withInstructor && <div className={styles.instructorBadge}>With Instructor</div>}
         </div>
 
         <div className={styles.workoutDetailContent}>
@@ -99,34 +95,20 @@ const WorkoutShowPage: React.FC = () => {
             <ul className={styles.exerciseDetailList}>
               {workout.exercises.map((exercise, index) => (
                 <li key={index} className={styles.exerciseDetailItem}>
-                  <div className={styles.exerciseDetailName}>
-                    {exercise.name}
-                  </div>
+                  <div className={styles.exerciseDetailName}>{exercise.name}</div>
                   <div className={styles.exerciseDetailStats}>
-                    <span className={styles.exerciseDetailReps}>
-                      {exercise.reps} reps
-                    </span>
+                    <span className={styles.exerciseDetailReps}>{exercise.reps} reps</span>
                     {exercise.weight && (
-                      <span className={styles.exerciseDetailWeight}>
-                        {exercise.weight} lbs
-                      </span>
+                      <span className={styles.exerciseDetailWeight}>{exercise.weight} lbs</span>
                     )}
                     {exercise.time_minutes && (
-                      <span className={styles.exerciseDetailTime}>
-                        {exercise.time_minutes} min
-                      </span>
+                      <span className={styles.exerciseDetailTime}>{exercise.time_minutes} min</span>
                     )}
                     {(exercise.new_reps || exercise.new_weight || exercise.new_time) && (
                       <div className={styles.badgeContainer}>
-                        {exercise.new_reps && (
-                          <span className={styles.newBadge}>NEW REPS</span>
-                        )}
-                        {exercise.new_weight && (
-                          <span className={styles.newBadge}>NEW WEIGHT</span>
-                        )}
-                        {exercise.new_time && (
-                          <span className={styles.newBadge}>NEW TIME</span>
-                        )}
+                        {exercise.new_reps && <span className={styles.newBadge}>NEW REPS</span>}
+                        {exercise.new_weight && <span className={styles.newBadge}>NEW WEIGHT</span>}
+                        {exercise.new_time && <span className={styles.newBadge}>NEW TIME</span>}
                       </div>
                     )}
                   </div>
@@ -140,7 +122,7 @@ const WorkoutShowPage: React.FC = () => {
           <Link
             to={toWorkoutEditPath(workout)}
             className={classNames(styles.button, buttonStyles.primaryBtn)}
-            style={{ display: 'inline-block', textAlign: 'center' }}
+            style={{ display: "inline-block", textAlign: "center" }}
           >
             Edit Workout
           </Link>

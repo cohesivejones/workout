@@ -12,9 +12,6 @@ export class Exercise {
   @Column({ unique: true })
   name: string;
 
-  @OneToMany(
-    () => WorkoutExercise,
-    (workoutExercise) => workoutExercise.exercise,
-  )
+  @OneToMany(() => WorkoutExercise, (workoutExercise) => workoutExercise.exercise)
   workoutExercises: WorkoutExercise[];
 }

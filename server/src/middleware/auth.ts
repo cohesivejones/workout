@@ -23,15 +23,10 @@ export const generateToken = (user: User): string => {
 };
 
 // Verify JWT token middleware
-export const authenticateToken = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
+export const authenticateToken = async (req: Request, res: Response, next: NextFunction) => {
   try {
     // Get token from cookies or Authorization header
-    const token =
-      req.cookies?.token || req.header("Authorization")?.replace("Bearer ", "");
+    const token = req.cookies?.token || req.header("Authorization")?.replace("Bearer ", "");
 
     if (!token) {
       return res.status(401).json({ error: "Authentication required" });
@@ -57,15 +52,10 @@ export const authenticateToken = async (
 };
 
 // Optional authentication middleware - doesn't require authentication but attaches user if token is valid
-export const optionalAuth = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
+export const optionalAuth = async (req: Request, res: Response, next: NextFunction) => {
   try {
     // Get token from cookies or Authorization header
-    const token =
-      req.cookies?.token || req.header("Authorization")?.replace("Bearer ", "");
+    const token = req.cookies?.token || req.header("Authorization")?.replace("Bearer ", "");
 
     if (!token) {
       return next();

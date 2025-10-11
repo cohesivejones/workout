@@ -46,7 +46,7 @@ function ChangePasswordPage() {
           currentPassword: data.currentPassword,
           newPassword: data.newPassword,
         },
-        { withCredentials: true },
+        { withCredentials: true }
       );
 
       // Reset form and show success message
@@ -103,70 +103,59 @@ function ChangePasswordPage() {
       className={styles.changePasswordContainer}
     >
       <p>Update your password below</p>
-        <div className={styles.formGroup}>
-          <label htmlFor="currentPassword">Current Password</label>
-          <input
-            id="currentPassword"
-            type="password"
-            placeholder="Enter your current password"
-            {...register("currentPassword", {
-              required: "Current password is required",
-            })}
-          />
-          {errors.currentPassword && (
-            <div className={styles.fieldError}>
-              {errors.currentPassword.message}
-            </div>
-          )}
-        </div>
+      <div className={styles.formGroup}>
+        <label htmlFor="currentPassword">Current Password</label>
+        <input
+          id="currentPassword"
+          type="password"
+          placeholder="Enter your current password"
+          {...register("currentPassword", {
+            required: "Current password is required",
+          })}
+        />
+        {errors.currentPassword && (
+          <div className={styles.fieldError}>{errors.currentPassword.message}</div>
+        )}
+      </div>
 
-        <div className={styles.formGroup}>
-          <label htmlFor="newPassword">New Password</label>
-          <input
-            id="newPassword"
-            type="password"
-            placeholder="Enter your new password"
-            {...register("newPassword", {
-              required: "New password is required",
-              minLength: {
-                value: 6,
-                message: "New password must be at least 6 characters",
-              },
-            })}
-          />
-          {errors.newPassword && (
-            <div className={styles.fieldError}>
-              {errors.newPassword.message}
-            </div>
-          )}
-        </div>
+      <div className={styles.formGroup}>
+        <label htmlFor="newPassword">New Password</label>
+        <input
+          id="newPassword"
+          type="password"
+          placeholder="Enter your new password"
+          {...register("newPassword", {
+            required: "New password is required",
+            minLength: {
+              value: 6,
+              message: "New password must be at least 6 characters",
+            },
+          })}
+        />
+        {errors.newPassword && (
+          <div className={styles.fieldError}>{errors.newPassword.message}</div>
+        )}
+      </div>
 
-        <div className={styles.formGroup}>
-          <label htmlFor="confirmPassword">Confirm New Password</label>
-          <input
-            id="confirmPassword"
-            type="password"
-            placeholder="Confirm your new password"
-            {...register("confirmPassword", {
-              required: "Please confirm your new password",
-              validate: (value) =>
-                value === watch("newPassword") || "Passwords do not match",
-            })}
-          />
-          {errors.confirmPassword && (
-            <div className={styles.fieldError}>
-              {errors.confirmPassword.message}
-            </div>
-          )}
-        </div>
+      <div className={styles.formGroup}>
+        <label htmlFor="confirmPassword">Confirm New Password</label>
+        <input
+          id="confirmPassword"
+          type="password"
+          placeholder="Confirm your new password"
+          {...register("confirmPassword", {
+            required: "Please confirm your new password",
+            validate: (value) => value === watch("newPassword") || "Passwords do not match",
+          })}
+        />
+        {errors.confirmPassword && (
+          <div className={styles.fieldError}>{errors.confirmPassword.message}</div>
+        )}
+      </div>
 
-        <button
-          type="submit"
-          className={styles.changePasswordButton}
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? "Changing Password..." : "Change Password"}
-        </button>
+      <button type="submit" className={styles.changePasswordButton} disabled={isSubmitting}>
+        {isSubmitting ? "Changing Password..." : "Change Password"}
+      </button>
     </FormContainer>
   );
 }

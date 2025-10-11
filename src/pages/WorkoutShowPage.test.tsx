@@ -28,7 +28,7 @@ describe("WorkoutShowPage", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    
+
     // Mock the user context to simulate a logged-in user
     jest.spyOn(UserContext, "useUserContext").mockReturnValue({
       user: { id: 1, name: "Test User" },
@@ -36,7 +36,7 @@ describe("WorkoutShowPage", () => {
       logout: jest.fn(),
       loading: false,
     });
-    
+
     // Mock the API call to return the workout
     (Api.fetchWorkout as jest.Mock).mockResolvedValue(mockWorkout);
   });
@@ -74,14 +74,14 @@ describe("WorkoutShowPage", () => {
     // Check that workout details are displayed
     expect(screen.getByText(/Apr 10, 2025/i)).toBeInTheDocument();
     expect(screen.getByText(/With Instructor/i)).toBeInTheDocument();
-    
+
     // Check that exercises are displayed
     expect(screen.getByText("Push-ups")).toBeInTheDocument();
     expect(screen.getByText("10 reps")).toBeInTheDocument();
     expect(screen.getByText("Squats")).toBeInTheDocument();
     expect(screen.getByText("15 reps")).toBeInTheDocument();
     expect(screen.getByText("20 lbs")).toBeInTheDocument();
-    
+
     // Check that edit button is displayed
     expect(screen.getByText("Edit Workout")).toBeInTheDocument();
   });
@@ -199,7 +199,7 @@ describe("WorkoutShowPage", () => {
     expect(screen.getByText("Plank")).toBeInTheDocument();
     expect(screen.getByText("3 reps")).toBeInTheDocument();
     expect(screen.getByText("2.5 min")).toBeInTheDocument();
-    
+
     expect(screen.getByText("Wall Sit")).toBeInTheDocument();
     expect(screen.getByText("2 reps")).toBeInTheDocument();
     expect(screen.getByText("1.5 min")).toBeInTheDocument();

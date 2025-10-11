@@ -68,8 +68,8 @@ describe("CalendarView", () => {
     jest.clearAllMocks();
     // Mock Date to always return May 2025
     jest.useFakeTimers();
-    jest.setSystemTime(new Date('2025-05-15'));
-    
+    jest.setSystemTime(new Date("2025-05-15"));
+
     // Mock window.innerWidth to simulate desktop view
     Object.defineProperty(window, "innerWidth", {
       writable: true,
@@ -88,7 +88,11 @@ describe("CalendarView", () => {
   it("renders calendar with workouts and pain scores", () => {
     render(
       <MemoryRouter>
-        <CalendarView workouts={mockWorkouts} painScores={mockPainScores} sleepScores={mockSleepScores} />
+        <CalendarView
+          workouts={mockWorkouts}
+          painScores={mockPainScores}
+          sleepScores={mockSleepScores}
+        />
       </MemoryRouter>
     );
 
@@ -117,7 +121,11 @@ describe("CalendarView", () => {
   it("navigates to pain score edit page when pain score is clicked", () => {
     render(
       <MemoryRouter>
-        <CalendarView workouts={mockWorkouts} painScores={mockPainScores} sleepScores={mockSleepScores} />
+        <CalendarView
+          workouts={mockWorkouts}
+          painScores={mockPainScores}
+          sleepScores={mockSleepScores}
+        />
       </MemoryRouter>
     );
 
@@ -132,7 +140,11 @@ describe("CalendarView", () => {
   it("changes month when navigation buttons are clicked", () => {
     render(
       <MemoryRouter>
-        <CalendarView workouts={mockWorkouts} painScores={mockPainScores} sleepScores={mockSleepScores} />
+        <CalendarView
+          workouts={mockWorkouts}
+          painScores={mockPainScores}
+          sleepScores={mockSleepScores}
+        />
       </MemoryRouter>
     );
 
@@ -162,7 +174,11 @@ describe("CalendarView", () => {
 
     render(
       <MemoryRouter>
-        <CalendarView workouts={mockWorkouts} painScores={mockPainScores} sleepScores={mockSleepScores} />
+        <CalendarView
+          workouts={mockWorkouts}
+          painScores={mockPainScores}
+          sleepScores={mockSleepScores}
+        />
       </MemoryRouter>
     );
 
@@ -186,7 +202,11 @@ describe("CalendarView", () => {
     // Render with desktop width first
     const { rerender } = render(
       <MemoryRouter>
-        <CalendarView workouts={mockWorkouts} painScores={mockPainScores} sleepScores={mockSleepScores} />
+        <CalendarView
+          workouts={mockWorkouts}
+          painScores={mockPainScores}
+          sleepScores={mockSleepScores}
+        />
       </MemoryRouter>
     );
 
@@ -210,12 +230,16 @@ describe("CalendarView", () => {
     // Re-render to apply the state change
     rerender(
       <MemoryRouter>
-        <CalendarView workouts={mockWorkouts} painScores={mockPainScores} sleepScores={mockSleepScores} />
+        <CalendarView
+          workouts={mockWorkouts}
+          painScores={mockPainScores}
+          sleepScores={mockSleepScores}
+        />
       </MemoryRouter>
     );
 
     // Check that week view is displayed by looking for the month title heading
-    const monthTitle = screen.getByRole('heading', { level: 2 });
+    const monthTitle = screen.getByRole("heading", { level: 2 });
     expect(monthTitle).toBeInTheDocument();
     expect(monthTitle.textContent).toMatch(/May \d+.*\d+, 2025/);
     expect(screen.getByText("Sunday")).toBeInTheDocument();
@@ -236,7 +260,7 @@ describe("CalendarView", () => {
 
     // Check that the calendar is rendered
     expect(screen.getByText(/May 2025/)).toBeInTheDocument();
-    
+
     // We can't check for specific empty state messages since they might be empty divs,
     // but we can verify that no workout or pain score content is displayed
     expect(screen.queryByText(/Pain:/)).not.toBeInTheDocument();

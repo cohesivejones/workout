@@ -41,7 +41,7 @@ export const ListView = ({
   const [showWorkouts, setShowWorkouts] = useState(true);
   const [showPainScores, setShowPainScores] = useState(true);
   const [showSleepScores, setShowSleepScores] = useState(true);
-  
+
   const [isDeleting, setIsDeleting] = useState<{
     type: string;
     id: number;
@@ -61,7 +61,7 @@ export const ListView = ({
   ];
 
   // Filter items based on filter state
-  const items = allItems.filter(item => {
+  const items = allItems.filter((item) => {
     if (item.type === "workout" && !showWorkouts) return false;
     if (item.type === "painScore" && !showPainScores) return false;
     if (item.type === "sleepScore" && !showSleepScores) return false;
@@ -118,12 +118,18 @@ export const ListView = ({
   // Function to get color based on sleep score
   const getSleepScoreColor = (score: number): string => {
     switch (score) {
-      case 5: return "#4caf50"; // Green for excellent sleep
-      case 4: return "#8bc34a"; // Light green for good sleep
-      case 3: return "#ffc107"; // Yellow for fair sleep
-      case 2: return "#ff9800"; // Orange for poor sleep
-      case 1: return "#f44336"; // Red for very poor sleep
-      default: return "#ffc107"; // Default to yellow
+      case 5:
+        return "#4caf50"; // Green for excellent sleep
+      case 4:
+        return "#8bc34a"; // Light green for good sleep
+      case 3:
+        return "#ffc107"; // Yellow for fair sleep
+      case 2:
+        return "#ff9800"; // Orange for poor sleep
+      case 1:
+        return "#f44336"; // Red for very poor sleep
+      default:
+        return "#ffc107"; // Default to yellow
     }
   };
 
@@ -209,7 +215,7 @@ export const ListView = ({
               />
               Sleep Scores
             </label>
-            <button 
+            <button
               onClick={showAll}
               className={classNames(buttonStyles.secondaryBtn, styles.showAllBtn)}
             >
@@ -255,37 +261,22 @@ export const ListView = ({
                 >
                   <div className={styles.listCardHeader}>
                     <div className={styles.listCardType}>Workout</div>
-                    <h3>
-                      {format(
-                        `${workout.date}T12:00:00.000`,
-                        "MMM d, yyyy (eeee)"
-                      )}
-                    </h3>
+                    <h3>{format(`${workout.date}T12:00:00.000`, "MMM d, yyyy (eeee)")}</h3>
                     <div className={styles.listCardActions}>
                       <Link
                         to={toWorkoutEditPath(workout)}
-                        className={classNames(
-                          styles.editBtn,
-                          buttonStyles.tertiaryIconBtn
-                        )}
+                        className={classNames(styles.editBtn, buttonStyles.tertiaryIconBtn)}
                         title="Edit workout"
                       >
                         <MdOutlineEdit />
                       </Link>
                       <button
                         onClick={() => handleDeleteWorkout(workout.id)}
-                        disabled={
-                          isDeleting?.type === "workout" &&
-                          isDeleting.id === workout.id
-                        }
-                        className={classNames(
-                          styles.deleteBtn,
-                          buttonStyles.secondaryIconBtn
-                        )}
+                        disabled={isDeleting?.type === "workout" && isDeleting.id === workout.id}
+                        className={classNames(styles.deleteBtn, buttonStyles.secondaryIconBtn)}
                         title="Delete workout"
                       >
-                        {isDeleting?.type === "workout" &&
-                        isDeleting.id === workout.id
+                        {isDeleting?.type === "workout" && isDeleting.id === workout.id
                           ? "..."
                           : "x"}
                       </button>
@@ -297,22 +288,22 @@ export const ListView = ({
                         .filter((ex) => ex)
                         .map((exercise, idx) => (
                           <div key={idx} className={styles.exerciseItem}>
-                            <span className={styles.exerciseName}>
-                              {exercise.name}
-                            </span>
+                            <span className={styles.exerciseName}>{exercise.name}</span>
                             <span className={styles.exerciseDetails}>
                               {exercise.reps} reps
-                              {exercise.weight
-                                ? ` - ${exercise.weight} lbs`
-                                : ""}
-                              {exercise.time_minutes
-                                ? ` - ${exercise.time_minutes} min`
-                                : ""}
+                              {exercise.weight ? ` - ${exercise.weight} lbs` : ""}
+                              {exercise.time_minutes ? ` - ${exercise.time_minutes} min` : ""}
                             </span>
                             <div className={styles.badgeContainer}>
-                              {exercise.new_reps && <span className={styles.newBadge}>NEW REPS</span>}
-                              {exercise.new_weight && <span className={styles.newBadge}>NEW WEIGHT</span>}
-                              {exercise.new_time && <span className={styles.newBadge}>NEW TIME</span>}
+                              {exercise.new_reps && (
+                                <span className={styles.newBadge}>NEW REPS</span>
+                              )}
+                              {exercise.new_weight && (
+                                <span className={styles.newBadge}>NEW WEIGHT</span>
+                              )}
+                              {exercise.new_time && (
+                                <span className={styles.newBadge}>NEW TIME</span>
+                              )}
                             </div>
                           </div>
                         ))}
@@ -332,19 +323,11 @@ export const ListView = ({
                 >
                   <div className={styles.listCardHeader}>
                     <div className={styles.listCardType}>Pain Score</div>
-                    <h3>
-                      {format(
-                        `${painScore.date}T12:00:00.000`,
-                        "MMM d, yyyy (eeee)"
-                      )}
-                    </h3>
+                    <h3>{format(`${painScore.date}T12:00:00.000`, "MMM d, yyyy (eeee)")}</h3>
                     <div className={styles.listCardActions}>
                       <Link
                         to={toPainScoreEditPath(painScore)}
-                        className={classNames(
-                          styles.editBtn,
-                          buttonStyles.tertiaryIconBtn
-                        )}
+                        className={classNames(styles.editBtn, buttonStyles.tertiaryIconBtn)}
                         title="Edit pain score"
                       >
                         <MdOutlineEdit />
@@ -352,17 +335,12 @@ export const ListView = ({
                       <button
                         onClick={() => handleDeletePainScore(painScore.id)}
                         disabled={
-                          isDeleting?.type === "painScore" &&
-                          isDeleting.id === painScore.id
+                          isDeleting?.type === "painScore" && isDeleting.id === painScore.id
                         }
-                        className={classNames(
-                          styles.deleteBtn,
-                          buttonStyles.secondaryIconBtn
-                        )}
+                        className={classNames(styles.deleteBtn, buttonStyles.secondaryIconBtn)}
                         title="Delete pain score"
                       >
-                        {isDeleting?.type === "painScore" &&
-                        isDeleting.id === painScore.id
+                        {isDeleting?.type === "painScore" && isDeleting.id === painScore.id
                           ? "..."
                           : "x"}
                       </button>
@@ -372,16 +350,13 @@ export const ListView = ({
                     <div className={styles.painScoreInfo}>
                       <span className={styles.painScoreLabel}>Pain Level:</span>
                       <span className={styles.painScoreValue}>
-                        {painScore.score} -{" "}
-                        {getPainScoreDescription(painScore.score)}
+                        {painScore.score} - {getPainScoreDescription(painScore.score)}
                       </span>
                     </div>
                     {painScore.notes && (
                       <div className={styles.painScoreInfo}>
                         <span className={styles.painScoreLabel}>Notes:</span>
-                        <span className={styles.painScoreValue}>
-                          {painScore.notes}
-                        </span>
+                        <span className={styles.painScoreValue}>{painScore.notes}</span>
                       </div>
                     )}
                   </div>
@@ -399,19 +374,11 @@ export const ListView = ({
                 >
                   <div className={styles.listCardHeader}>
                     <div className={styles.listCardType}>Sleep Score</div>
-                    <h3>
-                      {format(
-                        `${sleepScore.date}T12:00:00.000`,
-                        "MMM d, yyyy (eeee)"
-                      )}
-                    </h3>
+                    <h3>{format(`${sleepScore.date}T12:00:00.000`, "MMM d, yyyy (eeee)")}</h3>
                     <div className={styles.listCardActions}>
                       <Link
                         to={toSleepScoreEditPath(sleepScore)}
-                        className={classNames(
-                          styles.editBtn,
-                          buttonStyles.tertiaryIconBtn
-                        )}
+                        className={classNames(styles.editBtn, buttonStyles.tertiaryIconBtn)}
                         title="Edit sleep score"
                       >
                         <MdOutlineEdit />
@@ -419,17 +386,12 @@ export const ListView = ({
                       <button
                         onClick={() => handleDeleteSleepScore(sleepScore.id)}
                         disabled={
-                          isDeleting?.type === "sleepScore" &&
-                          isDeleting.id === sleepScore.id
+                          isDeleting?.type === "sleepScore" && isDeleting.id === sleepScore.id
                         }
-                        className={classNames(
-                          styles.deleteBtn,
-                          buttonStyles.secondaryIconBtn
-                        )}
+                        className={classNames(styles.deleteBtn, buttonStyles.secondaryIconBtn)}
                         title="Delete sleep score"
                       >
-                        {isDeleting?.type === "sleepScore" &&
-                        isDeleting.id === sleepScore.id
+                        {isDeleting?.type === "sleepScore" && isDeleting.id === sleepScore.id
                           ? "..."
                           : "x"}
                       </button>
@@ -439,8 +401,7 @@ export const ListView = ({
                     <div className={styles.sleepScoreInfo}>
                       <span className={styles.sleepScoreLabel}>Sleep Quality:</span>
                       <span className={styles.sleepScoreValue}>
-                        {sleepScore.score} -{" "}
-                        {getSleepScoreDescription(sleepScore.score)}
+                        {sleepScore.score} - {getSleepScoreDescription(sleepScore.score)}
                       </span>
                     </div>
                     <div className={styles.sleepScoreNote}>
@@ -451,9 +412,7 @@ export const ListView = ({
                     {sleepScore.notes && (
                       <div className={styles.sleepScoreInfo}>
                         <span className={styles.sleepScoreLabel}>Notes:</span>
-                        <span className={styles.sleepScoreValue}>
-                          {sleepScore.notes}
-                        </span>
+                        <span className={styles.sleepScoreValue}>{sleepScore.notes}</span>
                       </div>
                     )}
                   </div>

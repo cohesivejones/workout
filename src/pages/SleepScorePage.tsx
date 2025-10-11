@@ -39,9 +39,7 @@ function SleepScorePage(): React.ReactElement {
     }
   }, [id, user]);
 
-  const handleSleepScoreSubmit = async (
-    sleepScoreData: Omit<SleepScore, "id">,
-  ) => {
+  const handleSleepScoreSubmit = async (sleepScoreData: Omit<SleepScore, "id">) => {
     if (!user) return false;
 
     try {

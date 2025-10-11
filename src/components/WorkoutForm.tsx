@@ -6,12 +6,7 @@ import styles from "./WorkoutForm.module.css";
 import buttonStyles from "../styles/common/buttons.module.css";
 import { useUserContext } from "../contexts/useUserContext";
 import { fetchRecentExerciseData } from "../api";
-import {
-  useForm,
-  useFieldArray,
-  Controller,
-  SubmitHandler,
-} from "react-hook-form";
+import { useForm, useFieldArray, Controller, SubmitHandler } from "react-hook-form";
 import { SingleValue } from "react-select";
 
 interface FormValues {
@@ -34,8 +29,7 @@ function WorkoutForm({
   onCancel,
 }: WorkoutFormProps): React.ReactElement {
   const { user } = useUserContext();
-  const [isSavingExercise, setIsSavingExercise] =
-    React.useState<boolean>(false);
+  const [isSavingExercise, setIsSavingExercise] = React.useState<boolean>(false);
 
   // Initialize form with default values
   const {
@@ -121,9 +115,7 @@ function WorkoutForm({
           append({
             name,
             reps: Number(currentExercise.reps),
-            weight: currentExercise.weight
-              ? Number(currentExercise.weight)
-              : null,
+            weight: currentExercise.weight ? Number(currentExercise.weight) : null,
             time_minutes: currentExercise.time_minutes
               ? Number(currentExercise.time_minutes)
               : null,
@@ -149,7 +141,7 @@ function WorkoutForm({
   };
 
   const handlePopulateRepsAndWeight = async (
-    val: SingleValue<{ label: string; value: string }>,
+    val: SingleValue<{ label: string; value: string }>
   ) => {
     if (val === null) {
       setValue("currentExercise.reps", "");
@@ -163,13 +155,10 @@ function WorkoutForm({
     try {
       const recentData = await fetchRecentExerciseData(exerciseId);
       setValue("currentExercise.reps", String(recentData.reps));
-      setValue(
-        "currentExercise.weight",
-        recentData.weight ? String(recentData.weight) : "",
-      );
+      setValue("currentExercise.weight", recentData.weight ? String(recentData.weight) : "");
       setValue(
         "currentExercise.time_minutes",
-        recentData.time_minutes ? String(recentData.time_minutes) : "",
+        recentData.time_minutes ? String(recentData.time_minutes) : ""
       );
     } catch {
       // fail silently
@@ -183,11 +172,7 @@ function WorkoutForm({
   return (
     <div className={styles.workoutForm}>
       <h2>{existingWorkout ? "Edit Workout" : "New Workout"}</h2>
-      {errors.root && (
-        <div className={styles.errorMessage}>
-          {errors.root.message}
-        </div>
-      )}
+      {errors.root && <div className={styles.errorMessage}>{errors.root.message}</div>}
       <form onSubmit={handleSubmit(onFormSubmit)}>
         <div className={styles.dateInput}>
           <label htmlFor="workout-date">Workout Date:</label>
@@ -200,11 +185,7 @@ function WorkoutForm({
         </div>
         <div className={styles.instructorCheckbox}>
           <label htmlFor="with-instructor">
-            <input
-              type="checkbox"
-              id="with-instructor"
-              {...register("withInstructor")}
-            />
+            <input type="checkbox" id="with-instructor" {...register("withInstructor")} />
             With Instructor
           </label>
         </div>
@@ -252,9 +233,7 @@ function WorkoutForm({
               />
               <span className={styles.weightSuffix}>
                 {currentExercise.weight
-                  ? `${(Number(currentExercise.weight) * 0.453592).toFixed(
-                      1,
-                    )} kg`
+                  ? `${(Number(currentExercise.weight) * 0.453592).toFixed(1)} kg`
                   : "0 kg"}
               </span>
             </div>
@@ -271,15 +250,9 @@ function WorkoutForm({
             type="button"
             onClick={addExercise}
             disabled={
-              !currentExercise.name ||
-              !currentExercise.reps ||
-              isSavingExercise ||
-              isSubmitting
+              !currentExercise.name || !currentExercise.reps || isSavingExercise || isSubmitting
             }
-            className={classNames(
-              styles.addExerciseBtn,
-              buttonStyles.secondaryBtn,
-            )}
+            className={classNames(styles.addExerciseBtn, buttonStyles.secondaryBtn)}
             title="Add exercise to workout"
           >
             {isSavingExercise ? "Adding..." : <>Add Exercise</>}
@@ -296,13 +269,11 @@ function WorkoutForm({
                 <li key={field.id} className={styles.exerciseItem}>
                   <div className={styles.exerciseInfo}>
                     {exercises[index].name} - {exercises[index].reps} reps
-                    {exercises[index].weight
-                      ? ` - ${exercises[index].weight} lbs`
-                      : ""}
-                    {exercises[index].time_minutes
-                      ? ` - ${exercises[index].time_minutes} min`
-                      : ""}
-                    {(exercises[index].new_reps || exercises[index].new_weight || exercises[index].new_time) && (
+                    {exercises[index].weight ? ` - ${exercises[index].weight} lbs` : ""}
+                    {exercises[index].time_minutes ? ` - ${exercises[index].time_minutes} min` : ""}
+                    {(exercises[index].new_reps ||
+                      exercises[index].new_weight ||
+                      exercises[index].new_time) && (
                       <div className={styles.badgeContainer}>
                         {exercises[index].new_reps && (
                           <span className={styles.newBadge}>NEW REPS</span>
@@ -318,10 +289,7 @@ function WorkoutForm({
                   </div>
                   <button
                     type="button"
-                    className={classNames(
-                      styles.removeExerciseBtn,
-                      buttonStyles.secondaryBtn,
-                    )}
+                    className={classNames(styles.removeExerciseBtn, buttonStyles.secondaryBtn)}
                     onClick={() => remove(index)}
                     title="Remove exercise"
                   >
@@ -337,10 +305,7 @@ function WorkoutForm({
           <button
             type="submit"
             disabled={fields.length === 0 || isSubmitting}
-            className={classNames(
-              styles.saveWorkoutBtn,
-              buttonStyles.primaryBtn,
-            )}
+            className={classNames(styles.saveWorkoutBtn, buttonStyles.primaryBtn)}
             title={existingWorkout ? "Update workout" : "Save workout"}
           >
             {isSubmitting ? (
@@ -354,10 +319,7 @@ function WorkoutForm({
             <button
               type="button"
               onClick={onCancel}
-              className={classNames(
-                styles.cancelBtn,
-                buttonStyles.secondaryBtn,
-              )}
+              className={classNames(styles.cancelBtn, buttonStyles.secondaryBtn)}
               disabled={isSubmitting}
             >
               Cancel

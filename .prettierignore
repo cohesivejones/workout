@@ -1,0 +1,21 @@
+# Dependencies
+node_modules
+server/node_modules
+
+# Build outputs
+dist
+build
+server/dist
+
+# Coverage
+coverage
+
+# Misc
+.env
+.env.local
+*.log
+package-lock.json
+
+# Test results
+test-results
+playwright-report

@@ -35,9 +35,7 @@ jest.mock("../components/PainScoreForm", () => {
           Submit
         </button>
         {existingPainScore && (
-          <div data-testid="existing-pain-score-id">
-            {existingPainScore.id}
-          </div>
+          <div data-testid="existing-pain-score-id">{existingPainScore.id}</div>
         )}
       </div>
     ),
@@ -49,7 +47,7 @@ describe("PainScorePage", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    
+
     // Mock the user context to simulate a logged-in user
     jest.spyOn(UserContext, "useUserContext").mockReturnValue({
       user: mockUser,
@@ -57,7 +55,7 @@ describe("PainScorePage", () => {
       logout: jest.fn(),
       loading: false,
     });
-    
+
     // Mock successful API responses
     (Api.createPainScore as jest.Mock).mockResolvedValue({ id: 123 });
     (Api.updatePainScore as jest.Mock).mockResolvedValue({ id: 456 });
@@ -80,7 +78,7 @@ describe("PainScorePage", () => {
 
     // Check that the form is rendered
     expect(screen.getByTestId("mock-pain-score-form")).toBeInTheDocument();
-    
+
     // Check that there's no existing pain score ID
     expect(screen.queryByTestId("existing-pain-score-id")).not.toBeInTheDocument();
   });
@@ -101,7 +99,7 @@ describe("PainScorePage", () => {
 
     // Check that the API was called with the correct ID
     expect(Api.fetchPainScore).toHaveBeenCalledWith(456);
-    
+
     // Check that the existing pain score ID is displayed
     expect(screen.getByTestId("existing-pain-score-id").textContent).toBe("456");
   });
@@ -189,7 +187,7 @@ describe("PainScorePage", () => {
     await waitFor(() => {
       expect(screen.getByTestId("mock-pain-score-form")).toBeInTheDocument();
     });
-    
+
     // Check that there's no existing pain score ID
     expect(screen.queryByTestId("existing-pain-score-id")).not.toBeInTheDocument();
   });

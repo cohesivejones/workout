@@ -6,7 +6,7 @@ import { PainScore } from "../types";
 jest.mock("./PainScaleSelector", () => {
   return {
     __esModule: true,
-     
+
     default: ({ onChange, error }: any) => (
       <div data-testid="mock-pain-scale-selector">
         <select
@@ -121,12 +121,7 @@ describe("PainScoreForm", () => {
   it("shows error message when submission fails", async () => {
     // Mock onSubmit to return false (failure)
     const mockFailedSubmit = jest.fn().mockResolvedValue(false);
-    render(
-      <PainScoreForm
-        onSubmit={mockFailedSubmit}
-        onCancel={mockOnCancel}
-      />
-    );
+    render(<PainScoreForm onSubmit={mockFailedSubmit} onCancel={mockOnCancel} />);
 
     // Select pain score (required field)
     const painScoreSelect = screen.getByTestId("mock-pain-scale-select");
@@ -145,12 +140,7 @@ describe("PainScoreForm", () => {
   it("handles exceptions during submission", async () => {
     // Mock onSubmit to throw an error
     const mockErrorSubmit = jest.fn().mockRejectedValue(new Error("Test error"));
-    render(
-      <PainScoreForm
-        onSubmit={mockErrorSubmit}
-        onCancel={mockOnCancel}
-      />
-    );
+    render(<PainScoreForm onSubmit={mockErrorSubmit} onCancel={mockOnCancel} />);
 
     // Select pain score (required field)
     const painScoreSelect = screen.getByTestId("mock-pain-scale-select");
@@ -174,12 +164,7 @@ describe("PainScoreForm", () => {
       });
     });
 
-    render(
-      <PainScoreForm
-        onSubmit={mockDelayedSubmit}
-        onCancel={mockOnCancel}
-      />
-    );
+    render(<PainScoreForm onSubmit={mockDelayedSubmit} onCancel={mockOnCancel} />);
 
     // Select pain score (required field)
     const painScoreSelect = screen.getByTestId("mock-pain-scale-select");
@@ -191,7 +176,7 @@ describe("PainScoreForm", () => {
 
     // Check that the submit button shows "Saving..." and is disabled
     expect(screen.getByText("Saving...")).toBeInTheDocument();
-    
+
     // Check that the cancel button is disabled
     const cancelButton = screen.getByText("Cancel") as HTMLButtonElement;
     expect(cancelButton.disabled).toBe(true);

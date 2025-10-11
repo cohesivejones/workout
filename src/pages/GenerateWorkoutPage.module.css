@@ -88,7 +88,7 @@
 }
 
 .generateButton.loading::after {
-  content: '';
+  content: "";
   position: absolute;
   right: 12px;
   top: 50%;
@@ -102,8 +102,12 @@
 }
 
 @keyframes spin {
-  0% { transform: translateY(-50%) rotate(0deg); }
-  100% { transform: translateY(-50%) rotate(360deg); }
+  0% {
+    transform: translateY(-50%) rotate(0deg);
+  }
+  100% {
+    transform: translateY(-50%) rotate(360deg);
+  }
 }
 
 .resetButton {
@@ -154,7 +158,7 @@
 
 .workoutText {
   margin: 0;
-  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+  font-family: "SF Mono", "Monaco", "Inconsolata", "Roboto Mono", monospace;
   font-size: 14px;
   line-height: 1.6;
   color: #333;
@@ -190,25 +194,25 @@
   .container {
     padding: 16px;
   }
-  
+
   .buttonGroup {
     flex-direction: column;
   }
-  
+
   .generateButton,
   .resetButton {
     width: 100%;
   }
-  
+
   .resultsContainer {
     padding: 20px;
     margin-top: 24px;
   }
-  
+
   .workoutContent {
     padding: 16px;
   }
-  
+
   .workoutText {
     font-size: 13px;
   }
@@ -218,16 +222,16 @@
   .container {
     padding: 12px;
   }
-  
+
   .textarea {
     padding: 10px;
     font-size: 16px; /* Prevent zoom on iOS */
   }
-  
+
   .resultsContainer {
     padding: 16px;
   }
-  
+
   .workoutContent {
     padding: 12px;
   }

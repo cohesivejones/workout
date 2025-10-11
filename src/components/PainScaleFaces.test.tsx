@@ -8,7 +8,7 @@ describe("PainScaleFaces", () => {
 
     painLevels.forEach((level) => {
       const { container } = render(getPainFace(level));
-      
+
       // Each pain level should render an SVG
       const svg = container.querySelector("svg");
       expect(svg).toBeInTheDocument();
@@ -18,10 +18,10 @@ describe("PainScaleFaces", () => {
   it("applies custom size when provided", () => {
     const customSize = 48;
     const { container } = render(getPainFace(5, { size: customSize }));
-    
+
     const svg = container.querySelector("svg");
     expect(svg).toBeInTheDocument();
-    
+
     // Check that the SVG has the custom size
     expect(svg?.getAttribute("width")).toBe(customSize.toString());
     expect(svg?.getAttribute("height")).toBe(customSize.toString());
@@ -29,10 +29,10 @@ describe("PainScaleFaces", () => {
 
   it("uses default size when not provided", () => {
     const { container } = render(getPainFace(5));
-    
+
     const svg = container.querySelector("svg");
     expect(svg).toBeInTheDocument();
-    
+
     // Default size should be applied
     expect(svg?.getAttribute("width")).toBe("40");
     expect(svg?.getAttribute("height")).toBe("40");
@@ -50,15 +50,15 @@ describe("PainScaleFaces", () => {
 
     painLevelColorMap.forEach(({ level, expectedColor }) => {
       const { container } = render(getPainFace(level));
-      
+
       // The SVG should have elements with the expected color
       const svg = container.querySelector("svg");
       expect(svg).toBeInTheDocument();
-      
+
       // Check that the SVG has a circle with the expected fill color
       const circle = container.querySelector("circle");
       expect(circle).toBeInTheDocument();
-      
+
       // Get the fill attribute and convert to lowercase for case-insensitive comparison
       const fillColor = circle?.getAttribute("fill")?.toLowerCase();
       expect(fillColor).toBe(expectedColor);
@@ -71,7 +71,7 @@ describe("PainScaleFaces", () => {
 
     invalidLevels.forEach((level) => {
       const { container } = render(getPainFace(level));
-      
+
       // Should still render an SVG
       const svg = container.querySelector("svg");
       expect(svg).toBeInTheDocument();

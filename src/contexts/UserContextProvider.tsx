@@ -76,8 +76,6 @@ export const UserContextProvider = ({ children }: Props) => {
   };
 
   return (
-    <UserContext.Provider value={{ user, login, logout, loading }}>
-      {children}
-    </UserContext.Provider>
+    <UserContext.Provider value={{ user, login, logout, loading }}>{children}</UserContext.Provider>
   );
 };

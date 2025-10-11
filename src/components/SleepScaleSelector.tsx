@@ -76,9 +76,7 @@ const SleepScaleSelector: React.FC<SleepScaleSelectorProps> = ({
                   tabIndex={0}
                   role="button"
                   aria-pressed={selectedScore === scoreValue}
-                  aria-label={`Sleep level ${scoreValue}: ${getDetailedDescription(
-                    description
-                  )}`}
+                  aria-label={`Sleep level ${scoreValue}: ${getDetailedDescription(description)}`}
                 >
                   <span className={styles.sleepScaleNumber}>{scoreValue}</span>
                   <div className={styles.sleepScaleFace}>
@@ -95,9 +93,7 @@ const SleepScaleSelector: React.FC<SleepScaleSelectorProps> = ({
                 {getSleepFace(selectedScore, { size: 60 })}
               </div>
               <div className={styles.sleepScaleDescription}>
-                {getDetailedDescription(
-                  sleepScoreDescriptions[selectedScore - 1]
-                )}
+                {getDetailedDescription(sleepScoreDescriptions[selectedScore - 1])}
               </div>
             </div>
           )}

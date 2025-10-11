@@ -14,10 +14,16 @@ jest.mock("recharts", () => {
   const OriginalModule = jest.requireActual("recharts");
   return {
     ...OriginalModule,
-    ResponsiveContainer: ({ children }: { children: React.ReactNode }) => <div data-testid="responsive-container">{children}</div>,
-    LineChart: ({ children }: { children: React.ReactNode }) => <div data-testid="line-chart">{children}</div>,
+    ResponsiveContainer: ({ children }: { children: React.ReactNode }) => (
+      <div data-testid="responsive-container">{children}</div>
+    ),
+    LineChart: ({ children }: { children: React.ReactNode }) => (
+      <div data-testid="line-chart">{children}</div>
+    ),
     Line: () => <div data-testid="chart-line" />,
-    XAxis: (props: { domain?: unknown }) => <div data-testid="x-axis" data-domain={JSON.stringify(props.domain)} />,
+    XAxis: (props: { domain?: unknown }) => (
+      <div data-testid="x-axis" data-domain={JSON.stringify(props.domain)} />
+    ),
     YAxis: () => <div data-testid="y-axis" />,
     CartesianGrid: () => <div data-testid="cartesian-grid" />,
     Tooltip: () => <div data-testid="tooltip" />,
@@ -63,7 +69,7 @@ describe("DashboardPage", () => {
       { date: "2025-02-15", score: 3 },
       { date: "2025-02-22", score: 4 },
       { date: "2025-03-01", score: 2 },
-    ]
+    ],
   };
 
   const mockSleepData = {
@@ -71,7 +77,7 @@ describe("DashboardPage", () => {
       { date: "2025-02-15", score: 4 },
       { date: "2025-02-22", score: 3 },
       { date: "2025-03-01", score: 5 },
-    ]
+    ],
   };
 
   beforeEach(() => {
@@ -80,9 +86,7 @@ describe("DashboardPage", () => {
 
   it("renders loading state initially", () => {
     // Mock API to not resolve immediately
-    (Api.fetchWeightProgressionData as jest.Mock).mockImplementation(
-      () => new Promise(() => {})
-    );
+    (Api.fetchWeightProgressionData as jest.Mock).mockImplementation(() => new Promise(() => {}));
 
     render(<DashboardPage />);
 
@@ -103,11 +107,11 @@ describe("DashboardPage", () => {
 
     // Check page title
     expect(screen.getByText("Exercise Weight Progression")).toBeInTheDocument();
-    
+
     // Check that exercise names are displayed
     expect(screen.getByText("Bench Press")).toBeInTheDocument();
     expect(screen.getByText("Squat")).toBeInTheDocument();
-    
+
     // Check that charts are rendered
     const charts = screen.getAllByTestId("line-chart");
     expect(charts.length).toBe(2);
@@ -136,7 +140,9 @@ describe("DashboardPage", () => {
     // Wait for empty state to be displayed
     await waitFor(() => {
       expect(screen.getByText(/No exercise data available/i)).toBeInTheDocument();
-      expect(screen.getByText(/Add workouts with weight data to see your progress/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/Add workouts with weight data to see your progress/i)
+      ).toBeInTheDocument();
     });
   });
 
@@ -151,13 +157,13 @@ describe("DashboardPage", () => {
     await waitFor(() => {
       const xAxes = screen.getAllByTestId("x-axis");
       expect(xAxes.length).toBeGreaterThan(0);
-      
+
       // Check that all x-axes have the same domain
       const firstDomain = xAxes[0].getAttribute("data-domain");
-      xAxes.forEach(axis => {
+      xAxes.forEach((axis) => {
         expect(axis.getAttribute("data-domain")).toBe(firstDomain);
       });
-      
+
       expect(screen.getAllByTestId("y-axis").length).toBeGreaterThan(0);
     });
   });
@@ -178,15 +184,15 @@ describe("DashboardPage", () => {
     // Check that pain and sleep score sections are displayed
     expect(screen.getByText("Pain Score Progression")).toBeInTheDocument();
     expect(screen.getByText("Sleep Quality Progression")).toBeInTheDocument();
-    
+
     // Check that charts are rendered
     const charts = screen.getAllByTestId("line-chart");
     expect(charts.length).toBe(4); // 2 exercise charts + pain + sleep
-    
+
     // Check that all x-axes have the same domain
     const xAxes = screen.getAllByTestId("x-axis");
     const firstDomain = xAxes[0].getAttribute("data-domain");
-    xAxes.forEach(axis => {
+    xAxes.forEach((axis) => {
       expect(axis.getAttribute("data-domain")).toBe(firstDomain);
     });
   });
@@ -223,10 +229,10 @@ describe("DashboardPage", () => {
     // Check that all charts have the same x-axis domain
     const xAxes = screen.getAllByTestId("x-axis");
     expect(xAxes.length).toBeGreaterThan(0);
-    
+
     // All x-axes should have the same domain
     const firstDomain = xAxes[0].getAttribute("data-domain");
-    xAxes.forEach(axis => {
+    xAxes.forEach((axis) => {
       expect(axis.getAttribute("data-domain")).toBe(firstDomain);
     });
   });
@@ -263,18 +269,18 @@ describe("DashboardPage", () => {
 
       // Get all legend dots and verify their colors
       const legendDots = document.querySelectorAll('[class*="legendDot"]');
-      
+
       // Should have 4 legend dots total (2 per exercise chart)
       expect(legendDots).toHaveLength(4);
 
       // Check that we have the expected colors
-      const colors = Array.from(legendDots).map(dot => 
-        (dot as HTMLElement).style.backgroundColor
+      const colors = Array.from(legendDots).map(
+        (dot) => (dot as HTMLElement).style.backgroundColor
       );
-      
+
       // Should contain our simplified PR indicator colors
-      expect(colors).toContain('rgb(136, 132, 216)'); // #8884d8 - Previous Rep
-      expect(colors).toContain('rgb(255, 215, 0)');   // #ffd700 - New Rep PR
+      expect(colors).toContain("rgb(136, 132, 216)"); // #8884d8 - Previous Rep
+      expect(colors).toContain("rgb(255, 215, 0)"); // #ffd700 - New Rep PR
     });
   });
 
@@ -305,7 +311,7 @@ describe("DashboardPage", () => {
 
       // Verify that the chart is rendered
       expect(screen.getByText("Test Exercise")).toBeInTheDocument();
-      
+
       // Since there's only one exercise chart now, we can use getByTestId
       const charts = screen.getAllByTestId("line-chart");
       expect(charts.length).toBe(1); // Only the exercise chart, no pain/sleep charts
@@ -323,9 +329,9 @@ describe("DashboardPage", () => {
       // The tooltip formatting is tested through the data structure
       // Since we're mocking Recharts, we can't test the actual tooltip rendering
       // but we can verify the data contains the necessary fields
-      expect(mockProgressionData[0].dataPoints[0]).toHaveProperty('reps');
-      expect(mockProgressionData[0].dataPoints[0]).toHaveProperty('new_reps');
-      expect(mockProgressionData[0].dataPoints[0]).toHaveProperty('new_weight');
+      expect(mockProgressionData[0].dataPoints[0]).toHaveProperty("reps");
+      expect(mockProgressionData[0].dataPoints[0]).toHaveProperty("new_reps");
+      expect(mockProgressionData[0].dataPoints[0]).toHaveProperty("new_weight");
     });
   });
 
@@ -353,7 +359,7 @@ describe("DashboardPage", () => {
 
       // Verify the exercise is rendered
       expect(screen.getByText("Mixed PRs Exercise")).toBeInTheDocument();
-      
+
       // Verify PR legend is present
       expect(screen.getByText("Previous Rep")).toBeInTheDocument();
       expect(screen.getByText("New Rep PR")).toBeInTheDocument();

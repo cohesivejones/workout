@@ -15,12 +15,8 @@ export class Workout {
   @Column({ type: "boolean", default: false })
   withInstructor: boolean;
 
-  @OneToMany(
-    () => WorkoutExercise,
-    (workoutExercise) => workoutExercise.workout,
-    {
-      cascade: true,
-    },
-  )
+  @OneToMany(() => WorkoutExercise, (workoutExercise) => workoutExercise.workout, {
+    cascade: true,
+  })
   workoutExercises: WorkoutExercise[];
 }

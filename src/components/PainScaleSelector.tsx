@@ -84,9 +84,7 @@ const PainScaleSelector: React.FC<PainScaleSelectorProps> = ({
                 aria-label={`Pain level ${index}: ${getDetailedDescription(description)}`}
               >
                 <span className={styles.painScaleNumber}>{index}</span>
-                <div className={styles.painScaleFace}>
-                  {getPainFace(index, { size: 36 })}
-                </div>
+                <div className={styles.painScaleFace}>{getPainFace(index, { size: 36 })}</div>
               </div>
             ))}
           </div>

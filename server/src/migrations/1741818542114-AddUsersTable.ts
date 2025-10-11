@@ -19,7 +19,7 @@ export class AddUsers1741818542114 implements MigrationInterface {
           },
         ],
       }),
-      true,
+      true
     );
   }
 

@@ -2,7 +2,13 @@ import { useState, useEffect } from "react";
 import type { ReactElement } from "react";
 import { useSearchParams } from "react-router-dom";
 import CalendarView from "../components/CalendarView";
-import { fetchWorkouts, fetchPainScores, deletePainScore, fetchSleepScores, deleteSleepScore } from "../api";
+import {
+  fetchWorkouts,
+  fetchPainScores,
+  deletePainScore,
+  fetchSleepScores,
+  deleteSleepScore,
+} from "../api";
 import { Workout, PainScore, SleepScore } from "../types";
 import classNames from "classnames";
 import styles from "./TimelinePage.module.css";
@@ -17,7 +23,7 @@ function TimelinePage(): ReactElement {
   const [error, setError] = useState<string | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useUserContext();
-  
+
   // Get view mode from URL or default to "calendar"
   const viewMode = searchParams.get("view") === "list" ? "list" : "calendar";
 
@@ -44,9 +50,7 @@ function TimelinePage(): ReactElement {
   }, [user]);
 
   const handleWorkoutDeleted = (workoutId: number) => {
-    setWorkouts((prevWorkouts) =>
-      prevWorkouts.filter((w) => w.id !== workoutId),
-    );
+    setWorkouts((prevWorkouts) => prevWorkouts.filter((w) => w.id !== workoutId));
   };
 
   const handlePainScoreDelete = async (painScoreId: number) => {

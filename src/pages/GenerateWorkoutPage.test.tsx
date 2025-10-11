@@ -35,7 +35,8 @@ describe("GenerateWorkoutPage", () => {
 
   it("submits form with additional notes", async () => {
     const mockResponse = {
-      generatedWorkout: "1. Push-ups: 3 sets of 12\n2. Squats: 3 sets of 15\n3. Plank: 3 sets of 30 seconds"
+      generatedWorkout:
+        "1. Push-ups: 3 sets of 12\n2. Squats: 3 sets of 15\n3. Plank: 3 sets of 30 seconds",
     };
     mockGenerateWorkout.mockResolvedValue(mockResponse);
 
@@ -49,14 +50,14 @@ describe("GenerateWorkoutPage", () => {
 
     await waitFor(() => {
       expect(mockGenerateWorkout).toHaveBeenCalledWith({
-        additionalNotes: "Focus on upper body"
+        additionalNotes: "Focus on upper body",
       });
     });
   });
 
   it("submits form without additional notes", async () => {
     const mockResponse = {
-      generatedWorkout: "1. Push-ups: 3 sets of 12\n2. Squats: 3 sets of 15"
+      generatedWorkout: "1. Push-ups: 3 sets of 12\n2. Squats: 3 sets of 15",
     };
     mockGenerateWorkout.mockResolvedValue(mockResponse);
 
@@ -67,13 +68,15 @@ describe("GenerateWorkoutPage", () => {
 
     await waitFor(() => {
       expect(mockGenerateWorkout).toHaveBeenCalledWith({
-        additionalNotes: undefined
+        additionalNotes: undefined,
       });
     });
   });
 
   it("shows loading state during API call", async () => {
-    mockGenerateWorkout.mockImplementation(() => new Promise(resolve => setTimeout(resolve, 100)));
+    mockGenerateWorkout.mockImplementation(
+      () => new Promise((resolve) => setTimeout(resolve, 100))
+    );
 
     render(<GenerateWorkoutPage />);
 
@@ -87,7 +90,8 @@ describe("GenerateWorkoutPage", () => {
 
   it("displays generated workout after successful API call", async () => {
     const mockResponse = {
-      generatedWorkout: "1. Push-ups: 3 sets of 12\n2. Squats: 3 sets of 15\n3. Plank: 3 sets of 30 seconds"
+      generatedWorkout:
+        "1. Push-ups: 3 sets of 12\n2. Squats: 3 sets of 15\n3. Plank: 3 sets of 30 seconds",
     };
     mockGenerateWorkout.mockResolvedValue(mockResponse);
 
@@ -125,7 +129,7 @@ describe("GenerateWorkoutPage", () => {
 
   it("resets form when Start Over button is clicked", async () => {
     const mockResponse = {
-      generatedWorkout: "1. Push-ups: 3 sets of 12"
+      generatedWorkout: "1. Push-ups: 3 sets of 12",
     };
     mockGenerateWorkout.mockResolvedValue(mockResponse);
 
@@ -154,7 +158,7 @@ describe("GenerateWorkoutPage", () => {
 
   it("resets form when Generate Another Workout button is clicked", async () => {
     const mockResponse = {
-      generatedWorkout: "1. Push-ups: 3 sets of 12"
+      generatedWorkout: "1. Push-ups: 3 sets of 12",
     };
     mockGenerateWorkout.mockResolvedValue(mockResponse);
 
@@ -183,7 +187,7 @@ describe("GenerateWorkoutPage", () => {
 
   it("trims whitespace from additional notes", async () => {
     const mockResponse = {
-      generatedWorkout: "1. Push-ups: 3 sets of 12"
+      generatedWorkout: "1. Push-ups: 3 sets of 12",
     };
     mockGenerateWorkout.mockResolvedValue(mockResponse);
 
@@ -197,14 +201,14 @@ describe("GenerateWorkoutPage", () => {
 
     await waitFor(() => {
       expect(mockGenerateWorkout).toHaveBeenCalledWith({
-        additionalNotes: "Focus on upper body"
+        additionalNotes: "Focus on upper body",
       });
     });
   });
 
   it("sends undefined for empty additional notes", async () => {
     const mockResponse = {
-      generatedWorkout: "1. Push-ups: 3 sets of 12"
+      generatedWorkout: "1. Push-ups: 3 sets of 12",
     };
     mockGenerateWorkout.mockResolvedValue(mockResponse);
 
@@ -218,7 +222,7 @@ describe("GenerateWorkoutPage", () => {
 
     await waitFor(() => {
       expect(mockGenerateWorkout).toHaveBeenCalledWith({
-        additionalNotes: undefined
+        additionalNotes: undefined,
       });
     });
   });

@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class FixCascadeDeleteConstraint1746040210000
-  implements MigrationInterface
-{
+export class FixCascadeDeleteConstraint1746040210000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     // Drop the old constraints that don't have CASCADE
     // Using IF EXISTS makes this idempotent - won't fail if already dropped

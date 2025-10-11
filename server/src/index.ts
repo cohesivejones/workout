@@ -15,14 +15,7 @@ import { Between } from "typeorm";
 import * as dotenv from "dotenv";
 import * as bcrypt from "bcrypt";
 import dataSource from "./data-source";
-import {
-  Exercise,
-  Workout,
-  WorkoutExercise,
-  User,
-  PainScore,
-  SleepScore,
-} from "./entities";
+import { Exercise, Workout, WorkoutExercise, User, PainScore, SleepScore } from "./entities";
 import { authenticateToken, generateToken } from "./middleware/auth";
 
 // Initialize reflect-metadata
@@ -50,7 +43,7 @@ const app = express();
 // Middleware
 app.use(
   cors({
-    origin: (process.env.CORS_ORIGIN || "http://localhost:3000").split(','),
+    origin: (process.env.CORS_ORIGIN || "http://localhost:3000").split(","),
     credentials: true,
   })
 );
@@ -58,10 +51,10 @@ app.use(express.json());
 app.use(cookieParser());
 
 // Force HTTPS in production
-if (process.env.NODE_ENV === 'production') {
+if (process.env.NODE_ENV === "production") {
   app.use((req, res, next) => {
-    if (req.header('x-forwarded-proto') !== 'https') {
-      res.redirect(`https://${req.header('host')}${req.url}`);
+    if (req.header("x-forwarded-proto") !== "https") {
+      res.redirect(`https://${req.header("host")}${req.url}`);
     } else {
       next();
     }
@@ -97,9 +90,7 @@ apiRouter.post("/auth/login", async (req: Request, res: Response) => {
     }
 
     // Check if password is correct
-    const isPasswordValid = user.password
-      ? await bcrypt.compare(password, user.password)
-      : false;
+    const isPasswordValid = user.password ? await bcrypt.compare(password, user.password) : false;
 
     if (!isPasswordValid) {
       return res.status(401).json({ error: "Invalid email or password" });
@@ -150,51 +141,43 @@ apiRouter.get("/auth/me", authenticateToken, (req: Request, res: Response) => {
 });
 
 // Change password endpoint
-apiRouter.post(
-  "/auth/change-password",
-  authenticateToken,
-  async (req: Request, res: Response) => {
-    try {
-      const { currentPassword, newPassword } = req.body;
-      const user = req.user!;
+apiRouter.post("/auth/change-password", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const user = req.user!;
 
-      if (!currentPassword || !newPassword) {
-        return res
-          .status(400)
-          .json({ error: "Current password and new password are required" });
-      }
-
-      // Validate new password
-      if (newPassword.length < 6) {
-        return res
-          .status(400)
-          .json({ error: "New password must be at least 6 characters" });
-      }
-
-      // Verify current password
-      const isPasswordValid = user.password
-        ? await bcrypt.compare(currentPassword, user.password)
-        : false;
-
-      if (!isPasswordValid) {
-        return res.status(401).json({ error: "Current password is incorrect" });
-      }
-
-      // Hash new password
-      const saltRounds = 10;
-      const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
-
-      // Update user's password
-      const userRepository = dataSource.getRepository(User);
-      await userRepository.update(user.id, { password: hashedPassword });
-
-      res.json({ message: "Password changed successfully" });
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ error: "Server error" });
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ error: "Current password and new password are required" });
     }
+
+    // Validate new password
+    if (newPassword.length < 6) {
+      return res.status(400).json({ error: "New password must be at least 6 characters" });
+    }
+
+    // Verify current password
+    const isPasswordValid = user.password
+      ? await bcrypt.compare(currentPassword, user.password)
+      : false;
+
+    if (!isPasswordValid) {
+      return res.status(401).json({ error: "Current password is incorrect" });
+    }
+
+    // Hash new password
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+
+    // Update user's password
+    const userRepository = dataSource.getRepository(User);
+    await userRepository.update(user.id, { password: hashedPassword });
+
+    res.json({ message: "Password changed successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
   }
-);
+});
 
 // Get all exercises
 apiRouter.get("/exercises", authenticateToken, async (req: Request, res: Response) => {
@@ -421,8 +404,7 @@ apiRouter.post("/workouts", authenticateToken, async (req: Request, res: Respons
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
-    const { date, withInstructor, exercises } =
-      req.body as CreateWorkoutRequest;
+    const { date, withInstructor, exercises } = req.body as CreateWorkoutRequest;
     const userId = req.user!.id;
 
     // Create new workout
@@ -439,8 +421,7 @@ apiRouter.post("/workouts", authenticateToken, async (req: Request, res: Respons
 
     // Process exercises
     const exerciseRepository = queryRunner.manager.getRepository(Exercise);
-    const workoutExerciseRepository =
-      queryRunner.manager.getRepository(WorkoutExercise);
+    const workoutExerciseRepository = queryRunner.manager.getRepository(WorkoutExercise);
     const createdWorkoutExercises: WorkoutExercise[] = [];
 
     for (const exerciseData of exercises) {
@@ -472,7 +453,8 @@ apiRouter.post("/workouts", authenticateToken, async (req: Request, res: Respons
       await workoutExerciseRepository.save(workoutExercise);
 
       // Find the most recent previous workout exercise for this exercise
-      const previousWorkoutExercise = await workoutExerciseRepository.query(`
+      const previousWorkoutExercise = await workoutExerciseRepository.query(
+        `
         SELECT we.reps, we.weight, we.time_minutes
         FROM workout_exercises we
         JOIN workouts w ON we.workout_id = w.id
@@ -481,13 +463,16 @@ apiRouter.post("/workouts", authenticateToken, async (req: Request, res: Respons
         AND w.date < $3
         ORDER BY w.date DESC
         LIMIT 1
-      `, [exercise.id, userId, date]);
+      `,
+        [exercise.id, userId, date]
+      );
 
       // Set flags based on comparison
       if (previousWorkoutExercise.length > 0) {
         workoutExercise.new_reps = workoutExercise.reps !== previousWorkoutExercise[0].reps;
         workoutExercise.new_weight = workoutExercise.weight !== previousWorkoutExercise[0].weight;
-        workoutExercise.new_time = workoutExercise.time_minutes !== previousWorkoutExercise[0].time_minutes;
+        workoutExercise.new_time =
+          workoutExercise.time_minutes !== previousWorkoutExercise[0].time_minutes;
       } else {
         // First time this exercise appears in a workout
         workoutExercise.new_reps = false;
@@ -497,16 +482,16 @@ apiRouter.post("/workouts", authenticateToken, async (req: Request, res: Respons
 
       // Save the updated flags and reload with relations
       const savedWorkoutExercise = await workoutExerciseRepository.save(workoutExercise);
-      
+
       // Reload with exercise relation to ensure we have all data
       const reloadedWorkoutExercise = await workoutExerciseRepository.findOne({
-        where: { 
+        where: {
           workout_id: workout.id,
-          exercise_id: exercise.id
+          exercise_id: exercise.id,
         },
-        relations: ['exercise']
+        relations: ["exercise"],
       });
-      
+
       if (reloadedWorkoutExercise) {
         workout.workoutExercises.push(reloadedWorkoutExercise);
         createdWorkoutExercises.push(reloadedWorkoutExercise);
@@ -558,8 +543,7 @@ apiRouter.put("/workouts/:id", authenticateToken, async (req: Request, res: Resp
     await queryRunner.startTransaction();
 
     const workoutId = parseInt(req.params.id);
-    const { date, withInstructor, exercises } =
-      req.body as CreateWorkoutRequest;
+    const { date, withInstructor, exercises } = req.body as CreateWorkoutRequest;
 
     // Find workout
     const workoutRepository = queryRunner.manager.getRepository(Workout);
@@ -583,8 +567,7 @@ apiRouter.put("/workouts/:id", authenticateToken, async (req: Request, res: Resp
     await workoutRepository.save(workout);
 
     // Delete existing workout exercises
-    const workoutExerciseRepository =
-      queryRunner.manager.getRepository(WorkoutExercise);
+    const workoutExerciseRepository = queryRunner.manager.getRepository(WorkoutExercise);
 
     // First, delete all existing workout exercises for this workout
     await workoutExerciseRepository.delete({ workout_id: workout.id });
@@ -622,7 +605,8 @@ apiRouter.put("/workouts/:id", authenticateToken, async (req: Request, res: Resp
       await workoutExerciseRepository.save(workoutExercise);
 
       // Find the most recent previous workout exercise for this exercise
-      const previousWorkoutExercise = await workoutExerciseRepository.query(`
+      const previousWorkoutExercise = await workoutExerciseRepository.query(
+        `
         SELECT we.reps, we.weight, we.time_minutes
         FROM workout_exercises we
         JOIN workouts w ON we.workout_id = w.id
@@ -631,13 +615,16 @@ apiRouter.put("/workouts/:id", authenticateToken, async (req: Request, res: Resp
         AND w.date < $3
         ORDER BY w.date DESC
         LIMIT 1
-      `, [exercise.id, workout.userId, date]);
+      `,
+        [exercise.id, workout.userId, date]
+      );
 
       // Set flags based on comparison
       if (previousWorkoutExercise.length > 0) {
         workoutExercise.new_reps = workoutExercise.reps !== previousWorkoutExercise[0].reps;
         workoutExercise.new_weight = workoutExercise.weight !== previousWorkoutExercise[0].weight;
-        workoutExercise.new_time = workoutExercise.time_minutes !== previousWorkoutExercise[0].time_minutes;
+        workoutExercise.new_time =
+          workoutExercise.time_minutes !== previousWorkoutExercise[0].time_minutes;
       } else {
         // First time this exercise appears in a workout
         workoutExercise.new_reps = false;
@@ -647,7 +634,7 @@ apiRouter.put("/workouts/:id", authenticateToken, async (req: Request, res: Resp
 
       // Save the updated flags
       await workoutExerciseRepository.save(workoutExercise);
-      
+
       newWorkoutExercises.push(workoutExercise);
     }
 
@@ -774,9 +761,7 @@ apiRouter.post("/pain-scores", authenticateToken, async (req: Request, res: Resp
 
     // Validate score is between 0 and 10
     if (score < 0 || score > 10) {
-      return res
-        .status(400)
-        .json({ error: "Pain score must be between 0 and 10" });
+      return res.status(400).json({ error: "Pain score must be between 0 and 10" });
     }
 
     // Create new pain score
@@ -796,13 +781,8 @@ apiRouter.post("/pain-scores", authenticateToken, async (req: Request, res: Resp
     const error = err as DatabaseError;
 
     // Check for unique constraint violation
-    if (
-      error.code === "23505" &&
-      error.constraint === "UQ_pain_scores_userId_date"
-    ) {
-      res
-        .status(400)
-        .json({ error: "A pain score already exists for this date" });
+    if (error.code === "23505" && error.constraint === "UQ_pain_scores_userId_date") {
+      res.status(400).json({ error: "A pain score already exists for this date" });
     } else {
       res.status(500).json({ error: error.message || "Server error" });
     }
@@ -813,16 +793,11 @@ apiRouter.post("/pain-scores", authenticateToken, async (req: Request, res: Resp
 apiRouter.put("/pain-scores/:id", authenticateToken, async (req: Request, res: Response) => {
   try {
     const painScoreId = parseInt(req.params.id);
-    const { date, score, notes } = req.body as Omit<
-      CreatePainScoreRequest,
-      "userId"
-    >;
+    const { date, score, notes } = req.body as Omit<CreatePainScoreRequest, "userId">;
 
     // Validate score is between 0 and 10
     if (score < 0 || score > 10) {
-      return res
-        .status(400)
-        .json({ error: "Pain score must be between 0 and 10" });
+      return res.status(400).json({ error: "Pain score must be between 0 and 10" });
     }
 
     // Find pain score
@@ -848,13 +823,8 @@ apiRouter.put("/pain-scores/:id", authenticateToken, async (req: Request, res: R
     const error = err as DatabaseError;
 
     // Check for unique constraint violation
-    if (
-      error.code === "23505" &&
-      error.constraint === "UQ_pain_scores_userId_date"
-    ) {
-      res
-        .status(400)
-        .json({ error: "A pain score already exists for this date" });
+    if (error.code === "23505" && error.constraint === "UQ_pain_scores_userId_date") {
+      res.status(400).json({ error: "A pain score already exists for this date" });
     } else {
       res.status(500).json({ error: error.message || "Server error" });
     }
@@ -936,9 +906,7 @@ apiRouter.post("/sleep-scores", authenticateToken, async (req: Request, res: Res
 
     // Validate score is between 1 and 5
     if (score < 1 || score > 5) {
-      return res
-        .status(400)
-        .json({ error: "Sleep score must be between 1 and 5" });
+      return res.status(400).json({ error: "Sleep score must be between 1 and 5" });
     }
 
     // Create new sleep score
@@ -958,13 +926,8 @@ apiRouter.post("/sleep-scores", authenticateToken, async (req: Request, res: Res
     const error = err as DatabaseError;
 
     // Check for unique constraint violation
-    if (
-      error.code === "23505" &&
-      error.constraint === "UQ_sleep_scores_userId_date"
-    ) {
-      res
-        .status(400)
-        .json({ error: "A sleep score already exists for this date" });
+    if (error.code === "23505" && error.constraint === "UQ_sleep_scores_userId_date") {
+      res.status(400).json({ error: "A sleep score already exists for this date" });
     } else {
       res.status(500).json({ error: error.message || "Server error" });
     }
@@ -975,16 +938,11 @@ apiRouter.post("/sleep-scores", authenticateToken, async (req: Request, res: Res
 apiRouter.put("/sleep-scores/:id", authenticateToken, async (req: Request, res: Response) => {
   try {
     const sleepScoreId = parseInt(req.params.id);
-    const { date, score, notes } = req.body as Omit<
-      CreateSleepScoreRequest,
-      "userId"
-    >;
+    const { date, score, notes } = req.body as Omit<CreateSleepScoreRequest, "userId">;
 
     // Validate score is between 1 and 5
     if (score < 1 || score > 5) {
-      return res
-        .status(400)
-        .json({ error: "Sleep score must be between 1 and 5" });
+      return res.status(400).json({ error: "Sleep score must be between 1 and 5" });
     }
 
     // Find sleep score
@@ -1010,13 +968,8 @@ apiRouter.put("/sleep-scores/:id", authenticateToken, async (req: Request, res: 
     const error = err as DatabaseError;
 
     // Check for unique constraint violation
-    if (
-      error.code === "23505" &&
-      error.constraint === "UQ_sleep_scores_userId_date"
-    ) {
-      res
-        .status(400)
-        .json({ error: "A sleep score already exists for this date" });
+    if (error.code === "23505" && error.constraint === "UQ_sleep_scores_userId_date") {
+      res.status(400).json({ error: "A sleep score already exists for this date" });
     } else {
       res.status(500).json({ error: error.message || "Server error" });
     }
@@ -1146,9 +1099,7 @@ apiRouter.post("/diagnostics/analyze", authenticateToken, async (req: Request, r
     Sleep Score Data:
     ${JSON.stringify(diagnosticData.sleepScores, null, 2)}
     
-    Date Range: ${diagnosticData.dateRange.start} to ${
-      diagnosticData.dateRange.end
-    }
+    Date Range: ${diagnosticData.dateRange.start} to ${diagnosticData.dateRange.end}
     
     Please provide a detailed analysis of potential correlations between specific exercises, sleep quality, and pain, with recommendations for exercises that might need modification or should be avoided.`;
 
@@ -1171,154 +1122,169 @@ apiRouter.post("/diagnostics/analyze", authenticateToken, async (req: Request, r
 });
 
 // Dashboard API endpoint - Get exercise weight progression over 12 weeks
-apiRouter.get("/dashboard/weight-progression", authenticateToken, async (req: Request, res: Response) => {
-  try {
-    const userId = req.user!.id;
-    
-    // Calculate date range (12 weeks from today)
-    const endDate = new Date();
-    const startDate = new Date();
-    startDate.setDate(endDate.getDate() - 84); // 12 weeks = 84 days
-    
-    // Format dates for SQL query
-    const startDateStr = startDate.toISOString().split("T")[0];
-    const endDateStr = endDate.toISOString().split("T")[0];
-    
-    const workoutRepository = dataSource.getRepository(Workout);
-    
-    // Get all workouts in the date range
-    const workouts = await workoutRepository.find({
-      where: {
-        userId: Number(userId),
-        date: Between(startDateStr, endDateStr),
-      },
-      relations: {
-        workoutExercises: {
-          exercise: true,
+apiRouter.get(
+  "/dashboard/weight-progression",
+  authenticateToken,
+  async (req: Request, res: Response) => {
+    try {
+      const userId = req.user!.id;
+
+      // Calculate date range (12 weeks from today)
+      const endDate = new Date();
+      const startDate = new Date();
+      startDate.setDate(endDate.getDate() - 84); // 12 weeks = 84 days
+
+      // Format dates for SQL query
+      const startDateStr = startDate.toISOString().split("T")[0];
+      const endDateStr = endDate.toISOString().split("T")[0];
+
+      const workoutRepository = dataSource.getRepository(Workout);
+
+      // Get all workouts in the date range
+      const workouts = await workoutRepository.find({
+        where: {
+          userId: Number(userId),
+          date: Between(startDateStr, endDateStr),
         },
-      },
-      order: { date: "ASC" },
-    });
-    
-    // Process data for the dashboard
-    // Group by exercise and create time series data
-    const exerciseProgressionData: Record<string, Array<{
-      date: string, 
-      weight: number | null, 
-      reps: number,
-      new_reps?: boolean,
-      new_weight?: boolean
-    }>> = {};
-    
-    workouts.forEach(workout => {
-      workout.workoutExercises.forEach(we => {
-        const exerciseName = we.exercise.name;
-        
-        // Skip exercises without weight data
-        if (we.weight === null || we.weight === undefined) return;
-        
-        // Initialize array for this exercise if it doesn't exist
-        if (!exerciseProgressionData[exerciseName]) {
-          exerciseProgressionData[exerciseName] = [];
-        }
-        
-        // Add data point with all relevant information
-        exerciseProgressionData[exerciseName].push({
-          date: workout.date,
-          weight: we.weight,
-          reps: we.reps,
-          new_reps: we.new_reps,
-          new_weight: we.new_weight
+        relations: {
+          workoutExercises: {
+            exercise: true,
+          },
+        },
+        order: { date: "ASC" },
+      });
+
+      // Process data for the dashboard
+      // Group by exercise and create time series data
+      const exerciseProgressionData: Record<
+        string,
+        Array<{
+          date: string;
+          weight: number | null;
+          reps: number;
+          new_reps?: boolean;
+          new_weight?: boolean;
+        }>
+      > = {};
+
+      workouts.forEach((workout) => {
+        workout.workoutExercises.forEach((we) => {
+          const exerciseName = we.exercise.name;
+
+          // Skip exercises without weight data
+          if (we.weight === null || we.weight === undefined) return;
+
+          // Initialize array for this exercise if it doesn't exist
+          if (!exerciseProgressionData[exerciseName]) {
+            exerciseProgressionData[exerciseName] = [];
+          }
+
+          // Add data point with all relevant information
+          exerciseProgressionData[exerciseName].push({
+            date: workout.date,
+            weight: we.weight,
+            reps: we.reps,
+            new_reps: we.new_reps,
+            new_weight: we.new_weight,
+          });
         });
       });
-    });
-    
-    // Convert to array format for easier consumption by frontend
-    const result = Object.entries(exerciseProgressionData).map(([name, dataPoints]) => ({
-      exerciseName: name,
-      dataPoints: dataPoints
-    }));
-    
-    res.json(result);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Server error" });
+
+      // Convert to array format for easier consumption by frontend
+      const result = Object.entries(exerciseProgressionData).map(([name, dataPoints]) => ({
+        exerciseName: name,
+        dataPoints: dataPoints,
+      }));
+
+      res.json(result);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: "Server error" });
+    }
   }
-});
+);
 
 // Dashboard API endpoint - Get pain score progression over 12 weeks
-apiRouter.get("/dashboard/pain-progression", authenticateToken, async (req: Request, res: Response) => {
-  try {
-    const userId = req.user!.id;
-    
-    // Calculate date range (12 weeks from today)
-    const endDate = new Date();
-    const startDate = new Date();
-    startDate.setDate(endDate.getDate() - 84); // 12 weeks = 84 days
-    
-    // Format dates for SQL query
-    const startDateStr = startDate.toISOString().split("T")[0];
-    const endDateStr = endDate.toISOString().split("T")[0];
-    
-    // Fetch pain scores within date range
-    const painScoreRepository = dataSource.getRepository(PainScore);
-    const painScores = await painScoreRepository.find({
-      where: {
-        userId: Number(userId),
-        date: Between(startDateStr, endDateStr),
-      },
-      order: { date: "ASC" },
-    });
-    
-    // Format data for response
-    const dataPoints = painScores.map(ps => ({
-      date: ps.date,
-      score: ps.score
-    }));
-    
-    res.json({ dataPoints });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Server error" });
+apiRouter.get(
+  "/dashboard/pain-progression",
+  authenticateToken,
+  async (req: Request, res: Response) => {
+    try {
+      const userId = req.user!.id;
+
+      // Calculate date range (12 weeks from today)
+      const endDate = new Date();
+      const startDate = new Date();
+      startDate.setDate(endDate.getDate() - 84); // 12 weeks = 84 days
+
+      // Format dates for SQL query
+      const startDateStr = startDate.toISOString().split("T")[0];
+      const endDateStr = endDate.toISOString().split("T")[0];
+
+      // Fetch pain scores within date range
+      const painScoreRepository = dataSource.getRepository(PainScore);
+      const painScores = await painScoreRepository.find({
+        where: {
+          userId: Number(userId),
+          date: Between(startDateStr, endDateStr),
+        },
+        order: { date: "ASC" },
+      });
+
+      // Format data for response
+      const dataPoints = painScores.map((ps) => ({
+        date: ps.date,
+        score: ps.score,
+      }));
+
+      res.json({ dataPoints });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: "Server error" });
+    }
   }
-});
+);
 
 // Dashboard API endpoint - Get sleep score progression over 12 weeks
-apiRouter.get("/dashboard/sleep-progression", authenticateToken, async (req: Request, res: Response) => {
-  try {
-    const userId = req.user!.id;
-    
-    // Calculate date range (12 weeks from today)
-    const endDate = new Date();
-    const startDate = new Date();
-    startDate.setDate(endDate.getDate() - 84); // 12 weeks = 84 days
-    
-    // Format dates for SQL query
-    const startDateStr = startDate.toISOString().split("T")[0];
-    const endDateStr = endDate.toISOString().split("T")[0];
-    
-    // Fetch sleep scores within date range
-    const sleepScoreRepository = dataSource.getRepository(SleepScore);
-    const sleepScores = await sleepScoreRepository.find({
-      where: {
-        userId: Number(userId),
-        date: Between(startDateStr, endDateStr),
-      },
-      order: { date: "ASC" },
-    });
-    
-    // Format data for response
-    const dataPoints = sleepScores.map(ss => ({
-      date: ss.date,
-      score: ss.score
-    }));
-    
-    res.json({ dataPoints });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Server error" });
+apiRouter.get(
+  "/dashboard/sleep-progression",
+  authenticateToken,
+  async (req: Request, res: Response) => {
+    try {
+      const userId = req.user!.id;
+
+      // Calculate date range (12 weeks from today)
+      const endDate = new Date();
+      const startDate = new Date();
+      startDate.setDate(endDate.getDate() - 84); // 12 weeks = 84 days
+
+      // Format dates for SQL query
+      const startDateStr = startDate.toISOString().split("T")[0];
+      const endDateStr = endDate.toISOString().split("T")[0];
+
+      // Fetch sleep scores within date range
+      const sleepScoreRepository = dataSource.getRepository(SleepScore);
+      const sleepScores = await sleepScoreRepository.find({
+        where: {
+          userId: Number(userId),
+          date: Between(startDateStr, endDateStr),
+        },
+        order: { date: "ASC" },
+      });
+
+      // Format data for response
+      const dataPoints = sleepScores.map((ss) => ({
+        date: ss.date,
+        score: ss.score,
+      }));
+
+      res.json({ dataPoints });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: "Server error" });
+    }
   }
-});
+);
 
 // Generate workout using AI
 apiRouter.post("/workouts/generate", authenticateToken, async (req: Request, res: Response) => {
@@ -1351,34 +1317,37 @@ apiRouter.post("/workouts/generate", authenticateToken, async (req: Request, res
     });
 
     // Format workout data as structured JSON for the prompt
-    const workoutData = workouts.map(workout => ({
+    const workoutData = workouts.map((workout) => ({
       date_of_workout: workout.date,
-      exercises: workout.workoutExercises.map(we => ({
+      exercises: workout.workoutExercises.map((we) => ({
         name: we.exercise.name,
         reps: we.reps,
         sets: 3, // Assume all sets are 3 as requested
-        ...(we.weight && { weight: we.weight }) // Include weight if available
-      }))
+        ...(we.weight && { weight: we.weight }), // Include weight if available
+      })),
     }));
 
     // Create the prompt
-    const basePrompt = "Generally I do 6 full body exercises every workout covering legs core and upper body, generate a workout for me based on the following exercises over the last month";
-    
+    const basePrompt =
+      "Generally I do 6 full body exercises every workout covering legs core and upper body, generate a workout for me based on the following exercises over the last month";
+
     let fullPrompt = `${basePrompt}:\n\n${JSON.stringify(workoutData, null, 2)}`;
-    
+
     if (additionalNotes && additionalNotes.trim()) {
       fullPrompt += `\n\nAdditional notes: ${additionalNotes.trim()}`;
     }
 
-    fullPrompt += "\n\nPlease generate a balanced full-body workout with 6 exercises, including suggested reps and weights based on my recent performance. Focus on covering legs, core, and upper body as requested.";
+    fullPrompt +=
+      "\n\nPlease generate a balanced full-body workout with 6 exercises, including suggested reps and weights based on my recent performance. Focus on covering legs, core, and upper body as requested.";
 
     // Call OpenAI API
     const response = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
-        { 
-          role: "system", 
-          content: "You are a fitness trainer assistant. Generate practical workout routines based on the user's exercise history. Provide specific rep ranges and weight suggestions when possible. Format your response clearly with exercise names, reps, and weights." 
+        {
+          role: "system",
+          content:
+            "You are a fitness trainer assistant. Generate practical workout routines based on the user's exercise history. Provide specific rep ranges and weight suggestions when possible. Format your response clearly with exercise names, reps, and weights.",
         },
         { role: "user", content: fullPrompt },
       ],

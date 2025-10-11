@@ -1,9 +1,7 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 import * as bcrypt from "bcrypt";
 
-export class AddDefaultPasswordToExistingUsers1741910300000
-  implements MigrationInterface
-{
+export class AddDefaultPasswordToExistingUsers1741910300000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     // Generate a hashed password for "changeme"
     const saltRounds = 10;
@@ -14,7 +12,7 @@ export class AddDefaultPasswordToExistingUsers1741910300000
       `
             UPDATE "users" SET "password" = $1 WHERE "password" IS NULL
         `,
-      [defaultPassword],
+      [defaultPassword]
     );
   }
 

@@ -1,11 +1,4 @@
-import {
-  Exercise,
-  Workout,
-  WorkoutExercise,
-  User,
-  PainScore,
-  SleepScore,
-} from "./entities";
+import { Exercise, Workout, WorkoutExercise, User, PainScore, SleepScore } from "./entities";
 
 // Authentication interfaces
 export interface LoginRequest {

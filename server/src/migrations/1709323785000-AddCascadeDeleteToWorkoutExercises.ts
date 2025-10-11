@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class AddCascadeDeleteToWorkoutExercises1709323785000
-  implements MigrationInterface
-{
+export class AddCascadeDeleteToWorkoutExercises1709323785000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     // First, drop the existing foreign key constraint
     await queryRunner.query(`

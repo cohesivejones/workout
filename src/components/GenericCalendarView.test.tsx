@@ -2,7 +2,7 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import { GenericCalendarView, CalendarItem } from "./GenericCalendarView";
 
 // Fixed date for testing
-const FIXED_DATE = new Date('2025-05-15T12:00:00Z');
+const FIXED_DATE = new Date("2025-05-15T12:00:00Z");
 
 // Define a test item type
 interface TestItem extends CalendarItem {
@@ -47,14 +47,17 @@ describe("GenericCalendarView", () => {
 
   // Mock getItemsByDate function
   const getItemsByDate = jest.fn((items: TestItem[]) => {
-    return items.reduce((acc, item) => {
-      const dateStr = item.date;
-      if (!acc[dateStr]) {
-        acc[dateStr] = [];
-      }
-      acc[dateStr].push(item);
-      return acc;
-    }, {} as Record<string, TestItem[]>);
+    return items.reduce(
+      (acc, item) => {
+        const dateStr = item.date;
+        if (!acc[dateStr]) {
+          acc[dateStr] = [];
+        }
+        acc[dateStr].push(item);
+        return acc;
+      },
+      {} as Record<string, TestItem[]>
+    );
   });
 
   // Store original Date constructor
@@ -62,39 +65,39 @@ describe("GenericCalendarView", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    
+
     // Mock window.innerWidth to simulate desktop view
     Object.defineProperty(window, "innerWidth", {
       writable: true,
       configurable: true,
       value: 1024,
     });
-    
+
     // Mock window.addEventListener to capture resize event
     window.addEventListener = jest.fn();
     window.removeEventListener = jest.fn();
-    
+
     // Save original Date
     OriginalDate = global.Date;
-    
+
     // Mock Date
-    const MockDate = function(this: any, arg?: any) {
+    const MockDate = function (this: any, arg?: any) {
       return arg ? new OriginalDate(arg) : new OriginalDate(FIXED_DATE);
     } as any;
-    
+
     MockDate.now = () => FIXED_DATE.getTime();
     MockDate.parse = OriginalDate.parse;
     MockDate.UTC = OriginalDate.UTC;
     MockDate.prototype = OriginalDate.prototype;
-    
+
     // Replace global Date
     global.Date = MockDate as DateConstructor;
   });
-  
+
   afterEach(() => {
     // Restore original Date
     global.Date = OriginalDate;
-    
+
     // Restore all mocks
     jest.restoreAllMocks();
   });
@@ -112,7 +115,7 @@ describe("GenericCalendarView", () => {
 
     // Check that month view is displayed
     expect(screen.getByText(/May 2025/)).toBeInTheDocument();
-    
+
     // Check that day names are displayed
     expect(screen.getByText("Sun")).toBeInTheDocument();
     expect(screen.getByText("Mon")).toBeInTheDocument();
@@ -139,7 +142,7 @@ describe("GenericCalendarView", () => {
 
     // Check that renderGridItem was called for each item
     expect(renderGridItem).toHaveBeenCalledTimes(3);
-    
+
     // Check that the items were rendered with the correct data
     expect(renderGridItem).toHaveBeenCalledWith(testItems[0], "2025-05-10");
     expect(renderGridItem).toHaveBeenCalledWith(testItems[1], "2025-05-15");
@@ -208,19 +211,19 @@ describe("GenericCalendarView", () => {
       day.setDate(day.getDate() + i);
       weekItems.push({
         id: 100 + i,
-        date: day.toISOString().split('T')[0], // Format as YYYY-MM-DD
+        date: day.toISOString().split("T")[0], // Format as YYYY-MM-DD
         type: "test",
         content: `Week Item ${i + 1}`,
       });
     }
-    
+
     // Set window width to mobile size
     Object.defineProperty(window, "innerWidth", {
       writable: true,
       configurable: true,
       value: 600, // Less than 768px threshold
     });
-    
+
     // Render component
     render(
       <GenericCalendarView
@@ -233,10 +236,10 @@ describe("GenericCalendarView", () => {
     );
 
     // Check that week view is displayed by looking for the month title heading
-    const monthTitle = screen.getByRole('heading', { level: 2 });
+    const monthTitle = screen.getByRole("heading", { level: 2 });
     expect(monthTitle).toBeInTheDocument();
     expect(monthTitle.textContent).toMatch(/May \d+ - May \d+, 2025/);
-    
+
     // Check for day names in vertical view
     expect(screen.getByText("Sunday")).toBeInTheDocument();
     expect(screen.getByText("Monday")).toBeInTheDocument();
@@ -257,7 +260,7 @@ describe("GenericCalendarView", () => {
       configurable: true,
       value: 600, // Less than 768px threshold
     });
-    
+
     render(
       <GenericCalendarView
         items={testItems}
@@ -269,7 +272,7 @@ describe("GenericCalendarView", () => {
     );
 
     // Get the initial week title
-    const monthTitle = screen.getByRole('heading', { level: 2 });
+    const monthTitle = screen.getByRole("heading", { level: 2 });
     const initialText = monthTitle.textContent || "";
 
     // Click previous week button
@@ -278,7 +281,7 @@ describe("GenericCalendarView", () => {
 
     // Check that week changed
     expect(monthTitle.textContent).not.toBe(initialText);
-    
+
     // Store the current text
     const afterPrevText = monthTitle.textContent || "";
 
@@ -300,7 +303,7 @@ describe("GenericCalendarView", () => {
       configurable: true,
       value: 600, // Less than 768px threshold
     });
-    
+
     render(
       <GenericCalendarView
         items={[]}
@@ -313,12 +316,12 @@ describe("GenericCalendarView", () => {
 
     // Check that empty state message is displayed in the vertical view
     // The message is inside div elements with class noItems
-    const noItemsElements = document.querySelectorAll('.noItems');
+    const noItemsElements = document.querySelectorAll(".noItems");
     expect(noItemsElements.length).toBeGreaterThan(0);
-    
+
     // At least one of them should contain the empty state message
     let foundMessage = false;
-    noItemsElements.forEach(element => {
+    noItemsElements.forEach((element) => {
       if (element.textContent === "No items") {
         foundMessage = true;
       }

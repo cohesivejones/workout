@@ -34,11 +34,7 @@ export default function AddWorkoutPage() {
       return true;
     } catch (err) {
       console.error("Failed to add workout:", err);
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Failed to add workout. Please try again.",
-      );
+      setError(err instanceof Error ? err.message : "Failed to add workout. Please try again.");
       return false;
     }
   };
@@ -55,11 +51,7 @@ export default function AddWorkoutPage() {
       return true;
     } catch (err) {
       console.error("Failed to save exercise:", err);
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Failed to save exercise. Please try again.",
-      );
+      setError(err instanceof Error ? err.message : "Failed to save exercise. Please try again.");
       return false;
     }
   };
