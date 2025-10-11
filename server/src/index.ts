@@ -1399,6 +1399,27 @@ apiRouter.post("/workouts/generate", authenticateToken, async (req: Request, res
   }
 });
 
+// Test-only routes (only available when NODE_ENV=test)
+if (process.env.NODE_ENV === 'test') {
+  const testRouter = express.Router();
+  
+  testRouter.delete("/clear-workouts", async (_req: Request, res: Response) => {
+    try {
+      // Clear all workout data for test user
+      await dataSource.query('DELETE FROM workout_exercises WHERE workout_id IN (SELECT id FROM workouts WHERE "userId" = (SELECT id FROM users WHERE email = $1))', ['test@foo.com']);
+      await dataSource.query('DELETE FROM workouts WHERE "userId" = (SELECT id FROM users WHERE email = $1)', ['test@foo.com']);
+      
+      res.json({ success: true, message: 'Test workouts cleared' });
+    } catch (error) {
+      console.error('Failed to clear test workouts:', error);
+      res.status(500).json({ error: 'Failed to clear workouts' });
+    }
+  });
+  
+  apiRouter.use("/test", testRouter);
+  console.log('Test routes enabled (NODE_ENV=test)');
+}
+
 // Mount API router
 app.use("/api", apiRouter);
 
