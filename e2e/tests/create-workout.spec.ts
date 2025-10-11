@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { login } from '../helpers/auth';
 
 test.describe('Create Workout with Multiple Exercises', () => {
   // Clear storage and workout data before each test to ensure clean state
@@ -18,17 +19,8 @@ test.describe('Create Workout with Multiple Exercises', () => {
   test('should create a workout with 6 exercises and verify in list and calendar views', async ({
     page,
   }) => {
-    // Step 1: Login
-    await page.goto('/');
-    await page.waitForLoadState('networkidle');
-    await expect(page.locator('h2:has-text("Login")')).toBeVisible({ timeout: 10000 });
-
-    await page.fill('#email', 'test@foo.com');
-    await page.fill('#password', 'Secure123!');
-    await page.click('button[type="submit"]');
-
-    // Wait for successful login
-    await expect(page.getByRole('link', { name: 'Timeline' })).toBeVisible({ timeout: 10000 });
+    // Step 1: Login using helper
+    await login(page);
 
     // Step 2: Switch to List view to access "New Workout" button
     await page.getByRole('button', { name: 'List' }).click();

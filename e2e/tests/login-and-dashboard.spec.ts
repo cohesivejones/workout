@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { login } from '../helpers/auth';
 
 test.describe('Login and Dashboard', () => {
   // Clear storage before each test to ensure clean state
@@ -8,24 +9,8 @@ test.describe('Login and Dashboard', () => {
   });
 
   test('should login successfully and view dashboard', async ({ page }) => {
-    // Navigate to the login page
-    await page.goto('/');
-
-    // Wait for the login page to load
-    await page.waitForLoadState('networkidle');
-
-    // Wait for the login form to be visible (h2 with "Login" text)
-    await expect(page.locator('h2:has-text("Login")')).toBeVisible({ timeout: 10000 });
-
-    // Fill in the login form using id selectors
-    await page.fill('#email', 'test@foo.com');
-    await page.fill('#password', 'Secure123!');
-
-    // Click the login button
-    await page.click('button[type="submit"]');
-
-    // Wait for navigation to complete by checking for the Timeline link (appears after login)
-    await expect(page.getByRole('link', { name: 'Timeline' })).toBeVisible({ timeout: 10000 });
+    // Use login helper
+    await login(page);
 
     // Verify navigation is present with key links
     await expect(page.getByRole('link', { name: 'Dashboard' })).toBeVisible();
