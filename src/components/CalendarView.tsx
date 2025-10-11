@@ -151,6 +151,7 @@ const CalendarView: React.FC<WorkoutCalendarProps> = ({
             [styles.withInstructor]: workout.withInstructor,
           })}
           onClick={(e) => e.stopPropagation()}
+          data-testid={`calendar-workout-${workout.id}`}
         >
           <div className={styles.workoutExercises}>
             {workout.exercises.map((exercise, idx) => (
@@ -201,6 +202,7 @@ const CalendarView: React.FC<WorkoutCalendarProps> = ({
           className={classNames(styles.verticalWorkout, {
             [styles.withInstructor]: workout.withInstructor,
           })}
+          data-testid={`calendar-workout-${workout.id}`}
         >
           <div className={styles.verticalWorkoutExercises}>
             {workout.exercises.map((exercise, idx) => (
