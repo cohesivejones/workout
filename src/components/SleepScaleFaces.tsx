@@ -70,22 +70,3 @@ export const SleepFace5: React.FC<SleepFaceProps> = ({ size = 40, className }) =
     <path d="M30 65 Q50 85 70 65" stroke="#fff" strokeWidth="4" fill="none" />
   </svg>
 );
-
-// Function to get the appropriate face component based on sleep level
-// eslint-disable-next-line react-refresh/only-export-components
-export const getSleepFace = (level: number, props: SleepFaceProps = {}) => {
-  switch (level) {
-    case 1:
-      return <SleepFace1 {...props} />;
-    case 2:
-      return <SleepFace2 {...props} />;
-    case 3:
-      return <SleepFace3 {...props} />;
-    case 4:
-      return <SleepFace4 {...props} />;
-    case 5:
-      return <SleepFace5 {...props} />;
-    default:
-      return <SleepFace3 {...props} />; // Default to neutral face
-  }
-};

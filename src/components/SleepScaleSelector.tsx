@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Controller, Control } from 'react-hook-form';
 import classNames from 'classnames';
 import styles from './SleepScaleSelector.module.css';
-import { getSleepFace } from './SleepScaleFaces';
+import { getSleepFace } from './sleepScaleFaces.utils';
 
 // Sleep score descriptions
 const sleepScoreDescriptions = [
