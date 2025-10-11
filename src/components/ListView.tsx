@@ -255,6 +255,7 @@ export const ListView = ({
               return (
                 <div
                   key={`workout-${workout.id}`}
+                  data-testid={`workout-card-${workout.date}`}
                   className={classNames(styles.listCard, styles.workoutCard, {
                     [styles.withInstructor]: workout.withInstructor,
                   })}
