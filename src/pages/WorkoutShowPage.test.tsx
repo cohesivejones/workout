@@ -1,50 +1,50 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { render, screen, waitFor } from "@testing-library/react";
-import { MemoryRouter, Route, Routes } from "react-router-dom";
-import WorkoutShowPage from "./WorkoutShowPage";
-import * as Api from "../api";
-import * as UserContext from "../contexts/useUserContext";
+import { render, screen, waitFor } from '@testing-library/react';
+import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import WorkoutShowPage from './WorkoutShowPage';
+import * as Api from '../api';
+import * as UserContext from '../contexts/useUserContext';
 
 // Mock the API functions
-vi.mock("../api", () => ({
+vi.mock('../api', () => ({
   fetchWorkout: vi.fn(),
 }));
 
 // Mock the UserContext
-vi.mock("../contexts/useUserContext", () => ({
+vi.mock('../contexts/useUserContext', () => ({
   useUserContext: vi.fn(),
 }));
 
-describe("WorkoutShowPage", () => {
+describe('WorkoutShowPage', () => {
   const mockWorkout = {
     id: 1,
     userId: 1,
-    date: "2025-04-10",
+    date: '2025-04-10',
     withInstructor: true,
     exercises: [
-      { id: 1, name: "Push-ups", reps: 10 },
-      { id: 2, name: "Squats", reps: 15, weight: 20 },
+      { id: 1, name: 'Push-ups', reps: 10 },
+      { id: 2, name: 'Squats', reps: 15, weight: 20 },
     ],
   };
 
   beforeEach(() => {
     vi.clearAllMocks();
-    
+
     // Mock the user context to simulate a logged-in user
-    vi.spyOn(UserContext, "useUserContext").mockReturnValue({
-      user: { id: 1, name: "Test User" },
+    vi.spyOn(UserContext, 'useUserContext').mockReturnValue({
+      user: { id: 1, name: 'Test User' },
       login: vi.fn(),
       logout: vi.fn(),
       loading: false,
     });
-    
+
     // Mock the API call to return the workout
     (Api.fetchWorkout as any).mockResolvedValue(mockWorkout);
   });
 
-  it("renders loading state initially", () => {
+  it('renders loading state initially', () => {
     render(
-      <MemoryRouter initialEntries={["/workouts/1"]}>
+      <MemoryRouter initialEntries={['/workouts/1']}>
         <Routes>
           <Route path="/workouts/:id" element={<WorkoutShowPage />} />
         </Routes>
@@ -55,9 +55,9 @@ describe("WorkoutShowPage", () => {
     expect(screen.getByText(/Loading workout.../i)).toBeInTheDocument();
   });
 
-  it("renders workout details after loading", async () => {
+  it('renders workout details after loading', async () => {
     render(
-      <MemoryRouter initialEntries={["/workouts/1"]}>
+      <MemoryRouter initialEntries={['/workouts/1']}>
         <Routes>
           <Route path="/workouts/:id" element={<WorkoutShowPage />} />
         </Routes>
@@ -75,24 +75,24 @@ describe("WorkoutShowPage", () => {
     // Check that workout details are displayed
     expect(screen.getByText(/Apr 10, 2025/i)).toBeInTheDocument();
     expect(screen.getByText(/With Instructor/i)).toBeInTheDocument();
-    
+
     // Check that exercises are displayed
-    expect(screen.getByText("Push-ups")).toBeInTheDocument();
-    expect(screen.getByText("10 reps")).toBeInTheDocument();
-    expect(screen.getByText("Squats")).toBeInTheDocument();
-    expect(screen.getByText("15 reps")).toBeInTheDocument();
-    expect(screen.getByText("20 lbs")).toBeInTheDocument();
-    
+    expect(screen.getByText('Push-ups')).toBeInTheDocument();
+    expect(screen.getByText('10 reps')).toBeInTheDocument();
+    expect(screen.getByText('Squats')).toBeInTheDocument();
+    expect(screen.getByText('15 reps')).toBeInTheDocument();
+    expect(screen.getByText('20 lbs')).toBeInTheDocument();
+
     // Check that edit button is displayed
-    expect(screen.getByText("Edit Workout")).toBeInTheDocument();
+    expect(screen.getByText('Edit Workout')).toBeInTheDocument();
   });
 
-  it("renders error state when API call fails", async () => {
+  it('renders error state when API call fails', async () => {
     // Mock the API call to fail
-    (Api.fetchWorkout as any).mockRejectedValue(new Error("Failed to load workout"));
+    (Api.fetchWorkout as any).mockRejectedValue(new Error('Failed to load workout'));
 
     render(
-      <MemoryRouter initialEntries={["/workouts/1"]}>
+      <MemoryRouter initialEntries={['/workouts/1']}>
         <Routes>
           <Route path="/workouts/:id" element={<WorkoutShowPage />} />
         </Routes>
@@ -110,7 +110,7 @@ describe("WorkoutShowPage", () => {
     (Api.fetchWorkout as any).mockResolvedValue(null);
 
     render(
-      <MemoryRouter initialEntries={["/workouts/999"]}>
+      <MemoryRouter initialEntries={['/workouts/999']}>
         <Routes>
           <Route path="/workouts/:id" element={<WorkoutShowPage />} />
         </Routes>
@@ -123,13 +123,13 @@ describe("WorkoutShowPage", () => {
     });
   });
 
-  it("renders workout without instructor badge when withInstructor is false", async () => {
+  it('renders workout without instructor badge when withInstructor is false', async () => {
     // Mock the API call to return a workout without instructor
     const workoutWithoutInstructor = { ...mockWorkout, withInstructor: false };
     (Api.fetchWorkout as any).mockResolvedValue(workoutWithoutInstructor);
 
     render(
-      <MemoryRouter initialEntries={["/workouts/1"]}>
+      <MemoryRouter initialEntries={['/workouts/1']}>
         <Routes>
           <Route path="/workouts/:id" element={<WorkoutShowPage />} />
         </Routes>
@@ -145,16 +145,16 @@ describe("WorkoutShowPage", () => {
     expect(screen.queryByText(/With Instructor/i)).not.toBeInTheDocument();
   });
 
-  it("renders exercises without weight when weight is not provided", async () => {
+  it('renders exercises without weight when weight is not provided', async () => {
     // Mock the API call to return a workout with an exercise without weight
     const workoutWithExerciseWithoutWeight = {
       ...mockWorkout,
-      exercises: [{ id: 1, name: "Push-ups", reps: 10 }],
+      exercises: [{ id: 1, name: 'Push-ups', reps: 10 }],
     };
     (Api.fetchWorkout as any).mockResolvedValue(workoutWithExerciseWithoutWeight);
 
     render(
-      <MemoryRouter initialEntries={["/workouts/1"]}>
+      <MemoryRouter initialEntries={['/workouts/1']}>
         <Routes>
           <Route path="/workouts/:id" element={<WorkoutShowPage />} />
         </Routes>
@@ -167,24 +167,24 @@ describe("WorkoutShowPage", () => {
     });
 
     // Check that the exercise is displayed without weight
-    expect(screen.getByText("Push-ups")).toBeInTheDocument();
-    expect(screen.getByText("10 reps")).toBeInTheDocument();
+    expect(screen.getByText('Push-ups')).toBeInTheDocument();
+    expect(screen.getByText('10 reps')).toBeInTheDocument();
     expect(screen.queryByText(/lbs/i)).not.toBeInTheDocument();
   });
 
-  it("renders exercises with time when time_minutes is provided", async () => {
+  it('renders exercises with time when time_minutes is provided', async () => {
     // Mock the API call to return a workout with an exercise with time
     const workoutWithTime = {
       ...mockWorkout,
       exercises: [
-        { id: 1, name: "Plank", reps: 3, time_minutes: 2.5 },
-        { id: 2, name: "Wall Sit", reps: 2, weight: 0, time_minutes: 1.5 },
+        { id: 1, name: 'Plank', reps: 3, time_minutes: 2.5 },
+        { id: 2, name: 'Wall Sit', reps: 2, weight: 0, time_minutes: 1.5 },
       ],
     };
     (Api.fetchWorkout as any).mockResolvedValue(workoutWithTime);
 
     render(
-      <MemoryRouter initialEntries={["/workouts/1"]}>
+      <MemoryRouter initialEntries={['/workouts/1']}>
         <Routes>
           <Route path="/workouts/:id" element={<WorkoutShowPage />} />
         </Routes>
@@ -197,12 +197,12 @@ describe("WorkoutShowPage", () => {
     });
 
     // Check that exercises with time are displayed correctly
-    expect(screen.getByText("Plank")).toBeInTheDocument();
-    expect(screen.getByText("3 reps")).toBeInTheDocument();
-    expect(screen.getByText("2.5 min")).toBeInTheDocument();
-    
-    expect(screen.getByText("Wall Sit")).toBeInTheDocument();
-    expect(screen.getByText("2 reps")).toBeInTheDocument();
-    expect(screen.getByText("1.5 min")).toBeInTheDocument();
+    expect(screen.getByText('Plank')).toBeInTheDocument();
+    expect(screen.getByText('3 reps')).toBeInTheDocument();
+    expect(screen.getByText('2.5 min')).toBeInTheDocument();
+
+    expect(screen.getByText('Wall Sit')).toBeInTheDocument();
+    expect(screen.getByText('2 reps')).toBeInTheDocument();
+    expect(screen.getByText('1.5 min')).toBeInTheDocument();
   });
 });

@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate, useParams, useLocation } from "react-router-dom";
-import PainScoreForm from "../components/PainScoreForm";
-import { createPainScore, updatePainScore, fetchPainScore } from "../api";
-import { PainScore } from "../types";
-import { useUserContext } from "../contexts/useUserContext";
-import styles from "./PainScorePage.module.css";
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import PainScoreForm from '../components/PainScoreForm';
+import { createPainScore, updatePainScore, fetchPainScore } from '../api';
+import { PainScore } from '../types';
+import { useUserContext } from '../contexts/useUserContext';
+import styles from './PainScorePage.module.css';
 
 function PainScorePage(): React.ReactElement {
   const { id } = useParams<{ id?: string }>();
@@ -17,7 +17,7 @@ function PainScorePage(): React.ReactElement {
 
   // Get the date from query params if available
   const queryParams = new URLSearchParams(location.search);
-  const selectedDate = queryParams.get("date");
+  const selectedDate = queryParams.get('date');
 
   useEffect(() => {
     const loadPainScore = async () => {
@@ -28,8 +28,8 @@ function PainScorePage(): React.ReactElement {
         setPainScore(data);
         setLoading(false);
       } catch (err) {
-        console.error("Failed to load pain score:", err);
-        setError("Failed to load pain score. Please try again later.");
+        console.error('Failed to load pain score:', err);
+        setError('Failed to load pain score. Please try again later.');
         setLoading(false);
       }
     };
@@ -39,9 +39,7 @@ function PainScorePage(): React.ReactElement {
     }
   }, [id, user]);
 
-  const handlePainScoreSubmit = async (
-    painScoreData: Omit<PainScore, "id">,
-  ) => {
+  const handlePainScoreSubmit = async (painScoreData: Omit<PainScore, 'id'>) => {
     if (!user) return false;
 
     try {
@@ -53,16 +51,16 @@ function PainScorePage(): React.ReactElement {
         await createPainScore(painScoreData);
       }
 
-      navigate("/");
+      navigate('/');
       return true;
     } catch (err) {
-      console.error("Failed to save pain score:", err);
+      console.error('Failed to save pain score:', err);
       return false;
     }
   };
 
   const handleCancel = () => {
-    navigate("/");
+    navigate('/');
   };
 
   if (loading) {

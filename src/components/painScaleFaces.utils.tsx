@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import {
   PainFace0,
   PainFace1,
@@ -11,7 +11,7 @@ import {
   PainFace8,
   PainFace9,
   PainFace10,
-} from "./PainScaleFaces";
+} from './PainScaleFaces';
 
 interface PainFaceProps {
   size?: number;

@@ -35,7 +35,7 @@
 }
 
 .navLink:after {
-  content: "";
+  content: '';
   position: absolute;
   width: 0;
   height: 2px;

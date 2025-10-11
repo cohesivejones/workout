@@ -1,13 +1,19 @@
-import { useState, useEffect } from "react";
-import type { ReactElement } from "react";
-import { useSearchParams } from "react-router-dom";
-import CalendarView from "../components/CalendarView";
-import { fetchWorkouts, fetchPainScores, deletePainScore, fetchSleepScores, deleteSleepScore } from "../api";
-import { Workout, PainScore, SleepScore } from "../types";
-import classNames from "classnames";
-import styles from "./TimelinePage.module.css";
-import { useUserContext } from "../contexts/useUserContext";
-import { ListView } from "../components/ListView";
+import { useState, useEffect } from 'react';
+import type { ReactElement } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import CalendarView from '../components/CalendarView';
+import {
+  fetchWorkouts,
+  fetchPainScores,
+  deletePainScore,
+  fetchSleepScores,
+  deleteSleepScore,
+} from '../api';
+import { Workout, PainScore, SleepScore } from '../types';
+import classNames from 'classnames';
+import styles from './TimelinePage.module.css';
+import { useUserContext } from '../contexts/useUserContext';
+import { ListView } from '../components/ListView';
 
 function TimelinePage(): ReactElement {
   const [workouts, setWorkouts] = useState<Workout[]>([]);
@@ -17,9 +23,9 @@ function TimelinePage(): ReactElement {
   const [error, setError] = useState<string | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useUserContext();
-  
+
   // Get view mode from URL or default to "calendar"
-  const viewMode = searchParams.get("view") === "list" ? "list" : "calendar";
+  const viewMode = searchParams.get('view') === 'list' ? 'list' : 'calendar';
 
   useEffect(() => {
     const loadData = async () => {
@@ -35,8 +41,8 @@ function TimelinePage(): ReactElement {
         setSleepScores(sleepScoresData);
         setLoading(false);
       } catch (err) {
-        console.error("Failed to load data:", err);
-        setError("Failed to load data. Please try again later.");
+        console.error('Failed to load data:', err);
+        setError('Failed to load data. Please try again later.');
         setLoading(false);
       }
     };
@@ -44,29 +50,27 @@ function TimelinePage(): ReactElement {
   }, [user]);
 
   const handleWorkoutDeleted = (workoutId: number) => {
-    setWorkouts((prevWorkouts) =>
-      prevWorkouts.filter((w) => w.id !== workoutId),
-    );
+    setWorkouts((prevWorkouts) => prevWorkouts.filter((w) => w.id !== workoutId));
   };
 
   const handlePainScoreDelete = async (painScoreId: number) => {
-    if (window.confirm("Are you sure you want to delete this pain score?")) {
+    if (window.confirm('Are you sure you want to delete this pain score?')) {
       try {
         await deletePainScore(painScoreId);
         setPainScores((prev) => prev.filter((ps) => ps.id !== painScoreId));
       } catch (err) {
-        console.error("Failed to delete pain score:", err);
+        console.error('Failed to delete pain score:', err);
       }
     }
   };
 
   const handleSleepScoreDelete = async (sleepScoreId: number) => {
-    if (window.confirm("Are you sure you want to delete this sleep score?")) {
+    if (window.confirm('Are you sure you want to delete this sleep score?')) {
       try {
         await deleteSleepScore(sleepScoreId);
         setSleepScores((prev) => prev.filter((ss) => ss.id !== sleepScoreId));
       } catch (err) {
-        console.error("Failed to delete sleep score:", err);
+        console.error('Failed to delete sleep score:', err);
       }
     }
   };
@@ -83,17 +87,17 @@ function TimelinePage(): ReactElement {
           <div className={styles.viewToggle}>
             <button
               className={classNames({
-                [styles.active]: viewMode === "calendar",
+                [styles.active]: viewMode === 'calendar',
               })}
-              onClick={() => setSearchParams({ view: "calendar" })}
+              onClick={() => setSearchParams({ view: 'calendar' })}
             >
               Calendar
             </button>
             <button
               className={classNames({
-                [styles.active]: viewMode === "list",
+                [styles.active]: viewMode === 'list',
               })}
-              onClick={() => setSearchParams({ view: "list" })}
+              onClick={() => setSearchParams({ view: 'list' })}
             >
               List
             </button>
@@ -102,7 +106,7 @@ function TimelinePage(): ReactElement {
       </div>
       {error && <div className={styles.errorMessage}>{error}</div>}
 
-      {viewMode === "calendar" ? (
+      {viewMode === 'calendar' ? (
         <CalendarView workouts={workouts} painScores={painScores} sleepScores={sleepScores} />
       ) : (
         <ListView

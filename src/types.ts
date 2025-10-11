@@ -49,7 +49,7 @@ export interface Workout {
 }
 
 export interface WorkoutFormProps {
-  onSubmit: (workout: Omit<Workout, "id">) => Promise<boolean>;
+  onSubmit: (workout: Omit<Workout, 'id'>) => Promise<boolean>;
   savedExercises: Exercise[];
   onSaveExercise: (exerciseName: string) => Promise<boolean>;
   existingWorkout?: Workout;

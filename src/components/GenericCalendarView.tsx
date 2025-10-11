@@ -1,7 +1,7 @@
-import { useState, useEffect, ReactNode } from "react";
-import { MdChevronLeft, MdChevronRight } from "react-icons/md";
-import styles from "./GenericCalendarView.module.css";
-import classNames from "classnames";
+import { useState, useEffect, ReactNode } from 'react';
+import { MdChevronLeft, MdChevronRight } from 'react-icons/md';
+import styles from './GenericCalendarView.module.css';
+import classNames from 'classnames';
 import {
   startOfMonth,
   endOfMonth,
@@ -12,7 +12,7 @@ import {
   addMonths,
   subMonths,
   isToday,
-} from "date-fns";
+} from 'date-fns';
 
 // Generic interface for calendar items
 export interface CalendarItem {
@@ -38,7 +38,7 @@ export function GenericCalendarView<T extends CalendarItem>({
   renderGridItem,
   renderVerticalItem,
   getItemsByDate,
-  emptyStateMessage = "No items",
+  emptyStateMessage = 'No items',
   initialMobileView = false,
 }: GenericCalendarViewProps<T>) {
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
@@ -55,11 +55,11 @@ export function GenericCalendarView<T extends CalendarItem>({
     checkScreenSize();
 
     // Add resize listener
-    window.addEventListener("resize", checkScreenSize);
+    window.addEventListener('resize', checkScreenSize);
 
     // Cleanup
     return () => {
-      window.removeEventListener("resize", checkScreenSize);
+      window.removeEventListener('resize', checkScreenSize);
     };
   }, []);
 
@@ -92,15 +92,13 @@ export function GenericCalendarView<T extends CalendarItem>({
             <MdChevronRight />
           </button>
         </div>
-        <h2 className={styles.monthTitle}>
-          {format(currentMonth, "MMMM yyyy")}
-        </h2>
+        <h2 className={styles.monthTitle}>{format(currentMonth, 'MMMM yyyy')}</h2>
       </div>
     );
   };
 
   const renderDays = () => {
-    const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     return (
       <div className={styles.calendarDays}>
         {days.map((day) => (
@@ -147,11 +145,8 @@ export function GenericCalendarView<T extends CalendarItem>({
           </button>
         </div>
         <h2 className={styles.monthTitle}>
-          {format(currentWeek, "MMMM d")} -{" "}
-          {format(
-            new Date(currentWeek.getTime() + 6 * 24 * 60 * 60 * 1000),
-            "MMMM d, yyyy"
-          )}
+          {format(currentWeek, 'MMMM d')} -{' '}
+          {format(new Date(currentWeek.getTime() + 6 * 24 * 60 * 60 * 1000), 'MMMM d, yyyy')}
         </h2>
       </div>
     );
@@ -163,16 +158,16 @@ export function GenericCalendarView<T extends CalendarItem>({
     const startDate = startOfWeek(monthStart);
     const endDate = endOfWeek(monthEnd);
 
-    const dateFormat = "d";
+    const dateFormat = 'd';
     const rows = [];
     let days = [];
     let day = startDate;
-    let formattedDate = "";
+    let formattedDate = '';
 
     while (day <= endDate) {
       for (let i = 0; i < 7; i++) {
         formattedDate = format(day, dateFormat);
-        const dateStr = format(day, "yyyy-MM-dd");
+        const dateStr = format(day, 'yyyy-MM-dd');
         const dayItems = itemsByDate[dateStr] || [];
 
         days.push(
@@ -214,7 +209,7 @@ export function GenericCalendarView<T extends CalendarItem>({
     // Generate 7 days (a full week)
     for (let i = 0; i < 7; i++) {
       const day = new Date(startDate.getTime() + i * 24 * 60 * 60 * 1000);
-      const dateStr = format(day, "yyyy-MM-dd");
+      const dateStr = format(day, 'yyyy-MM-dd');
       const dayItems = itemsByDate[dateStr] || [];
 
       days.push(
@@ -225,10 +220,8 @@ export function GenericCalendarView<T extends CalendarItem>({
           })}
         >
           <div className={styles.verticalDayHeader}>
-            <div className={styles.verticalDayName}>{format(day, "EEEE")}</div>
-            <div className={styles.verticalDayDate}>
-              {format(day, "MMMM d, yyyy")}
-            </div>
+            <div className={styles.verticalDayName}>{format(day, 'EEEE')}</div>
+            <div className={styles.verticalDayDate}>{format(day, 'MMMM d, yyyy')}</div>
           </div>
 
           <div className={styles.verticalItems}>

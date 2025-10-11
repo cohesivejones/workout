@@ -1,18 +1,18 @@
-import { useState, useEffect } from "react";
-import type { ReactElement } from "react";
-import { fetchExercises, updateExercise } from "../api";
-import { Exercise } from "../types";
-import { useUserContext } from "../contexts/useUserContext";
-import classNames from "classnames";
-import styles from "./ExerciseListPage.module.css";
-import buttonStyles from "../styles/common/buttons.module.css";
+import { useState, useEffect } from 'react';
+import type { ReactElement } from 'react';
+import { fetchExercises, updateExercise } from '../api';
+import { Exercise } from '../types';
+import { useUserContext } from '../contexts/useUserContext';
+import classNames from 'classnames';
+import styles from './ExerciseListPage.module.css';
+import buttonStyles from '../styles/common/buttons.module.css';
 
 function ExerciseListPage(): ReactElement {
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [editingExercise, setEditingExercise] = useState<Exercise | null>(null);
-  const [newName, setNewName] = useState<string>("");
+  const [newName, setNewName] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const { user } = useUserContext();
 
@@ -24,8 +24,8 @@ function ExerciseListPage(): ReactElement {
         setExercises(exercisesData);
         setLoading(false);
       } catch (err) {
-        console.error("Failed to load exercises:", err);
-        setError("Failed to load exercises. Please try again later.");
+        console.error('Failed to load exercises:', err);
+        setError('Failed to load exercises. Please try again later.');
         setLoading(false);
       }
     };
@@ -39,7 +39,7 @@ function ExerciseListPage(): ReactElement {
 
   const handleCancelEdit = () => {
     setEditingExercise(null);
-    setNewName("");
+    setNewName('');
   };
 
   const handleSaveEdit = async () => {
@@ -47,24 +47,19 @@ function ExerciseListPage(): ReactElement {
 
     try {
       setIsSubmitting(true);
-      const updatedExercise = await updateExercise(
-        editingExercise.id,
-        newName.trim(),
-      );
+      const updatedExercise = await updateExercise(editingExercise.id, newName.trim());
 
       // Update the exercises list with the updated exercise
       setExercises((prevExercises) =>
-        prevExercises.map((ex) =>
-          ex.id === updatedExercise.id ? updatedExercise : ex,
-        ),
+        prevExercises.map((ex) => (ex.id === updatedExercise.id ? updatedExercise : ex))
       );
 
       // Reset editing state
       setEditingExercise(null);
-      setNewName("");
+      setNewName('');
     } catch (err) {
-      console.error("Failed to update exercise:", err);
-      setError("Failed to update exercise. Please try again.");
+      console.error('Failed to update exercise:', err);
+      setError('Failed to update exercise. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -104,19 +99,13 @@ function ExerciseListPage(): ReactElement {
                       <button
                         onClick={handleSaveEdit}
                         disabled={!newName.trim() || isSubmitting}
-                        className={classNames(
-                          styles.saveBtn,
-                          buttonStyles.primaryBtn,
-                        )}
+                        className={classNames(styles.saveBtn, buttonStyles.primaryBtn)}
                       >
-                        {isSubmitting ? "Saving..." : "Save"}
+                        {isSubmitting ? 'Saving...' : 'Save'}
                       </button>
                       <button
                         onClick={handleCancelEdit}
-                        className={classNames(
-                          styles.cancelBtn,
-                          buttonStyles.secondaryBtn,
-                        )}
+                        className={classNames(styles.cancelBtn, buttonStyles.secondaryBtn)}
                         disabled={isSubmitting}
                       >
                         Cancel
@@ -129,10 +118,7 @@ function ExerciseListPage(): ReactElement {
                     <div className={styles.exerciseActions}>
                       <button
                         onClick={() => handleEditClick(exercise)}
-                        className={classNames(
-                          styles.editBtn,
-                          buttonStyles.tertiaryBtn,
-                        )}
+                        className={classNames(styles.editBtn, buttonStyles.tertiaryBtn)}
                       >
                         Edit
                       </button>

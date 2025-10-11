@@ -1,8 +1,8 @@
-import { render, screen } from "@testing-library/react";
-import * as UserContext from "./contexts/useUserContext";
+import { render, screen } from '@testing-library/react';
+import * as UserContext from './contexts/useUserContext';
 
 // Mock the UserContext
-vi.mock("./contexts/useUserContext", () => ({
+vi.mock('./contexts/useUserContext', () => ({
   useUserContext: vi.fn(),
 }));
 
@@ -13,18 +13,18 @@ const Header = () => (
   </header>
 );
 
-describe("App", () => {
+describe('App', () => {
   beforeEach(() => {
     // Mock the user context to simulate a logged-in user
-    vi.spyOn(UserContext, "useUserContext").mockReturnValue({
-      user: { id: 1, name: "Test User" },
+    vi.spyOn(UserContext, 'useUserContext').mockReturnValue({
+      user: { id: 1, name: 'Test User' },
       login: vi.fn(),
       logout: vi.fn(),
       loading: false,
     });
   });
 
-  it("renders workout tracker header", () => {
+  it('renders workout tracker header', () => {
     // Just test a simple header component instead of the full Layout
     render(<Header />);
     const headerElement = screen.getByText(/workout tracker/i);

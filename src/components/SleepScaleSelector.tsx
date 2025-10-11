@@ -1,22 +1,22 @@
-import React, { useState, useEffect } from "react";
-import { Controller, Control } from "react-hook-form";
-import classNames from "classnames";
-import styles from "./SleepScaleSelector.module.css";
-import { getSleepFace } from "./SleepScaleFaces";
+import React, { useState, useEffect } from 'react';
+import { Controller, Control } from 'react-hook-form';
+import classNames from 'classnames';
+import styles from './SleepScaleSelector.module.css';
+import { getSleepFace } from './SleepScaleFaces';
 
 // Sleep score descriptions
 const sleepScoreDescriptions = [
-  "1: Very Poor - Sleep was highly fragmented and interrupted, with many awakenings and very little restorative deep sleep.",
-  "2: Poor - Sleep was frequently interrupted, with many awakenings and periods of light sleep.",
-  "3: Fair - Sleep had some interruptions, with periods of lighter sleep or more frequent awakenings.",
-  "4: Good - Sleep was generally continuous, with only occasional brief awakenings or light sleep phases.",
-  "5: Excellent - Sleep was consistently uninterrupted and restorative, with minimal or no awakenings throughout the night.",
+  '1: Very Poor - Sleep was highly fragmented and interrupted, with many awakenings and very little restorative deep sleep.',
+  '2: Poor - Sleep was frequently interrupted, with many awakenings and periods of light sleep.',
+  '3: Fair - Sleep had some interruptions, with periods of lighter sleep or more frequent awakenings.',
+  '4: Good - Sleep was generally continuous, with only occasional brief awakenings or light sleep phases.',
+  '5: Excellent - Sleep was consistently uninterrupted and restorative, with minimal or no awakenings throughout the night.',
 ];
 
 // Get the detailed description (part after the colon)
 const getDetailedDescription = (description: string) => {
-  const parts = description.split(":");
-  return parts.length > 1 ? parts.slice(1).join(":").trim() : "";
+  const parts = description.split(':');
+  return parts.length > 1 ? parts.slice(1).join(':').trim() : '';
 };
 
 interface SleepScaleSelectorProps {
@@ -46,7 +46,7 @@ const SleepScaleSelector: React.FC<SleepScaleSelectorProps> = ({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent, score: number) => {
-    if (e.key === "Enter" || e.key === " ") {
+    if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       handleScoreSelect(score);
     }
@@ -76,9 +76,7 @@ const SleepScaleSelector: React.FC<SleepScaleSelectorProps> = ({
                   tabIndex={0}
                   role="button"
                   aria-pressed={selectedScore === scoreValue}
-                  aria-label={`Sleep level ${scoreValue}: ${getDetailedDescription(
-                    description
-                  )}`}
+                  aria-label={`Sleep level ${scoreValue}: ${getDetailedDescription(description)}`}
                 >
                   <span className={styles.sleepScaleNumber}>{scoreValue}</span>
                   <div className={styles.sleepScaleFace}>
@@ -95,9 +93,7 @@ const SleepScaleSelector: React.FC<SleepScaleSelectorProps> = ({
                 {getSleepFace(selectedScore, { size: 60 })}
               </div>
               <div className={styles.sleepScaleDescription}>
-                {getDetailedDescription(
-                  sleepScoreDescriptions[selectedScore - 1]
-                )}
+                {getDetailedDescription(sleepScoreDescriptions[selectedScore - 1])}
               </div>
             </div>
           )}

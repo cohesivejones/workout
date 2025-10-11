@@ -7,10 +7,5 @@
     "allowSyntheticDefaultImports": true,
     "types": ["vitest/globals", "node", "@testing-library/jest-dom"]
   },
-  "include": [
-    "src/**/*.test.ts",
-    "src/**/*.test.tsx",
-    "src/setupTests.ts",
-    "src/types/css.d.ts"
-  ]
+  "include": ["src/**/*.test.ts", "src/**/*.test.tsx", "src/setupTests.ts", "src/types/css.d.ts"]
 }

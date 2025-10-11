@@ -1,10 +1,10 @@
-import { useState } from "react";
-import { generateWorkout, GenerateWorkoutRequest } from "../api";
-import FormContainer from "../components/common/FormContainer";
-import styles from "./GenerateWorkoutPage.module.css";
+import { useState } from 'react';
+import { generateWorkout, GenerateWorkoutRequest } from '../api';
+import FormContainer from '../components/common/FormContainer';
+import styles from './GenerateWorkoutPage.module.css';
 
 function GenerateWorkoutPage() {
-  const [additionalNotes, setAdditionalNotes] = useState<string>("");
+  const [additionalNotes, setAdditionalNotes] = useState<string>('');
   const [generatedWorkout, setGeneratedWorkout] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -23,15 +23,17 @@ function GenerateWorkoutPage() {
       const response = await generateWorkout(request);
       setGeneratedWorkout(response.generatedWorkout);
     } catch (err) {
-      console.error("Failed to generate workout:", err);
-      setError(err instanceof Error ? err.message : "Failed to generate workout. Please try again.");
+      console.error('Failed to generate workout:', err);
+      setError(
+        err instanceof Error ? err.message : 'Failed to generate workout. Please try again.'
+      );
     } finally {
       setLoading(false);
     }
   };
 
   const handleReset = () => {
-    setAdditionalNotes("");
+    setAdditionalNotes('');
     setGeneratedWorkout(null);
     setError(null);
   };
@@ -58,7 +60,8 @@ function GenerateWorkoutPage() {
             disabled={loading}
           />
           <p className={styles.helpText}>
-            Tell the AI about any specific goals, injuries to avoid, equipment preferences, or other considerations.
+            Tell the AI about any specific goals, injuries to avoid, equipment preferences, or other
+            considerations.
           </p>
         </div>
 
@@ -66,11 +69,11 @@ function GenerateWorkoutPage() {
           <button
             type="submit"
             disabled={loading}
-            className={`${styles.generateButton} ${loading ? styles.loading : ""}`}
+            className={`${styles.generateButton} ${loading ? styles.loading : ''}`}
           >
-            {loading ? "Generating..." : "Generate Workout"}
+            {loading ? 'Generating...' : 'Generate Workout'}
           </button>
-          
+
           {(generatedWorkout || error) && (
             <button
               type="button"
@@ -91,10 +94,7 @@ function GenerateWorkoutPage() {
             <pre className={styles.workoutText}>{generatedWorkout}</pre>
           </div>
           <div className={styles.resultsActions}>
-            <button
-              onClick={handleReset}
-              className={styles.generateAnotherButton}
-            >
+            <button onClick={handleReset} className={styles.generateAnotherButton}>
               Generate Another Workout
             </button>
           </div>

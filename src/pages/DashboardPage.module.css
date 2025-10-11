@@ -20,22 +20,22 @@
   .chartsContainer {
     grid-template-columns: 1fr;
   }
-  
+
   .chartCard {
     padding: 15px 10px;
     overflow-x: hidden;
   }
-  
+
   .chartCard h3 {
     font-size: 1.2rem;
     margin-top: 0;
     margin-bottom: 10px;
   }
-  
+
   .pageHeader h2 {
     font-size: 1.5rem;
   }
-  
+
   .subtitle {
     font-size: 0.9rem;
   }
@@ -101,7 +101,7 @@
     gap: 10px;
     font-size: 11px;
   }
-  
+
   .legendDot {
     width: 6px;
     height: 6px;

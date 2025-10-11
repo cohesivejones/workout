@@ -12,6 +12,7 @@ sudo ./scripts/setup-startup-systemd.sh
 ## How It Works
 
 The setup script automatically detects:
+
 - Current user (from `$SUDO_USER` when run with sudo)
 - User's group
 - User's home directory
@@ -47,6 +48,7 @@ sudo systemctl disable workout-deploy.service
 ## Template Variables
 
 The service template uses these variables:
+
 - `{{USER}}` - Current user
 - `{{GROUP}}` - User's primary group
 - `{{WORKING_DIR}}` - Project directory

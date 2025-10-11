@@ -1,5 +1,5 @@
-import React, { createContext, useState, useEffect } from "react";
-import { getCurrentUser, login as apiLogin, logout as apiLogout } from "../api";
+import React, { createContext, useState, useEffect } from 'react';
+import { getCurrentUser, login as apiLogin, logout as apiLogout } from '../api';
 
 type Props = {
   children: React.ReactNode;
@@ -53,7 +53,7 @@ export const UserContextProvider = ({ children }: Props) => {
       // Set user from response
       setUser(response.user);
     } catch (error) {
-      console.error("Login failed:", error);
+      console.error('Login failed:', error);
       throw error;
     } finally {
       setLoading(false);
@@ -70,15 +70,13 @@ export const UserContextProvider = ({ children }: Props) => {
       // Clear user state
       setUser(null);
     } catch (error) {
-      console.error("Logout failed:", error);
+      console.error('Logout failed:', error);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <UserContext.Provider value={{ user, login, logout, loading }}>
-      {children}
-    </UserContext.Provider>
+    <UserContext.Provider value={{ user, login, logout, loading }}>{children}</UserContext.Provider>
   );
 };

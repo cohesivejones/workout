@@ -1,10 +1,10 @@
-import { Outlet, Link } from "react-router-dom";
-import { useState, useRef, useEffect } from "react";
-import { FaBars } from "react-icons/fa"; // Hamburger icon
-import { UserContextProvider } from "./contexts/UserContextProvider";
-import { useUserContext } from "./contexts/useUserContext";
-import LoginPage from "./pages/LoginPage";
-import styles from "./App.module.css";
+import { Outlet, Link } from 'react-router-dom';
+import { useState, useRef, useEffect } from 'react';
+import { FaBars } from 'react-icons/fa'; // Hamburger icon
+import { UserContextProvider } from './contexts/UserContextProvider';
+import { useUserContext } from './contexts/useUserContext';
+import LoginPage from './pages/LoginPage';
+import styles from './App.module.css';
 
 const Header = () => {
   const { user, logout } = useUserContext();
@@ -14,16 +14,13 @@ const Header = () => {
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setDropdownOpen(false);
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const handleLogout = async () => {
@@ -41,16 +38,16 @@ const Header = () => {
         <Link
           to="/"
           style={{
-            display: "flex",
-            alignItems: "center",
-            textDecoration: "none",
-            color: "white",
+            display: 'flex',
+            alignItems: 'center',
+            textDecoration: 'none',
+            color: 'white',
           }}
         >
           <img
             src="/dumbbell.svg"
             alt="Dumbbell"
-            style={{ height: "30px", marginRight: "10px", filter: "invert(1)" }}
+            style={{ height: '30px', marginRight: '10px', filter: 'invert(1)' }}
           />
           <h1 style={{ margin: 0 }}>Workout Tracker</h1>
         </Link>

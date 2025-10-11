@@ -102,8 +102,12 @@
 }
 
 @keyframes spin {
-  0% { transform: translateY(-50%) rotate(0deg); }
-  100% { transform: translateY(-50%) rotate(360deg); }
+  0% {
+    transform: translateY(-50%) rotate(0deg);
+  }
+  100% {
+    transform: translateY(-50%) rotate(360deg);
+  }
 }
 
 .resetButton {
@@ -190,25 +194,25 @@
   .container {
     padding: 16px;
   }
-  
+
   .buttonGroup {
     flex-direction: column;
   }
-  
+
   .generateButton,
   .resetButton {
     width: 100%;
   }
-  
+
   .resultsContainer {
     padding: 20px;
     margin-top: 24px;
   }
-  
+
   .workoutContent {
     padding: 16px;
   }
-  
+
   .workoutText {
     font-size: 13px;
   }
@@ -218,16 +222,16 @@
   .container {
     padding: 12px;
   }
-  
+
   .textarea {
     padding: 10px;
     font-size: 16px; /* Prevent zoom on iOS */
   }
-  
+
   .resultsContainer {
     padding: 16px;
   }
-  
+
   .workoutContent {
     padding: 12px;
   }

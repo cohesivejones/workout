@@ -1,0 +1,29 @@
+# Dependencies
+node_modules
+
+# Build outputs
+dist
+dist-ssr
+build
+coverage
+
+# Server directory (has its own package.json)
+server
+
+# Test outputs
+test-results
+playwright-report
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+
+# Lock files
+package-lock.json

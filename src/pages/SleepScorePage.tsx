@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate, useParams, useLocation } from "react-router-dom";
-import SleepScoreForm from "../components/SleepScoreForm";
-import { createSleepScore, updateSleepScore, fetchSleepScore } from "../api";
-import { SleepScore } from "../types";
-import { useUserContext } from "../contexts/useUserContext";
-import styles from "./SleepScorePage.module.css";
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import SleepScoreForm from '../components/SleepScoreForm';
+import { createSleepScore, updateSleepScore, fetchSleepScore } from '../api';
+import { SleepScore } from '../types';
+import { useUserContext } from '../contexts/useUserContext';
+import styles from './SleepScorePage.module.css';
 
 function SleepScorePage(): React.ReactElement {
   const { id } = useParams<{ id?: string }>();
@@ -17,7 +17,7 @@ function SleepScorePage(): React.ReactElement {
 
   // Get the date from query params if available
   const queryParams = new URLSearchParams(location.search);
-  const selectedDate = queryParams.get("date");
+  const selectedDate = queryParams.get('date');
 
   useEffect(() => {
     const loadSleepScore = async () => {
@@ -28,8 +28,8 @@ function SleepScorePage(): React.ReactElement {
         setSleepScore(data);
         setLoading(false);
       } catch (err) {
-        console.error("Failed to load sleep score:", err);
-        setError("Failed to load sleep score. Please try again later.");
+        console.error('Failed to load sleep score:', err);
+        setError('Failed to load sleep score. Please try again later.');
         setLoading(false);
       }
     };
@@ -39,9 +39,7 @@ function SleepScorePage(): React.ReactElement {
     }
   }, [id, user]);
 
-  const handleSleepScoreSubmit = async (
-    sleepScoreData: Omit<SleepScore, "id">,
-  ) => {
+  const handleSleepScoreSubmit = async (sleepScoreData: Omit<SleepScore, 'id'>) => {
     if (!user) return false;
 
     try {
@@ -53,16 +51,16 @@ function SleepScorePage(): React.ReactElement {
         await createSleepScore(sleepScoreData);
       }
 
-      navigate("/");
+      navigate('/');
       return true;
     } catch (err) {
-      console.error("Failed to save sleep score:", err);
+      console.error('Failed to save sleep score:', err);
       return false;
     }
   };
 
   const handleCancel = () => {
-    navigate("/");
+    navigate('/');
   };
 
   if (loading) {
