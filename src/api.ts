@@ -4,17 +4,12 @@ import { Workout, Exercise, PainScore, SleepScore, User } from './types';
 // Auth types
 export interface AuthResponse {
   user: User;
-  token: string;
 }
-
-// Get token from localStorage if available
-const token = localStorage.getItem('token');
 
 const api = axios.create({
   baseURL: '/api',
   headers: {
     'Content-Type': 'application/json',
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
   },
   withCredentials: true, // Include cookies in requests
 });
@@ -97,24 +92,11 @@ export const deleteSleepScore = (sleepScoreId: number): Promise<{ id: number }> 
 export const getCurrentUser = (): Promise<User> => api.get('/auth/me');
 
 export const login = (email: string, password: string): Promise<AuthResponse> => {
-  return api.post('/auth/login', { email, password }).then((response) => {
-    const authResponse = response as unknown as AuthResponse;
-    // After successful login, store token
-    localStorage.setItem('token', authResponse.token);
-
-    // Configure axios for future requests
-    api.defaults.headers.common['Authorization'] = `Bearer ${authResponse.token}`;
-
-    return authResponse;
-  });
+  return api.post('/auth/login', { email, password });
 };
 
 export const logout = (): Promise<void> => {
-  return api.post('/auth/logout', {}).then(() => {
-    // Clear auth data
-    localStorage.removeItem('token');
-    delete api.defaults.headers.common['Authorization'];
-  });
+  return api.post('/auth/logout');
 };
 
 // Diagnostician API functions

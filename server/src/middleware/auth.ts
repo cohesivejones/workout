@@ -18,7 +18,7 @@ const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 // Generate JWT token
 export const generateToken = (user: User): string => {
   return jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, {
-    expiresIn: "7d",
+    expiresIn: "2h",
   });
 };
 
@@ -29,9 +29,8 @@ export const authenticateToken = async (
   next: NextFunction,
 ) => {
   try {
-    // Get token from cookies or Authorization header
-    const token =
-      req.cookies?.token || req.header("Authorization")?.replace("Bearer ", "");
+    // Get token from cookies only (no bearer token support)
+    const token = req.cookies?.token;
 
     if (!token) {
       return res.status(401).json({ error: "Authentication required" });
@@ -63,9 +62,8 @@ export const optionalAuth = async (
   next: NextFunction,
 ) => {
   try {
-    // Get token from cookies or Authorization header
-    const token =
-      req.cookies?.token || req.header("Authorization")?.replace("Bearer ", "");
+    // Get token from cookies only (no bearer token support)
+    const token = req.cookies?.token;
 
     if (!token) {
       return next();
