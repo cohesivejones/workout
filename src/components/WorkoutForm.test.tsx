@@ -5,15 +5,24 @@ import { Workout, WorkoutFormProps } from '../types';
 import * as UserContext from '../contexts/useUserContext';
 import * as Api from '../api';
 
+interface SelectOption {
+  label: string;
+  value: string;
+}
+
+interface MockSelectProps {
+  options: SelectOption[];
+  value: SelectOption | null;
+  onChange: (option: SelectOption | null) => void;
+}
+
 vi.mock('react-select/creatable', () => ({
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  default: ({ options, value, onChange }: any) => {
+  default: ({ options, value, onChange }: MockSelectProps) => {
     function handleChange(event: React.ChangeEvent<HTMLSelectElement>) {
       const option = options.find(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (option: any) => option.value === event.currentTarget.value
+        (option: SelectOption) => option.value === event.currentTarget.value
       );
-      onChange(option);
+      onChange(option || null);
     }
 
     return (
@@ -23,8 +32,7 @@ vi.mock('react-select/creatable', () => ({
         onChange={handleChange}
       >
         <option value="">Select...</option>
-        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-        {options.map(({ label, value }: any) => (
+        {options.map(({ label, value }: SelectOption) => (
           <option key={value} value={value}>
             {label}
           </option>

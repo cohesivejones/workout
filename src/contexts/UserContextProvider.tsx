@@ -1,25 +1,10 @@
-import React, { createContext, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { getCurrentUser, login as apiLogin, logout as apiLogout } from '../api';
+import { UserContext, User } from './UserContext';
 
 type Props = {
   children: React.ReactNode;
 };
-
-interface User {
-  id: number;
-  name: string;
-  email?: string;
-}
-
-export type UserContext = {
-  user: User | null;
-  login: (email: string, password: string) => Promise<void>;
-  logout: () => Promise<void>;
-  loading: boolean;
-};
-
-// eslint-disable-next-line react-refresh/only-export-components
-export const UserContext = createContext<UserContext>({} as UserContext);
 
 export const UserContextProvider = ({ children }: Props) => {
   const [user, setUser] = useState<User | null>(null);
