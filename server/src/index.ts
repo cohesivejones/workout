@@ -1403,16 +1403,20 @@ apiRouter.post("/workouts/generate", authenticateToken, async (req: Request, res
 if (process.env.NODE_ENV === 'test') {
   const testRouter = express.Router();
   
-  testRouter.delete("/clear-workouts", async (_req: Request, res: Response) => {
+  testRouter.delete("/clear-test-data", async (_req: Request, res: Response) => {
     try {
-      // Clear all workout data for test user
-      await dataSource.query('DELETE FROM workout_exercises WHERE workout_id IN (SELECT id FROM workouts WHERE "userId" = (SELECT id FROM users WHERE email = $1))', ['test@foo.com']);
-      await dataSource.query('DELETE FROM workouts WHERE "userId" = (SELECT id FROM users WHERE email = $1)', ['test@foo.com']);
+      const testUserEmail = 'test@foo.com';
       
-      res.json({ success: true, message: 'Test workouts cleared' });
+      // Clear all test data in correct order (respecting foreign keys)
+      await dataSource.query('DELETE FROM workout_exercises WHERE workout_id IN (SELECT id FROM workouts WHERE "userId" = (SELECT id FROM users WHERE email = $1))', [testUserEmail]);
+      await dataSource.query('DELETE FROM workouts WHERE "userId" = (SELECT id FROM users WHERE email = $1)', [testUserEmail]);
+      await dataSource.query('DELETE FROM pain_scores WHERE "userId" = (SELECT id FROM users WHERE email = $1)', [testUserEmail]);
+      await dataSource.query('DELETE FROM sleep_scores WHERE "userId" = (SELECT id FROM users WHERE email = $1)', [testUserEmail]);
+      
+      res.json({ success: true, message: 'All test data cleared' });
     } catch (error) {
-      console.error('Failed to clear test workouts:', error);
-      res.status(500).json({ error: 'Failed to clear workouts' });
+      console.error('Failed to clear test data:', error);
+      res.status(500).json({ error: 'Failed to clear test data' });
     }
   });
   

@@ -1,18 +1,12 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../helpers/auth';
+import { clearTestData } from '../helpers/testData';
 
 test.describe('Create Workout with Multiple Exercises', () => {
   // Clear storage and workout data before each test to ensure clean state
   test.beforeEach(async ({ page, request }) => {
     await page.context().clearCookies();
-
-    // Clear test workout data via test-only API endpoint
-    try {
-      await request.delete('http://localhost:5001/api/test/clear-workouts');
-    } catch (error) {
-      console.warn('Failed to clear test workouts:', error);
-    }
-
+    await clearTestData(request);
     await page.goto('/');
   });
 

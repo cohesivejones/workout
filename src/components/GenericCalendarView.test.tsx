@@ -82,7 +82,7 @@ describe('GenericCalendarView', () => {
 
     // Mock Date
     type DateConstructorArg = string | number | Date | undefined;
-    
+
     const MockDate = function (this: Date, arg?: DateConstructorArg) {
       return arg ? new OriginalDate(arg) : new OriginalDate(FIXED_DATE);
     } as unknown as DateConstructor;

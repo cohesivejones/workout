@@ -1,11 +1,5 @@
 import React from 'react';
-import {
-  SleepFace1,
-  SleepFace2,
-  SleepFace3,
-  SleepFace4,
-  SleepFace5,
-} from './SleepScaleFaces';
+import { SleepFace1, SleepFace2, SleepFace3, SleepFace4, SleepFace5 } from './SleepScaleFaces';
 
 interface SleepFaceProps {
   size?: number;
