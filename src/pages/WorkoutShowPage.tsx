@@ -1,16 +1,16 @@
-import React, { useState, useEffect } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
-import { fetchWorkout, deleteWorkout } from "../api";
-import { Workout } from "../types";
-import styles from "./WorkoutShowPage.module.css";
-import buttonStyles from "../styles/common/buttons.module.css";
-import { format } from "date-fns";
-import classNames from "classnames";
-import { toHomePath, toWorkoutEditPath } from "../utils/paths";
+import React, { useState, useEffect } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { fetchWorkout, deleteWorkout } from '../api';
+import { Workout } from '../types';
+import styles from './WorkoutShowPage.module.css';
+import buttonStyles from '../styles/common/buttons.module.css';
+import { format } from 'date-fns';
+import classNames from 'classnames';
+import { toHomePath, toWorkoutEditPath } from '../utils/paths';
 
 const WorkoutShowPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const workoutId = parseInt(id || "0");
+  const workoutId = parseInt(id || '0');
   const navigate = useNavigate();
 
   const [workout, setWorkout] = useState<Workout | null>(null);
@@ -26,8 +26,8 @@ const WorkoutShowPage: React.FC = () => {
         const data = await fetchWorkout(workoutId);
         setWorkout(data);
       } catch (err) {
-        console.error("Failed to load workout:", err);
-        setError(err instanceof Error ? err.message : "Failed to load workout");
+        console.error('Failed to load workout:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load workout');
       } finally {
         setLoading(false);
       }
@@ -37,14 +37,14 @@ const WorkoutShowPage: React.FC = () => {
   }, [workoutId]);
 
   const handleDelete = async () => {
-    if (window.confirm("Are you sure you want to delete this workout?")) {
+    if (window.confirm('Are you sure you want to delete this workout?')) {
       try {
         setIsDeleting(true);
         await deleteWorkout(workoutId);
-        navigate("/");
+        navigate('/');
       } catch (err) {
-        console.error("Failed to delete workout:", err);
-        alert("Failed to delete workout. Please try again.");
+        console.error('Failed to delete workout:', err);
+        alert('Failed to delete workout. Please try again.');
         setIsDeleting(false);
       }
     }
@@ -83,12 +83,8 @@ const WorkoutShowPage: React.FC = () => {
         })}
       >
         <div className={styles.workoutDetailHeader}>
-          <h3>
-            {format(`${workout.date}T12:00:00.000`, "MMM d, yyyy (eeee)")}
-          </h3>
-          {workout.withInstructor && (
-            <div className={styles.instructorBadge}>With Instructor</div>
-          )}
+          <h3>{format(`${workout.date}T12:00:00.000`, 'MMM d, yyyy (eeee)')}</h3>
+          {workout.withInstructor && <div className={styles.instructorBadge}>With Instructor</div>}
         </div>
 
         <div className={styles.workoutDetailContent}>
@@ -99,34 +95,20 @@ const WorkoutShowPage: React.FC = () => {
             <ul className={styles.exerciseDetailList}>
               {workout.exercises.map((exercise, index) => (
                 <li key={index} className={styles.exerciseDetailItem}>
-                  <div className={styles.exerciseDetailName}>
-                    {exercise.name}
-                  </div>
+                  <div className={styles.exerciseDetailName}>{exercise.name}</div>
                   <div className={styles.exerciseDetailStats}>
-                    <span className={styles.exerciseDetailReps}>
-                      {exercise.reps} reps
-                    </span>
+                    <span className={styles.exerciseDetailReps}>{exercise.reps} reps</span>
                     {exercise.weight && (
-                      <span className={styles.exerciseDetailWeight}>
-                        {exercise.weight} lbs
-                      </span>
+                      <span className={styles.exerciseDetailWeight}>{exercise.weight} lbs</span>
                     )}
                     {exercise.time_minutes && (
-                      <span className={styles.exerciseDetailTime}>
-                        {exercise.time_minutes} min
-                      </span>
+                      <span className={styles.exerciseDetailTime}>{exercise.time_minutes} min</span>
                     )}
                     {(exercise.new_reps || exercise.new_weight || exercise.new_time) && (
                       <div className={styles.badgeContainer}>
-                        {exercise.new_reps && (
-                          <span className={styles.newBadge}>NEW REPS</span>
-                        )}
-                        {exercise.new_weight && (
-                          <span className={styles.newBadge}>NEW WEIGHT</span>
-                        )}
-                        {exercise.new_time && (
-                          <span className={styles.newBadge}>NEW TIME</span>
-                        )}
+                        {exercise.new_reps && <span className={styles.newBadge}>NEW REPS</span>}
+                        {exercise.new_weight && <span className={styles.newBadge}>NEW WEIGHT</span>}
+                        {exercise.new_time && <span className={styles.newBadge}>NEW TIME</span>}
                       </div>
                     )}
                   </div>
@@ -149,7 +131,7 @@ const WorkoutShowPage: React.FC = () => {
             disabled={isDeleting}
             className={classNames(styles.button, buttonStyles.secondaryBtn)}
           >
-            {isDeleting ? "Deleting..." : "Delete Workout"}
+            {isDeleting ? 'Deleting...' : 'Delete Workout'}
           </button>
         </div>
       </div>

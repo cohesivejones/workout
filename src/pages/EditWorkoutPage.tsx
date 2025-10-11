@@ -1,21 +1,16 @@
-import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import WorkoutForm from "../components/WorkoutForm";
-import {
-  fetchWorkouts,
-  updateWorkout,
-  createExercise,
-  fetchExercises,
-} from "../api";
-import { Exercise, Workout } from "../types";
-import { useUserContext } from "../contexts/useUserContext";
-import styles from "../components/WorkoutForm.module.css";
-import loadingStyles from "../App.module.css";
+import { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import WorkoutForm from '../components/WorkoutForm';
+import { fetchWorkouts, updateWorkout, createExercise, fetchExercises } from '../api';
+import { Exercise, Workout } from '../types';
+import { useUserContext } from '../contexts/useUserContext';
+import styles from '../components/WorkoutForm.module.css';
+import loadingStyles from '../App.module.css';
 
 export default function EditWorkoutPage() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const workoutId = parseInt(id || "0");
+  const workoutId = parseInt(id || '0');
   const { user } = useUserContext();
 
   const [workout, setWorkout] = useState<Workout | null>(null);
@@ -48,8 +43,8 @@ export default function EditWorkoutPage() {
 
         setLoading(false);
       } catch (err) {
-        console.error("Failed to load data:", err);
-        setError("Failed to load data. Please try again later.");
+        console.error('Failed to load data:', err);
+        setError('Failed to load data. Please try again later.');
         setLoading(false);
       }
     };
@@ -57,21 +52,15 @@ export default function EditWorkoutPage() {
     loadData();
   }, [workoutId, user]);
 
-  const handleUpdateWorkout = async (
-    updatedWorkout: Omit<Workout, "id">,
-  ): Promise<boolean> => {
+  const handleUpdateWorkout = async (updatedWorkout: Omit<Workout, 'id'>): Promise<boolean> => {
     try {
       setError(null);
       await updateWorkout(workoutId, updatedWorkout);
-      navigate("/");
+      navigate('/');
       return true;
     } catch (err) {
-      console.error("Failed to update workout:", err);
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Failed to update workout. Please try again.",
-      );
+      console.error('Failed to update workout:', err);
+      setError(err instanceof Error ? err.message : 'Failed to update workout. Please try again.');
       return false;
     }
   };
@@ -87,12 +76,8 @@ export default function EditWorkoutPage() {
       }
       return true;
     } catch (err) {
-      console.error("Failed to save exercise:", err);
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Failed to save exercise. Please try again.",
-      );
+      console.error('Failed to save exercise:', err);
+      setError(err instanceof Error ? err.message : 'Failed to save exercise. Please try again.');
       return false;
     }
   };
@@ -106,7 +91,7 @@ export default function EditWorkoutPage() {
   }
 
   const handleCancel = () => {
-    navigate("/");
+    navigate('/');
   };
 
   if (!workout) {

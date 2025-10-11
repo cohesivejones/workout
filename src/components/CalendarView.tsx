@@ -1,24 +1,24 @@
-import React from "react";
-import styles from "./CalendarView.module.css";
-import classNames from "classnames";
-import { Workout, PainScore, SleepScore } from "../types";
-import { Link, useNavigate } from "react-router-dom";
-import { toWorkoutPath, toPainScoreEditPath, toSleepScoreEditPath } from "../utils/paths";
-import { GenericCalendarView, CalendarItem } from "./GenericCalendarView";
+import React from 'react';
+import styles from './CalendarView.module.css';
+import classNames from 'classnames';
+import { Workout, PainScore, SleepScore } from '../types';
+import { Link, useNavigate } from 'react-router-dom';
+import { toWorkoutPath, toPainScoreEditPath, toSleepScoreEditPath } from '../utils/paths';
+import { GenericCalendarView, CalendarItem } from './GenericCalendarView';
 
 // Type for workout calendar items
 export type WorkoutCalendarItem = Workout & {
-  type: "workout";
+  type: 'workout';
 };
 
 // Type for pain score calendar items
 export type PainScoreCalendarItem = PainScore & {
-  type: "painScore";
+  type: 'painScore';
 };
 
 // Type for sleep score calendar items
 export type SleepScoreCalendarItem = SleepScore & {
-  type: "sleepScore";
+  type: 'sleepScore';
 };
 
 // Union type for all calendar items in this application
@@ -26,22 +26,28 @@ export type AppCalendarItem = WorkoutCalendarItem | PainScoreCalendarItem | Slee
 
 // Function to get color based on pain score
 const getPainScoreColor = (score: number): string => {
-  if (score === 0) return "#4caf50"; // Green for no pain
-  if (score <= 3) return "#8bc34a"; // Light green for mild pain
-  if (score <= 5) return "#ffc107"; // Yellow for moderate pain
-  if (score <= 7) return "#ff9800"; // Orange for severe pain
-  return "#f44336"; // Red for extreme pain
+  if (score === 0) return '#4caf50'; // Green for no pain
+  if (score <= 3) return '#8bc34a'; // Light green for mild pain
+  if (score <= 5) return '#ffc107'; // Yellow for moderate pain
+  if (score <= 7) return '#ff9800'; // Orange for severe pain
+  return '#f44336'; // Red for extreme pain
 };
 
 // Function to get color based on sleep score
 const getSleepScoreColor = (score: number): string => {
   switch (score) {
-    case 5: return "#4caf50"; // Green for excellent sleep
-    case 4: return "#8bc34a"; // Light green for good sleep
-    case 3: return "#ffc107"; // Yellow for fair sleep
-    case 2: return "#ff9800"; // Orange for poor sleep
-    case 1: return "#f44336"; // Red for very poor sleep
-    default: return "#ffc107"; // Default to yellow
+    case 5:
+      return '#4caf50'; // Green for excellent sleep
+    case 4:
+      return '#8bc34a'; // Light green for good sleep
+    case 3:
+      return '#ffc107'; // Yellow for fair sleep
+    case 2:
+      return '#ff9800'; // Orange for poor sleep
+    case 1:
+      return '#f44336'; // Red for very poor sleep
+    default:
+      return '#ffc107'; // Default to yellow
   }
 };
 
@@ -52,50 +58,45 @@ interface WorkoutCalendarProps {
   sleepScores: SleepScore[];
 }
 
-const CalendarView: React.FC<WorkoutCalendarProps> = ({
-  workouts,
-  painScores,
-  sleepScores,
-}) => {
+const CalendarView: React.FC<WorkoutCalendarProps> = ({ workouts, painScores, sleepScores }) => {
   const navigate = useNavigate();
 
   // Convert workouts, pain scores, and sleep scores to calendar items
   const workoutItems: WorkoutCalendarItem[] = workouts.map((workout) => ({
     ...workout,
-    type: "workout",
+    type: 'workout',
   }));
 
-  const painScoreItems: PainScoreCalendarItem[] = painScores.map(
-    (painScore) => ({
-      ...painScore,
-      type: "painScore",
-    })
-  );
+  const painScoreItems: PainScoreCalendarItem[] = painScores.map((painScore) => ({
+    ...painScore,
+    type: 'painScore',
+  }));
 
-  const sleepScoreItems: SleepScoreCalendarItem[] = sleepScores.map(
-    (sleepScore) => ({
-      ...sleepScore,
-      type: "sleepScore",
-    })
-  );
+  const sleepScoreItems: SleepScoreCalendarItem[] = sleepScores.map((sleepScore) => ({
+    ...sleepScore,
+    type: 'sleepScore',
+  }));
 
   const allItems: AppCalendarItem[] = [...workoutItems, ...painScoreItems, ...sleepScoreItems];
 
   // Group items by date
   const getItemsByDate = (items: AppCalendarItem[]) => {
-    return items.reduce((acc, item) => {
-      const dateStr = item.date.split("T")[0]; // Handle ISO date format
-      if (!acc[dateStr]) {
-        acc[dateStr] = [];
-      }
-      acc[dateStr].push(item);
-      return acc;
-    }, {} as Record<string, AppCalendarItem[]>);
+    return items.reduce(
+      (acc, item) => {
+        const dateStr = item.date.split('T')[0]; // Handle ISO date format
+        if (!acc[dateStr]) {
+          acc[dateStr] = [];
+        }
+        acc[dateStr].push(item);
+        return acc;
+      },
+      {} as Record<string, AppCalendarItem[]>
+    );
   };
 
   // Render a grid item (for month view)
   const renderGridItem = (item: AppCalendarItem, dateStr: string) => {
-    if (item.type === "painScore") {
+    if (item.type === 'painScore') {
       const painScore = item as PainScoreCalendarItem;
       return (
         <button
@@ -107,7 +108,7 @@ const CalendarView: React.FC<WorkoutCalendarProps> = ({
             navigate(toPainScoreEditPath(painScore));
           }}
           onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
+            if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault();
               e.stopPropagation();
               navigate(toPainScoreEditPath(painScore));
@@ -118,7 +119,7 @@ const CalendarView: React.FC<WorkoutCalendarProps> = ({
           Pain: {painScore.score}
         </button>
       );
-    } else if (item.type === "sleepScore") {
+    } else if (item.type === 'sleepScore') {
       const sleepScore = item as SleepScoreCalendarItem;
       return (
         <button
@@ -130,7 +131,7 @@ const CalendarView: React.FC<WorkoutCalendarProps> = ({
             navigate(toSleepScoreEditPath(sleepScore));
           }}
           onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
+            if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault();
               e.stopPropagation();
               navigate(toSleepScoreEditPath(sleepScore));
@@ -167,7 +168,7 @@ const CalendarView: React.FC<WorkoutCalendarProps> = ({
 
   // Render a vertical item (for week view)
   const renderVerticalItem = (item: AppCalendarItem, dateStr: string) => {
-    if (item.type === "painScore") {
+    if (item.type === 'painScore') {
       const painScore = item as PainScoreCalendarItem;
       return (
         <button
@@ -180,7 +181,7 @@ const CalendarView: React.FC<WorkoutCalendarProps> = ({
           Pain: {painScore.score}
         </button>
       );
-    } else if (item.type === "sleepScore") {
+    } else if (item.type === 'sleepScore') {
       const sleepScore = item as SleepScoreCalendarItem;
       return (
         <button
@@ -210,7 +211,7 @@ const CalendarView: React.FC<WorkoutCalendarProps> = ({
                 <span className={styles.exerciseName}>{exercise.name}</span>
                 <span className={styles.exerciseDetails}>
                   {exercise.reps} reps
-                  {exercise.weight ? ` - ${exercise.weight} lbs` : ""}
+                  {exercise.weight ? ` - ${exercise.weight} lbs` : ''}
                 </span>
               </div>
             ))}

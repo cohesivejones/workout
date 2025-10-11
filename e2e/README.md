@@ -51,6 +51,7 @@ cd server && npm run db:migrate:test
 ```
 
 The test database uses these credentials (configured in `server/.env.test`):
+
 - **Host**: localhost
 - **Port**: 5433 (different from dev database on 5432)
 - **User**: test_user
@@ -58,6 +59,7 @@ The test database uses these credentials (configured in `server/.env.test`):
 - **Database**: workout_test
 
 The migrations will automatically create a test user with these credentials:
+
 - **Email**: `test@foo.com`
 - **Password**: `Secure123!`
 
@@ -96,6 +98,7 @@ npm run test:e2e:db:reset
 ### CI/CD Setup (GitHub Actions)
 
 The CI environment uses GitHub Actions services instead of Docker:
+
 - PostgreSQL service on port 5432
 - Credentials: postgres/postgres
 - Database: workout_test
@@ -173,10 +176,12 @@ The Playwright configuration is in `playwright.config.ts` at the project root. K
 ## CI/CD
 
 E2E tests run automatically on GitHub Actions for:
+
 - Push to `main` or `master` branches
 - Pull requests to `main` or `master` branches
 
 The workflow:
+
 1. Sets up PostgreSQL test database
 2. Installs dependencies
 3. Runs database migrations

@@ -12,18 +12,18 @@ function DiagnosticianPage(): React.ReactElement {
 
   const handleDiagnose = async () => {
     if (!user) return;
-    
+
     setLoading(true);
     setError(null);
     setAnalysis(null);
-    
+
     try {
       // Fetch diagnostic data
       const diagnosticData = await fetchDiagnosticData();
-      
+
       // Send to server for OpenAI analysis
       const result = await analyzeDiagnosticData(diagnosticData);
-      
+
       // Display results
       setAnalysis(result.analysis);
     } catch (err) {
@@ -39,27 +39,23 @@ function DiagnosticianPage(): React.ReactElement {
       <div className={styles.pageHeader}>
         <h2>Workout Pain Analysis</h2>
       </div>
-      
+
       <div className={styles.diagnosticContent}>
         <p>
-          This tool analyzes your workout history and pain scores from the last two months
-          to identify potential correlations between specific exercises and reported pain.
+          This tool analyzes your workout history and pain scores from the last two months to
+          identify potential correlations between specific exercises and reported pain.
         </p>
-        
+
         <div className={styles.actionSection}>
-          <button 
-            className={buttonStyles.primaryBtn}
-            onClick={handleDiagnose}
-            disabled={loading}
-          >
+          <button className={buttonStyles.primaryBtn} onClick={handleDiagnose} disabled={loading}>
             {loading ? 'Analyzing...' : 'Diagnose'}
           </button>
         </div>
-        
+
         {error && <div className={styles.errorMessage}>{error}</div>}
-        
+
         {loading && <div className={styles.loading}>Analyzing your workout and pain data...</div>}
-        
+
         {analysis && (
           <div className={styles.analysisResults}>
             <h3>Analysis Results</h3>

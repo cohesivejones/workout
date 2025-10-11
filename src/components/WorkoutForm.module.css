@@ -41,7 +41,7 @@
   cursor: pointer;
 }
 
-.instructorCheckbox input[type="checkbox"] {
+.instructorCheckbox input[type='checkbox'] {
   margin-right: 8px;
 }
 
@@ -80,7 +80,7 @@
 }
 
 /* Ensure consistent input height and alignment */
-.exerciseInputField[type="number"] {
+.exerciseInputField[type='number'] {
   height: 36px; /* Set a fixed height */
   padding: 0 8px; /* Horizontal padding only */
   line-height: 36px; /* Match line-height to height */

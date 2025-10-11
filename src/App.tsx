@@ -1,17 +1,17 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import TimelinePage from "./pages/TimelinePage";
-import AddWorkoutPage from "./pages/NewWorkoutPage";
-import EditWorkoutPage from "./pages/EditWorkoutPage";
-import WorkoutShowPage from "./pages/WorkoutShowPage";
-import PainScorePage from "./pages/PainScorePage";
-import SleepScorePage from "./pages/SleepScorePage";
-import ExerciseListPage from "./pages/ExerciseListPage";
-import ChangePasswordPage from "./pages/ChangePasswordPage";
-import DiagnosticianPage from "./pages/DiagnosticianPage";
-import DashboardPage from "./pages/DashboardPage";
-import GenerateWorkoutPage from "./pages/GenerateWorkoutPage";
-import NotFoundPage from "./pages/NotFoundPage";
-import { Layout } from "./Layout";
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import TimelinePage from './pages/TimelinePage';
+import AddWorkoutPage from './pages/NewWorkoutPage';
+import EditWorkoutPage from './pages/EditWorkoutPage';
+import WorkoutShowPage from './pages/WorkoutShowPage';
+import PainScorePage from './pages/PainScorePage';
+import SleepScorePage from './pages/SleepScorePage';
+import ExerciseListPage from './pages/ExerciseListPage';
+import ChangePasswordPage from './pages/ChangePasswordPage';
+import DiagnosticianPage from './pages/DiagnosticianPage';
+import DashboardPage from './pages/DashboardPage';
+import GenerateWorkoutPage from './pages/GenerateWorkoutPage';
+import NotFoundPage from './pages/NotFoundPage';
+import { Layout } from './Layout';
 
 function App() {
   return (

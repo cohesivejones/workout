@@ -1,7 +1,7 @@
-import { Workout, PainScore, SleepScore } from "../types";
+import { Workout, PainScore, SleepScore } from '../types';
 
 export function toHomePath() {
-  return "/";
+  return '/';
 }
 
 export function toWorkoutPath(workout: Workout) {
@@ -9,7 +9,7 @@ export function toWorkoutPath(workout: Workout) {
 }
 
 export function toWorkoutNewPath() {
-  return "/workouts/new";
+  return '/workouts/new';
 }
 
 export function toWorkoutEditPath(workout: Workout) {
@@ -17,7 +17,7 @@ export function toWorkoutEditPath(workout: Workout) {
 }
 
 export function toPainScoreNewPath(date?: string) {
-  return date ? `/pain-scores/new?date=${date}` : "/pain-scores/new";
+  return date ? `/pain-scores/new?date=${date}` : '/pain-scores/new';
 }
 
 export function toPainScoreEditPath(painScore: PainScore) {
@@ -25,7 +25,7 @@ export function toPainScoreEditPath(painScore: PainScore) {
 }
 
 export function toSleepScoreNewPath(date?: string) {
-  return date ? `/sleep-scores/new?date=${date}` : "/sleep-scores/new";
+  return date ? `/sleep-scores/new?date=${date}` : '/sleep-scores/new';
 }
 
 export function toSleepScoreEditPath(sleepScore: SleepScore) {

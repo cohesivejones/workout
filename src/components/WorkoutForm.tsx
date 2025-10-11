@@ -1,18 +1,13 @@
-import * as React from "react";
-import { WorkoutFormProps, WorkoutExercise } from "../types";
-import CreatableSelect from "react-select/creatable";
-import classNames from "classnames";
-import styles from "./WorkoutForm.module.css";
-import buttonStyles from "../styles/common/buttons.module.css";
-import { useUserContext } from "../contexts/useUserContext";
-import { fetchRecentExerciseData } from "../api";
-import {
-  useForm,
-  useFieldArray,
-  Controller,
-  SubmitHandler,
-} from "react-hook-form";
-import { SingleValue } from "react-select";
+import * as React from 'react';
+import { WorkoutFormProps, WorkoutExercise } from '../types';
+import CreatableSelect from 'react-select/creatable';
+import classNames from 'classnames';
+import styles from './WorkoutForm.module.css';
+import buttonStyles from '../styles/common/buttons.module.css';
+import { useUserContext } from '../contexts/useUserContext';
+import { fetchRecentExerciseData } from '../api';
+import { useForm, useFieldArray, Controller, SubmitHandler } from 'react-hook-form';
+import { SingleValue } from 'react-select';
 
 interface FormValues {
   date: string;
@@ -34,8 +29,7 @@ function WorkoutForm({
   onCancel,
 }: WorkoutFormProps): React.ReactElement {
   const { user } = useUserContext();
-  const [isSavingExercise, setIsSavingExercise] =
-    React.useState<boolean>(false);
+  const [isSavingExercise, setIsSavingExercise] = React.useState<boolean>(false);
 
   // Initialize form with default values
   const {
@@ -50,15 +44,15 @@ function WorkoutForm({
   } = useForm<FormValues>({
     defaultValues: {
       date: existingWorkout
-        ? new Date(existingWorkout.date).toISOString().split("T")[0]
-        : new Date().toISOString().split("T")[0],
+        ? new Date(existingWorkout.date).toISOString().split('T')[0]
+        : new Date().toISOString().split('T')[0],
       withInstructor: existingWorkout?.withInstructor || false,
       exercises: existingWorkout?.exercises || [],
       currentExercise: {
-        name: "",
-        reps: "",
-        weight: "",
-        time_minutes: "",
+        name: '',
+        reps: '',
+        weight: '',
+        time_minutes: '',
       },
     },
   });
@@ -66,12 +60,12 @@ function WorkoutForm({
   // Use fieldArray to manage the dynamic exercises list
   const { fields, append, remove } = useFieldArray({
     control,
-    name: "exercises",
+    name: 'exercises',
   });
 
   // Watch current values
-  const currentExercise = watch("currentExercise");
-  const exercises = watch("exercises");
+  const currentExercise = watch('currentExercise');
+  const exercises = watch('exercises');
 
   const onFormSubmit: SubmitHandler<FormValues> = async (data) => {
     if (exercises.length === 0 || !user) return;
@@ -93,17 +87,17 @@ function WorkoutForm({
           ...data,
           exercises: [],
           currentExercise: {
-            name: "",
-            reps: "",
-            weight: "",
-            time_minutes: "",
+            name: '',
+            reps: '',
+            weight: '',
+            time_minutes: '',
           },
         });
       }
     } catch (error) {
-      setError("root", {
-        type: "server",
-        message: error instanceof Error ? error.message : "An error occurred",
+      setError('root', {
+        type: 'server',
+        message: error instanceof Error ? error.message : 'An error occurred',
       });
     }
   };
@@ -121,26 +115,24 @@ function WorkoutForm({
           append({
             name,
             reps: Number(currentExercise.reps),
-            weight: currentExercise.weight
-              ? Number(currentExercise.weight)
-              : null,
+            weight: currentExercise.weight ? Number(currentExercise.weight) : null,
             time_minutes: currentExercise.time_minutes
               ? Number(currentExercise.time_minutes)
               : null,
           });
 
           // Reset current exercise fields
-          setValue("currentExercise", {
-            name: "",
-            reps: "",
-            weight: "",
-            time_minutes: "",
+          setValue('currentExercise', {
+            name: '',
+            reps: '',
+            weight: '',
+            time_minutes: '',
           });
         }
       } catch (error) {
-        setError("root", {
-          type: "server",
-          message: error instanceof Error ? error.message : "An error occurred",
+        setError('root', {
+          type: 'server',
+          message: error instanceof Error ? error.message : 'An error occurred',
         });
       } finally {
         setIsSavingExercise(false);
@@ -149,12 +141,12 @@ function WorkoutForm({
   };
 
   const handlePopulateRepsAndWeight = async (
-    val: SingleValue<{ label: string; value: string }>,
+    val: SingleValue<{ label: string; value: string }>
   ) => {
     if (val === null) {
-      setValue("currentExercise.reps", "");
-      setValue("currentExercise.weight", "");
-      setValue("currentExercise.time_minutes", "");
+      setValue('currentExercise.reps', '');
+      setValue('currentExercise.weight', '');
+      setValue('currentExercise.time_minutes', '');
       return;
     }
     const exerciseId = savedExercises.find((ex) => ex.name === val.value)?.id;
@@ -162,14 +154,11 @@ function WorkoutForm({
     if (!user) return;
     try {
       const recentData = await fetchRecentExerciseData(exerciseId);
-      setValue("currentExercise.reps", String(recentData.reps));
+      setValue('currentExercise.reps', String(recentData.reps));
+      setValue('currentExercise.weight', recentData.weight ? String(recentData.weight) : '');
       setValue(
-        "currentExercise.weight",
-        recentData.weight ? String(recentData.weight) : "",
-      );
-      setValue(
-        "currentExercise.time_minutes",
-        recentData.time_minutes ? String(recentData.time_minutes) : "",
+        'currentExercise.time_minutes',
+        recentData.time_minutes ? String(recentData.time_minutes) : ''
       );
     } catch {
       // fail silently
@@ -182,12 +171,8 @@ function WorkoutForm({
   }));
   return (
     <div className={styles.workoutForm}>
-      <h2>{existingWorkout ? "Edit Workout" : "New Workout"}</h2>
-      {errors.root && (
-        <div className={styles.errorMessage}>
-          {errors.root.message}
-        </div>
-      )}
+      <h2>{existingWorkout ? 'Edit Workout' : 'New Workout'}</h2>
+      {errors.root && <div className={styles.errorMessage}>{errors.root.message}</div>}
       <form onSubmit={handleSubmit(onFormSubmit)}>
         <div className={styles.dateInput}>
           <label htmlFor="workout-date">Workout Date:</label>
@@ -195,16 +180,12 @@ function WorkoutForm({
             type="date"
             id="workout-date"
             className={styles.exerciseInputField}
-            {...register("date")}
+            {...register('date')}
           />
         </div>
         <div className={styles.instructorCheckbox}>
           <label htmlFor="with-instructor">
-            <input
-              type="checkbox"
-              id="with-instructor"
-              {...register("withInstructor")}
-            />
+            <input type="checkbox" id="with-instructor" {...register('withInstructor')} />
             With Instructor
           </label>
         </div>
@@ -222,7 +203,7 @@ function WorkoutForm({
                   placeholder="Select or create an exercise"
                   options={exerciseSelectOptions}
                   onChange={(val) => {
-                    field.onChange(val ? val.value : "");
+                    field.onChange(val ? val.value : '');
                     handlePopulateRepsAndWeight(val);
                   }}
                   value={selectedExerciseOption}
@@ -238,7 +219,7 @@ function WorkoutForm({
             placeholder="Reps"
             min="1"
             className={styles.exerciseInputField}
-            {...register("currentExercise.reps")}
+            {...register('currentExercise.reps')}
           />
           <div className={styles.weightInputContainer}>
             <div className={styles.weightInputWrapper}>
@@ -248,14 +229,12 @@ function WorkoutForm({
                 min="0"
                 step="0.5"
                 className={`${styles.exerciseInputField} ${styles.weightInput}`}
-                {...register("currentExercise.weight")}
+                {...register('currentExercise.weight')}
               />
               <span className={styles.weightSuffix}>
                 {currentExercise.weight
-                  ? `${(Number(currentExercise.weight) * 0.453592).toFixed(
-                      1,
-                    )} kg`
-                  : "0 kg"}
+                  ? `${(Number(currentExercise.weight) * 0.453592).toFixed(1)} kg`
+                  : '0 kg'}
               </span>
             </div>
           </div>
@@ -265,24 +244,18 @@ function WorkoutForm({
             min="0"
             step="0.5"
             className={styles.exerciseInputField}
-            {...register("currentExercise.time_minutes")}
+            {...register('currentExercise.time_minutes')}
           />
           <button
             type="button"
             onClick={addExercise}
             disabled={
-              !currentExercise.name ||
-              !currentExercise.reps ||
-              isSavingExercise ||
-              isSubmitting
+              !currentExercise.name || !currentExercise.reps || isSavingExercise || isSubmitting
             }
-            className={classNames(
-              styles.addExerciseBtn,
-              buttonStyles.secondaryBtn,
-            )}
+            className={classNames(styles.addExerciseBtn, buttonStyles.secondaryBtn)}
             title="Add exercise to workout"
           >
-            {isSavingExercise ? "Adding..." : <>Add Exercise</>}
+            {isSavingExercise ? 'Adding...' : <>Add Exercise</>}
           </button>
         </div>
 
@@ -296,13 +269,11 @@ function WorkoutForm({
                 <li key={field.id} className={styles.exerciseItem}>
                   <div className={styles.exerciseInfo}>
                     {exercises[index].name} - {exercises[index].reps} reps
-                    {exercises[index].weight
-                      ? ` - ${exercises[index].weight} lbs`
-                      : ""}
-                    {exercises[index].time_minutes
-                      ? ` - ${exercises[index].time_minutes} min`
-                      : ""}
-                    {(exercises[index].new_reps || exercises[index].new_weight || exercises[index].new_time) && (
+                    {exercises[index].weight ? ` - ${exercises[index].weight} lbs` : ''}
+                    {exercises[index].time_minutes ? ` - ${exercises[index].time_minutes} min` : ''}
+                    {(exercises[index].new_reps ||
+                      exercises[index].new_weight ||
+                      exercises[index].new_time) && (
                       <div className={styles.badgeContainer}>
                         {exercises[index].new_reps && (
                           <span className={styles.newBadge}>NEW REPS</span>
@@ -318,10 +289,7 @@ function WorkoutForm({
                   </div>
                   <button
                     type="button"
-                    className={classNames(
-                      styles.removeExerciseBtn,
-                      buttonStyles.secondaryBtn,
-                    )}
+                    className={classNames(styles.removeExerciseBtn, buttonStyles.secondaryBtn)}
                     onClick={() => remove(index)}
                     title="Remove exercise"
                   >
@@ -337,16 +305,13 @@ function WorkoutForm({
           <button
             type="submit"
             disabled={fields.length === 0 || isSubmitting}
-            className={classNames(
-              styles.saveWorkoutBtn,
-              buttonStyles.primaryBtn,
-            )}
-            title={existingWorkout ? "Update workout" : "Save workout"}
+            className={classNames(styles.saveWorkoutBtn, buttonStyles.primaryBtn)}
+            title={existingWorkout ? 'Update workout' : 'Save workout'}
           >
             {isSubmitting ? (
-              "Saving..."
+              'Saving...'
             ) : (
-              <>{existingWorkout ? "Update Workout" : "Save Workout"}</>
+              <>{existingWorkout ? 'Update Workout' : 'Save Workout'}</>
             )}
           </button>
 
@@ -354,10 +319,7 @@ function WorkoutForm({
             <button
               type="button"
               onClick={onCancel}
-              className={classNames(
-                styles.cancelBtn,
-                buttonStyles.secondaryBtn,
-              )}
+              className={classNames(styles.cancelBtn, buttonStyles.secondaryBtn)}
               disabled={isSubmitting}
             >
               Cancel

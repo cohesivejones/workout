@@ -5,8 +5,9 @@ A full-stack React application for tracking workouts, built with Vite, TypeScrip
 ## Architecture
 
 This application uses a consolidated single-server approach:
+
 - **Single Express server** serves both the React frontend and API endpoints
-- **API routes** are available at `/api/*` 
+- **API routes** are available at `/api/*`
 - **Static files** (React build) served from `/dist`
 - **Database** uses PostgreSQL with TypeORM
 - **Authentication** via JWT tokens with HTTP-only cookies
@@ -45,6 +46,7 @@ npm run dev
 ```
 
 This will start:
+
 - Vite dev server (frontend) on port 5173
 - API server (backend) on port 5001
 - The frontend will proxy API requests to the backend
@@ -57,6 +59,7 @@ npm start
 ```
 
 This will:
+
 - Build the React frontend to `/dist`
 - Compile the TypeScript backend to `/server/dist`
 - Start the single consolidated server on the configured PORT
@@ -90,16 +93,19 @@ All environment variables are now consolidated in a single `.env` file:
 This application is optimized for single-dyno Heroku deployment:
 
 1. **Create Heroku app:**
+
 ```bash
 heroku create your-app-name
 ```
 
 2. **Add Heroku Postgres:**
+
 ```bash
 heroku addons:create heroku-postgresql:mini
 ```
 
 3. **Set environment variables:**
+
 ```bash
 heroku config:set JWT_SECRET=your-secret-key
 heroku config:set OPENAI_API_KEY=your-openai-key
@@ -107,11 +113,13 @@ heroku config:set NODE_ENV=production
 ```
 
 4. **Deploy:**
+
 ```bash
 git push heroku main
 ```
 
 5. **Run migrations:**
+
 ```bash
 heroku run npm run db:migrate
 ```
@@ -125,6 +133,7 @@ The application includes deployment scripts for traditional server deployment:
 ```
 
 This script:
+
 1. Kills existing Node.js processes
 2. Pulls latest code from git
 3. Installs dependencies
@@ -133,6 +142,7 @@ This script:
 6. Starts the production server
 
 Make the script executable:
+
 ```bash
 chmod +x scripts/deploy.sh
 ```
