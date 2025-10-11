@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../helpers/auth';
 import { clearTestData } from '../helpers/testData';
+import { addExercise } from '../helpers/workout';
 
 test.describe('Create Workout with Multiple Exercises', () => {
   // Clear storage and workout data before each test to ensure clean state
@@ -40,39 +41,9 @@ test.describe('Create Workout with Multiple Exercises', () => {
     // Wait for the form to be fully loaded
     await page.waitForLoadState('networkidle');
 
+    // Add all exercises using the helper
     for (const exercise of exercises) {
-      // Click on the CreatableSelect control to focus it
-      await page.locator('.reactSelect__control').click();
-
-      // Type the exercise name
-      await page.keyboard.type(exercise.name);
-
-      // Press Enter to create/select the exercise
-      await page.keyboard.press('Enter');
-
-      // Wait a moment for the selection to register
-      await page.waitForTimeout(500);
-
-      // Fill in reps
-      await page.fill('input[placeholder="Reps"]', exercise.reps);
-
-      // Fill in weight if provided
-      if (exercise.weight) {
-        await page.fill('input[placeholder="Weight (lbs)"]', exercise.weight);
-      }
-
-      // Fill in time if provided
-      if (exercise.time) {
-        await page.fill('input[placeholder="Time (min)"]', exercise.time);
-      }
-
-      // Click Add Exercise button
-      await page.getByRole('button', { name: 'Add Exercise' }).click();
-
-      // Wait for exercise to be added to the list
-      await expect(page.locator(`text=${exercise.name} - ${exercise.reps} reps`)).toBeVisible({
-        timeout: 3000,
-      });
+      await addExercise(page, exercise);
     }
 
     // Verify all 6 exercises are in the current exercises list
@@ -165,5 +136,99 @@ test.describe('Create Workout with Multiple Exercises', () => {
 
     await expect(page.locator('text=Pull-ups').first()).toBeVisible();
     await expect(page.locator('text=12 reps').first()).toBeVisible();
+
+    // Step 8: Create a second workout with improved metrics on a future date
+    // Navigate back to timeline
+    await page.goto('/');
+    await page.getByRole('button', { name: 'List' }).click();
+    await page.waitForURL('/?view=list', { timeout: 5000 });
+
+    // Navigate to New Workout page
+    await page.getByRole('link', { name: 'New Workout' }).click();
+    await expect(page.getByRole('heading', { name: 'New Workout' })).toBeVisible({ timeout: 5000 });
+
+    // Set date to tomorrow
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowDateStr = tomorrow.toISOString().split('T')[0]; // Format: YYYY-MM-DD
+    await page.fill('input[type="date"]', tomorrowDateStr);
+
+    // Wait for the form to be fully loaded
+    await page.waitForLoadState('networkidle');
+
+    // Add exercises with improved metrics
+    const improvedExercises = [
+      // Improved reps
+      { name: 'Bench Press', reps: '12', weight: '135', time: '', expectedBadge: 'NEW REPS' },
+      // Improved weight
+      { name: 'Squat', reps: '8', weight: '200', time: '', expectedBadge: 'NEW WEIGHT' },
+      // Improved time
+      { name: 'Plank', reps: '1', weight: '', time: '2.5', expectedBadge: 'NEW TIME' },
+      // No improvement (same as before)
+      { name: 'Push-ups', reps: '20', weight: '', time: '', expectedBadge: null },
+    ];
+
+    // Add all exercises using the helper
+    for (const exercise of improvedExercises) {
+      await addExercise(page, exercise);
+    }
+
+    // Submit the second workout
+    await page.getByRole('button', { name: 'Save Workout' }).click();
+
+    // Wait for redirect to Timeline page
+    await page.waitForURL('/', { timeout: 10000 });
+    await expect(page.locator('h2:has-text("Activity Timeline")')).toBeVisible({ timeout: 5000 });
+
+    // Step 9: Verify NEW badges in List View
+    await page.getByRole('button', { name: 'List' }).click();
+    await page.waitForURL('/?view=list', { timeout: 5000 });
+
+    // Find the second workout by its date using data-testid
+    const tomorrowWorkout = page.locator(`[data-testid="workout-card-${tomorrowDateStr}"]`);
+    await expect(tomorrowWorkout).toBeVisible({ timeout: 5000 });
+
+    // Verify NEW REPS badge appears for Bench Press
+    await expect(tomorrowWorkout.locator('text=NEW REPS')).toBeVisible({ timeout: 5000 });
+
+    // Verify NEW WEIGHT badge appears for Squat
+    await expect(tomorrowWorkout.locator('text=NEW WEIGHT')).toBeVisible({ timeout: 5000 });
+
+    // Verify NEW TIME badge appears for Plank
+    await expect(tomorrowWorkout.locator('text=NEW TIME')).toBeVisible({ timeout: 5000 });
+
+    // Verify Push-ups doesn't have a badge (no improvement)
+    const pushUpsExercise = tomorrowWorkout.locator('text=Push-ups').locator('..');
+    await expect(pushUpsExercise.locator('text=NEW')).not.toBeVisible();
+
+    // Step 10: Verify NEW badges in Calendar View
+    await page.getByRole('button', { name: 'Calendar' }).click();
+    await page.waitForURL('/?view=calendar', { timeout: 5000 });
+
+    // Click on tomorrow's workout
+    const tomorrowWorkoutLink = page.locator('[data-testid^="calendar-workout-"]').last();
+    await expect(tomorrowWorkoutLink).toBeVisible({ timeout: 5000 });
+    await tomorrowWorkoutLink.click();
+
+    // Wait for navigation to workout detail page
+    await page.waitForURL(/\/workouts\/\d+/, { timeout: 5000 });
+
+    // Verify we're on the workout detail page
+    await expect(page.locator('h2:has-text("Workout Details")')).toBeVisible({ timeout: 5000 });
+
+    // Verify NEW badges appear on the detail page
+    await expect(page.locator('text=NEW REPS')).toBeVisible();
+    await expect(page.locator('text=NEW WEIGHT')).toBeVisible();
+    await expect(page.locator('text=NEW TIME')).toBeVisible();
+
+    // Verify the improved values are displayed
+    await expect(page.locator('text=Bench Press')).toBeVisible();
+    await expect(page.locator('text=12 reps')).toBeVisible();
+
+    await expect(page.locator('text=Squat')).toBeVisible();
+    await expect(page.locator('text=200 lbs')).toBeVisible();
+
+    await expect(page.locator('text=Plank')).toBeVisible();
+    await expect(page.locator('text=2.5 min')).toBeVisible();
   });
 });
