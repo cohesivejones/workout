@@ -12,6 +12,11 @@ This application uses a consolidated single-server approach:
 - **Database** uses PostgreSQL with TypeORM
 - **Authentication** via JWT tokens with HTTP-only cookies
 
+## Prerequisites
+
+- Node.js >= 18.0.0
+- Docker and Docker Compose
+
 ## Local Development
 
 1. Install dependencies:
@@ -20,26 +25,25 @@ This application uses a consolidated single-server approach:
 npm install
 ```
 
-2. Copy `.env.example` to `.env` and configure variables:
+2. Copy `server/.env.example` to `server/.env`:
 
 ```bash
-cp .env.example .env
+cp server/.env.example server/.env
 ```
 
-3. Set up the database:
+3. Start the PostgreSQL database using Docker:
 
 ```bash
-psql -U postgres
-CREATE DATABASE workout;
+npm run db:start
 ```
 
-4. Run migrations:
+4. Run database migrations:
 
 ```bash
 npm run db:migrate
 ```
 
-5. Start the development server:
+5. Start the development servers:
 
 ```bash
 npm run dev
@@ -47,9 +51,24 @@ npm run dev
 
 This will start:
 
-- Vite dev server (frontend) on port 5173
+- Vite dev server (frontend) on port 3000
 - API server (backend) on port 5001
+- PostgreSQL database on port 5432 (in Docker)
 - The frontend will proxy API requests to the backend
+
+### Test User Credentials
+
+For testing purposes, you can use these credentials:
+
+- Email: `test@foo.com`
+- Password: `Secure123!`
+
+### Database Management
+
+- `npm run db:start` - Start the development database
+- `npm run db:stop` - Stop the development database
+- `npm run db:reset` - Reset the database (removes all data and restarts)
+- `npm run db:migrate` - Run database migrations
 
 ## Production Build
 
@@ -78,55 +97,63 @@ All environment variables are now consolidated in a single `.env` file:
 
 ## Scripts
 
-- `npm run dev`: Start development servers (Vite + API server)
-- `npm run build`: Build for production (frontend + backend)
-- `npm start`: Start production server (single consolidated server)
-- `npm run db:create`: Create database
-- `npm run db:migrate`: Run database migrations
-- `npm test`: Run tests
-- `npm run lint`: Run ESLint
+### Development
+
+- `npm run dev` - Start development servers (Vite + API server)
+- `npm run db:start` - Start the development database
+- `npm run db:stop` - Stop the development database
+- `npm run db:reset` - Reset the database (removes all data)
+- `npm run db:migrate` - Run database migrations
+
+### Testing
+
+- `npm test` - Run unit tests
+- `npm run test:e2e` - Run end-to-end tests
+- `npm run test:e2e:db:start` - Start test database
+- `npm run test:e2e:db:stop` - Stop test database
+- `npm run test:e2e:db:reset` - Reset test database
+
+### Production
+
+- `npm run build` - Build for production (frontend + backend)
+- `npm start` - Start production server
+
+### Code Quality
+
+- `npm run lint` - Run ESLint
+- `npm run lint:fix` - Run ESLint and fix issues
+- `npm run format` - Format code with Prettier
+- `npm run format:check` - Check code formatting
 
 ## Deployment
 
-### Heroku Deployment
+The application is deployed to Heroku and automatically deploys when changes are pushed to the main branch on GitHub.
 
-This application is optimized for single-dyno Heroku deployment:
+### Deployment Process
 
-1. **Create Heroku app:**
+1. **Push to GitHub:**
 
 ```bash
-heroku create your-app-name
+git push origin main
 ```
 
-2. **Add Heroku Postgres:**
+2. **Heroku automatically deploys** from the connected GitHub repository
+
+### Manual Deployment (if needed)
+
+If you need to manually trigger a deployment or run migrations:
 
 ```bash
-heroku addons:create heroku-postgresql:mini
-```
-
-3. **Set environment variables:**
-
-```bash
-heroku config:set JWT_SECRET=your-secret-key
-heroku config:set OPENAI_API_KEY=your-openai-key
-heroku config:set NODE_ENV=production
-```
-
-4. **Deploy:**
-
-```bash
+# Trigger manual deployment
 git push heroku main
-```
 
-5. **Run migrations:**
-
-```bash
+# Run migrations on Heroku
 heroku run npm run db:migrate
 ```
 
-### Traditional Server Deployment
+### Deployment Scripts
 
-The application includes deployment scripts for traditional server deployment:
+The application includes deployment scripts for server management:
 
 ```bash
 ./scripts/deploy.sh
