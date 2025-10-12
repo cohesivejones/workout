@@ -20,6 +20,7 @@ jobs:
       NODE_ENV: test
       PORT: 5001
       CORS_ORIGIN: https://localhost
+      OPENAI_API_KEY: test_key_for_ci
     
     services:
       postgres:
@@ -51,6 +52,9 @@ jobs:
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps chromium
     
+    - name: Build frontend
+      run: npm run build
+    
     - name: Generate SSL certificates
       run: |
         mkdir -p nginx/certs
@@ -68,43 +72,34 @@ jobs:
           -p 80:80 \
           -p 443:443 \
           --add-host=host.docker.internal:host-gateway \
-          -v $(pwd)/nginx/nginx.conf:/etc/nginx/nginx.conf:ro \
+          -v $(pwd)/nginx/nginx.ci.conf:/etc/nginx/nginx.conf:ro \
           -v $(pwd)/nginx/certs:/etc/nginx/certs:ro \
           nginx:alpine
-        echo "Nginx container started"
+        echo "Nginx container started with CI config"
     
     - name: Set up test database
       run: |
         cd server
         npm run db:migrate
     
-    - name: Start backend server
+    - name: Start backend server (serves built frontend + API)
       run: |
         cd server
-        NODE_ENV=test npm run dev > ../backend.log 2>&1 &
+        npm start > ../backend.log 2>&1 &
         echo $! > ../server.pid
         echo "Backend server started with PID $(cat ../server.pid)"
-    
-    - name: Start frontend server
-      run: |
-        npx vite --port 3000 > vite.log 2>&1 &
-        echo $! > vite.pid
-        echo "Frontend server started with PID $(cat vite.pid)"
     
     - name: Wait for servers to be ready
       run: |
         echo "Waiting for backend server on port 5001..."
-        timeout 60 bash -c 'until curl -f http://localhost:5001/api/exercises 2>/dev/null; do sleep 1; done' || echo "Backend started (no auth endpoint check)"
-        
-        echo "Waiting for frontend server on port 3000..."
         for i in {1..60}; do
-          if curl -f http://localhost:3000 2>/dev/null; then
-            echo "Frontend server is ready!"
+          if curl -f http://localhost:5001/ 2>/dev/null; then
+            echo "Backend server is ready and serving frontend!"
             break
           fi
           if [ $i -eq 60 ]; then
-            echo "Frontend server failed to start. Logs:"
-            cat vite.log || echo "No vite.log found"
+            echo "Backend server failed to start. Logs:"
+            cat backend.log || echo "No backend.log found"
             exit 1
           fi
           sleep 1
@@ -133,7 +128,6 @@ jobs:
       if: always()
       run: |
         if [ -f server.pid ]; then kill $(cat server.pid) || true; fi
-        if [ -f vite.pid ]; then kill $(cat vite.pid) || true; fi
         docker stop workout-test-nginx || true
         docker rm workout-test-nginx || true
     
