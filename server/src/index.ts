@@ -117,7 +117,7 @@ apiRouter.post("/auth/login", async (req: Request, res: Response) => {
     // Set secure cookie with 2-hour expiration
     res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: true,
       sameSite: "lax",
       maxAge: 2 * 60 * 60 * 1000, // 2 hours
     });
@@ -1435,8 +1435,8 @@ app.get("*", (req: Request, res: Response) => {
   res.sendFile(path.join(__dirname, "../../dist", "index.html"));
 });
 
-const PORT = process.env.PORT || 5001;
-app.listen(PORT, () => {
+const PORT = parseInt(process.env.PORT || '5001', 10);
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
   console.log(`Build timestamp: ${new Date().toISOString()}`);
 });

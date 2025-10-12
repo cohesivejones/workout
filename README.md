@@ -12,6 +12,11 @@ This application uses a consolidated single-server approach:
 - **Database** uses PostgreSQL with TypeORM
 - **Authentication** via JWT tokens with HTTP-only cookies
 
+## Prerequisites
+
+- Node.js >= 18.0.0
+- Docker and Docker Compose
+
 ## Local Development
 
 1. Install dependencies:
@@ -20,36 +25,89 @@ This application uses a consolidated single-server approach:
 npm install
 ```
 
-2. Copy `.env.example` to `.env` and configure variables:
+2. Copy `server/.env.example` to `server/.env`:
 
 ```bash
-cp .env.example .env
+cp server/.env.example server/.env
 ```
 
-3. Set up the database:
+3. Generate SSL certificates (first time only):
 
 ```bash
-psql -U postgres
-CREATE DATABASE workout;
+npm run certs:generate
 ```
 
-4. Run migrations:
+4. Start the PostgreSQL database and Nginx proxy using Docker:
+
+```bash
+npm run db:start
+```
+
+5. Run database migrations:
 
 ```bash
 npm run db:migrate
 ```
 
-5. Start the development server:
+6. Start the development servers:
 
 ```bash
 npm run dev
 ```
 
+7. Access the application at **https://localhost**
+
+   **Note:** Your browser will show a security warning because this is a self-signed certificate. This is normal for development. Click "Advanced" and proceed to localhost.
+
 This will start:
 
-- Vite dev server (frontend) on port 5173
-- API server (backend) on port 5001
-- The frontend will proxy API requests to the backend
+- Nginx HTTPS proxy on ports 80 (HTTP) and 443 (HTTPS)
+- Vite dev server (frontend) on port 3000 (proxied through Nginx)
+- API server (backend) on port 5001 (proxied through Nginx)
+- PostgreSQL database on port 5432 (in Docker)
+- HTTP requests are automatically redirected to HTTPS
+
+### Test User Credentials
+
+For testing purposes, you can use these credentials:
+
+- Email: `test@foo.com`
+- Password: `Secure123!`
+
+### SSL Certificate Trust (Optional)
+
+To avoid the browser security warning, you can trust the self-signed certificate:
+
+**macOS:**
+
+```bash
+sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain nginx/certs/localhost.crt
+```
+
+**Linux:**
+
+```bash
+sudo cp nginx/certs/localhost.crt /usr/local/share/ca-certificates/
+sudo update-ca-certificates
+```
+
+**Windows:**
+
+1. Double-click `nginx/certs/localhost.crt`
+2. Click "Install Certificate"
+3. Select "Local Machine"
+4. Select "Place all certificates in the following store"
+5. Browse and select "Trusted Root Certification Authorities"
+6. Click "Finish"
+
+After trusting the certificate, restart your browser.
+
+### Database Management
+
+- `npm run db:start` - Start the development database and Nginx proxy
+- `npm run db:stop` - Stop the development database and Nginx proxy
+- `npm run db:reset` - Reset the database (removes all data and restarts)
+- `npm run db:migrate` - Run database migrations
 
 ## Production Build
 
@@ -78,55 +136,99 @@ All environment variables are now consolidated in a single `.env` file:
 
 ## Scripts
 
-- `npm run dev`: Start development servers (Vite + API server)
-- `npm run build`: Build for production (frontend + backend)
-- `npm start`: Start production server (single consolidated server)
-- `npm run db:create`: Create database
-- `npm run db:migrate`: Run database migrations
-- `npm test`: Run tests
-- `npm run lint`: Run ESLint
+### Development
+
+- `npm run dev` - Start development servers (Vite + API server)
+- `npm run certs:generate` - Generate SSL certificates for HTTPS (first time only)
+- `npm run db:start` - Start the development database and Nginx proxy
+- `npm run db:stop` - Stop the development database and Nginx proxy
+- `npm run db:reset` - Reset the database (removes all data)
+- `npm run db:migrate` - Run database migrations
+
+### Testing
+
+- `npm test` - Run unit tests
+- `npm run test:e2e` - Run end-to-end tests (requires test environment setup)
+- `npm run test:e2e:start` - Start test environment (database + nginx)
+- `npm run test:e2e:stop` - Stop test environment
+- `npm run test:e2e:reset` - Reset test environment
+- `npm run test:e2e:logs` - Show test environment logs
+
+**E2E Test Setup:**
+
+E2E tests run against `https://localhost` using the same HTTPS setup as development:
+
+1. Generate SSL certificates (if not already done):
+
+   ```bash
+   npm run certs:generate
+   ```
+
+2. Start test database and nginx:
+
+   ```bash
+   npm run test:e2e:start
+   ```
+
+3. Run tests (Playwright auto-starts backend and frontend servers):
+
+   ```bash
+   npm run test:e2e
+   ```
+
+4. Stop test environment:
+   ```bash
+   npm run test:e2e:stop
+   ```
+
+**Note:**
+
+- Playwright automatically starts the backend (port 5001) and frontend (port 5173) servers when running locally
+- You only need to manually start the test database and nginx proxy
+- In CI, all services (database, nginx, backend, frontend) are started by the workflow
+- E2E tests use the same HTTPS configuration as development, ensuring production parity
+
+### Production
+
+- `npm run build` - Build for production (frontend + backend)
+- `npm start` - Start production server
+
+### Code Quality
+
+- `npm run lint` - Run ESLint
+- `npm run lint:fix` - Run ESLint and fix issues
+- `npm run format` - Format code with Prettier
+- `npm run format:check` - Check code formatting
 
 ## Deployment
 
-### Heroku Deployment
+The application is deployed to Heroku and automatically deploys when changes are pushed to the main branch on GitHub.
 
-This application is optimized for single-dyno Heroku deployment:
+### Deployment Process
 
-1. **Create Heroku app:**
+1. **Push to GitHub:**
 
 ```bash
-heroku create your-app-name
+git push origin main
 ```
 
-2. **Add Heroku Postgres:**
+2. **Heroku automatically deploys** from the connected GitHub repository
+
+### Manual Deployment (if needed)
+
+If you need to manually trigger a deployment or run migrations:
 
 ```bash
-heroku addons:create heroku-postgresql:mini
-```
-
-3. **Set environment variables:**
-
-```bash
-heroku config:set JWT_SECRET=your-secret-key
-heroku config:set OPENAI_API_KEY=your-openai-key
-heroku config:set NODE_ENV=production
-```
-
-4. **Deploy:**
-
-```bash
+# Trigger manual deployment
 git push heroku main
-```
 
-5. **Run migrations:**
-
-```bash
+# Run migrations on Heroku
 heroku run npm run db:migrate
 ```
 
-### Traditional Server Deployment
+### Deployment Scripts
 
-The application includes deployment scripts for traditional server deployment:
+The application includes deployment scripts for server management:
 
 ```bash
 ./scripts/deploy.sh

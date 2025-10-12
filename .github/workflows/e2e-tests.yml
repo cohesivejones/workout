@@ -18,8 +18,8 @@ jobs:
       PGPASSWORD: postgres
       PGDATABASE: workout_test
       NODE_ENV: test
-      PORT: 3001
-      VITE_API_URL: http://localhost:3001
+      PORT: 5001
+      CORS_ORIGIN: https://localhost
     
     services:
       postgres:
@@ -51,6 +51,28 @@ jobs:
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps chromium
     
+    - name: Generate SSL certificates
+      run: |
+        mkdir -p nginx/certs
+        openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+          -keyout nginx/certs/localhost.key \
+          -out nginx/certs/localhost.crt \
+          -subj "/C=US/ST=State/L=City/O=CI/CN=localhost" \
+          -addext "subjectAltName=DNS:localhost,IP:127.0.0.1"
+        echo "SSL certificates generated"
+    
+    - name: Start nginx container
+      run: |
+        docker run -d \
+          --name workout-test-nginx \
+          -p 80:80 \
+          -p 443:443 \
+          --add-host=host.docker.internal:host-gateway \
+          -v $(pwd)/nginx/nginx.conf:/etc/nginx/nginx.conf:ro \
+          -v $(pwd)/nginx/certs:/etc/nginx/certs:ro \
+          nginx:alpine
+        echo "Nginx container started"
+    
     - name: Set up test database
       run: |
         cd server
@@ -59,24 +81,24 @@ jobs:
     - name: Start backend server
       run: |
         cd server
-        npm run dev > ../backend.log 2>&1 &
+        NODE_ENV=test npm run dev > ../backend.log 2>&1 &
         echo $! > ../server.pid
         echo "Backend server started with PID $(cat ../server.pid)"
     
     - name: Start frontend server
       run: |
-        npx vite --port 5173 > vite.log 2>&1 &
+        npx vite --port 3000 > vite.log 2>&1 &
         echo $! > vite.pid
         echo "Frontend server started with PID $(cat vite.pid)"
     
     - name: Wait for servers to be ready
       run: |
-        echo "Waiting for backend server on port 3001..."
-        timeout 60 bash -c 'until curl -f http://localhost:3001/api/exercises 2>/dev/null; do sleep 1; done' || echo "Backend started (no auth endpoint check)"
+        echo "Waiting for backend server on port 5001..."
+        timeout 60 bash -c 'until curl -f http://localhost:5001/api/exercises 2>/dev/null; do sleep 1; done' || echo "Backend started (no auth endpoint check)"
         
-        echo "Waiting for frontend server on port 5173..."
+        echo "Waiting for frontend server on port 3000..."
         for i in {1..60}; do
-          if curl -f http://localhost:5173 2>/dev/null; then
+          if curl -f http://localhost:3000 2>/dev/null; then
             echo "Frontend server is ready!"
             break
           fi
@@ -88,7 +110,21 @@ jobs:
           sleep 1
         done
         
-        echo "Both servers are ready!"
+        echo "Waiting for nginx on port 443..."
+        for i in {1..30}; do
+          if curl -k -f https://localhost 2>/dev/null; then
+            echo "Nginx is ready!"
+            break
+          fi
+          if [ $i -eq 30 ]; then
+            echo "Nginx failed to start"
+            docker logs workout-test-nginx || echo "No nginx logs"
+            exit 1
+          fi
+          sleep 1
+        done
+        
+        echo "All servers are ready!"
     
     - name: Run Playwright tests
       run: npm run test:e2e
@@ -98,6 +134,8 @@ jobs:
       run: |
         if [ -f server.pid ]; then kill $(cat server.pid) || true; fi
         if [ -f vite.pid ]; then kill $(cat vite.pid) || true; fi
+        docker stop workout-test-nginx || true
+        docker rm workout-test-nginx || true
     
     - uses: actions/upload-artifact@v4
       if: always()

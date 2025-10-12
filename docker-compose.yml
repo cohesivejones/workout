@@ -1,24 +1,24 @@
 services:
-  postgres-test:
+  postgres:
     image: postgres:15-alpine
-    container_name: workout-test-db
+    container_name: workout-dev-db
     environment:
-      POSTGRES_USER: test_user
-      POSTGRES_PASSWORD: test_password
-      POSTGRES_DB: workout_test
+      POSTGRES_USER: workout_user
+      POSTGRES_PASSWORD: workout_password
+      POSTGRES_DB: workout
     ports:
-      - "5433:5432"
+      - "5432:5432"
     volumes:
-      - postgres-test-data:/var/lib/postgresql/data
+      - postgres-dev-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U test_user -d workout_test"]
+      test: ["CMD-SHELL", "pg_isready -U workout_user -d workout"]
       interval: 5s
       timeout: 5s
       retries: 5
 
-  nginx-test:
+  nginx:
     image: nginx:alpine
-    container_name: workout-test-nginx
+    container_name: workout-nginx
     ports:
       - "80:80"
       - "443:443"
@@ -28,8 +28,8 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
-      - postgres-test
+      - postgres
     restart: unless-stopped
 
 volumes:
-  postgres-test-data:
+  postgres-dev-data:
