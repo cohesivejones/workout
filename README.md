@@ -164,13 +164,13 @@ E2E tests run against `https://localhost` using the same HTTPS setup as developm
    npm run certs:generate
    ```
 
-2. Start test database and nginx:
+2. Start test database, nginx, and run migrations:
 
    ```bash
    npm run test:e2e:start
    ```
 
-3. Run tests (Playwright auto-starts backend and frontend servers):
+3. Run tests (Playwright auto-starts backend server):
 
    ```bash
    npm run test:e2e
