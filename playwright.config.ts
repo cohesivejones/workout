@@ -47,25 +47,16 @@ export default defineConfig({
     },
   ],
 
-  /* Start servers automatically when running locally (not in CI) */
+  /* Start backend server automatically when running locally (not in CI) */
+  /* Backend serves both built frontend assets and API */
   webServer: process.env.CI
     ? undefined
-    : [
-        {
-          command: 'NODE_ENV=test cd server && npm run dev:test',
-          url: 'http://localhost:5001',
-          timeout: 120000,
-          reuseExistingServer: true,
-          stdout: 'pipe',
-          stderr: 'pipe',
-        },
-        {
-          command: 'npx vite --port 3000',
-          url: 'http://localhost:3000',
-          timeout: 120000,
-          reuseExistingServer: true,
-          stdout: 'pipe',
-          stderr: 'pipe',
-        },
-      ],
+    : {
+        command: 'NODE_ENV=test cd server && npm run dev:test',
+        url: 'http://localhost:5001',
+        timeout: 120000,
+        reuseExistingServer: true,
+        stdout: 'pipe',
+        stderr: 'pipe',
+      },
 });
