@@ -1435,8 +1435,8 @@ app.get("*", (req: Request, res: Response) => {
   res.sendFile(path.join(__dirname, "../../dist", "index.html"));
 });
 
-const PORT = process.env.PORT || 5001;
-app.listen(PORT, () => {
+const PORT = parseInt(process.env.PORT || '5001', 10);
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
   console.log(`Build timestamp: ${new Date().toISOString()}`);
 });

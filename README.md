@@ -31,30 +31,41 @@ npm install
 cp server/.env.example server/.env
 ```
 
-3. Start the PostgreSQL database using Docker:
+3. Generate SSL certificates (first time only):
+
+```bash
+npm run certs:generate
+```
+
+4. Start the PostgreSQL database and Nginx proxy using Docker:
 
 ```bash
 npm run db:start
 ```
 
-4. Run database migrations:
+5. Run database migrations:
 
 ```bash
 npm run db:migrate
 ```
 
-5. Start the development servers:
+6. Start the development servers:
 
 ```bash
 npm run dev
 ```
 
+7. Access the application at **https://localhost**
+
+   **Note:** Your browser will show a security warning because this is a self-signed certificate. This is normal for development. Click "Advanced" and proceed to localhost.
+
 This will start:
 
-- Vite dev server (frontend) on port 3000
-- API server (backend) on port 5001
+- Nginx HTTPS proxy on ports 80 (HTTP) and 443 (HTTPS)
+- Vite dev server (frontend) on port 3000 (proxied through Nginx)
+- API server (backend) on port 5001 (proxied through Nginx)
 - PostgreSQL database on port 5432 (in Docker)
-- The frontend will proxy API requests to the backend
+- HTTP requests are automatically redirected to HTTPS
 
 ### Test User Credentials
 
@@ -63,10 +74,35 @@ For testing purposes, you can use these credentials:
 - Email: `test@foo.com`
 - Password: `Secure123!`
 
+### SSL Certificate Trust (Optional)
+
+To avoid the browser security warning, you can trust the self-signed certificate:
+
+**macOS:**
+```bash
+sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain nginx/certs/localhost.crt
+```
+
+**Linux:**
+```bash
+sudo cp nginx/certs/localhost.crt /usr/local/share/ca-certificates/
+sudo update-ca-certificates
+```
+
+**Windows:**
+1. Double-click `nginx/certs/localhost.crt`
+2. Click "Install Certificate"
+3. Select "Local Machine"
+4. Select "Place all certificates in the following store"
+5. Browse and select "Trusted Root Certification Authorities"
+6. Click "Finish"
+
+After trusting the certificate, restart your browser.
+
 ### Database Management
 
-- `npm run db:start` - Start the development database
-- `npm run db:stop` - Stop the development database
+- `npm run db:start` - Start the development database and Nginx proxy
+- `npm run db:stop` - Stop the development database and Nginx proxy
 - `npm run db:reset` - Reset the database (removes all data and restarts)
 - `npm run db:migrate` - Run database migrations
 
@@ -100,8 +136,9 @@ All environment variables are now consolidated in a single `.env` file:
 ### Development
 
 - `npm run dev` - Start development servers (Vite + API server)
-- `npm run db:start` - Start the development database
-- `npm run db:stop` - Stop the development database
+- `npm run certs:generate` - Generate SSL certificates for HTTPS (first time only)
+- `npm run db:start` - Start the development database and Nginx proxy
+- `npm run db:stop` - Stop the development database and Nginx proxy
 - `npm run db:reset` - Reset the database (removes all data)
 - `npm run db:migrate` - Run database migrations
 
