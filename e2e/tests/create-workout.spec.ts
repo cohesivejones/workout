@@ -4,18 +4,21 @@ import { clearTestData } from '../helpers/testData';
 import { addExercise } from '../helpers/workout';
 
 test.describe('Create Workout with Multiple Exercises', () => {
-  // Clear storage and workout data before each test to ensure clean state
-  test.beforeEach(async ({ page, request }) => {
+  // Clear storage before each test to ensure clean state
+  test.beforeEach(async ({ page }) => {
     await page.context().clearCookies();
-    await clearTestData(request);
     await page.goto('/');
   });
 
   test('should create a workout with 6 exercises and verify in list and calendar views', async ({
     page,
+    request,
   }) => {
     // Step 1: Login using helper
     await login(page);
+
+    // Clear test data after login (when backend is running)
+    await clearTestData(request);
 
     // Step 2: Switch to List view to access "New Workout" button
     await page.getByRole('button', { name: 'List' }).click();

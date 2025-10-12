@@ -23,10 +23,10 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "test:e2e:db:start": "docker-compose -f docker-compose.test.yml up -d",
-    "test:e2e:db:stop": "docker-compose -f docker-compose.test.yml down",
-    "test:e2e:db:reset": "docker-compose -f docker-compose.test.yml down -v && npm run test:e2e:db:start",
-    "test:e2e:db:logs": "docker-compose -f docker-compose.test.yml logs -f postgres-test"
+    "test:e2e:start": "docker-compose -f docker-compose.test.yml up -d",
+    "test:e2e:stop": "docker-compose -f docker-compose.test.yml down",
+    "test:e2e:reset": "docker-compose -f docker-compose.test.yml down -v && npm run test:e2e:start",
+    "test:e2e:logs": "docker-compose -f docker-compose.test.yml logs -f postgres-test"
   },
   "dependencies": {
     "@ai-sdk/openai": "^1.3.10",

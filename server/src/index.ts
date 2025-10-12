@@ -117,7 +117,7 @@ apiRouter.post("/auth/login", async (req: Request, res: Response) => {
     // Set secure cookie with 2-hour expiration
     res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: true,
       sameSite: "lax",
       maxAge: 2 * 60 * 60 * 1000, // 2 hours
     });

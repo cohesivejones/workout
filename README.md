@@ -79,17 +79,20 @@ For testing purposes, you can use these credentials:
 To avoid the browser security warning, you can trust the self-signed certificate:
 
 **macOS:**
+
 ```bash
 sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain nginx/certs/localhost.crt
 ```
 
 **Linux:**
+
 ```bash
 sudo cp nginx/certs/localhost.crt /usr/local/share/ca-certificates/
 sudo update-ca-certificates
 ```
 
 **Windows:**
+
 1. Double-click `nginx/certs/localhost.crt`
 2. Click "Install Certificate"
 3. Select "Local Machine"
@@ -145,10 +148,45 @@ All environment variables are now consolidated in a single `.env` file:
 ### Testing
 
 - `npm test` - Run unit tests
-- `npm run test:e2e` - Run end-to-end tests
-- `npm run test:e2e:db:start` - Start test database
-- `npm run test:e2e:db:stop` - Stop test database
-- `npm run test:e2e:db:reset` - Reset test database
+- `npm run test:e2e` - Run end-to-end tests (requires test environment setup)
+- `npm run test:e2e:start` - Start test environment (database + nginx)
+- `npm run test:e2e:stop` - Stop test environment
+- `npm run test:e2e:reset` - Reset test environment
+- `npm run test:e2e:logs` - Show test environment logs
+
+**E2E Test Setup:**
+
+E2E tests run against `https://localhost` using the same HTTPS setup as development:
+
+1. Generate SSL certificates (if not already done):
+
+   ```bash
+   npm run certs:generate
+   ```
+
+2. Start test database and nginx:
+
+   ```bash
+   npm run test:e2e:start
+   ```
+
+3. Run tests (Playwright auto-starts backend and frontend servers):
+
+   ```bash
+   npm run test:e2e
+   ```
+
+4. Stop test environment:
+   ```bash
+   npm run test:e2e:stop
+   ```
+
+**Note:**
+
+- Playwright automatically starts the backend (port 5001) and frontend (port 5173) servers when running locally
+- You only need to manually start the test database and nginx proxy
+- In CI, all services (database, nginx, backend, frontend) are started by the workflow
+- E2E tests use the same HTTPS configuration as development, ensuring production parity
 
 ### Production
 

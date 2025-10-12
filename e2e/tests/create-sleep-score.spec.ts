@@ -4,15 +4,20 @@ import { clearTestData } from '../helpers/testData';
 
 test.describe('Create Sleep Score', () => {
   // Clear storage and test data before each test to ensure clean state
-  test.beforeEach(async ({ page, request }) => {
+  test.beforeEach(async ({ page }) => {
     await page.context().clearCookies();
-    await clearTestData(request);
     await page.goto('/');
   });
 
-  test('should create a sleep score and verify in list and calendar views', async ({ page }) => {
+  test('should create a sleep score and verify in list and calendar views', async ({
+    page,
+    request,
+  }) => {
     // Step 1: Login using helper
     await login(page);
+
+    // Clear test data after login (when backend is running)
+    await clearTestData(request);
 
     // Step 2: Switch to List view to access "New Sleep Score" button
     await page.getByRole('button', { name: 'List' }).click();
