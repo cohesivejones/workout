@@ -262,7 +262,12 @@ export const ListView = ({
                 >
                   <div className={styles.listCardHeader}>
                     <div className={styles.listCardType}>Workout</div>
-                    <h3>{format(`${workout.date}T12:00:00.000`, 'MMM d, yyyy (eeee)')}</h3>
+                    <h3>
+                      {format(`${workout.date}T12:00:00.000`, 'MMM d, yyyy (eeee)')}
+                      {workout.withInstructor && (
+                        <span className={styles.srOnly}>With Instructor</span>
+                      )}
+                    </h3>
                     <div className={styles.listCardActions}>
                       <Link
                         to={toWorkoutEditPath(workout)}

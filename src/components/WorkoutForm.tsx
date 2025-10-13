@@ -264,7 +264,7 @@ function WorkoutForm({
           {fields.length === 0 ? (
             <p>No exercises added yet</p>
           ) : (
-            <ul>
+            <ul data-testid="exercise-list">
               {fields.map((field, index) => (
                 <li key={field.id} className={styles.exerciseItem}>
                   <div className={styles.exerciseInfo}>
