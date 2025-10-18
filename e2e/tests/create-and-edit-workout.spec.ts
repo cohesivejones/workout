@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import { login } from '../helpers/auth';
 import { clearTestData } from '../helpers/testData';
 import { addExercise } from '../helpers/workout';
+import { clickFabMenuItem } from '../helpers/navigation';
 
 test.describe('Create and Edit Workout', () => {
   test.beforeEach(async ({ page }) => {
@@ -19,10 +20,10 @@ test.describe('Create and Edit Workout', () => {
     await login(page);
     await clearTestData(request);
 
-    // Step 2: Navigate to New Workout page
+    // Step 2: Navigate to New Workout page using FAB
     await page.getByRole('button', { name: 'List' }).click();
     await page.waitForURL('/?view=list', { timeout: 5000 });
-    await page.getByRole('link', { name: 'New Workout' }).click();
+    await clickFabMenuItem(page, 'New Workout');
     await expect(page.getByRole('heading', { name: 'New Workout' })).toBeVisible({ timeout: 5000 });
 
     // Step 3: Add 6 exercises with variety

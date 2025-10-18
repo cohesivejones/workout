@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import { login } from '../helpers/auth';
 import { clearTestData } from '../helpers/testData';
 import { addExercise } from '../helpers/workout';
+import { clickFabMenuItem } from '../helpers/navigation';
 
 test.describe('Create Workout with Multiple Exercises', () => {
   // Clear storage before each test to ensure clean state
@@ -24,8 +25,8 @@ test.describe('Create Workout with Multiple Exercises', () => {
     await page.getByRole('button', { name: 'List' }).click();
     await page.waitForURL('/?view=list', { timeout: 5000 });
 
-    // Step 3: Navigate to New Workout page
-    await page.getByRole('link', { name: 'New Workout' }).click();
+    // Step 3: Navigate to New Workout page using FAB
+    await clickFabMenuItem(page, 'New Workout');
     await expect(page.getByRole('heading', { name: 'New Workout' })).toBeVisible({ timeout: 5000 });
 
     // Step 4: Add 6 exercises with different types
@@ -146,8 +147,8 @@ test.describe('Create Workout with Multiple Exercises', () => {
     await page.getByRole('button', { name: 'List' }).click();
     await page.waitForURL('/?view=list', { timeout: 5000 });
 
-    // Navigate to New Workout page
-    await page.getByRole('link', { name: 'New Workout' }).click();
+    // Navigate to New Workout page using FAB
+    await clickFabMenuItem(page, 'New Workout');
     await expect(page.getByRole('heading', { name: 'New Workout' })).toBeVisible({ timeout: 5000 });
 
     // Set date to tomorrow

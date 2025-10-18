@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
-import { MdOutlineEdit } from 'react-icons/md';
+import { MdOutlineEdit, MdAdd, MdFitnessCenter, MdLocalHospital, MdHotel } from 'react-icons/md';
 import { PainScore, Workout, SleepScore } from '../types';
 import {
   toPainScoreNewPath,
@@ -46,6 +46,23 @@ export const ListView = ({
     type: string;
     id: number;
   } | null>(null);
+
+  const [fabOpen, setFabOpen] = useState(false);
+  const fabRef = useRef<HTMLDivElement | null>(null);
+
+  // Close FAB menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (fabRef.current && !fabRef.current.contains(event.target as Node)) {
+        setFabOpen(false);
+      }
+    };
+
+    if (fabOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [fabOpen]);
 
   // Combine workouts, pain scores, and sleep scores into a single array
   const allItems: ListItem[] = [
@@ -222,26 +239,6 @@ export const ListView = ({
               Show All
             </button>
           </div>
-        </div>
-        <div className={styles.actionButtons}>
-          <Link
-            to={toWorkoutNewPath()}
-            className={classNames(styles.addBtn, buttonStyles.primaryBtn)}
-          >
-            New Workout
-          </Link>
-          <Link
-            to={toPainScoreNewPath()}
-            className={classNames(styles.addBtn, buttonStyles.secondaryBtn)}
-          >
-            New Pain Score
-          </Link>
-          <Link
-            to={toSleepScoreNewPath()}
-            className={classNames(styles.addBtn, buttonStyles.secondaryBtn)}
-          >
-            New Sleep Score
-          </Link>
         </div>
       </div>
 
@@ -428,6 +425,43 @@ export const ListView = ({
           })}
         </div>
       )}
+
+      {/* Floating Action Button */}
+      <div className={styles.fabContainer} ref={fabRef}>
+        <button
+          className={classNames(styles.fab, { [styles.fabOpen]: fabOpen })}
+          onClick={() => setFabOpen(!fabOpen)}
+          aria-label="Add new item"
+          aria-expanded={fabOpen}
+        >
+          <MdAdd className={styles.fabIcon} />
+        </button>
+        {fabOpen && (
+          <div className={styles.fabMenu}>
+            <Link
+              to={toWorkoutNewPath()}
+              className={styles.fabMenuItem}
+              onClick={() => setFabOpen(false)}
+            >
+              <MdFitnessCenter /> New Workout
+            </Link>
+            <Link
+              to={toPainScoreNewPath()}
+              className={styles.fabMenuItem}
+              onClick={() => setFabOpen(false)}
+            >
+              <MdLocalHospital /> New Pain Score
+            </Link>
+            <Link
+              to={toSleepScoreNewPath()}
+              className={styles.fabMenuItem}
+              onClick={() => setFabOpen(false)}
+            >
+              <MdHotel /> New Sleep Score
+            </Link>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
