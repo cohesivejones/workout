@@ -81,11 +81,6 @@ function LoginPage() {
       >
         {isSubmitting || loading ? 'Logging in...' : 'Login'}
       </button>
-      <div className={styles.loginNote}>
-        <p className={styles.loginNoteLink}>
-          After logging in, you can <a href="/change-password">change your password</a>.
-        </p>
-      </div>
     </FormContainer>
   );
 }

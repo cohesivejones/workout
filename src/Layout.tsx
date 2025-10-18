@@ -51,23 +51,25 @@ const Header = () => {
           />
           <h1 style={{ margin: 0 }}>Workout Tracker</h1>
         </Link>
-        <nav className={styles.mainNav}>
-          <Link to="/" className={styles.navLink}>
-            Timeline
-          </Link>
-          <Link to="/dashboard" className={styles.navLink}>
-            Dashboard
-          </Link>
-          <Link to="/exercises" className={styles.navLink}>
-            Exercises
-          </Link>
-          <Link to="/workouts/generate" className={styles.navLink}>
-            Generate Workout
-          </Link>
-          <Link to="/diagnostician" className={styles.navLink}>
-            Diagnostician
-          </Link>
-        </nav>
+        {user && (
+          <nav className={styles.mainNav}>
+            <Link to="/" className={styles.navLink}>
+              Timeline
+            </Link>
+            <Link to="/dashboard" className={styles.navLink}>
+              Dashboard
+            </Link>
+            <Link to="/exercises" className={styles.navLink}>
+              Exercises
+            </Link>
+            <Link to="/workouts/generate" className={styles.navLink}>
+              Generate Workout
+            </Link>
+            <Link to="/diagnostician" className={styles.navLink}>
+              Diagnostician
+            </Link>
+          </nav>
+        )}
       </div>
 
       {user && (
