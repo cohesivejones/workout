@@ -21,35 +21,28 @@ function createTestApp() {
       const userId = req.user!.id;
       const { startDate, endDate } = req.query;
 
-      // Default to last 3 months if no dates provided
-      let start: string;
-      let end: string;
-
-      if (!startDate || !endDate) {
-        const today = new Date();
-        const threeMonthsAgo = new Date();
-        threeMonthsAgo.setMonth(today.getMonth() - 3);
-        
-        start = threeMonthsAgo.toISOString().split('T')[0];
-        end = today.toISOString().split('T')[0];
-      } else {
-        start = startDate as string;
-        end = endDate as string;
-      }
-
       // Fetch all three data types in parallel
       const workoutRepository = dataSource.getRepository(Workout);
       const painScoreRepository = dataSource.getRepository(PainScore);
       const sleepScoreRepository = dataSource.getRepository(SleepScore);
 
-      const { Between } = await import('typeorm');
+      // If date range is provided, filter by it; otherwise return all data
+      const workoutWhere: any = { userId: Number(userId) };
+      const painScoreWhere: any = { userId: Number(userId) };
+      const sleepScoreWhere: any = { userId: Number(userId) };
+
+      if (startDate && endDate) {
+        const { Between } = await import('typeorm');
+        const start = startDate as string;
+        const end = endDate as string;
+        workoutWhere.date = Between(start, end);
+        painScoreWhere.date = Between(start, end);
+        sleepScoreWhere.date = Between(start, end);
+      }
 
       const [workouts, painScores, sleepScores] = await Promise.all([
         workoutRepository.find({
-          where: {
-            userId: Number(userId),
-            date: Between(start, end),
-          },
+          where: workoutWhere,
           relations: {
             workoutExercises: {
               exercise: true,
@@ -58,44 +51,42 @@ function createTestApp() {
           order: { date: "DESC" },
         }),
         painScoreRepository.find({
-          where: {
-            userId: Number(userId),
-            date: Between(start, end),
-          },
+          where: painScoreWhere,
           order: { date: "DESC" },
         }),
         sleepScoreRepository.find({
-          where: {
-            userId: Number(userId),
-            date: Between(start, end),
-          },
+          where: sleepScoreWhere,
           order: { date: "DESC" },
         }),
       ]);
 
-      // Check if there's more data before the start date
-      const [earlierWorkouts, earlierPainScores, earlierSleepScores] = await Promise.all([
-        workoutRepository.count({
-          where: {
-            userId: Number(userId),
-            date: Between('1900-01-01', start),
-          },
-        }),
-        painScoreRepository.count({
-          where: {
-            userId: Number(userId),
-            date: Between('1900-01-01', start),
-          },
-        }),
-        sleepScoreRepository.count({
-          where: {
-            userId: Number(userId),
-            date: Between('1900-01-01', start),
-          },
-        }),
-      ]);
-
-      const hasMore = earlierWorkouts > 0 || earlierPainScores > 0 || earlierSleepScores > 0;
+      // Check if there's more data before the start date (only if date range was provided)
+      let hasMore = false;
+      if (startDate && endDate) {
+        const { Between } = await import('typeorm');
+        const start = startDate as string;
+        const [earlierWorkouts, earlierPainScores, earlierSleepScores] = await Promise.all([
+          workoutRepository.count({
+            where: {
+              userId: Number(userId),
+              date: Between('1900-01-01', start),
+            },
+          }),
+          painScoreRepository.count({
+            where: {
+              userId: Number(userId),
+              date: Between('1900-01-01', start),
+            },
+          }),
+          sleepScoreRepository.count({
+            where: {
+              userId: Number(userId),
+              date: Between('1900-01-01', start),
+            },
+          }),
+        ]);
+        hasMore = earlierWorkouts > 0 || earlierPainScores > 0 || earlierSleepScores > 0;
+      }
 
       // Transform workouts to match expected response format
       const workoutResponses = workouts.map((workout) => ({
@@ -354,7 +345,7 @@ describe('Timeline API Routes', () => {
       expect(response.body.hasMore).toBe(false);
     });
 
-    it('should default to last 3 months when no dates provided', async () => {
+    it('should return all data when no dates provided', async () => {
       const workoutRepository = dataSource.getRepository(Workout);
       
       const today = new Date();
@@ -364,7 +355,7 @@ describe('Timeline API Routes', () => {
       const twoMonthsAgo = new Date(today);
       twoMonthsAgo.setMonth(today.getMonth() - 2);
 
-      // Create workout 4 months ago (should not be included)
+      // Create workout 4 months ago (should be included)
       await workoutRepository.save(
         workoutRepository.create({
           userId: testUser.id,
@@ -387,8 +378,9 @@ describe('Timeline API Routes', () => {
         .set('Cookie', [`token=${authToken}`])
         .expect(200);
 
-      expect(response.body.workouts).toHaveLength(1);
-      expect(response.body.hasMore).toBe(true);
+      // Should return all workouts when no date range is specified
+      expect(response.body.workouts).toHaveLength(2);
+      expect(response.body.hasMore).toBe(false);
     });
 
     it('should return empty arrays when no data in range', async () => {
