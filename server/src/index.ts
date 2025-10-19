@@ -1399,6 +1399,115 @@ apiRouter.post("/workouts/generate", authenticateToken, async (req: Request, res
   }
 });
 
+// Timeline API endpoint - Get paginated timeline data
+apiRouter.get("/timeline", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user!.id;
+    const { startDate, endDate } = req.query;
+
+    // Default to last 3 months if no dates provided
+    let start: string;
+    let end: string;
+
+    if (!startDate || !endDate) {
+      const today = new Date();
+      const threeMonthsAgo = new Date();
+      threeMonthsAgo.setMonth(today.getMonth() - 3);
+      
+      start = threeMonthsAgo.toISOString().split('T')[0];
+      end = today.toISOString().split('T')[0];
+    } else {
+      start = startDate as string;
+      end = endDate as string;
+    }
+
+    // Fetch all three data types in parallel
+    const workoutRepository = dataSource.getRepository(Workout);
+    const painScoreRepository = dataSource.getRepository(PainScore);
+    const sleepScoreRepository = dataSource.getRepository(SleepScore);
+
+    const [workouts, painScores, sleepScores] = await Promise.all([
+      workoutRepository.find({
+        where: {
+          userId: Number(userId),
+          date: Between(start, end),
+        },
+        relations: {
+          workoutExercises: {
+            exercise: true,
+          },
+        },
+        order: { date: "DESC" },
+      }),
+      painScoreRepository.find({
+        where: {
+          userId: Number(userId),
+          date: Between(start, end),
+        },
+        order: { date: "DESC" },
+      }),
+      sleepScoreRepository.find({
+        where: {
+          userId: Number(userId),
+          date: Between(start, end),
+        },
+        order: { date: "DESC" },
+      }),
+    ]);
+
+    // Check if there's more data before the start date
+    const [earlierWorkouts, earlierPainScores, earlierSleepScores] = await Promise.all([
+      workoutRepository.count({
+        where: {
+          userId: Number(userId),
+          date: Between('1900-01-01', start),
+        },
+      }),
+      painScoreRepository.count({
+        where: {
+          userId: Number(userId),
+          date: Between('1900-01-01', start),
+        },
+      }),
+      sleepScoreRepository.count({
+        where: {
+          userId: Number(userId),
+          date: Between('1900-01-01', start),
+        },
+      }),
+    ]);
+
+    const hasMore = earlierWorkouts > 0 || earlierPainScores > 0 || earlierSleepScores > 0;
+
+    // Transform workouts to match expected response format
+    const workoutResponses: WorkoutResponse[] = workouts.map((workout) => ({
+      id: workout.id,
+      date: workout.date,
+      withInstructor: workout.withInstructor,
+      exercises: workout.workoutExercises.map((we) => ({
+        id: we.exercise.id,
+        name: we.exercise.name,
+        reps: we.reps,
+        weight: we.weight,
+        time_minutes: we.time_minutes,
+        new_reps: we.new_reps,
+        new_weight: we.new_weight,
+        new_time: we.new_time,
+      })),
+    }));
+
+    res.json({
+      workouts: workoutResponses,
+      painScores,
+      sleepScores,
+      hasMore,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 // Test-only routes (only available when NODE_ENV=test)
 if (process.env.NODE_ENV === 'test') {
   const testRouter = express.Router();
