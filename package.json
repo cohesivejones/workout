@@ -22,11 +22,12 @@
     "start": "npm start --prefix server",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:integration": "npm run test:integration --prefix server",
     "test:e2e": "NODE_ENV=test npm run build && playwright test",
-    "test:e2e:start": "docker-compose -f docker-compose.test.yml up -d && npm run db:migrate:test --prefix server",
-    "test:e2e:stop": "docker-compose -f docker-compose.test.yml down",
-    "test:e2e:reset": "docker-compose -f docker-compose.test.yml down -v && npm run test:e2e:start",
-    "test:e2e:logs": "docker-compose -f docker-compose.test.yml logs -f postgres-test"
+    "test:env:start": "docker-compose -f docker-compose.test.yml up -d && npm run db:migrate:test --prefix server",
+    "test:env:stop": "docker-compose -f docker-compose.test.yml down",
+    "test:env:reset": "docker-compose -f docker-compose.test.yml down -v && npm run test:env:start",
+    "test:env:logs": "docker-compose -f docker-compose.test.yml logs -f postgres-test"
   },
   "dependencies": {
     "@ai-sdk/openai": "^1.3.10",

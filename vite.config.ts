@@ -43,6 +43,7 @@ export default defineConfig(({ mode }) => {
         '**/node_modules/**',
         '**/dist/**',
         '**/e2e/**',
+        '**/server/**',
         '**/.{idea,git,cache,output,temp}/**',
         '**/playwright-report/**',
         '**/test-results/**',
