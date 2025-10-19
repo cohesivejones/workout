@@ -44,10 +44,7 @@ Or manually:
 
 ```bash
 # Start Docker test database (runs on port 5433 to avoid conflicts)
-npm run test:e2e:db:start
-
-# Wait a few seconds for database to be ready, then run migrations
-cd server && npm run db:migrate:test
+npm run test:env:start
 ```
 
 The test database uses these credentials (configured in `server/.env.test`):
@@ -89,10 +86,10 @@ When done testing:
 
 ```bash
 # Stop the test database
-npm run test:e2e:db:stop
+npm run test:env:stop
 
 # Or reset it completely (removes all data)
-npm run test:e2e:db:reset
+npm run test:env:reset
 ```
 
 ### CI/CD Setup (GitHub Actions)

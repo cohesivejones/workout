@@ -149,10 +149,10 @@ All environment variables are now consolidated in a single `.env` file:
 
 - `npm test` - Run unit tests
 - `npm run test:e2e` - Run end-to-end tests (requires test environment setup)
-- `npm run test:e2e:start` - Start test environment (database + nginx)
-- `npm run test:e2e:stop` - Stop test environment
-- `npm run test:e2e:reset` - Reset test environment
-- `npm run test:e2e:logs` - Show test environment logs
+- `npm run test:env:start` - Start test environment (database + nginx)
+- `npm run test:env:stop` - Stop test environment
+- `npm run test:env:reset` - Reset test environment
+- `npm run test:env:logs` - Show test environment logs
 
 **E2E Test Setup:**
 
@@ -167,7 +167,7 @@ E2E tests run against `https://localhost` using the same HTTPS setup as developm
 2. Start test database, nginx, and run migrations:
 
    ```bash
-   npm run test:e2e:start
+   npm run test:env:start
    ```
 
 3. Run tests (Playwright auto-starts backend server):
@@ -178,7 +178,7 @@ E2E tests run against `https://localhost` using the same HTTPS setup as developm
 
 4. Stop test environment:
    ```bash
-   npm run test:e2e:stop
+   npm run test:env:stop
    ```
 
 **Note:**
