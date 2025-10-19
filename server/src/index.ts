@@ -545,7 +545,7 @@ apiRouter.post("/workouts", authenticateToken, async (req: Request, res: Respons
     const error = err as DatabaseError;
 
     // Check for unique constraint violation
-    if (error.code === "23505" && error.constraint === "workouts_date_key") {
+    if (error.code === "23505" && error.constraint === "workouts_date_user_id_key") {
       res.status(400).json({ error: "A workout already exists for this date" });
     } else {
       res.status(500).json({ error: error.message || "Server error" });
@@ -1405,7 +1405,7 @@ apiRouter.get("/timeline", authenticateToken, async (req: Request, res: Response
     const userId = req.user!.id;
     const { startDate, endDate } = req.query;
 
-    // Default to last 3 months if no dates provided
+    // Default to last 3 months and next 3 months if no dates provided
     let start: string;
     let end: string;
 
@@ -1413,9 +1413,11 @@ apiRouter.get("/timeline", authenticateToken, async (req: Request, res: Response
       const today = new Date();
       const threeMonthsAgo = new Date();
       threeMonthsAgo.setMonth(today.getMonth() - 3);
+      const threeMonthsAhead = new Date();
+      threeMonthsAhead.setMonth(today.getMonth() + 3);
       
       start = threeMonthsAgo.toISOString().split('T')[0];
-      end = today.toISOString().split('T')[0];
+      end = threeMonthsAhead.toISOString().split('T')[0];
     } else {
       start = startDate as string;
       end = endDate as string;

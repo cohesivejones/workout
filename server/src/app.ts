@@ -371,33 +371,27 @@ apiRouter.get("/timeline", authenticateToken, async (req: Request, res: Response
     const userId = req.user!.id;
     const { startDate, endDate } = req.query;
 
-    // Default to last 3 months if no dates provided
-    let start: string;
-    let end: string;
-
-    if (!startDate || !endDate) {
-      const today = new Date();
-      const threeMonthsAgo = new Date();
-      threeMonthsAgo.setMonth(today.getMonth() - 3);
-      
-      start = threeMonthsAgo.toISOString().split('T')[0];
-      end = today.toISOString().split('T')[0];
-    } else {
-      start = startDate as string;
-      end = endDate as string;
-    }
-
     // Fetch all three data types in parallel
     const workoutRepository = dataSource.getRepository(Workout);
     const painScoreRepository = dataSource.getRepository(PainScore);
     const sleepScoreRepository = dataSource.getRepository(SleepScore);
 
+    // If date range is provided, filter by it; otherwise return all data
+    const workoutWhere: any = { userId: Number(userId) };
+    const painScoreWhere: any = { userId: Number(userId) };
+    const sleepScoreWhere: any = { userId: Number(userId) };
+
+    if (startDate && endDate) {
+      const start = startDate as string;
+      const end = endDate as string;
+      workoutWhere.date = Between(start, end);
+      painScoreWhere.date = Between(start, end);
+      sleepScoreWhere.date = Between(start, end);
+    }
+
     const [workouts, painScores, sleepScores] = await Promise.all([
       workoutRepository.find({
-        where: {
-          userId: Number(userId),
-          date: Between(start, end),
-        },
+        where: workoutWhere,
         relations: {
           workoutExercises: {
             exercise: true,
@@ -406,44 +400,41 @@ apiRouter.get("/timeline", authenticateToken, async (req: Request, res: Response
         order: { date: "DESC" },
       }),
       painScoreRepository.find({
-        where: {
-          userId: Number(userId),
-          date: Between(start, end),
-        },
+        where: painScoreWhere,
         order: { date: "DESC" },
       }),
       sleepScoreRepository.find({
-        where: {
-          userId: Number(userId),
-          date: Between(start, end),
-        },
+        where: sleepScoreWhere,
         order: { date: "DESC" },
       }),
     ]);
 
-    // Check if there's more data before the start date
-    const [earlierWorkouts, earlierPainScores, earlierSleepScores] = await Promise.all([
-      workoutRepository.count({
-        where: {
-          userId: Number(userId),
-          date: Between('1900-01-01', start),
-        },
-      }),
-      painScoreRepository.count({
-        where: {
-          userId: Number(userId),
-          date: Between('1900-01-01', start),
-        },
-      }),
-      sleepScoreRepository.count({
-        where: {
-          userId: Number(userId),
-          date: Between('1900-01-01', start),
-        },
-      }),
-    ]);
-
-    const hasMore = earlierWorkouts > 0 || earlierPainScores > 0 || earlierSleepScores > 0;
+    // Check if there's more data before the start date (only if date range was provided)
+    let hasMore = false;
+    if (startDate && endDate) {
+      const start = startDate as string;
+      const [earlierWorkouts, earlierPainScores, earlierSleepScores] = await Promise.all([
+        workoutRepository.count({
+          where: {
+            userId: Number(userId),
+            date: Between('1900-01-01', start),
+          },
+        }),
+        painScoreRepository.count({
+          where: {
+            userId: Number(userId),
+            date: Between('1900-01-01', start),
+          },
+        }),
+        sleepScoreRepository.count({
+          where: {
+            userId: Number(userId),
+            date: Between('1900-01-01', start),
+          },
+        }),
+      ]);
+      hasMore = earlierWorkouts > 0 || earlierPainScores > 0 || earlierSleepScores > 0;
+    }
 
     // Transform workouts to match expected response format
     const workoutResponses: WorkoutResponse[] = workouts.map((workout) => ({
@@ -473,6 +464,30 @@ apiRouter.get("/timeline", authenticateToken, async (req: Request, res: Response
     res.status(500).json({ error: "Server error" });
   }
 });
+
+// Test-only endpoint to clear test data
+if (process.env.NODE_ENV === 'test') {
+  apiRouter.delete("/test/clear-test-data", authenticateToken, async (req: Request, res: Response) => {
+    try {
+      const userId = req.user!.id;
+      
+      // Delete all test data for the authenticated user
+      await dataSource.query(
+        'DELETE FROM workout_exercises WHERE workout_id IN (SELECT id FROM workouts WHERE "userId" = $1)',
+        [userId]
+      );
+      await dataSource.query('DELETE FROM workouts WHERE "userId" = $1', [userId]);
+      await dataSource.query('DELETE FROM pain_scores WHERE "userId" = $1', [userId]);
+      await dataSource.query('DELETE FROM sleep_scores WHERE "userId" = $1', [userId]);
+      await dataSource.query('DELETE FROM exercises WHERE "userId" = $1', [userId]);
+      
+      res.json({ message: 'Test data cleared successfully' });
+    } catch (err) {
+      console.error('Failed to clear test data:', err);
+      res.status(500).json({ error: 'Failed to clear test data' });
+    }
+  });
+}
 
 // Mount API router
 app.use("/api", apiRouter);
