@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../helpers/auth';
 import { clearTestData } from '../helpers/testData';
+import { clickFabMenuItem } from '../helpers/navigation';
 
 test.describe('Create Sleep Score', () => {
   // Clear storage and test data before each test to ensure clean state
@@ -23,8 +24,8 @@ test.describe('Create Sleep Score', () => {
     await page.getByRole('button', { name: 'List' }).click();
     await page.waitForURL('/?view=list', { timeout: 5000 });
 
-    // Step 3: Navigate to New Sleep Score page
-    await page.getByRole('link', { name: 'New Sleep Score' }).click();
+    // Step 3: Navigate to New Sleep Score page using FAB
+    await clickFabMenuItem(page, 'New Sleep Score');
     await expect(page.getByRole('heading', { name: 'Add Sleep Score' })).toBeVisible({
       timeout: 5000,
     });

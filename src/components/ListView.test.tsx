@@ -512,4 +512,175 @@ describe('ListView', () => {
     expect(lungesItem).not.toHaveTextContent('NEW REPS');
     expect(lungesItem).not.toHaveTextContent('NEW WEIGHT');
   });
+
+  describe('FAB (Floating Action Button)', () => {
+    it('renders FAB button with correct aria-label', () => {
+      render(
+        <MemoryRouter>
+          <ListView
+            workouts={mockWorkouts}
+            painScores={mockPainScores}
+            sleepScores={mockSleepScores}
+            handleWorkoutDeleted={mockHandleWorkoutDeleted}
+            handlePainScoreDelete={mockHandlePainScoreDelete}
+            handleSleepScoreDelete={mockHandleSleepScoreDelete}
+          />
+        </MemoryRouter>
+      );
+
+      const fabButton = screen.getByRole('button', { name: 'Add new item' });
+      expect(fabButton).toBeInTheDocument();
+      expect(fabButton).toHaveAttribute('aria-expanded', 'false');
+    });
+
+    it('toggles FAB menu when button is clicked', () => {
+      render(
+        <MemoryRouter>
+          <ListView
+            workouts={mockWorkouts}
+            painScores={mockPainScores}
+            sleepScores={mockSleepScores}
+            handleWorkoutDeleted={mockHandleWorkoutDeleted}
+            handlePainScoreDelete={mockHandlePainScoreDelete}
+            handleSleepScoreDelete={mockHandleSleepScoreDelete}
+          />
+        </MemoryRouter>
+      );
+
+      const fabButton = screen.getByRole('button', { name: 'Add new item' });
+
+      // Menu should not be visible initially
+      expect(screen.queryByRole('link', { name: /New Workout/i })).not.toBeInTheDocument();
+
+      // Click to open menu
+      fireEvent.click(fabButton);
+
+      // Menu items should now be visible
+      expect(screen.getByRole('link', { name: /New Workout/i })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: /New Pain Score/i })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: /New Sleep Score/i })).toBeInTheDocument();
+      expect(fabButton).toHaveAttribute('aria-expanded', 'true');
+
+      // Click again to close menu
+      fireEvent.click(fabButton);
+
+      // Menu should be hidden again
+      expect(screen.queryByRole('link', { name: /New Workout/i })).not.toBeInTheDocument();
+      expect(fabButton).toHaveAttribute('aria-expanded', 'false');
+    });
+
+    it('displays correct links in FAB menu', () => {
+      render(
+        <MemoryRouter>
+          <ListView
+            workouts={mockWorkouts}
+            painScores={mockPainScores}
+            sleepScores={mockSleepScores}
+            handleWorkoutDeleted={mockHandleWorkoutDeleted}
+            handlePainScoreDelete={mockHandlePainScoreDelete}
+            handleSleepScoreDelete={mockHandleSleepScoreDelete}
+          />
+        </MemoryRouter>
+      );
+
+      const fabButton = screen.getByRole('button', { name: 'Add new item' });
+      fireEvent.click(fabButton);
+
+      // Check that all three menu items have correct hrefs
+      const workoutLink = screen.getByRole('link', { name: /New Workout/i });
+      const painScoreLink = screen.getByRole('link', { name: /New Pain Score/i });
+      const sleepScoreLink = screen.getByRole('link', { name: /New Sleep Score/i });
+
+      expect(workoutLink).toHaveAttribute('href', '/workouts/new');
+      expect(painScoreLink).toHaveAttribute('href', '/pain-scores/new');
+      expect(sleepScoreLink).toHaveAttribute('href', '/sleep-scores/new');
+    });
+
+    it('closes FAB menu when clicking outside', () => {
+      render(
+        <MemoryRouter>
+          <ListView
+            workouts={mockWorkouts}
+            painScores={mockPainScores}
+            sleepScores={mockSleepScores}
+            handleWorkoutDeleted={mockHandleWorkoutDeleted}
+            handlePainScoreDelete={mockHandlePainScoreDelete}
+            handleSleepScoreDelete={mockHandleSleepScoreDelete}
+          />
+        </MemoryRouter>
+      );
+
+      const fabButton = screen.getByRole('button', { name: 'Add new item' });
+
+      // Open menu
+      fireEvent.click(fabButton);
+      expect(screen.getByRole('link', { name: /New Workout/i })).toBeInTheDocument();
+
+      // Click outside (on the document body)
+      fireEvent.mouseDown(document.body);
+
+      // Menu should be closed
+      expect(screen.queryByRole('link', { name: /New Workout/i })).not.toBeInTheDocument();
+    });
+
+    it('closes FAB menu when a menu item is clicked', () => {
+      render(
+        <MemoryRouter>
+          <ListView
+            workouts={mockWorkouts}
+            painScores={mockPainScores}
+            sleepScores={mockSleepScores}
+            handleWorkoutDeleted={mockHandleWorkoutDeleted}
+            handlePainScoreDelete={mockHandlePainScoreDelete}
+            handleSleepScoreDelete={mockHandleSleepScoreDelete}
+          />
+        </MemoryRouter>
+      );
+
+      const fabButton = screen.getByRole('button', { name: 'Add new item' });
+
+      // Open menu
+      fireEvent.click(fabButton);
+      expect(screen.getByRole('link', { name: /New Workout/i })).toBeInTheDocument();
+
+      // Click on a menu item
+      const workoutLink = screen.getByRole('link', { name: /New Workout/i });
+      fireEvent.click(workoutLink);
+
+      // Menu should be closed
+      expect(screen.queryByRole('link', { name: /New Workout/i })).not.toBeInTheDocument();
+    });
+
+    it('does not render old action buttons in header', () => {
+      render(
+        <MemoryRouter>
+          <ListView
+            workouts={mockWorkouts}
+            painScores={mockPainScores}
+            sleepScores={mockSleepScores}
+            handleWorkoutDeleted={mockHandleWorkoutDeleted}
+            handlePainScoreDelete={mockHandlePainScoreDelete}
+            handleSleepScoreDelete={mockHandleSleepScoreDelete}
+          />
+        </MemoryRouter>
+      );
+
+      // The old action buttons should not be in the header section
+      // They should only appear in the FAB menu
+      const fabButton = screen.getByRole('button', { name: 'Add new item' });
+
+      // Before opening FAB, the links should not be visible
+      expect(screen.queryByRole('link', { name: 'New Workout' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('link', { name: 'New Pain Score' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('link', { name: 'New Sleep Score' })).not.toBeInTheDocument();
+
+      // Open FAB to verify they're only in the menu
+      fireEvent.click(fabButton);
+
+      // Now they should be visible in the FAB menu
+      expect(screen.getByRole('link', { name: /New Workout/i })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: /New Pain Score/i })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: /New Sleep Score/i })).toBeInTheDocument();
+    });
+  });
 });
