@@ -2,13 +2,7 @@ import { useState, useEffect } from 'react';
 import type { ReactElement } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import CalendarView from '../components/CalendarView';
-import {
-  fetchWorkouts,
-  fetchPainScores,
-  deletePainScore,
-  fetchSleepScores,
-  deleteSleepScore,
-} from '../api';
+import { fetchTimeline, deletePainScore, deleteSleepScore } from '../api';
 import { Workout, PainScore, SleepScore } from '../types';
 import classNames from 'classnames';
 import styles from './TimelinePage.module.css';
@@ -31,14 +25,10 @@ function TimelinePage(): ReactElement {
     const loadData = async () => {
       if (!user) return;
       try {
-        const [workoutsData, painScoresData, sleepScoresData] = await Promise.all([
-          fetchWorkouts(),
-          fetchPainScores(),
-          fetchSleepScores(),
-        ]);
-        setWorkouts(workoutsData);
-        setPainScores(painScoresData);
-        setSleepScores(sleepScoresData);
+        const timelineData = await fetchTimeline();
+        setWorkouts(timelineData.workouts);
+        setPainScores(timelineData.painScores);
+        setSleepScores(timelineData.sleepScores);
         setLoading(false);
       } catch (err) {
         console.error('Failed to load data:', err);
