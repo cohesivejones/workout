@@ -1491,7 +1491,7 @@ apiRouter.get("/timeline", authenticateToken, async (req: Request, res: Response
         name: we.exercise.name,
         reps: we.reps,
         weight: we.weight,
-        time_minutes: we.time_minutes,
+        time_seconds: we.time_seconds,
         new_reps: we.new_reps,
         new_weight: we.new_weight,
         new_time: we.new_time,
