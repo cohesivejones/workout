@@ -40,7 +40,7 @@ npm run certs:generate
 4. Start the PostgreSQL database and Nginx proxy using Docker:
 
 ```bash
-npm run db:start
+npm run dev:start
 ```
 
 5. Run database migrations:
@@ -104,9 +104,9 @@ After trusting the certificate, restart your browser.
 
 ### Database Management
 
-- `npm run db:start` - Start the development database and Nginx proxy
-- `npm run db:stop` - Stop the development database and Nginx proxy
-- `npm run db:reset` - Reset the database (removes all data and restarts)
+- `npm run dev:start` - Start the development database and Nginx proxy
+- `npm run dev:stop` - Stop the development database and Nginx proxy
+- `npm run dev:reset` - Reset the database (removes all data and restarts)
 - `npm run db:migrate` - Run database migrations
 
 ## Production Build
@@ -140,9 +140,9 @@ All environment variables are now consolidated in a single `.env` file:
 
 - `npm run dev` - Start development servers (Vite + API server)
 - `npm run certs:generate` - Generate SSL certificates for HTTPS (first time only)
-- `npm run db:start` - Start the development database and Nginx proxy
-- `npm run db:stop` - Stop the development database and Nginx proxy
-- `npm run db:reset` - Reset the database (removes all data)
+- `npm run dev:start` - Start the development database and Nginx proxy
+- `npm run dev:stop` - Stop the development database and Nginx proxy
+- `npm run dev:reset` - Reset the database (removes all data)
 - `npm run db:migrate` - Run database migrations
 
 ### Testing
