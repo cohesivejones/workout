@@ -10,6 +10,10 @@ const envPath = path.join(__dirname, '..', envFile);
 dotenv.config({ path: envPath });
 
 // Parse DATABASE_URL if provided (Heroku), otherwise use individual config vars
+// Only skip migrations during vitest integration tests (not E2E tests)
+// Vitest sets VITEST=true, so we can use that to distinguish
+const migrations = process.env.VITEST === 'true' ? [] : [__dirname + "/migrations/*.ts"];
+
 const dataSource = process.env.DATABASE_URL
   ? new DataSource({
       type: "postgres",
@@ -20,7 +24,7 @@ const dataSource = process.env.DATABASE_URL
       synchronize: false, // Set to true only in development
       logging: process.env.NODE_ENV === "development",
       entities,
-      migrations: [__dirname + "/migrations/*.ts"],
+      migrations,
       migrationsTransactionMode: "each",
       subscribers: [],
     })
@@ -34,7 +38,7 @@ const dataSource = process.env.DATABASE_URL
       synchronize: false, // Set to true only in development
       logging: process.env.NODE_ENV === "development",
       entities,
-      migrations: [__dirname + "/migrations/*.ts"],
+      migrations,
       migrationsTransactionMode: "each",
       subscribers: [],
     });

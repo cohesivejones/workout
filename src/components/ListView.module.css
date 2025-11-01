@@ -311,6 +311,20 @@
   font-size: 0.9rem;
 }
 
+/* Load More Button Styles */
+.loadMoreContainer {
+  display: flex;
+  justify-content: center;
+  margin: 24px 0;
+  padding: 16px 0;
+}
+
+.loadMoreBtn {
+  min-width: 200px;
+  padding: 12px 24px;
+  font-size: 1rem;
+}
+
 /* FAB Styles */
 .fabContainer {
   position: fixed;

@@ -4,13 +4,13 @@ import { Workout } from "./Workout";
 
 @Entity("workout_exercises")
 export class WorkoutExercise {
-  @PrimaryColumn()
+  @PrimaryColumn("int")
   workout_id: number;
 
-  @PrimaryColumn()
+  @PrimaryColumn("int")
   exercise_id: number;
 
-  @Column()
+  @Column("int")
   reps: number;
 
   @Column({ type: "float", nullable: true })
@@ -19,13 +19,13 @@ export class WorkoutExercise {
   @Column({ type: "float", nullable: true })
   time_seconds: number | null;
 
-  @Column({ default: false })
+  @Column({ type: "boolean", default: false })
   new_reps: boolean;
 
-  @Column({ default: false })
+  @Column({ type: "boolean", default: false })
   new_weight: boolean;
 
-  @Column({ default: false })
+  @Column({ type: "boolean", default: false })
   new_time: boolean;
 
   @ManyToOne(() => Workout, (workout) => workout.workoutExercises, {
