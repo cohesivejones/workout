@@ -41,7 +41,7 @@ export async function addExercise(page: Page, exercise: Exercise): Promise<void>
 
   // Fill in time if provided
   if (exercise.time) {
-    await page.fill('input[placeholder="Time (min)"]', exercise.time);
+    await page.fill('input[placeholder="Time (sec)"]', exercise.time);
   }
 
   // Click Add Exercise button

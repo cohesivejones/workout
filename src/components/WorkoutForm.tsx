@@ -17,7 +17,7 @@ interface FormValues {
     name: string;
     reps: string;
     weight: string;
-    time_minutes: string;
+    time_seconds: string;
   };
 }
 
@@ -52,7 +52,7 @@ function WorkoutForm({
         name: '',
         reps: '',
         weight: '',
-        time_minutes: '',
+        time_seconds: '',
       },
     },
   });
@@ -78,7 +78,7 @@ function WorkoutForm({
           ...ex,
           reps: Number(ex.reps),
           weight: ex.weight ? Number(ex.weight) : null,
-          time_minutes: ex.time_minutes ? Number(ex.time_minutes) : null,
+          time_seconds: ex.time_seconds ? Number(ex.time_seconds) : null,
         })),
       });
 
@@ -90,7 +90,7 @@ function WorkoutForm({
             name: '',
             reps: '',
             weight: '',
-            time_minutes: '',
+            time_seconds: '',
           },
         });
       }
@@ -116,8 +116,8 @@ function WorkoutForm({
             name,
             reps: Number(currentExercise.reps),
             weight: currentExercise.weight ? Number(currentExercise.weight) : null,
-            time_minutes: currentExercise.time_minutes
-              ? Number(currentExercise.time_minutes)
+            time_seconds: currentExercise.time_seconds
+              ? Number(currentExercise.time_seconds)
               : null,
           });
 
@@ -126,7 +126,7 @@ function WorkoutForm({
             name: '',
             reps: '',
             weight: '',
-            time_minutes: '',
+            time_seconds: '',
           });
         }
       } catch (error) {
@@ -146,7 +146,7 @@ function WorkoutForm({
     if (val === null) {
       setValue('currentExercise.reps', '');
       setValue('currentExercise.weight', '');
-      setValue('currentExercise.time_minutes', '');
+      setValue('currentExercise.time_seconds', '');
       return;
     }
     const exerciseId = savedExercises.find((ex) => ex.name === val.value)?.id;
@@ -157,8 +157,8 @@ function WorkoutForm({
       setValue('currentExercise.reps', String(recentData.reps));
       setValue('currentExercise.weight', recentData.weight ? String(recentData.weight) : '');
       setValue(
-        'currentExercise.time_minutes',
-        recentData.time_minutes ? String(recentData.time_minutes) : ''
+        'currentExercise.time_seconds',
+        recentData.time_seconds ? String(recentData.time_seconds) : ''
       );
     } catch {
       // fail silently
@@ -240,11 +240,11 @@ function WorkoutForm({
           </div>
           <input
             type="number"
-            placeholder="Time (min)"
+            placeholder="Time (sec)"
             min="0"
-            step="0.5"
+            step="1"
             className={styles.exerciseInputField}
-            {...register('currentExercise.time_minutes')}
+            {...register('currentExercise.time_seconds')}
           />
           <button
             type="button"
@@ -270,7 +270,7 @@ function WorkoutForm({
                   <div className={styles.exerciseInfo}>
                     {exercises[index].name} - {exercises[index].reps} reps
                     {exercises[index].weight ? ` - ${exercises[index].weight} lbs` : ''}
-                    {exercises[index].time_minutes ? ` - ${exercises[index].time_minutes} min` : ''}
+                    {exercises[index].time_seconds ? ` - ${exercises[index].time_seconds} sec` : ''}
                     {(exercises[index].new_reps ||
                       exercises[index].new_weight ||
                       exercises[index].new_time) && (

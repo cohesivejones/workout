@@ -295,7 +295,7 @@ export const ListView = ({
                             <span className={styles.exerciseDetails}>
                               {exercise.reps} reps
                               {exercise.weight ? ` - ${exercise.weight} lbs` : ''}
-                              {exercise.time_minutes ? ` - ${exercise.time_minutes} min` : ''}
+                              {exercise.time_seconds ? ` - ${exercise.time_seconds} sec` : ''}
                             </span>
                             <div className={styles.badgeContainer}>
                               {exercise.new_reps && (

@@ -248,7 +248,7 @@ apiRouter.get("/exercises/recent", authenticateToken, async (req: Request, res: 
         ORDER BY w.date DESC
         LIMIT 1
       )
-      SELECT we.reps, we.weight, we.time_minutes
+      SELECT we.reps, we.weight, we.time_seconds
       FROM workout_exercises we
       WHERE we.workout_id = (SELECT id FROM latest_workout)
       AND we.exercise_id = $1
@@ -266,7 +266,7 @@ apiRouter.get("/exercises/recent", authenticateToken, async (req: Request, res: 
     res.json({
       reps: result[0].reps,
       weight: result[0].weight,
-      time_minutes: result[0].time_minutes,
+      time_seconds: result[0].time_seconds,
     });
   } catch (err) {
     console.error(err);
@@ -362,7 +362,7 @@ apiRouter.get("/workouts", authenticateToken, async (req: Request, res: Response
         name: we.exercise.name,
         reps: we.reps,
         weight: we.weight,
-        time_minutes: we.time_minutes,
+        time_seconds: we.time_seconds,
         new_reps: we.new_reps,
         new_weight: we.new_weight,
         new_time: we.new_time,
@@ -405,7 +405,7 @@ apiRouter.get("/workouts/:id", authenticateToken, async (req: Request, res: Resp
         name: we.exercise.name,
         reps: we.reps,
         weight: we.weight,
-        time_minutes: we.time_minutes,
+        time_seconds: we.time_seconds,
         new_reps: we.new_reps,
         new_weight: we.new_weight,
         new_time: we.new_time,
@@ -469,7 +469,7 @@ apiRouter.post("/workouts", authenticateToken, async (req: Request, res: Respons
         exercise_id: exercise.id,
         reps: exerciseData.reps,
         weight: exerciseData.weight || null,
-        time_minutes: exerciseData.time_minutes || null,
+        time_seconds: exerciseData.time_seconds || null,
         workout,
         exercise,
       });
@@ -479,7 +479,7 @@ apiRouter.post("/workouts", authenticateToken, async (req: Request, res: Respons
 
       // Find the most recent previous workout exercise for this exercise
       const previousWorkoutExercise = await workoutExerciseRepository.query(`
-        SELECT we.reps, we.weight, we.time_minutes
+        SELECT we.reps, we.weight, we.time_seconds
         FROM workout_exercises we
         JOIN workouts w ON we.workout_id = w.id
         WHERE we.exercise_id = $1
@@ -493,7 +493,7 @@ apiRouter.post("/workouts", authenticateToken, async (req: Request, res: Respons
       if (previousWorkoutExercise.length > 0) {
         workoutExercise.new_reps = workoutExercise.reps !== previousWorkoutExercise[0].reps;
         workoutExercise.new_weight = workoutExercise.weight !== previousWorkoutExercise[0].weight;
-        workoutExercise.new_time = workoutExercise.time_minutes !== previousWorkoutExercise[0].time_minutes;
+        workoutExercise.new_time = workoutExercise.time_seconds !== previousWorkoutExercise[0].time_seconds;
       } else {
         // First time this exercise appears in a workout
         workoutExercise.new_reps = false;
@@ -531,7 +531,7 @@ apiRouter.post("/workouts", authenticateToken, async (req: Request, res: Respons
         name: we.exercise.name,
         reps: we.reps,
         weight: we.weight,
-        time_minutes: we.time_minutes,
+        time_seconds: we.time_seconds,
         new_reps: we.new_reps,
         new_weight: we.new_weight,
         new_time: we.new_time,
@@ -619,7 +619,7 @@ apiRouter.put("/workouts/:id", authenticateToken, async (req: Request, res: Resp
         exercise_id: exercise.id,
         reps: exerciseData.reps,
         weight: exerciseData.weight || null,
-        time_minutes: exerciseData.time_minutes || null,
+        time_seconds: exerciseData.time_seconds || null,
         workout: workout,
         exercise: exercise,
       });
@@ -629,7 +629,7 @@ apiRouter.put("/workouts/:id", authenticateToken, async (req: Request, res: Resp
 
       // Find the most recent previous workout exercise for this exercise
       const previousWorkoutExercise = await workoutExerciseRepository.query(`
-        SELECT we.reps, we.weight, we.time_minutes
+        SELECT we.reps, we.weight, we.time_seconds
         FROM workout_exercises we
         JOIN workouts w ON we.workout_id = w.id
         WHERE we.exercise_id = $1
@@ -643,7 +643,7 @@ apiRouter.put("/workouts/:id", authenticateToken, async (req: Request, res: Resp
       if (previousWorkoutExercise.length > 0) {
         workoutExercise.new_reps = workoutExercise.reps !== previousWorkoutExercise[0].reps;
         workoutExercise.new_weight = workoutExercise.weight !== previousWorkoutExercise[0].weight;
-        workoutExercise.new_time = workoutExercise.time_minutes !== previousWorkoutExercise[0].time_minutes;
+        workoutExercise.new_time = workoutExercise.time_seconds !== previousWorkoutExercise[0].time_seconds;
       } else {
         // First time this exercise appears in a workout
         workoutExercise.new_reps = false;
@@ -669,7 +669,7 @@ apiRouter.put("/workouts/:id", authenticateToken, async (req: Request, res: Resp
         name: we.exercise.name,
         reps: we.reps,
         weight: we.weight,
-        time_minutes: we.time_minutes,
+        time_seconds: we.time_seconds,
         new_reps: we.new_reps,
         new_weight: we.new_weight,
         new_time: we.new_time,
