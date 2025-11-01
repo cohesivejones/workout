@@ -513,6 +513,112 @@ describe('ListView', () => {
     expect(lungesItem).not.toHaveTextContent('NEW WEIGHT');
   });
 
+  describe('Load More functionality', () => {
+    it('renders Load More button when hasMore is true', () => {
+      render(
+        <MemoryRouter>
+          <ListView
+            workouts={mockWorkouts}
+            painScores={mockPainScores}
+            sleepScores={mockSleepScores}
+            handleWorkoutDeleted={mockHandleWorkoutDeleted}
+            handlePainScoreDelete={mockHandlePainScoreDelete}
+            handleSleepScoreDelete={mockHandleSleepScoreDelete}
+            hasMore={true}
+            onLoadMore={vi.fn()}
+            isLoadingMore={false}
+          />
+        </MemoryRouter>
+      );
+
+      expect(screen.getByRole('button', { name: /load more/i })).toBeInTheDocument();
+    });
+
+    it('hides Load More button when hasMore is false', () => {
+      render(
+        <MemoryRouter>
+          <ListView
+            workouts={mockWorkouts}
+            painScores={mockPainScores}
+            sleepScores={mockSleepScores}
+            handleWorkoutDeleted={mockHandleWorkoutDeleted}
+            handlePainScoreDelete={mockHandlePainScoreDelete}
+            handleSleepScoreDelete={mockHandleSleepScoreDelete}
+            hasMore={false}
+            onLoadMore={vi.fn()}
+            isLoadingMore={false}
+          />
+        </MemoryRouter>
+      );
+
+      expect(screen.queryByRole('button', { name: /load more/i })).not.toBeInTheDocument();
+    });
+
+    it('calls onLoadMore when Load More button is clicked', () => {
+      const mockOnLoadMore = vi.fn();
+
+      render(
+        <MemoryRouter>
+          <ListView
+            workouts={mockWorkouts}
+            painScores={mockPainScores}
+            sleepScores={mockSleepScores}
+            handleWorkoutDeleted={mockHandleWorkoutDeleted}
+            handlePainScoreDelete={mockHandlePainScoreDelete}
+            handleSleepScoreDelete={mockHandleSleepScoreDelete}
+            hasMore={true}
+            onLoadMore={mockOnLoadMore}
+            isLoadingMore={false}
+          />
+        </MemoryRouter>
+      );
+
+      const loadMoreButton = screen.getByRole('button', { name: /load more/i });
+      fireEvent.click(loadMoreButton);
+
+      expect(mockOnLoadMore).toHaveBeenCalledTimes(1);
+    });
+
+    it('shows loading state while loading more data', () => {
+      render(
+        <MemoryRouter>
+          <ListView
+            workouts={mockWorkouts}
+            painScores={mockPainScores}
+            sleepScores={mockSleepScores}
+            handleWorkoutDeleted={mockHandleWorkoutDeleted}
+            handlePainScoreDelete={mockHandlePainScoreDelete}
+            handleSleepScoreDelete={mockHandleSleepScoreDelete}
+            hasMore={true}
+            onLoadMore={vi.fn()}
+            isLoadingMore={true}
+          />
+        </MemoryRouter>
+      );
+
+      const loadMoreButton = screen.getByRole('button', { name: /loading/i });
+      expect(loadMoreButton).toBeDisabled();
+    });
+
+    it('works without Load More props for backward compatibility', () => {
+      render(
+        <MemoryRouter>
+          <ListView
+            workouts={mockWorkouts}
+            painScores={mockPainScores}
+            sleepScores={mockSleepScores}
+            handleWorkoutDeleted={mockHandleWorkoutDeleted}
+            handlePainScoreDelete={mockHandlePainScoreDelete}
+            handleSleepScoreDelete={mockHandleSleepScoreDelete}
+          />
+        </MemoryRouter>
+      );
+
+      // Should not show Load More button when props are not provided
+      expect(screen.queryByRole('button', { name: /load more/i })).not.toBeInTheDocument();
+    });
+  });
+
   describe('FAB (Floating Action Button)', () => {
     it('renders FAB button with correct aria-label', () => {
       render(

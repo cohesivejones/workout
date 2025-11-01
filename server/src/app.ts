@@ -11,7 +11,7 @@ import {
   LoginRequest,
 } from "./types";
 import OpenAI from "openai";
-import { Between } from "typeorm";
+import { Between, LessThan } from "typeorm";
 import * as dotenv from "dotenv";
 import * as bcrypt from "bcrypt";
 import dataSource from "./data-source";
@@ -209,7 +209,7 @@ apiRouter.get("/exercises/recent", authenticateToken, async (req: Request, res: 
         ORDER BY w.date DESC
         LIMIT 1
       )
-      SELECT we.reps, we.weight, we.time_minutes
+      SELECT we.reps, we.weight, we.time_seconds
       FROM workout_exercises we
       WHERE we.workout_id = (SELECT id FROM latest_workout)
       AND we.exercise_id = $1
@@ -226,7 +226,7 @@ apiRouter.get("/exercises/recent", authenticateToken, async (req: Request, res: 
     res.json({
       reps: result[0].reps,
       weight: result[0].weight,
-      time_minutes: result[0].time_minutes,
+      time_seconds: result[0].time_seconds,
     });
   } catch (err) {
     console.error(err);
@@ -310,7 +310,7 @@ apiRouter.get("/workouts", authenticateToken, async (req: Request, res: Response
         name: we.exercise.name,
         reps: we.reps,
         weight: we.weight,
-        time_minutes: we.time_minutes,
+        time_seconds: we.time_seconds,
         new_reps: we.new_reps,
         new_weight: we.new_weight,
         new_time: we.new_time,
@@ -351,7 +351,7 @@ apiRouter.get("/workouts/:id", authenticateToken, async (req: Request, res: Resp
         name: we.exercise.name,
         reps: we.reps,
         weight: we.weight,
-        time_minutes: we.time_minutes,
+        time_seconds: we.time_seconds,
         new_reps: we.new_reps,
         new_weight: we.new_weight,
         new_time: we.new_time,
@@ -417,19 +417,19 @@ apiRouter.get("/timeline", authenticateToken, async (req: Request, res: Response
         workoutRepository.count({
           where: {
             userId: Number(userId),
-            date: Between('1900-01-01', start),
+            date: LessThan(start),
           },
         }),
         painScoreRepository.count({
           where: {
             userId: Number(userId),
-            date: Between('1900-01-01', start),
+            date: LessThan(start),
           },
         }),
         sleepScoreRepository.count({
           where: {
             userId: Number(userId),
-            date: Between('1900-01-01', start),
+            date: LessThan(start),
           },
         }),
       ]);
@@ -446,7 +446,7 @@ apiRouter.get("/timeline", authenticateToken, async (req: Request, res: Response
         name: we.exercise.name,
         reps: we.reps,
         weight: we.weight,
-        time_minutes: we.time_minutes,
+        time_seconds: we.time_seconds,
         new_reps: we.new_reps,
         new_weight: we.new_weight,
         new_time: we.new_time,

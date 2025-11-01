@@ -11,7 +11,7 @@ import {
   LoginRequest,
 } from "./types";
 import OpenAI from "openai";
-import { Between } from "typeorm";
+import { Between, LessThan } from "typeorm";
 import * as dotenv from "dotenv";
 import * as bcrypt from "bcrypt";
 import dataSource from "./data-source";
@@ -1457,29 +1457,33 @@ apiRouter.get("/timeline", authenticateToken, async (req: Request, res: Response
       }),
     ]);
 
-    // Check if there's more data before the start date
+    // Check if there's more data before the start date (strictly less than, not including start date)
+    console.log(`[Timeline] Checking for data before ${start} for user ${userId}`);
     const [earlierWorkouts, earlierPainScores, earlierSleepScores] = await Promise.all([
       workoutRepository.count({
         where: {
           userId: Number(userId),
-          date: Between('1900-01-01', start),
+          date: LessThan(start),
         },
       }),
       painScoreRepository.count({
         where: {
           userId: Number(userId),
-          date: Between('1900-01-01', start),
+          date: LessThan(start),
         },
       }),
       sleepScoreRepository.count({
         where: {
           userId: Number(userId),
-          date: Between('1900-01-01', start),
+          date: LessThan(start),
         },
       }),
     ]);
 
     const hasMore = earlierWorkouts > 0 || earlierPainScores > 0 || earlierSleepScores > 0;
+    console.log(`[Timeline] Found ${earlierWorkouts} workouts, ${earlierPainScores} pain scores, ${earlierSleepScores} sleep scores before ${start}`);
+    console.log(`[Timeline] hasMore: ${hasMore}`);
+    console.log(`[Timeline] Returning ${workouts.length} workouts, ${painScores.length} pain scores, ${sleepScores.length} sleep scores in range ${start} to ${end}`);
 
     // Transform workouts to match expected response format
     const workoutResponses: WorkoutResponse[] = workouts.map((workout) => ({
@@ -1491,7 +1495,7 @@ apiRouter.get("/timeline", authenticateToken, async (req: Request, res: Response
         name: we.exercise.name,
         reps: we.reps,
         weight: we.weight,
-        time_minutes: we.time_minutes,
+        time_seconds: we.time_seconds,
         new_reps: we.new_reps,
         new_weight: we.new_weight,
         new_time: we.new_time,

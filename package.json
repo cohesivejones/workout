@@ -9,9 +9,9 @@
     "db:create": "npm run db:create --prefix server",
     "db:migrate": "npm run db:migrate --prefix server",
     "dev": "concurrently \"vite\" \"npm run dev --prefix server\"",
-    "dev:start": "docker-compose up -d",
-    "dev:stop": "docker-compose down",
-    "dev:reset": "docker-compose down -v && docker-compose up -d",
+    "dev:env:reset": "docker-compose down -v && docker-compose up -d",
+    "dev:env:start": "docker-compose -f docker-compose.yml up -d && npm run db:migrate --prefix server",
+    "dev:env:stop": "docker-compose down",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,html,md}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,css,html,md}\"",
     "heroku-postbuild": "npm run build",
@@ -21,13 +21,11 @@
     "preview": "vite preview",
     "start": "npm start --prefix server",
     "test": "vitest run",
-    "test:watch": "vitest",
-    "test:integration": "npm run test:integration --prefix server",
     "test:e2e": "NODE_ENV=test npm run build && playwright test",
+    "test:env:reset": "docker-compose -f docker-compose.test.yml down -v && npm run test:env:start",
     "test:env:start": "docker-compose -f docker-compose.test.yml up -d && npm run db:migrate:test --prefix server",
     "test:env:stop": "docker-compose -f docker-compose.test.yml down",
-    "test:env:reset": "docker-compose -f docker-compose.test.yml down -v && npm run test:env:start",
-    "test:env:logs": "docker-compose -f docker-compose.test.yml logs -f postgres-test"
+    "test:integration": "npm run test:integration --prefix server"
   },
   "dependencies": {
     "@ai-sdk/openai": "^1.3.10",

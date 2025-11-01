@@ -63,25 +63,25 @@ function createTestApp() {
       // Check if there's more data before the start date (only if date range was provided)
       let hasMore = false;
       if (startDate && endDate) {
-        const { Between } = await import('typeorm');
+        const { LessThan } = await import('typeorm');
         const start = startDate as string;
         const [earlierWorkouts, earlierPainScores, earlierSleepScores] = await Promise.all([
           workoutRepository.count({
             where: {
               userId: Number(userId),
-              date: Between('1900-01-01', start),
+              date: LessThan(start),
             },
           }),
           painScoreRepository.count({
             where: {
               userId: Number(userId),
-              date: Between('1900-01-01', start),
+              date: LessThan(start),
             },
           }),
           sleepScoreRepository.count({
             where: {
               userId: Number(userId),
-              date: Between('1900-01-01', start),
+              date: LessThan(start),
             },
           }),
         ]);
@@ -98,7 +98,7 @@ function createTestApp() {
           name: we.exercise.name,
           reps: we.reps,
           weight: we.weight,
-          time_minutes: we.time_minutes,
+          time_seconds: we.time_seconds,
           new_reps: we.new_reps,
           new_weight: we.new_weight,
           new_time: we.new_time,
@@ -211,7 +211,7 @@ describe('Timeline API Routes', () => {
         exercise_id: exercise.id,
         reps: 10,
         weight: 100,
-        time_minutes: null,
+        time_seconds: null,
         new_reps: false,
         new_weight: false,
         new_time: false,
@@ -345,6 +345,69 @@ describe('Timeline API Routes', () => {
       expect(response.body.hasMore).toBe(false);
     });
 
+    it('should return hasMore: false when data exists only at startDate boundary', async () => {
+      const workoutRepository = dataSource.getRepository(Workout);
+
+      // Create workouts at specific dates
+      await workoutRepository.save(
+        workoutRepository.create({
+          userId: testUser.id,
+          date: '2024-02-01', // Exactly at start date
+          withInstructor: false,
+        })
+      );
+      
+      await workoutRepository.save(
+        workoutRepository.create({
+          userId: testUser.id,
+          date: '2024-02-15', // Within range
+          withInstructor: false,
+        })
+      );
+
+      // Request February data - should return both workouts but hasMore should be false
+      // because there's no data BEFORE 2024-02-01
+      const response = await request(app)
+        .get('/api/timeline')
+        .query({ startDate: '2024-02-01', endDate: '2024-02-29' })
+        .set('Cookie', [`token=${authToken}`])
+        .expect(200);
+
+      expect(response.body.workouts).toHaveLength(2);
+      expect(response.body.hasMore).toBe(false); // This will fail with Between logic
+    });
+
+    it('should return hasMore: true only when data exists strictly before startDate', async () => {
+      const workoutRepository = dataSource.getRepository(Workout);
+
+      // Create workouts at specific dates
+      await workoutRepository.save(
+        workoutRepository.create({
+          userId: testUser.id,
+          date: '2024-01-31', // One day before start date
+          withInstructor: false,
+        })
+      );
+      
+      await workoutRepository.save(
+        workoutRepository.create({
+          userId: testUser.id,
+          date: '2024-02-15', // Within range
+          withInstructor: false,
+        })
+      );
+
+      // Request February data
+      const response = await request(app)
+        .get('/api/timeline')
+        .query({ startDate: '2024-02-01', endDate: '2024-02-29' })
+        .set('Cookie', [`token=${authToken}`])
+        .expect(200);
+
+      expect(response.body.workouts).toHaveLength(1); // Only Feb 15
+      expect(response.body.hasMore).toBe(true); // Jan 31 exists before start date
+    });
+
     it('should return all data when no dates provided', async () => {
       const workoutRepository = dataSource.getRepository(Workout);
       
@@ -442,6 +505,66 @@ describe('Timeline API Routes', () => {
       // Clean up other user
       await dataSource.query('DELETE FROM workouts WHERE "userId" = $1', [otherUser.id]);
       await userRepository.remove(otherUser);
+    });
+
+    it('should return hasMore: false when oldest workout is at startDate boundary (real scenario)', async () => {
+      const workoutRepository = dataSource.getRepository(Workout);
+
+      // Create 6 workouts spanning from May to October (matching real scenario)
+      const workoutDates = [
+        '2025-05-05', // Oldest - at the boundary
+        '2025-06-04',
+        '2025-07-04',
+        '2025-08-13',
+        '2025-09-17',
+        '2025-10-22', // Most recent
+      ];
+
+      for (const date of workoutDates) {
+        await workoutRepository.save(
+          workoutRepository.create({
+            userId: testUser.id,
+            date,
+            withInstructor: false,
+          })
+        );
+      }
+
+      // First request: startDate at the oldest workout date
+      const response1 = await request(app)
+        .get('/api/timeline')
+        .query({ startDate: '2025-05-06', endDate: '2025-11-01' })
+        .set('Cookie', [`token=${authToken}`])
+        .expect(200);
+
+      // Should return all 5 workouts
+      expect(response1.body.workouts).toHaveLength(5);
+      // Should return hasMore: true because May 5 is the oldest workout
+      expect(response1.body.hasMore).toBe(true);
+
+      // Second request: startDate at the oldest workout date
+      const response2 = await request(app)
+        .get('/api/timeline')
+        .query({ startDate: '2025-05-05', endDate: '2025-11-01' })
+        .set('Cookie', [`token=${authToken}`])
+        .expect(200);
+
+      // Should return all 6 workouts
+      expect(response2.body.workouts).toHaveLength(6);
+      // Should return hasMore: false because May 5 is the oldest workout
+      expect(response2.body.hasMore).toBe(false);
+
+      // Third request: extend range 3 months earlier
+      const response3 = await request(app)
+        .get('/api/timeline')
+        .query({ startDate: '2025-02-04', endDate: '2025-11-01' })
+        .set('Cookie', [`token=${authToken}`])
+        .expect(200);
+
+      // Should still return all 6 workouts
+      expect(response3.body.workouts).toHaveLength(6);
+      // Should still return hasMore: false
+      expect(response3.body.hasMore).toBe(false);
     });
   });
 });

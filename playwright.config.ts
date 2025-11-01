@@ -52,7 +52,7 @@ export default defineConfig({
   webServer: process.env.CI
     ? undefined
     : {
-        command: 'NODE_ENV=test cd server && npm run dev:test',
+        command: 'NODE_ENV=test npm run build && cd server && npm run dev:test',
         url: 'http://localhost:5001',
         timeout: 120000,
         reuseExistingServer: true,
