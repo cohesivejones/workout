@@ -171,13 +171,13 @@ describe('WorkoutShowPage', () => {
     expect(screen.queryByText(/lbs/i)).not.toBeInTheDocument();
   });
 
-  it('renders exercises with time when time_minutes is provided', async () => {
+  it('renders exercises with time when time_seconds is provided', async () => {
     // Mock the API call to return a workout with an exercise with time
     const workoutWithTime = {
       ...mockWorkout,
       exercises: [
-        { id: 1, name: 'Plank', reps: 3, time_minutes: 2.5 },
-        { id: 2, name: 'Wall Sit', reps: 2, weight: 0, time_minutes: 1.5 },
+        { id: 1, name: 'Plank', reps: 3, time_seconds: 2.5 },
+        { id: 2, name: 'Wall Sit', reps: 2, weight: 0, time_seconds: 1.5 },
       ],
     };
     vi.mocked(Api.fetchWorkout).mockResolvedValue(workoutWithTime);
@@ -198,10 +198,10 @@ describe('WorkoutShowPage', () => {
     // Check that exercises with time are displayed correctly
     expect(screen.getByText('Plank')).toBeInTheDocument();
     expect(screen.getByText('3 reps')).toBeInTheDocument();
-    expect(screen.getByText('2.5 min')).toBeInTheDocument();
+    expect(screen.getByText('2.5 sec')).toBeInTheDocument();
 
     expect(screen.getByText('Wall Sit')).toBeInTheDocument();
     expect(screen.getByText('2 reps')).toBeInTheDocument();
-    expect(screen.getByText('1.5 min')).toBeInTheDocument();
+    expect(screen.getByText('1.5 sec')).toBeInTheDocument();
   });
 });

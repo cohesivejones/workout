@@ -53,8 +53,8 @@ test.describe('Create Workout with Multiple Exercises', () => {
     // Verify all 6 exercises are in the current exercises list
     await expect(page.locator('text=Bench Press - 10 reps - 135 lbs')).toBeVisible();
     await expect(page.locator('text=Squat - 8 reps - 185 lbs')).toBeVisible();
-    await expect(page.locator('text=Plank - 1 reps - 2 min')).toBeVisible();
-    await expect(page.locator('text=Wall Sit - 1 reps - 1.5 min')).toBeVisible();
+    await expect(page.locator('text=Plank - 1 reps - 2 sec')).toBeVisible();
+    await expect(page.locator('text=Wall Sit - 1 reps - 1.5 sec')).toBeVisible();
     await expect(page.locator('text=Push-ups - 20 reps')).toBeVisible();
     await expect(page.locator('text=Pull-ups - 12 reps')).toBeVisible();
 
@@ -85,7 +85,7 @@ test.describe('Create Workout with Multiple Exercises', () => {
     // Verify exercise details are shown with reps/weight/time
     await expect(page.locator('text=10 reps')).toBeVisible();
     await expect(page.locator('text=135 lbs')).toBeVisible();
-    await expect(page.locator('text=2 min')).toBeVisible();
+    await expect(page.locator('text=2 sec')).toBeVisible();
 
     // Step 7: Verify in Calendar View
     await page.getByRole('button', { name: 'Calendar' }).click();
@@ -129,10 +129,10 @@ test.describe('Create Workout with Multiple Exercises', () => {
     // Isometric/time exercises
     await expect(page.locator('text=Plank').first()).toBeVisible();
     await expect(page.locator('text=1 reps').first()).toBeVisible();
-    await expect(page.locator('text=2 min').first()).toBeVisible();
+    await expect(page.locator('text=2 sec').first()).toBeVisible();
 
     await expect(page.locator('text=Wall Sit').first()).toBeVisible();
-    await expect(page.locator('text=1.5 min').first()).toBeVisible();
+    await expect(page.locator('text=1.5 sec').first()).toBeVisible();
 
     // Bodyweight exercises
     await expect(page.locator('text=Push-ups').first()).toBeVisible();
@@ -233,6 +233,6 @@ test.describe('Create Workout with Multiple Exercises', () => {
     await expect(page.locator('text=200 lbs')).toBeVisible();
 
     await expect(page.locator('text=Plank')).toBeVisible();
-    await expect(page.locator('text=2.5 min')).toBeVisible();
+    await expect(page.locator('text=2.5 sec')).toBeVisible();
   });
 });

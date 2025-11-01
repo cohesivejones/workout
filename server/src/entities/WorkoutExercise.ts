@@ -17,7 +17,7 @@ export class WorkoutExercise {
   weight: number | null;
 
   @Column({ type: "float", nullable: true })
-  time_minutes: number | null;
+  time_seconds: number | null;
 
   @Column({ default: false })
   new_reps: boolean;
