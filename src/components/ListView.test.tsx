@@ -64,8 +64,8 @@ describe('ListView', () => {
   ];
 
   const mockHandleWorkoutDeleted = vi.fn();
-  const mockHandlePainScoreDelete = vi.fn();
-  const mockHandleSleepScoreDelete = vi.fn();
+  const mockHandlePainScoreDeleted = vi.fn();
+  const mockHandleSleepScoreDeleted = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -86,8 +86,8 @@ describe('ListView', () => {
           painScores={mockPainScores}
           sleepScores={mockSleepScores}
           handleWorkoutDeleted={mockHandleWorkoutDeleted}
-          handlePainScoreDelete={mockHandlePainScoreDelete}
-          handleSleepScoreDelete={mockHandleSleepScoreDelete}
+          handlePainScoreDeleted={mockHandlePainScoreDeleted}
+          handleSleepScoreDeleted={mockHandleSleepScoreDeleted}
         />
       </MemoryRouter>
     );
@@ -133,8 +133,8 @@ describe('ListView', () => {
           painScores={[]}
           sleepScores={[]}
           handleWorkoutDeleted={mockHandleWorkoutDeleted}
-          handlePainScoreDelete={mockHandlePainScoreDelete}
-          handleSleepScoreDelete={mockHandleSleepScoreDelete}
+          handlePainScoreDeleted={mockHandlePainScoreDeleted}
+          handleSleepScoreDeleted={mockHandleSleepScoreDeleted}
         />
       </MemoryRouter>
     );
@@ -159,8 +159,8 @@ describe('ListView', () => {
           painScores={mockPainScores}
           sleepScores={mockSleepScores}
           handleWorkoutDeleted={mockHandleWorkoutDeleted}
-          handlePainScoreDelete={mockHandlePainScoreDelete}
-          handleSleepScoreDelete={mockHandleSleepScoreDelete}
+          handlePainScoreDeleted={mockHandlePainScoreDeleted}
+          handleSleepScoreDeleted={mockHandleSleepScoreDeleted}
         />
       </MemoryRouter>
     );
@@ -196,8 +196,8 @@ describe('ListView', () => {
           painScores={mockPainScores}
           sleepScores={mockSleepScores}
           handleWorkoutDeleted={mockHandleWorkoutDeleted}
-          handlePainScoreDelete={mockHandlePainScoreDelete}
-          handleSleepScoreDelete={mockHandleSleepScoreDelete}
+          handlePainScoreDeleted={mockHandlePainScoreDeleted}
+          handleSleepScoreDeleted={mockHandleSleepScoreDeleted}
         />
       </MemoryRouter>
     );
@@ -214,7 +214,7 @@ describe('ListView', () => {
 
     // Check that the handler was called with the correct ID
     await waitFor(() => {
-      expect(mockHandlePainScoreDelete).toHaveBeenCalledWith(1);
+      expect(mockHandlePainScoreDeleted).toHaveBeenCalledWith(1);
     });
   });
 
@@ -241,8 +241,8 @@ describe('ListView', () => {
           painScores={mockPainScores}
           sleepScores={mockSleepScores}
           handleWorkoutDeleted={mockHandleWorkoutDeleted}
-          handlePainScoreDelete={mockHandlePainScoreDelete}
-          handleSleepScoreDelete={mockHandleSleepScoreDelete}
+          handlePainScoreDeleted={mockHandlePainScoreDeleted}
+          handleSleepScoreDeleted={mockHandleSleepScoreDeleted}
         />
       </MemoryRouter>
     );
@@ -290,8 +290,8 @@ describe('ListView', () => {
           painScores={mockPainScores}
           sleepScores={mockSleepScores}
           handleWorkoutDeleted={mockHandleWorkoutDeleted}
-          handlePainScoreDelete={mockHandlePainScoreDelete}
-          handleSleepScoreDelete={mockHandleSleepScoreDelete}
+          handlePainScoreDeleted={mockHandlePainScoreDeleted}
+          handleSleepScoreDeleted={mockHandleSleepScoreDeleted}
         />
       </MemoryRouter>
     );
@@ -309,7 +309,7 @@ describe('ListView', () => {
     });
 
     // Check that the handler was not called
-    expect(mockHandlePainScoreDelete).not.toHaveBeenCalled();
+    expect(mockHandlePainScoreDeleted).not.toHaveBeenCalled();
 
     // Restore mocks
     console.error = originalConsoleError;
@@ -327,8 +327,8 @@ describe('ListView', () => {
           painScores={mockPainScores}
           sleepScores={mockSleepScores}
           handleWorkoutDeleted={mockHandleWorkoutDeleted}
-          handlePainScoreDelete={mockHandlePainScoreDelete}
-          handleSleepScoreDelete={mockHandleSleepScoreDelete}
+          handlePainScoreDeleted={mockHandlePainScoreDeleted}
+          handleSleepScoreDeleted={mockHandleSleepScoreDeleted}
         />
       </MemoryRouter>
     );
@@ -354,8 +354,8 @@ describe('ListView', () => {
           painScores={mockPainScores}
           sleepScores={mockSleepScores}
           handleWorkoutDeleted={mockHandleWorkoutDeleted}
-          handlePainScoreDelete={mockHandlePainScoreDelete}
-          handleSleepScoreDelete={mockHandleSleepScoreDelete}
+          handlePainScoreDeleted={mockHandlePainScoreDeleted}
+          handleSleepScoreDeleted={mockHandleSleepScoreDeleted}
         />
       </MemoryRouter>
     );
@@ -388,8 +388,8 @@ describe('ListView', () => {
           painScores={mockPainScores}
           sleepScores={mockSleepScores}
           handleWorkoutDeleted={mockHandleWorkoutDeleted}
-          handlePainScoreDelete={mockHandlePainScoreDelete}
-          handleSleepScoreDelete={mockHandleSleepScoreDelete}
+          handlePainScoreDeleted={mockHandlePainScoreDeleted}
+          handleSleepScoreDeleted={mockHandleSleepScoreDeleted}
         />
       </MemoryRouter>
     );
@@ -438,8 +438,8 @@ describe('ListView', () => {
           painScores={mockPainScores}
           sleepScores={mockSleepScores}
           handleWorkoutDeleted={mockHandleWorkoutDeleted}
-          handlePainScoreDelete={mockHandlePainScoreDelete}
-          handleSleepScoreDelete={mockHandleSleepScoreDelete}
+          handlePainScoreDeleted={mockHandlePainScoreDeleted}
+          handleSleepScoreDeleted={mockHandleSleepScoreDeleted}
         />
       </MemoryRouter>
     );
@@ -481,8 +481,8 @@ describe('ListView', () => {
           painScores={mockPainScores}
           sleepScores={mockSleepScores}
           handleWorkoutDeleted={mockHandleWorkoutDeleted}
-          handlePainScoreDelete={mockHandlePainScoreDelete}
-          handleSleepScoreDelete={mockHandleSleepScoreDelete}
+          handlePainScoreDeleted={mockHandlePainScoreDeleted}
+          handleSleepScoreDeleted={mockHandleSleepScoreDeleted}
         />
       </MemoryRouter>
     );
@@ -517,8 +517,8 @@ describe('ListView', () => {
             painScores={mockPainScores}
             sleepScores={mockSleepScores}
             handleWorkoutDeleted={mockHandleWorkoutDeleted}
-            handlePainScoreDelete={mockHandlePainScoreDelete}
-            handleSleepScoreDelete={mockHandleSleepScoreDelete}
+            handlePainScoreDeleted={mockHandlePainScoreDeleted}
+            handleSleepScoreDeleted={mockHandleSleepScoreDeleted}
             hasMore={true}
             onLoadMore={vi.fn()}
             isLoadingMore={false}
@@ -537,8 +537,8 @@ describe('ListView', () => {
             painScores={mockPainScores}
             sleepScores={mockSleepScores}
             handleWorkoutDeleted={mockHandleWorkoutDeleted}
-            handlePainScoreDelete={mockHandlePainScoreDelete}
-            handleSleepScoreDelete={mockHandleSleepScoreDelete}
+            handlePainScoreDeleted={mockHandlePainScoreDeleted}
+            handleSleepScoreDeleted={mockHandleSleepScoreDeleted}
             hasMore={false}
             onLoadMore={vi.fn()}
             isLoadingMore={false}
@@ -559,8 +559,8 @@ describe('ListView', () => {
             painScores={mockPainScores}
             sleepScores={mockSleepScores}
             handleWorkoutDeleted={mockHandleWorkoutDeleted}
-            handlePainScoreDelete={mockHandlePainScoreDelete}
-            handleSleepScoreDelete={mockHandleSleepScoreDelete}
+            handlePainScoreDeleted={mockHandlePainScoreDeleted}
+            handleSleepScoreDeleted={mockHandleSleepScoreDeleted}
             hasMore={true}
             onLoadMore={mockOnLoadMore}
             isLoadingMore={false}
@@ -582,8 +582,8 @@ describe('ListView', () => {
             painScores={mockPainScores}
             sleepScores={mockSleepScores}
             handleWorkoutDeleted={mockHandleWorkoutDeleted}
-            handlePainScoreDelete={mockHandlePainScoreDelete}
-            handleSleepScoreDelete={mockHandleSleepScoreDelete}
+            handlePainScoreDeleted={mockHandlePainScoreDeleted}
+            handleSleepScoreDeleted={mockHandleSleepScoreDeleted}
             hasMore={true}
             onLoadMore={vi.fn()}
             isLoadingMore={true}
@@ -603,8 +603,8 @@ describe('ListView', () => {
             painScores={mockPainScores}
             sleepScores={mockSleepScores}
             handleWorkoutDeleted={mockHandleWorkoutDeleted}
-            handlePainScoreDelete={mockHandlePainScoreDelete}
-            handleSleepScoreDelete={mockHandleSleepScoreDelete}
+            handlePainScoreDeleted={mockHandlePainScoreDeleted}
+            handleSleepScoreDeleted={mockHandleSleepScoreDeleted}
           />
         </MemoryRouter>
       );
@@ -623,8 +623,8 @@ describe('ListView', () => {
             painScores={mockPainScores}
             sleepScores={mockSleepScores}
             handleWorkoutDeleted={mockHandleWorkoutDeleted}
-            handlePainScoreDelete={mockHandlePainScoreDelete}
-            handleSleepScoreDelete={mockHandleSleepScoreDelete}
+            handlePainScoreDeleted={mockHandlePainScoreDeleted}
+            handleSleepScoreDeleted={mockHandleSleepScoreDeleted}
           />
         </MemoryRouter>
       );
@@ -642,8 +642,8 @@ describe('ListView', () => {
             painScores={mockPainScores}
             sleepScores={mockSleepScores}
             handleWorkoutDeleted={mockHandleWorkoutDeleted}
-            handlePainScoreDelete={mockHandlePainScoreDelete}
-            handleSleepScoreDelete={mockHandleSleepScoreDelete}
+            handlePainScoreDeleted={mockHandlePainScoreDeleted}
+            handleSleepScoreDeleted={mockHandleSleepScoreDeleted}
           />
         </MemoryRouter>
       );
@@ -678,8 +678,8 @@ describe('ListView', () => {
             painScores={mockPainScores}
             sleepScores={mockSleepScores}
             handleWorkoutDeleted={mockHandleWorkoutDeleted}
-            handlePainScoreDelete={mockHandlePainScoreDelete}
-            handleSleepScoreDelete={mockHandleSleepScoreDelete}
+            handlePainScoreDeleted={mockHandlePainScoreDeleted}
+            handleSleepScoreDeleted={mockHandleSleepScoreDeleted}
           />
         </MemoryRouter>
       );
@@ -705,8 +705,8 @@ describe('ListView', () => {
             painScores={mockPainScores}
             sleepScores={mockSleepScores}
             handleWorkoutDeleted={mockHandleWorkoutDeleted}
-            handlePainScoreDelete={mockHandlePainScoreDelete}
-            handleSleepScoreDelete={mockHandleSleepScoreDelete}
+            handlePainScoreDeleted={mockHandlePainScoreDeleted}
+            handleSleepScoreDeleted={mockHandleSleepScoreDeleted}
           />
         </MemoryRouter>
       );
@@ -732,8 +732,8 @@ describe('ListView', () => {
             painScores={mockPainScores}
             sleepScores={mockSleepScores}
             handleWorkoutDeleted={mockHandleWorkoutDeleted}
-            handlePainScoreDelete={mockHandlePainScoreDelete}
-            handleSleepScoreDelete={mockHandleSleepScoreDelete}
+            handlePainScoreDeleted={mockHandlePainScoreDeleted}
+            handleSleepScoreDeleted={mockHandleSleepScoreDeleted}
           />
         </MemoryRouter>
       );
@@ -760,8 +760,8 @@ describe('ListView', () => {
             painScores={mockPainScores}
             sleepScores={mockSleepScores}
             handleWorkoutDeleted={mockHandleWorkoutDeleted}
-            handlePainScoreDelete={mockHandlePainScoreDelete}
-            handleSleepScoreDelete={mockHandleSleepScoreDelete}
+            handlePainScoreDeleted={mockHandlePainScoreDeleted}
+            handleSleepScoreDeleted={mockHandleSleepScoreDeleted}
           />
         </MemoryRouter>
       );
