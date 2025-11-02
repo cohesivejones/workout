@@ -27,6 +27,7 @@ import { authenticateToken, generateToken } from "./middleware/auth";
 
 // Initialize reflect-metadata
 import "reflect-metadata";
+import logger from "./logger";
 
 // Load environment variables from the appropriate .env file
 // Use path.join to resolve relative to the server directory
@@ -35,6 +36,12 @@ const envFile = process.env.NODE_ENV === 'test' ? '.env.test' : '.env';
 // When running compiled code, __dirname is in dist/, so we also go up one level
 const envPath = path.join(__dirname, '..', envFile);
 dotenv.config({ path: envPath });
+
+logger.info('Environment loaded', { 
+  nodeEnv: process.env.NODE_ENV,
+  envFile,
+  port: process.env.PORT || '5001'
+});
 
 // Initialize OpenAI client
 const openai = new OpenAI({
@@ -45,10 +52,11 @@ const openai = new OpenAI({
 dataSource
   .initialize()
   .then(() => {
-    console.log("Data Source has been initialized!");
+    logger.info("Database connection initialized successfully");
   })
   .catch((err) => {
-    console.error("Error during Data Source initialization:", err);
+    logger.error("Database connection initialization failed", { error: err });
+    process.exit(1);
   });
 
 const app = express();
@@ -131,7 +139,7 @@ apiRouter.post("/auth/login", async (req: Request, res: Response) => {
       },
     });
   } catch (err) {
-    console.error(err);
+    logger.error('Get exercises error', { error: err, userId: req.user?.id });
     res.status(500).json({ error: "Server error" });
   }
 });
@@ -269,7 +277,7 @@ apiRouter.get("/exercises/recent", authenticateToken, async (req: Request, res: 
       time_seconds: result[0].time_seconds,
     });
   } catch (err) {
-    console.error(err);
+    logger.error('Get recent exercise error', { error: err, exerciseId: req.query.exerciseId, userId: req.user?.id });
     res.status(500).json({ error: "Server error" });
   }
 });
@@ -293,9 +301,10 @@ apiRouter.post("/exercises", authenticateToken, async (req: Request, res: Respon
 
     // Save exercise (either new or existing)
     await exerciseRepository.save(exercise);
+    logger.info('Exercise created/updated', { exerciseId: exercise.id, name: exercise.name, userId: req.user?.id });
     res.json(exercise);
   } catch (err) {
-    console.error(err);
+    logger.error('Create exercise error', { error: err, userId: req.user?.id });
     res.status(500).json({ error: "Server error" });
   }
 });
@@ -326,9 +335,10 @@ apiRouter.put("/exercises/:id", authenticateToken, async (req: Request, res: Res
 
     // Save updated exercise
     await exerciseRepository.save(exercise);
+    logger.info('Exercise updated', { exerciseId: exercise.id, name: exercise.name, userId: req.user?.id });
     res.json(exercise);
   } catch (err) {
-    console.error(err);
+    logger.error('Update exercise error', { error: err, exerciseId: req.params.id, userId: req.user?.id });
     res.status(500).json({ error: "Server error" });
   }
 });
@@ -371,7 +381,7 @@ apiRouter.get("/workouts", authenticateToken, async (req: Request, res: Response
 
     res.json(workoutResponses);
   } catch (err) {
-    console.error(err);
+    logger.error('Get workouts error', { error: err, userId: req.user?.id });
     res.status(500).json({ error: "Server error" });
   }
 });
@@ -414,7 +424,7 @@ apiRouter.get("/workouts/:id", authenticateToken, async (req: Request, res: Resp
 
     res.json(workoutResponse);
   } catch (err) {
-    console.error(err);
+    logger.error('Get workout error', { error: err, workoutId: req.params.id, userId: req.user?.id });
     res.status(500).json({ error: "Server error" });
   }
 });
@@ -538,11 +548,12 @@ apiRouter.post("/workouts", authenticateToken, async (req: Request, res: Respons
       })),
     };
 
+    logger.info('Workout created', { workoutId: workout.id, date: workout.date, exerciseCount: exercises.length, userId: req.user?.id });
     res.json(response);
   } catch (err) {
     await queryRunner.rollbackTransaction();
-    console.error(err);
     const error = err as DatabaseError;
+    logger.error('Create workout error', { error: err, userId: req.user?.id });
 
     // Check for unique constraint violation
     if (error.code === "23505" && error.constraint === "workouts_date_user_id_key") {
@@ -676,11 +687,12 @@ apiRouter.put("/workouts/:id", authenticateToken, async (req: Request, res: Resp
       })),
     };
 
+    logger.info('Workout updated', { workoutId: workout.id, date: workout.date, exerciseCount: exercises.length, userId: req.user?.id });
     res.json(response);
   } catch (err) {
     await queryRunner.rollbackTransaction();
-    console.error(err);
     const error = err as DatabaseError;
+    logger.error('Update workout error', { error: err, workoutId: req.params.id, userId: req.user?.id });
 
     // Check for unique constraint violation
     if (error.code === "23505" && error.constraint === "workouts_date_key") {
@@ -718,11 +730,12 @@ apiRouter.delete("/workouts/:id", authenticateToken, async (req: Request, res: R
 
     await queryRunner.commitTransaction();
 
+    logger.info('Workout deleted', { workoutId, userId: req.user?.id });
     res.json({ id: workoutId });
   } catch (err) {
     await queryRunner.rollbackTransaction();
-    console.error(err);
     const error = err as DatabaseError;
+    logger.error('Delete workout error', { error: err, workoutId: req.params.id, userId: req.user?.id });
     res.status(500).json({ error: error.message || "Server error" });
   } finally {
     await queryRunner.release();
@@ -746,7 +759,7 @@ apiRouter.get("/pain-scores", authenticateToken, async (req: Request, res: Respo
 
     res.json(painScores);
   } catch (err) {
-    console.error(err);
+    logger.error('Get pain scores error', { error: err, userId: req.user?.id });
     res.status(500).json({ error: "Server error" });
   }
 });
@@ -767,7 +780,7 @@ apiRouter.get("/pain-scores/:id", authenticateToken, async (req: Request, res: R
 
     res.json(painScore);
   } catch (err) {
-    console.error(err);
+    logger.error('Get pain score error', { error: err, painScoreId: req.params.id, userId: req.user?.id });
     res.status(500).json({ error: "Server error" });
   }
 });
@@ -796,10 +809,11 @@ apiRouter.post("/pain-scores", authenticateToken, async (req: Request, res: Resp
 
     // Save pain score
     await painScoreRepository.save(painScore);
+    logger.info('Pain score created', { painScoreId: painScore.id, date: painScore.date, score: painScore.score, userId: req.user?.id });
     res.json(painScore);
   } catch (err) {
-    console.error(err);
     const error = err as DatabaseError;
+    logger.error('Create pain score error', { error: err, userId: req.user?.id });
 
     // Check for unique constraint violation
     if (
@@ -848,10 +862,11 @@ apiRouter.put("/pain-scores/:id", authenticateToken, async (req: Request, res: R
 
     // Save updated pain score
     await painScoreRepository.save(painScore);
+    logger.info('Pain score updated', { painScoreId: painScore.id, date: painScore.date, score: painScore.score, userId: req.user?.id });
     res.json(painScore);
   } catch (err) {
-    console.error(err);
     const error = err as DatabaseError;
+    logger.error('Update pain score error', { error: err, painScoreId: req.params.id, userId: req.user?.id });
 
     // Check for unique constraint violation
     if (
@@ -884,9 +899,10 @@ apiRouter.delete("/pain-scores/:id", authenticateToken, async (req: Request, res
 
     // Delete pain score
     await painScoreRepository.remove(painScore);
+    logger.info('Pain score deleted', { painScoreId, userId: req.user?.id });
     res.json({ id: painScoreId });
   } catch (err) {
-    console.error(err);
+    logger.error('Delete pain score error', { error: err, painScoreId: req.params.id, userId: req.user?.id });
     res.status(500).json({ error: "Server error" });
   }
 });
@@ -908,7 +924,7 @@ apiRouter.get("/sleep-scores", authenticateToken, async (req: Request, res: Resp
 
     res.json(sleepScores);
   } catch (err) {
-    console.error(err);
+    logger.error('Get sleep scores error', { error: err, userId: req.user?.id });
     res.status(500).json({ error: "Server error" });
   }
 });
@@ -929,7 +945,7 @@ apiRouter.get("/sleep-scores/:id", authenticateToken, async (req: Request, res: 
 
     res.json(sleepScore);
   } catch (err) {
-    console.error(err);
+    logger.error('Get sleep score error', { error: err, sleepScoreId: req.params.id, userId: req.user?.id });
     res.status(500).json({ error: "Server error" });
   }
 });
@@ -958,10 +974,11 @@ apiRouter.post("/sleep-scores", authenticateToken, async (req: Request, res: Res
 
     // Save sleep score
     await sleepScoreRepository.save(sleepScore);
+    logger.info('Sleep score created', { sleepScoreId: sleepScore.id, date: sleepScore.date, score: sleepScore.score, userId: req.user?.id });
     res.json(sleepScore);
   } catch (err) {
-    console.error(err);
     const error = err as DatabaseError;
+    logger.error('Create sleep score error', { error: err, userId: req.user?.id });
 
     // Check for unique constraint violation
     if (
@@ -1010,10 +1027,11 @@ apiRouter.put("/sleep-scores/:id", authenticateToken, async (req: Request, res: 
 
     // Save updated sleep score
     await sleepScoreRepository.save(sleepScore);
+    logger.info('Sleep score updated', { sleepScoreId: sleepScore.id, date: sleepScore.date, score: sleepScore.score, userId: req.user?.id });
     res.json(sleepScore);
   } catch (err) {
-    console.error(err);
     const error = err as DatabaseError;
+    logger.error('Update sleep score error', { error: err, sleepScoreId: req.params.id, userId: req.user?.id });
 
     // Check for unique constraint violation
     if (
@@ -1046,9 +1064,10 @@ apiRouter.delete("/sleep-scores/:id", authenticateToken, async (req: Request, re
 
     // Delete sleep score
     await sleepScoreRepository.remove(sleepScore);
+    logger.info('Sleep score deleted', { sleepScoreId, userId: req.user?.id });
     res.json({ id: sleepScoreId });
   } catch (err) {
-    console.error(err);
+    logger.error('Delete sleep score error', { error: err, sleepScoreId: req.params.id, userId: req.user?.id });
     res.status(500).json({ error: "Server error" });
   }
 });
@@ -1124,7 +1143,7 @@ apiRouter.get("/diagnostics/data", authenticateToken, async (req: Request, res: 
 
     res.json(diagnosticData);
   } catch (err) {
-    console.error(err);
+    logger.error('Get diagnostic data error', { error: err, userId: req.user?.id });
     res.status(500).json({ error: "Server error" });
   }
 });
@@ -1169,9 +1188,10 @@ apiRouter.post("/diagnostics/analyze", authenticateToken, async (req: Request, r
     });
 
     // Return the analysis
+    logger.info('Diagnostic analysis completed', { userId: req.user?.id });
     res.json({ analysis: response.choices[0].message.content });
   } catch (err) {
-    console.error("OpenAI API error:", err);
+    logger.error("OpenAI API error", { error: err, userId: req.user?.id });
     res.status(500).json({ error: "Failed to analyze diagnostic data" });
   }
 });
@@ -1247,7 +1267,7 @@ apiRouter.get("/dashboard/weight-progression", authenticateToken, async (req: Re
     
     res.json(result);
   } catch (err) {
-    console.error(err);
+    logger.error('Get weight progression error', { error: err, userId: req.user?.id });
     res.status(500).json({ error: "Server error" });
   }
 });
@@ -1284,7 +1304,7 @@ apiRouter.get("/dashboard/pain-progression", authenticateToken, async (req: Requ
     
     res.json({ dataPoints });
   } catch (err) {
-    console.error(err);
+    logger.error('Get pain progression error', { error: err, userId: req.user?.id });
     res.status(500).json({ error: "Server error" });
   }
 });
@@ -1321,7 +1341,7 @@ apiRouter.get("/dashboard/sleep-progression", authenticateToken, async (req: Req
     
     res.json({ dataPoints });
   } catch (err) {
-    console.error(err);
+    logger.error('Get sleep progression error', { error: err, userId: req.user?.id });
     res.status(500).json({ error: "Server error" });
   }
 });
@@ -1392,9 +1412,10 @@ apiRouter.post("/workouts/generate", authenticateToken, async (req: Request, res
     });
 
     // Return the generated workout
+    logger.info('Workout generated', { userId: req.user?.id });
     res.json({ generatedWorkout: response.choices[0].message.content });
   } catch (err) {
-    console.error("Generate workout error:", err);
+    logger.error("Generate workout error", { error: err, userId: req.user?.id });
     res.status(500).json({ error: "Failed to generate workout" });
   }
 });
@@ -1458,7 +1479,7 @@ apiRouter.get("/timeline", authenticateToken, async (req: Request, res: Response
     ]);
 
     // Check if there's more data before the start date (strictly less than, not including start date)
-    console.log(`[Timeline] Checking for data before ${start} for user ${userId}`);
+    logger.debug('Checking for earlier timeline data', { startDate: start, userId });
     const [earlierWorkouts, earlierPainScores, earlierSleepScores] = await Promise.all([
       workoutRepository.count({
         where: {
@@ -1481,9 +1502,17 @@ apiRouter.get("/timeline", authenticateToken, async (req: Request, res: Response
     ]);
 
     const hasMore = earlierWorkouts > 0 || earlierPainScores > 0 || earlierSleepScores > 0;
-    console.log(`[Timeline] Found ${earlierWorkouts} workouts, ${earlierPainScores} pain scores, ${earlierSleepScores} sleep scores before ${start}`);
-    console.log(`[Timeline] hasMore: ${hasMore}`);
-    console.log(`[Timeline] Returning ${workouts.length} workouts, ${painScores.length} pain scores, ${sleepScores.length} sleep scores in range ${start} to ${end}`);
+    logger.debug('Timeline data fetched', {
+      workoutCount: workouts.length,
+      painScoreCount: painScores.length,
+      sleepScoreCount: sleepScores.length,
+      earlierWorkouts,
+      earlierPainScores,
+      earlierSleepScores,
+      hasMore,
+      dateRange: { start, end },
+      userId
+    });
 
     // Transform workouts to match expected response format
     const workoutResponses: WorkoutResponse[] = workouts.map((workout) => ({
@@ -1509,7 +1538,7 @@ apiRouter.get("/timeline", authenticateToken, async (req: Request, res: Response
       hasMore,
     });
   } catch (err) {
-    console.error(err);
+    logger.error('Get timeline error', { error: err, userId: req.user?.id });
     res.status(500).json({ error: "Server error" });
   }
 });
@@ -1528,15 +1557,16 @@ if (process.env.NODE_ENV === 'test') {
       await dataSource.query('DELETE FROM pain_scores WHERE "userId" = (SELECT id FROM users WHERE email = $1)', [testUserEmail]);
       await dataSource.query('DELETE FROM sleep_scores WHERE "userId" = (SELECT id FROM users WHERE email = $1)', [testUserEmail]);
       
+      logger.info('Test data cleared');
       res.json({ success: true, message: 'All test data cleared' });
     } catch (error) {
-      console.error('Failed to clear test data:', error);
+      logger.error('Failed to clear test data', { error });
       res.status(500).json({ error: 'Failed to clear test data' });
     }
   });
   
   apiRouter.use("/test", testRouter);
-  console.log('Test routes enabled (NODE_ENV=test)');
+  logger.info('Test routes enabled (NODE_ENV=test)');
 }
 
 // Mount API router
@@ -1552,6 +1582,10 @@ app.get("*", (req: Request, res: Response) => {
 
 const PORT = parseInt(process.env.PORT || '5001', 10);
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log(`Build timestamp: ${new Date().toISOString()}`);
+  logger.info('Server started successfully', {
+    port: PORT,
+    host: '0.0.0.0',
+    nodeEnv: process.env.NODE_ENV,
+    buildTimestamp: new Date().toISOString()
+  });
 });

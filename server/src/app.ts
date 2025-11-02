@@ -24,6 +24,8 @@ import {
   SleepScore,
 } from "./entities";
 import { authenticateToken, generateToken } from "./middleware/auth";
+import { requestLogger } from "./middleware/requestLogger";
+import logger from "./logger";
 
 // Initialize reflect-metadata
 import "reflect-metadata";
@@ -41,6 +43,7 @@ const openai = new OpenAI({
 const app = express();
 
 // Middleware
+app.use(requestLogger);
 app.use(
   cors({
     origin: (process.env.CORS_ORIGIN || "").split(','),
@@ -70,6 +73,7 @@ apiRouter.post("/auth/login", async (req: Request, res: Response) => {
     const { email, password } = req.body as LoginRequest;
 
     if (!email || !password) {
+      logger.warn('Login attempt with missing credentials');
       return res.status(400).json({ error: "Email and password are required" });
     }
 
@@ -78,6 +82,7 @@ apiRouter.post("/auth/login", async (req: Request, res: Response) => {
     let user = await userRepository.findOne({ where: { email: normalizedEmail } });
 
     if (!user) {
+      logger.warn('Login attempt with invalid email', { email: normalizedEmail });
       return res.status(401).json({ error: "Invalid email or password" });
     }
 
@@ -86,6 +91,7 @@ apiRouter.post("/auth/login", async (req: Request, res: Response) => {
       : false;
 
     if (!isPasswordValid) {
+      logger.warn('Login attempt with invalid password', { userId: user.id, email: normalizedEmail });
       return res.status(401).json({ error: "Invalid email or password" });
     }
 
@@ -98,6 +104,8 @@ apiRouter.post("/auth/login", async (req: Request, res: Response) => {
       maxAge: 2 * 60 * 60 * 1000,
     });
 
+    logger.info('User logged in successfully', { userId: user.id, email: normalizedEmail });
+
     res.json({
       user: {
         id: user.id,
@@ -106,12 +114,14 @@ apiRouter.post("/auth/login", async (req: Request, res: Response) => {
       },
     });
   } catch (err) {
-    console.error(err);
+    logger.error('Login error', { error: err });
     res.status(500).json({ error: "Server error" });
   }
 });
 
-apiRouter.post("/auth/logout", (_req: Request, res: Response) => {
+apiRouter.post("/auth/logout", (req: Request, res: Response) => {
+  const userId = req.user?.id;
+  logger.info('User logged out', { userId });
   res.clearCookie("token");
   res.json({ message: "Logged out successfully" });
 });
@@ -159,9 +169,10 @@ apiRouter.post(
       const userRepository = dataSource.getRepository(User);
       await userRepository.update(user.id, { password: hashedPassword });
 
+      logger.info('Password changed successfully', { userId: user.id });
       res.json({ message: "Password changed successfully" });
     } catch (err) {
-      console.error(err);
+      logger.error('Change password error', { error: err, userId: req.user?.id });
       res.status(500).json({ error: "Server error" });
     }
   }
@@ -180,7 +191,7 @@ apiRouter.get("/exercises", authenticateToken, async (req: Request, res: Respons
     });
     res.json(exercises);
   } catch (err) {
-    console.error(err);
+    logger.error('Get exercises error', { error: err, userId: req.user?.id });
     res.status(500).json({ error: "Server error" });
   }
 });
@@ -229,7 +240,7 @@ apiRouter.get("/exercises/recent", authenticateToken, async (req: Request, res: 
       time_seconds: result[0].time_seconds,
     });
   } catch (err) {
-    console.error(err);
+    logger.error('Get recent exercise error', { error: err, exerciseId: req.query.exerciseId, userId: req.user?.id });
     res.status(500).json({ error: "Server error" });
   }
 });
@@ -249,9 +260,10 @@ apiRouter.post("/exercises", authenticateToken, async (req: Request, res: Respon
     }
 
     await exerciseRepository.save(exercise);
+    logger.info('Exercise created/updated', { exerciseId: exercise.id, name: exercise.name, userId: req.user?.id });
     res.json(exercise);
   } catch (err) {
-    console.error(err);
+    logger.error('Create exercise error', { error: err, userId: req.user?.id });
     res.status(500).json({ error: "Server error" });
   }
 });
@@ -276,9 +288,10 @@ apiRouter.put("/exercises/:id", authenticateToken, async (req: Request, res: Res
 
     exercise.name = name;
     await exerciseRepository.save(exercise);
+    logger.info('Exercise updated', { exerciseId: exercise.id, name: exercise.name, userId: req.user?.id });
     res.json(exercise);
   } catch (err) {
-    console.error(err);
+    logger.error('Update exercise error', { error: err, exerciseId: req.params.id, userId: req.user?.id });
     res.status(500).json({ error: "Server error" });
   }
 });
@@ -319,7 +332,7 @@ apiRouter.get("/workouts", authenticateToken, async (req: Request, res: Response
 
     res.json(workoutResponses);
   } catch (err) {
-    console.error(err);
+    logger.error('Get workouts error', { error: err, userId: req.user?.id });
     res.status(500).json({ error: "Server error" });
   }
 });
@@ -360,7 +373,7 @@ apiRouter.get("/workouts/:id", authenticateToken, async (req: Request, res: Resp
 
     res.json(workoutResponse);
   } catch (err) {
-    console.error(err);
+    logger.error('Get workout error', { error: err, workoutId: req.params.id, userId: req.user?.id });
     res.status(500).json({ error: "Server error" });
   }
 });
@@ -453,6 +466,14 @@ apiRouter.get("/timeline", authenticateToken, async (req: Request, res: Response
       })),
     }));
 
+    logger.debug('Timeline data fetched', { 
+      workoutCount: workouts.length, 
+      painScoreCount: painScores.length,
+      sleepScoreCount: sleepScores.length,
+      hasMore,
+      userId: req.user?.id 
+    });
+
     res.json({
       workouts: workoutResponses,
       painScores,
@@ -460,7 +481,7 @@ apiRouter.get("/timeline", authenticateToken, async (req: Request, res: Response
       hasMore,
     });
   } catch (err) {
-    console.error(err);
+    logger.error('Get timeline error', { error: err, userId: req.user?.id });
     res.status(500).json({ error: "Server error" });
   }
 });
@@ -481,9 +502,10 @@ if (process.env.NODE_ENV === 'test') {
       await dataSource.query('DELETE FROM sleep_scores WHERE "userId" = $1', [userId]);
       await dataSource.query('DELETE FROM exercises WHERE "userId" = $1', [userId]);
       
+      logger.info('Test data cleared', { userId });
       res.json({ message: 'Test data cleared successfully' });
     } catch (err) {
-      console.error('Failed to clear test data:', err);
+      logger.error('Failed to clear test data', { error: err, userId: req.user?.id });
       res.status(500).json({ error: 'Failed to clear test data' });
     }
   });
