@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import WorkoutForm from '../components/WorkoutForm';
-import { fetchWorkouts, updateWorkout, createExercise, fetchExercises } from '../api';
+import { fetchWorkout, updateWorkout, createExercise, fetchExercises } from '../api';
 import { Exercise, Workout } from '../types';
 import { useUserContext } from '../contexts/useUserContext';
 import styles from '../components/WorkoutForm.module.css';
@@ -25,9 +25,8 @@ export default function EditWorkoutPage() {
         setLoading(true);
         setError(null);
 
-        // Load workouts and find the one we're editing
-        const workoutsData = await fetchWorkouts();
-        const foundWorkout = workoutsData.find((w) => w.id === workoutId);
+        // Load the specific workout we're editing
+        const foundWorkout = await fetchWorkout(workoutId);
 
         if (!foundWorkout) {
           setError(`Workout with ID ${workoutId} not found`);

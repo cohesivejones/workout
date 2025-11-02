@@ -23,8 +23,6 @@ api.interceptors.response.use(
   }
 );
 
-export const fetchWorkouts = (): Promise<Workout[]> => api.get(`/workouts`);
-
 export const fetchExercises = (): Promise<Exercise[]> => api.get(`/exercises`);
 
 export const createWorkout = (workout: Workout): Promise<Workout> => api.post('/workouts', workout);
@@ -55,8 +53,6 @@ export const fetchRecentExerciseData = (exerciseId: number): Promise<RecentExerc
   api.get(`/exercises/recent?exerciseId=${encodeURIComponent(exerciseId)}`);
 
 // Pain Score API functions
-export const fetchPainScores = (): Promise<PainScore[]> => api.get(`/pain-scores`);
-
 export const fetchPainScore = (painScoreId: number): Promise<PainScore> =>
   api.get(`/pain-scores/${painScoreId}`);
 
@@ -72,8 +68,6 @@ export const deletePainScore = (painScoreId: number): Promise<{ id: number }> =>
   api.delete(`/pain-scores/${painScoreId}`);
 
 // Sleep Score API functions
-export const fetchSleepScores = (): Promise<SleepScore[]> => api.get(`/sleep-scores`);
-
 export const fetchSleepScore = (sleepScoreId: number): Promise<SleepScore> =>
   api.get(`/sleep-scores/${sleepScoreId}`);
 

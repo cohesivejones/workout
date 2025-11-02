@@ -343,49 +343,6 @@ apiRouter.put("/exercises/:id", authenticateToken, async (req: Request, res: Res
   }
 });
 
-// Get all workouts with exercises
-apiRouter.get("/workouts", authenticateToken, async (req: Request, res: Response) => {
-  try {
-    const userId = req.user!.id;
-
-    const workoutRepository = dataSource.getRepository(Workout);
-
-    const workouts = await workoutRepository.find({
-      where: { userId: Number(userId) },
-      relations: {
-        workoutExercises: {
-          exercise: true,
-        },
-      },
-      order: {
-        date: "DESC",
-      },
-    });
-
-    // Transform to match the expected response format
-    const workoutResponses: WorkoutResponse[] = workouts.map((workout) => ({
-      id: workout.id,
-      date: workout.date,
-      withInstructor: workout.withInstructor,
-      exercises: workout.workoutExercises.map((we) => ({
-        id: we.exercise.id,
-        name: we.exercise.name,
-        reps: we.reps,
-        weight: we.weight,
-        time_seconds: we.time_seconds,
-        new_reps: we.new_reps,
-        new_weight: we.new_weight,
-        new_time: we.new_time,
-      })),
-    }));
-
-    res.json(workoutResponses);
-  } catch (err) {
-    logger.error('Get workouts error', { error: err, userId: req.user?.id });
-    res.status(500).json({ error: "Server error" });
-  }
-});
-
 // Get a single workout by ID
 apiRouter.get("/workouts/:id", authenticateToken, async (req: Request, res: Response) => {
   try {
@@ -744,26 +701,6 @@ apiRouter.delete("/workouts/:id", authenticateToken, async (req: Request, res: R
 
 // Pain Score Routes
 
-// Get all pain scores for a user
-apiRouter.get("/pain-scores", authenticateToken, async (req: Request, res: Response) => {
-  try {
-    const userId = req.user!.id;
-
-    const painScoreRepository = dataSource.getRepository(PainScore);
-    const painScores = await painScoreRepository.find({
-      where: { userId: Number(userId) },
-      order: {
-        date: "DESC",
-      },
-    });
-
-    res.json(painScores);
-  } catch (err) {
-    logger.error('Get pain scores error', { error: err, userId: req.user?.id });
-    res.status(500).json({ error: "Server error" });
-  }
-});
-
 // Get a single pain score by ID
 apiRouter.get("/pain-scores/:id", authenticateToken, async (req: Request, res: Response) => {
   try {
@@ -908,26 +845,6 @@ apiRouter.delete("/pain-scores/:id", authenticateToken, async (req: Request, res
 });
 
 // Sleep Score Routes
-
-// Get all sleep scores for a user
-apiRouter.get("/sleep-scores", authenticateToken, async (req: Request, res: Response) => {
-  try {
-    const userId = req.user!.id;
-
-    const sleepScoreRepository = dataSource.getRepository(SleepScore);
-    const sleepScores = await sleepScoreRepository.find({
-      where: { userId: Number(userId) },
-      order: {
-        date: "DESC",
-      },
-    });
-
-    res.json(sleepScores);
-  } catch (err) {
-    logger.error('Get sleep scores error', { error: err, userId: req.user?.id });
-    res.status(500).json({ error: "Server error" });
-  }
-});
 
 // Get a single sleep score by ID
 apiRouter.get("/sleep-scores/:id", authenticateToken, async (req: Request, res: Response) => {

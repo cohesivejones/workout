@@ -297,46 +297,6 @@ apiRouter.put("/exercises/:id", authenticateToken, async (req: Request, res: Res
 });
 
 // Workout routes
-apiRouter.get("/workouts", authenticateToken, async (req: Request, res: Response) => {
-  try {
-    const userId = req.user!.id;
-    const workoutRepository = dataSource.getRepository(Workout);
-
-    const workouts = await workoutRepository.find({
-      where: { userId: Number(userId) },
-      relations: {
-        workoutExercises: {
-          exercise: true,
-        },
-      },
-      order: {
-        date: "DESC",
-      },
-    });
-
-    const workoutResponses: WorkoutResponse[] = workouts.map((workout) => ({
-      id: workout.id,
-      date: workout.date,
-      withInstructor: workout.withInstructor,
-      exercises: workout.workoutExercises.map((we) => ({
-        id: we.exercise.id,
-        name: we.exercise.name,
-        reps: we.reps,
-        weight: we.weight,
-        time_seconds: we.time_seconds,
-        new_reps: we.new_reps,
-        new_weight: we.new_weight,
-        new_time: we.new_time,
-      })),
-    }));
-
-    res.json(workoutResponses);
-  } catch (err) {
-    logger.error('Get workouts error', { error: err, userId: req.user?.id });
-    res.status(500).json({ error: "Server error" });
-  }
-});
-
 apiRouter.get("/workouts/:id", authenticateToken, async (req: Request, res: Response) => {
   try {
     const workoutId = parseInt(req.params.id);
