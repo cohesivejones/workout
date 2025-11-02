@@ -9,7 +9,7 @@ echo "🚀 Setting up e2e test database..."
 
 # Start Docker test database
 echo "📦 Starting Docker test database..."
-npm run test:e2e:db:start
+npm run test:env:start
 
 # Wait for database to be ready
 echo "⏳ Waiting for database to be ready..."
@@ -30,5 +30,5 @@ echo "  1. Start the backend: cd server && npm run dev:test"
 echo "  2. Start the frontend: npm run dev (in another terminal)"
 echo "  3. Run e2e tests: npm run test:e2e (in another terminal)"
 echo ""
-echo "To stop the test database: npm run test:e2e:db:stop"
-echo "To reset the test database: npm run test:e2e:db:reset"
+echo "To stop the test database: npm run test:env:stop"
+echo "To reset the test database: npm run test:env:reset"

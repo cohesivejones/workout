@@ -60,3 +60,10 @@ export interface WorkoutListProps {
   workouts: Workout[];
   onWorkoutDeleted: (workoutId: number) => void;
 }
+
+export interface TimelineResponse {
+  workouts: Workout[];
+  painScores: PainScore[];
+  sleepScores: SleepScore[];
+  hasMore: boolean;
+}

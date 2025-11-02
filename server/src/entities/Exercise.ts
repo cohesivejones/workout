@@ -9,7 +9,7 @@ export class Exercise {
   @Column({ type: "integer" })
   userId: number;
 
-  @Column({ unique: true })
+  @Column({ type: "varchar", unique: true })
   name: string;
 
   @OneToMany(

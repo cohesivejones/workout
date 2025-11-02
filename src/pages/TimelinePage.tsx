@@ -2,13 +2,7 @@ import { useState, useEffect } from 'react';
 import type { ReactElement } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import CalendarView from '../components/CalendarView';
-import {
-  fetchWorkouts,
-  fetchPainScores,
-  deletePainScore,
-  fetchSleepScores,
-  deleteSleepScore,
-} from '../api';
+import { fetchTimeline, deletePainScore, deleteSleepScore } from '../api';
 import { Workout, PainScore, SleepScore } from '../types';
 import classNames from 'classnames';
 import styles from './TimelinePage.module.css';
@@ -23,6 +17,10 @@ function TimelinePage(): ReactElement {
   const [error, setError] = useState<string | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useUserContext();
+  const [hasMore, setHasMore] = useState<boolean>(false);
+  const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
+  const [startDate, setStartDate] = useState<string>('');
+  const [endDate, setEndDate] = useState<string>('');
 
   // Get view mode from URL or default to "calendar"
   const viewMode = searchParams.get('view') === 'list' ? 'list' : 'calendar';
@@ -30,15 +28,25 @@ function TimelinePage(): ReactElement {
   useEffect(() => {
     const loadData = async () => {
       if (!user) return;
+      setLoading(true);
       try {
-        const [workoutsData, painScoresData, sleepScoresData] = await Promise.all([
-          fetchWorkouts(),
-          fetchPainScores(),
-          fetchSleepScores(),
-        ]);
-        setWorkouts(workoutsData);
-        setPainScores(painScoresData);
-        setSleepScores(sleepScoresData);
+        // Calculate initial date range (last 3 months to next 3 months)
+        const threeMonthsAgo = new Date();
+        threeMonthsAgo.setDate(threeMonthsAgo.getDate() - 90);
+        const threeMonthsAhead = new Date();
+        threeMonthsAhead.setDate(threeMonthsAhead.getDate() + 90);
+
+        const startDateStr = threeMonthsAgo.toISOString().split('T')[0];
+        const endDateStr = threeMonthsAhead.toISOString().split('T')[0];
+
+        setStartDate(startDateStr);
+        setEndDate(endDateStr);
+
+        const timelineData = await fetchTimeline(startDateStr, endDateStr);
+        setWorkouts(timelineData.workouts);
+        setPainScores(timelineData.painScores);
+        setSleepScores(timelineData.sleepScores);
+        setHasMore(timelineData.hasMore);
         setLoading(false);
       } catch (err) {
         console.error('Failed to load data:', err);
@@ -47,7 +55,33 @@ function TimelinePage(): ReactElement {
       }
     };
     loadData();
-  }, [user]);
+  }, [user, searchParams]);
+
+  const handleLoadMore = async () => {
+    if (!user || isLoadingMore) return;
+
+    setIsLoadingMore(true);
+    try {
+      // Extend the date range by another 3 months backward
+      const newStartDate = new Date(startDate);
+      newStartDate.setDate(newStartDate.getDate() - 90);
+      const newStartDateStr = newStartDate.toISOString().split('T')[0];
+
+      setStartDate(newStartDateStr);
+
+      // Fetch data with extended date range
+      const timelineData = await fetchTimeline(newStartDateStr, endDate);
+      setWorkouts(timelineData.workouts);
+      setPainScores(timelineData.painScores);
+      setSleepScores(timelineData.sleepScores);
+      setHasMore(timelineData.hasMore);
+    } catch (err) {
+      console.error('Failed to load more data:', err);
+      setError('Failed to load more data. Please try again later.');
+    } finally {
+      setIsLoadingMore(false);
+    }
+  };
 
   const handleWorkoutDeleted = (workoutId: number) => {
     setWorkouts((prevWorkouts) => prevWorkouts.filter((w) => w.id !== workoutId));
@@ -116,6 +150,9 @@ function TimelinePage(): ReactElement {
           handleWorkoutDeleted={handleWorkoutDeleted}
           handlePainScoreDelete={handlePainScoreDelete}
           handleSleepScoreDelete={handleSleepScoreDelete}
+          hasMore={hasMore}
+          onLoadMore={handleLoadMore}
+          isLoadingMore={isLoadingMore}
         />
       )}
     </div>

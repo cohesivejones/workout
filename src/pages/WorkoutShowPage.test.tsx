@@ -1,13 +1,10 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { http, HttpResponse } from 'msw';
+import { server } from '../mocks/server';
 import WorkoutShowPage from './WorkoutShowPage';
-import * as Api from '../api';
 import * as UserContext from '../contexts/useUserContext';
-
-// Mock the API functions
-vi.mock('../api', () => ({
-  fetchWorkout: vi.fn(),
-}));
 
 // Mock the UserContext
 vi.mock('../contexts/useUserContext', () => ({
@@ -31,17 +28,20 @@ describe('WorkoutShowPage', () => {
 
     // Mock the user context to simulate a logged-in user
     vi.spyOn(UserContext, 'useUserContext').mockReturnValue({
-      user: { id: 1, name: 'Test User' },
+      user: { id: 1, name: 'Test User', email: 'test@example.com' },
       login: vi.fn(),
       logout: vi.fn(),
       loading: false,
     });
-
-    // Mock the API call to return the workout
-    vi.mocked(Api.fetchWorkout).mockResolvedValue(mockWorkout);
   });
 
   it('renders loading state initially', () => {
+    server.use(
+      http.get('/api/workouts/:id', () => {
+        return new Promise(() => {}); // Never resolve
+      })
+    );
+
     render(
       <MemoryRouter initialEntries={['/workouts/1']}>
         <Routes>
@@ -55,6 +55,13 @@ describe('WorkoutShowPage', () => {
   });
 
   it('renders workout details after loading', async () => {
+    server.use(
+      http.get('/api/workouts/:id', ({ params }) => {
+        expect(params.id).toBe('1');
+        return HttpResponse.json(mockWorkout);
+      })
+    );
+
     render(
       <MemoryRouter initialEntries={['/workouts/1']}>
         <Routes>
@@ -67,9 +74,6 @@ describe('WorkoutShowPage', () => {
     await waitFor(() => {
       expect(screen.queryByText(/Loading workout.../i)).not.toBeInTheDocument();
     });
-
-    // Check that the API was called with the correct ID
-    expect(Api.fetchWorkout).toHaveBeenCalledWith(1);
 
     // Check that workout details are displayed
     expect(screen.getByText(/Apr 10, 2025/i)).toBeInTheDocument();
@@ -87,8 +91,11 @@ describe('WorkoutShowPage', () => {
   });
 
   it('renders error state when API call fails', async () => {
-    // Mock the API call to fail
-    vi.mocked(Api.fetchWorkout).mockRejectedValue(new Error('Failed to load workout'));
+    server.use(
+      http.get('/api/workouts/:id', () => {
+        return HttpResponse.json({ error: 'Failed to load workout' }, { status: 500 });
+      })
+    );
 
     render(
       <MemoryRouter initialEntries={['/workouts/1']}>
@@ -105,8 +112,11 @@ describe('WorkoutShowPage', () => {
   });
 
   it("renders not found state when workout doesn't exist", async () => {
-    // Mock the API call to return null (workout not found)
-    vi.mocked(Api.fetchWorkout).mockResolvedValue(null);
+    server.use(
+      http.get('/api/workouts/:id', () => {
+        return HttpResponse.json(null);
+      })
+    );
 
     render(
       <MemoryRouter initialEntries={['/workouts/999']}>
@@ -123,9 +133,13 @@ describe('WorkoutShowPage', () => {
   });
 
   it('renders workout without instructor badge when withInstructor is false', async () => {
-    // Mock the API call to return a workout without instructor
     const workoutWithoutInstructor = { ...mockWorkout, withInstructor: false };
-    vi.mocked(Api.fetchWorkout).mockResolvedValue(workoutWithoutInstructor);
+
+    server.use(
+      http.get('/api/workouts/:id', () => {
+        return HttpResponse.json(workoutWithoutInstructor);
+      })
+    );
 
     render(
       <MemoryRouter initialEntries={['/workouts/1']}>
@@ -145,12 +159,16 @@ describe('WorkoutShowPage', () => {
   });
 
   it('renders exercises without weight when weight is not provided', async () => {
-    // Mock the API call to return a workout with an exercise without weight
     const workoutWithExerciseWithoutWeight = {
       ...mockWorkout,
       exercises: [{ id: 1, name: 'Push-ups', reps: 10 }],
     };
-    vi.mocked(Api.fetchWorkout).mockResolvedValue(workoutWithExerciseWithoutWeight);
+
+    server.use(
+      http.get('/api/workouts/:id', () => {
+        return HttpResponse.json(workoutWithExerciseWithoutWeight);
+      })
+    );
 
     render(
       <MemoryRouter initialEntries={['/workouts/1']}>
@@ -172,7 +190,6 @@ describe('WorkoutShowPage', () => {
   });
 
   it('renders exercises with time when time_seconds is provided', async () => {
-    // Mock the API call to return a workout with an exercise with time
     const workoutWithTime = {
       ...mockWorkout,
       exercises: [
@@ -180,7 +197,12 @@ describe('WorkoutShowPage', () => {
         { id: 2, name: 'Wall Sit', reps: 2, weight: 0, time_seconds: 1.5 },
       ],
     };
-    vi.mocked(Api.fetchWorkout).mockResolvedValue(workoutWithTime);
+
+    server.use(
+      http.get('/api/workouts/:id', () => {
+        return HttpResponse.json(workoutWithTime);
+      })
+    );
 
     render(
       <MemoryRouter initialEntries={['/workouts/1']}>

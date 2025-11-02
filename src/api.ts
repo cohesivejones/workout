@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Workout, Exercise, PainScore, SleepScore, User } from './types';
+import { Workout, Exercise, PainScore, SleepScore, User, TimelineResponse } from './types';
 
 // Auth types
 export interface AuthResponse {
@@ -182,3 +182,13 @@ export interface GenerateWorkoutResponse {
 export const generateWorkout = (
   request: GenerateWorkoutRequest
 ): Promise<GenerateWorkoutResponse> => api.post('/workouts/generate', request);
+
+// Timeline API function
+export const fetchTimeline = (startDate?: string, endDate?: string): Promise<TimelineResponse> => {
+  const params = new URLSearchParams();
+  if (startDate) params.append('startDate', startDate);
+  if (endDate) params.append('endDate', endDate);
+
+  const queryString = params.toString();
+  return api.get(`/timeline${queryString ? `?${queryString}` : ''}`);
+};

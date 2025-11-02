@@ -40,7 +40,7 @@ npm run certs:generate
 4. Start the PostgreSQL database and Nginx proxy using Docker:
 
 ```bash
-npm run db:start
+npm run dev:env:start
 ```
 
 5. Run database migrations:
@@ -104,9 +104,9 @@ After trusting the certificate, restart your browser.
 
 ### Database Management
 
-- `npm run db:start` - Start the development database and Nginx proxy
-- `npm run db:stop` - Stop the development database and Nginx proxy
-- `npm run db:reset` - Reset the database (removes all data and restarts)
+- `npm run dev:env:start` - Start the development database and Nginx proxy
+- `npm run dev:env:stop` - Stop the development database and Nginx proxy
+- `npm run dev:env:reset` - Reset the database (removes all data and restarts)
 - `npm run db:migrate` - Run database migrations
 
 ## Production Build
@@ -140,19 +140,18 @@ All environment variables are now consolidated in a single `.env` file:
 
 - `npm run dev` - Start development servers (Vite + API server)
 - `npm run certs:generate` - Generate SSL certificates for HTTPS (first time only)
-- `npm run db:start` - Start the development database and Nginx proxy
-- `npm run db:stop` - Stop the development database and Nginx proxy
-- `npm run db:reset` - Reset the database (removes all data)
+- `npm run dev:env:start` - Start the development database and Nginx proxy
+- `npm run dev:env:stop` - Stop the development database and Nginx proxy
+- `npm run dev:env:reset` - Reset the database (removes all data)
 - `npm run db:migrate` - Run database migrations
 
 ### Testing
 
 - `npm test` - Run unit tests
 - `npm run test:e2e` - Run end-to-end tests (requires test environment setup)
-- `npm run test:e2e:start` - Start test environment (database + nginx)
-- `npm run test:e2e:stop` - Stop test environment
-- `npm run test:e2e:reset` - Reset test environment
-- `npm run test:e2e:logs` - Show test environment logs
+- `npm run test:env:start` - Start test environment (database + nginx)
+- `npm run test:env:stop` - Stop test environment
+- `npm run test:env:reset` - Reset test environment
 
 **E2E Test Setup:**
 
@@ -167,7 +166,7 @@ E2E tests run against `https://localhost` using the same HTTPS setup as developm
 2. Start test database, nginx, and run migrations:
 
    ```bash
-   npm run test:e2e:start
+   npm run test:env:start
    ```
 
 3. Run tests (Playwright auto-starts backend server):
@@ -178,7 +177,7 @@ E2E tests run against `https://localhost` using the same HTTPS setup as developm
 
 4. Stop test environment:
    ```bash
-   npm run test:e2e:stop
+   npm run test:env:stop
    ```
 
 **Note:**

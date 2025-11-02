@@ -1,13 +1,8 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { http, HttpResponse } from 'msw';
+import { server } from '../mocks/server';
 import GenerateWorkoutPage from './GenerateWorkoutPage';
-import * as api from '../api';
-
-// Mock the API module
-vi.mock('../api', () => ({
-  generateWorkout: vi.fn(),
-}));
-
-const mockGenerateWorkout = api.generateWorkout as anyedFunction<typeof api.generateWorkout>;
 
 describe('GenerateWorkoutPage', () => {
   beforeEach(() => {
@@ -38,7 +33,14 @@ describe('GenerateWorkoutPage', () => {
       generatedWorkout:
         '1. Push-ups: 3 sets of 12\n2. Squats: 3 sets of 15\n3. Plank: 3 sets of 30 seconds',
     };
-    mockGenerateWorkout.mockResolvedValue(mockResponse);
+
+    server.use(
+      http.post('/api/workouts/generate', async ({ request }) => {
+        const body = await request.json();
+        expect(body).toEqual({ additionalNotes: 'Focus on upper body' });
+        return HttpResponse.json(mockResponse);
+      })
+    );
 
     render(<GenerateWorkoutPage />);
 
@@ -49,9 +51,7 @@ describe('GenerateWorkoutPage', () => {
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(mockGenerateWorkout).toHaveBeenCalledWith({
-        additionalNotes: 'Focus on upper body',
-      });
+      expect(screen.getByText('Your Generated Workout')).toBeInTheDocument();
     });
   });
 
@@ -59,7 +59,14 @@ describe('GenerateWorkoutPage', () => {
     const mockResponse = {
       generatedWorkout: '1. Push-ups: 3 sets of 12\n2. Squats: 3 sets of 15',
     };
-    mockGenerateWorkout.mockResolvedValue(mockResponse);
+
+    server.use(
+      http.post('/api/workouts/generate', async ({ request }) => {
+        const body = await request.json();
+        expect(body).toEqual({ additionalNotes: undefined });
+        return HttpResponse.json(mockResponse);
+      })
+    );
 
     render(<GenerateWorkoutPage />);
 
@@ -67,15 +74,15 @@ describe('GenerateWorkoutPage', () => {
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(mockGenerateWorkout).toHaveBeenCalledWith({
-        additionalNotes: undefined,
-      });
+      expect(screen.getByText('Your Generated Workout')).toBeInTheDocument();
     });
   });
 
   it('shows loading state during API call', async () => {
-    mockGenerateWorkout.mockImplementation(
-      () => new Promise((resolve) => setTimeout(resolve, 100))
+    server.use(
+      http.post('/api/workouts/generate', () => {
+        return new Promise((resolve) => setTimeout(resolve, 100));
+      })
     );
 
     render(<GenerateWorkoutPage />);
@@ -93,7 +100,12 @@ describe('GenerateWorkoutPage', () => {
       generatedWorkout:
         '1. Push-ups: 3 sets of 12\n2. Squats: 3 sets of 15\n3. Plank: 3 sets of 30 seconds',
     };
-    mockGenerateWorkout.mockResolvedValue(mockResponse);
+
+    server.use(
+      http.post('/api/workouts/generate', () => {
+        return HttpResponse.json(mockResponse);
+      })
+    );
 
     render(<GenerateWorkoutPage />);
 
@@ -113,7 +125,12 @@ describe('GenerateWorkoutPage', () => {
 
   it('displays error message on API failure', async () => {
     const errorMessage = 'Failed to generate workout';
-    mockGenerateWorkout.mockRejectedValue(new Error(errorMessage));
+
+    server.use(
+      http.post('/api/workouts/generate', () => {
+        return HttpResponse.json({ error: errorMessage }, { status: 500 });
+      })
+    );
 
     render(<GenerateWorkoutPage />);
 
@@ -131,7 +148,12 @@ describe('GenerateWorkoutPage', () => {
     const mockResponse = {
       generatedWorkout: '1. Push-ups: 3 sets of 12',
     };
-    mockGenerateWorkout.mockResolvedValue(mockResponse);
+
+    server.use(
+      http.post('/api/workouts/generate', () => {
+        return HttpResponse.json(mockResponse);
+      })
+    );
 
     render(<GenerateWorkoutPage />);
 
@@ -160,7 +182,12 @@ describe('GenerateWorkoutPage', () => {
     const mockResponse = {
       generatedWorkout: '1. Push-ups: 3 sets of 12',
     };
-    mockGenerateWorkout.mockResolvedValue(mockResponse);
+
+    server.use(
+      http.post('/api/workouts/generate', () => {
+        return HttpResponse.json(mockResponse);
+      })
+    );
 
     render(<GenerateWorkoutPage />);
 
@@ -189,7 +216,14 @@ describe('GenerateWorkoutPage', () => {
     const mockResponse = {
       generatedWorkout: '1. Push-ups: 3 sets of 12',
     };
-    mockGenerateWorkout.mockResolvedValue(mockResponse);
+
+    server.use(
+      http.post('/api/workouts/generate', async ({ request }) => {
+        const body = await request.json();
+        expect(body).toEqual({ additionalNotes: 'Focus on upper body' });
+        return HttpResponse.json(mockResponse);
+      })
+    );
 
     render(<GenerateWorkoutPage />);
 
@@ -200,9 +234,7 @@ describe('GenerateWorkoutPage', () => {
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(mockGenerateWorkout).toHaveBeenCalledWith({
-        additionalNotes: 'Focus on upper body',
-      });
+      expect(screen.getByText('Your Generated Workout')).toBeInTheDocument();
     });
   });
 
@@ -210,7 +242,14 @@ describe('GenerateWorkoutPage', () => {
     const mockResponse = {
       generatedWorkout: '1. Push-ups: 3 sets of 12',
     };
-    mockGenerateWorkout.mockResolvedValue(mockResponse);
+
+    server.use(
+      http.post('/api/workouts/generate', async ({ request }) => {
+        const body = await request.json();
+        expect(body).toEqual({ additionalNotes: undefined });
+        return HttpResponse.json(mockResponse);
+      })
+    );
 
     render(<GenerateWorkoutPage />);
 
@@ -221,9 +260,7 @@ describe('GenerateWorkoutPage', () => {
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(mockGenerateWorkout).toHaveBeenCalledWith({
-        additionalNotes: undefined,
-      });
+      expect(screen.getByText('Your Generated Workout')).toBeInTheDocument();
     });
   });
 });

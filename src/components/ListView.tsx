@@ -23,6 +23,9 @@ interface ListViewProps {
   handleSleepScoreDelete: (sleepScoreId: number) => void;
   workouts: Workout[];
   handleWorkoutDeleted: (workoutId: number) => void;
+  hasMore?: boolean;
+  onLoadMore?: () => void;
+  isLoadingMore?: boolean;
 }
 
 type ListItem =
@@ -37,6 +40,9 @@ export const ListView = ({
   handleSleepScoreDelete,
   workouts,
   handleWorkoutDeleted,
+  hasMore = false,
+  onLoadMore,
+  isLoadingMore = false,
 }: ListViewProps) => {
   const [showWorkouts, setShowWorkouts] = useState(true);
   const [showPainScores, setShowPainScores] = useState(true);
@@ -423,6 +429,19 @@ export const ListView = ({
               );
             }
           })}
+        </div>
+      )}
+
+      {/* Load More Button */}
+      {hasMore && onLoadMore && (
+        <div className={styles.loadMoreContainer}>
+          <button
+            onClick={onLoadMore}
+            disabled={isLoadingMore}
+            className={classNames(buttonStyles.secondaryBtn, styles.loadMoreBtn)}
+          >
+            {isLoadingMore ? 'Loading...' : 'Load More'}
+          </button>
         </div>
       )}
 

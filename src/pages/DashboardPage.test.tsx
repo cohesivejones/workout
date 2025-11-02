@@ -1,13 +1,8 @@
 import { render, screen, waitFor } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { http, HttpResponse } from 'msw';
+import { server } from '../mocks/server';
 import DashboardPage from './DashboardPage';
-import * as Api from '../api';
-
-// Mock the API functions
-vi.mock('../api', () => ({
-  fetchWeightProgressionData: vi.fn(),
-  fetchPainProgressionData: vi.fn(),
-  fetchSleepProgressionData: vi.fn(),
-}));
 
 // Mock the Recharts components
 vi.mock('recharts', () => {
@@ -81,7 +76,11 @@ describe('DashboardPage', () => {
 
   it('renders loading state initially', () => {
     // Mock API to not resolve immediately
-    vi.mocked(Api.fetchWeightProgressionData).mockImplementation(() => new Promise(() => {}));
+    server.use(
+      http.get('/api/dashboard/weight-progression', () => {
+        return new Promise(() => {});
+      })
+    );
 
     render(<DashboardPage />);
 
@@ -90,8 +89,18 @@ describe('DashboardPage', () => {
   });
 
   it('renders charts when data is loaded successfully', async () => {
-    // Mock successful API response
-    vi.mocked(Api.fetchWeightProgressionData).mockResolvedValue(mockProgressionData);
+    // Mock successful API responses for all endpoints
+    server.use(
+      http.get('/api/dashboard/weight-progression', () => {
+        return HttpResponse.json(mockProgressionData);
+      }),
+      http.get('/api/dashboard/pain-progression', () => {
+        return HttpResponse.json({ dataPoints: [] });
+      }),
+      http.get('/api/dashboard/sleep-progression', () => {
+        return HttpResponse.json({ dataPoints: [] });
+      })
+    );
 
     render(<DashboardPage />);
 
@@ -114,7 +123,11 @@ describe('DashboardPage', () => {
 
   it('renders error message when API call fails', async () => {
     // Mock API failure
-    vi.mocked(Api.fetchWeightProgressionData).mockRejectedValue(new Error('Failed to fetch data'));
+    server.use(
+      http.get('/api/dashboard/weight-progression', () => {
+        return HttpResponse.json({ error: 'Failed to fetch data' }, { status: 500 });
+      })
+    );
 
     render(<DashboardPage />);
 
@@ -125,8 +138,18 @@ describe('DashboardPage', () => {
   });
 
   it('renders empty state when no data is available', async () => {
-    // Mock empty data response
-    vi.mocked(Api.fetchWeightProgressionData).mockResolvedValue([]);
+    // Mock empty data responses for all endpoints
+    server.use(
+      http.get('/api/dashboard/weight-progression', () => {
+        return HttpResponse.json([]);
+      }),
+      http.get('/api/dashboard/pain-progression', () => {
+        return HttpResponse.json({ dataPoints: [] });
+      }),
+      http.get('/api/dashboard/sleep-progression', () => {
+        return HttpResponse.json({ dataPoints: [] });
+      })
+    );
 
     render(<DashboardPage />);
 
@@ -141,9 +164,17 @@ describe('DashboardPage', () => {
 
   it('formats dates correctly in chart labels and uses consistent domain', async () => {
     // Mock successful API responses
-    vi.mocked(Api.fetchWeightProgressionData).mockResolvedValue(mockProgressionData);
-    vi.mocked(Api.fetchPainProgressionData).mockResolvedValue(mockPainData);
-    vi.mocked(Api.fetchSleepProgressionData).mockResolvedValue(mockSleepData);
+    server.use(
+      http.get('/api/dashboard/weight-progression', () => {
+        return HttpResponse.json(mockProgressionData);
+      }),
+      http.get('/api/dashboard/pain-progression', () => {
+        return HttpResponse.json(mockPainData);
+      }),
+      http.get('/api/dashboard/sleep-progression', () => {
+        return HttpResponse.json(mockSleepData);
+      })
+    );
 
     render(<DashboardPage />);
 
@@ -163,9 +194,17 @@ describe('DashboardPage', () => {
 
   it('renders pain and sleep score charts when data is loaded successfully', async () => {
     // Mock successful API responses
-    vi.mocked(Api.fetchWeightProgressionData).mockResolvedValue(mockProgressionData);
-    vi.mocked(Api.fetchPainProgressionData).mockResolvedValue(mockPainData);
-    vi.mocked(Api.fetchSleepProgressionData).mockResolvedValue(mockSleepData);
+    server.use(
+      http.get('/api/dashboard/weight-progression', () => {
+        return HttpResponse.json(mockProgressionData);
+      }),
+      http.get('/api/dashboard/pain-progression', () => {
+        return HttpResponse.json(mockPainData);
+      }),
+      http.get('/api/dashboard/sleep-progression', () => {
+        return HttpResponse.json(mockSleepData);
+      })
+    );
 
     render(<DashboardPage />);
 
@@ -192,9 +231,17 @@ describe('DashboardPage', () => {
 
   it('does not render pain and sleep charts when no data is available', async () => {
     // Mock API responses with empty data for pain and sleep
-    vi.mocked(Api.fetchWeightProgressionData).mockResolvedValue(mockProgressionData);
-    vi.mocked(Api.fetchPainProgressionData).mockResolvedValue({ dataPoints: [] });
-    vi.mocked(Api.fetchSleepProgressionData).mockResolvedValue({ dataPoints: [] });
+    server.use(
+      http.get('/api/dashboard/weight-progression', () => {
+        return HttpResponse.json(mockProgressionData);
+      }),
+      http.get('/api/dashboard/pain-progression', () => {
+        return HttpResponse.json({ dataPoints: [] });
+      }),
+      http.get('/api/dashboard/sleep-progression', () => {
+        return HttpResponse.json({ dataPoints: [] });
+      })
+    );
 
     render(<DashboardPage />);
 
@@ -209,9 +256,17 @@ describe('DashboardPage', () => {
 
   it('normalizes data to have consistent date range across all charts', async () => {
     // Mock successful API responses
-    vi.mocked(Api.fetchWeightProgressionData).mockResolvedValue(mockProgressionData);
-    vi.mocked(Api.fetchPainProgressionData).mockResolvedValue(mockPainData);
-    vi.mocked(Api.fetchSleepProgressionData).mockResolvedValue(mockSleepData);
+    server.use(
+      http.get('/api/dashboard/weight-progression', () => {
+        return HttpResponse.json(mockProgressionData);
+      }),
+      http.get('/api/dashboard/pain-progression', () => {
+        return HttpResponse.json(mockPainData);
+      }),
+      http.get('/api/dashboard/sleep-progression', () => {
+        return HttpResponse.json(mockSleepData);
+      })
+    );
 
     render(<DashboardPage />);
 
@@ -232,9 +287,17 @@ describe('DashboardPage', () => {
 
   describe('PR Indicator Features', () => {
     beforeEach(() => {
-      vi.mocked(Api.fetchWeightProgressionData).mockResolvedValue(mockProgressionData);
-      vi.mocked(Api.fetchPainProgressionData).mockResolvedValue(mockPainData);
-      vi.mocked(Api.fetchSleepProgressionData).mockResolvedValue(mockSleepData);
+      server.use(
+        http.get('/api/dashboard/weight-progression', () => {
+          return HttpResponse.json(mockProgressionData);
+        }),
+        http.get('/api/dashboard/pain-progression', () => {
+          return HttpResponse.json(mockPainData);
+        }),
+        http.get('/api/dashboard/sleep-progression', () => {
+          return HttpResponse.json(mockSleepData);
+        })
+      );
     });
 
     it('renders PR legend for each exercise chart', async () => {
@@ -292,9 +355,17 @@ describe('DashboardPage', () => {
         },
       ];
 
-      vi.mocked(Api.fetchWeightProgressionData).mockResolvedValue(mockDataWithPRs);
-      vi.mocked(Api.fetchPainProgressionData).mockResolvedValue({ dataPoints: [] });
-      vi.mocked(Api.fetchSleepProgressionData).mockResolvedValue({ dataPoints: [] });
+      server.use(
+        http.get('/api/dashboard/weight-progression', () => {
+          return HttpResponse.json(mockDataWithPRs);
+        }),
+        http.get('/api/dashboard/pain-progression', () => {
+          return HttpResponse.json({ dataPoints: [] });
+        }),
+        http.get('/api/dashboard/sleep-progression', () => {
+          return HttpResponse.json({ dataPoints: [] });
+        })
+      );
 
       render(<DashboardPage />);
 
@@ -313,6 +384,12 @@ describe('DashboardPage', () => {
 
   describe('Enhanced Tooltip Formatting', () => {
     it('includes reps and PR indicators in tooltip data structure', async () => {
+      server.use(
+        http.get('/api/dashboard/weight-progression', () => {
+          return HttpResponse.json(mockProgressionData);
+        })
+      );
+
       render(<DashboardPage />);
 
       await waitFor(() => {
@@ -342,7 +419,17 @@ describe('DashboardPage', () => {
         },
       ];
 
-      vi.mocked(Api.fetchWeightProgressionData).mockResolvedValue(dataWithMixedPRs);
+      server.use(
+        http.get('/api/dashboard/weight-progression', () => {
+          return HttpResponse.json(dataWithMixedPRs);
+        }),
+        http.get('/api/dashboard/pain-progression', () => {
+          return HttpResponse.json({ dataPoints: [] });
+        }),
+        http.get('/api/dashboard/sleep-progression', () => {
+          return HttpResponse.json({ dataPoints: [] });
+        })
+      );
 
       render(<DashboardPage />);
 
@@ -369,7 +456,17 @@ describe('DashboardPage', () => {
         },
       ];
 
-      vi.mocked(Api.fetchWeightProgressionData).mockResolvedValue(dataWithoutPRFlags);
+      server.use(
+        http.get('/api/dashboard/weight-progression', () => {
+          return HttpResponse.json(dataWithoutPRFlags);
+        }),
+        http.get('/api/dashboard/pain-progression', () => {
+          return HttpResponse.json({ dataPoints: [] });
+        }),
+        http.get('/api/dashboard/sleep-progression', () => {
+          return HttpResponse.json({ dataPoints: [] });
+        })
+      );
 
       render(<DashboardPage />);
 
