@@ -1,9 +1,11 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { http, HttpResponse } from 'msw';
+import { server } from '../mocks/server';
 import WorkoutForm from './WorkoutForm';
 import { Workout, WorkoutFormProps } from '../types';
 import * as UserContext from '../contexts/useUserContext';
-import * as Api from '../api';
 
 interface SelectOption {
   label: string;
@@ -50,15 +52,6 @@ describe('WorkoutForm', () => {
     { id: 2, userId: 1, name: 'Squats' },
     { id: 3, userId: 1, name: 'Lunges' },
   ];
-  vi.spyOn(UserContext, 'useUserContext').mockReturnValue({
-    user: { id: 1, name: 'Bob Jones' },
-    login: vi.fn(),
-    logout: vi.fn(),
-    loading: false,
-  });
-  vi.spyOn(Api, 'fetchRecentExerciseData').mockRejectedValue(
-    new Error('Failed to fetch recent data')
-  );
 
   const defaultProps: WorkoutFormProps = {
     onSubmit: mockOnSubmit,
@@ -68,6 +61,19 @@ describe('WorkoutForm', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.spyOn(UserContext, 'useUserContext').mockReturnValue({
+      user: { id: 1, name: 'Bob Jones', email: 'bob@example.com' },
+      login: vi.fn(),
+      logout: vi.fn(),
+      loading: false,
+    });
+
+    // Mock the fetchRecentExerciseData API to reject by default
+    server.use(
+      http.get('/api/exercises/recent', () => {
+        return HttpResponse.json({ error: 'Failed to fetch recent data' }, { status: 500 });
+      })
+    );
   });
 
   it('renders the form with correct initial state for new workout', () => {

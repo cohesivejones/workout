@@ -1,11 +1,11 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
+import { http, HttpResponse } from 'msw';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { server } from '../mocks/server';
 import TimelinePage from './TimelinePage';
-import * as api from '../api';
 import * as UserContext from '../contexts/useUserContext';
-
-// Mock the API module
-vi.mock('../api');
+import { TimelineResponse } from '../types';
 
 // Mock the UserContext
 vi.mock('../contexts/useUserContext');
@@ -26,12 +26,13 @@ const mockUser = {
   email: 'test@example.com',
 };
 
-const mockTimelineData = {
+const mockTimelineData: TimelineResponse = {
   workouts: [
     {
       id: 1,
       date: '2025-01-15',
       withInstructor: false,
+      userId: 1,
       exercises: [
         {
           id: 1,
@@ -78,21 +79,28 @@ describe('TimelinePage', () => {
   };
 
   it('should call fetchTimeline API once on mount', async () => {
-    const mockFetchTimeline = vi.fn().mockResolvedValue(mockTimelineData);
-    vi.spyOn(api, 'fetchTimeline').mockImplementation(mockFetchTimeline);
+    let callCount = 0;
+    server.use(
+      http.get('/api/timeline', () => {
+        callCount++;
+        return HttpResponse.json(mockTimelineData);
+      })
+    );
 
     renderWithRouter(<TimelinePage />);
 
     await waitFor(() => {
-      expect(mockFetchTimeline).toHaveBeenCalledTimes(1);
+      expect(callCount).toBe(1);
     });
   });
 
   it('should display loading state initially', () => {
-    const mockFetchTimeline = vi.fn().mockImplementation(
-      () => new Promise(() => {}) // Never resolves
+    server.use(
+      http.get('/api/timeline', () => {
+        // Never resolve to keep loading state
+        return new Promise(() => {});
+      })
     );
-    vi.spyOn(api, 'fetchTimeline').mockImplementation(mockFetchTimeline);
 
     renderWithRouter(<TimelinePage />);
 
@@ -100,8 +108,11 @@ describe('TimelinePage', () => {
   });
 
   it('should display calendar view by default after loading', async () => {
-    const mockFetchTimeline = vi.fn().mockResolvedValue(mockTimelineData);
-    vi.spyOn(api, 'fetchTimeline').mockImplementation(mockFetchTimeline);
+    server.use(
+      http.get('/api/timeline', () => {
+        return HttpResponse.json(mockTimelineData);
+      })
+    );
 
     renderWithRouter(<TimelinePage />);
 
@@ -111,8 +122,11 @@ describe('TimelinePage', () => {
   });
 
   it('should display error message when API call fails', async () => {
-    const mockFetchTimeline = vi.fn().mockRejectedValue(new Error('API Error'));
-    vi.spyOn(api, 'fetchTimeline').mockImplementation(mockFetchTimeline);
+    server.use(
+      http.get('/api/timeline', () => {
+        return HttpResponse.json({ error: 'API Error' }, { status: 500 });
+      })
+    );
 
     renderWithRouter(<TimelinePage />);
 
@@ -122,8 +136,14 @@ describe('TimelinePage', () => {
   });
 
   it('should not call fetchTimeline when user is not logged in', () => {
-    const mockFetchTimeline = vi.fn().mockResolvedValue(mockTimelineData);
-    vi.spyOn(api, 'fetchTimeline').mockImplementation(mockFetchTimeline);
+    let callCount = 0;
+    server.use(
+      http.get('/api/timeline', () => {
+        callCount++;
+        return HttpResponse.json(mockTimelineData);
+      })
+    );
+
     vi.spyOn(UserContext, 'useUserContext').mockReturnValue({
       user: null,
       login: vi.fn(),
@@ -133,168 +153,160 @@ describe('TimelinePage', () => {
 
     renderWithRouter(<TimelinePage />);
 
-    expect(mockFetchTimeline).not.toHaveBeenCalled();
+    expect(callCount).toBe(0);
   });
 
   describe('Date range pagination', () => {
     it('should initially fetch last 3 months to next 3 months of data', async () => {
-      const mockFetchTimeline = vi.fn().mockResolvedValue(mockTimelineData);
-      vi.spyOn(api, 'fetchTimeline').mockImplementation(mockFetchTimeline);
+      let capturedStartDate: string | null = null;
+      let capturedEndDate: string | null = null;
+
+      server.use(
+        http.get('/api/timeline', ({ request }) => {
+          const url = new URL(request.url);
+          capturedStartDate = url.searchParams.get('startDate');
+          capturedEndDate = url.searchParams.get('endDate');
+          return HttpResponse.json(mockTimelineData);
+        })
+      );
 
       renderWithRouter(<TimelinePage />);
 
       await waitFor(() => {
-        expect(mockFetchTimeline).toHaveBeenCalledTimes(1);
+        expect(capturedStartDate).not.toBeNull();
+        expect(capturedEndDate).not.toBeNull();
       });
-
-      // Check that it was called with date parameters for last 3 months to next 3 months
-      const callArgs = mockFetchTimeline.mock.calls[0];
-      expect(callArgs).toHaveLength(2);
-
-      const startDate = callArgs[0];
-      const endDate = callArgs[1];
 
       // Verify startDate is approximately 90 days ago
       const expectedStartDate = new Date();
       expectedStartDate.setDate(expectedStartDate.getDate() - 90);
       const expectedStart = expectedStartDate.toISOString().split('T')[0];
-      expect(startDate).toBe(expectedStart);
+      expect(capturedStartDate).toBe(expectedStart);
 
       // Verify endDate is approximately 90 days ahead
       const expectedEndDate = new Date();
       expectedEndDate.setDate(expectedEndDate.getDate() + 90);
       const expectedEnd = expectedEndDate.toISOString().split('T')[0];
-      expect(endDate).toBe(expectedEnd);
+      expect(capturedEndDate).toBe(expectedEnd);
     });
 
     it('should extend date range by 3 months when loading more', async () => {
-      const mockFetchTimeline = vi
-        .fn()
-        .mockResolvedValueOnce({ ...mockTimelineData, hasMore: true })
-        .mockResolvedValueOnce({ ...mockTimelineData, hasMore: false });
-      vi.spyOn(api, 'fetchTimeline').mockImplementation(mockFetchTimeline);
+      server.use(
+        http.get('/api/timeline', () => {
+          return HttpResponse.json({ ...mockTimelineData, hasMore: true });
+        })
+      );
 
       const { rerender } = renderWithRouter(<TimelinePage />);
 
       // Wait for initial load
       await waitFor(() => {
-        expect(mockFetchTimeline).toHaveBeenCalledTimes(1);
+        expect(screen.getByTestId('calendar-view')).toBeInTheDocument();
       });
 
       // Simulate load more action by triggering a re-render with updated state
-      // This will be done through the ListView component's onLoadMore callback
       rerender(
         <BrowserRouter>
           <TimelinePage />
         </BrowserRouter>
       );
-
-      // The actual implementation will call fetchTimeline again with extended date range
-      // For now, we're just testing that the logic exists
     });
 
     it('should pass hasMore flag to ListView', async () => {
-      const mockFetchTimeline = vi.fn().mockResolvedValue({
-        ...mockTimelineData,
-        hasMore: true,
-      });
-      vi.spyOn(api, 'fetchTimeline').mockImplementation(mockFetchTimeline);
+      server.use(
+        http.get('/api/timeline', () => {
+          return HttpResponse.json({
+            ...mockTimelineData,
+            hasMore: true,
+          });
+        })
+      );
 
       renderWithRouter(<TimelinePage />);
 
       await waitFor(() => {
-        expect(mockFetchTimeline).toHaveBeenCalled();
+        expect(screen.getByTestId('calendar-view')).toBeInTheDocument();
       });
-
-      // The ListView component should receive hasMore prop
-      // This will be verified once we implement the feature
     });
 
     it('should handle loading more data without duplicates', async () => {
-      const initialData = {
-        workouts: [{ id: 1, date: '2025-01-15', withInstructor: false, exercises: [] }],
+      const initialData: TimelineResponse = {
+        workouts: [{ id: 1, date: '2025-01-15', withInstructor: false, userId: 1, exercises: [] }],
         painScores: [],
         sleepScores: [],
         hasMore: true,
       };
 
-      const olderData = {
-        workouts: [{ id: 2, date: '2024-10-15', withInstructor: false, exercises: [] }],
+      const olderData: TimelineResponse = {
+        workouts: [{ id: 2, date: '2024-10-15', withInstructor: false, userId: 1, exercises: [] }],
         painScores: [],
         sleepScores: [],
         hasMore: false,
       };
 
-      const mockFetchTimeline = vi
-        .fn()
-        .mockResolvedValueOnce(initialData)
-        .mockResolvedValueOnce({
-          workouts: [...initialData.workouts, ...olderData.workouts],
-          painScores: [],
-          sleepScores: [],
-          hasMore: false,
-        });
-
-      vi.spyOn(api, 'fetchTimeline').mockImplementation(mockFetchTimeline);
+      let callCount = 0;
+      server.use(
+        http.get('/api/timeline', () => {
+          callCount++;
+          if (callCount === 1) {
+            return HttpResponse.json(initialData);
+          }
+          return HttpResponse.json({
+            workouts: [...initialData.workouts, ...olderData.workouts],
+            painScores: [],
+            sleepScores: [],
+            hasMore: false,
+          });
+        })
+      );
 
       renderWithRouter(<TimelinePage />);
 
       await waitFor(() => {
-        expect(mockFetchTimeline).toHaveBeenCalledTimes(1);
+        expect(callCount).toBe(1);
       });
-
-      // After loading more, both workouts should be present without duplicates
     });
 
     it('should update hasMore state correctly when loading more data', async () => {
-      const initialData = {
+      const initialData: TimelineResponse = {
         workouts: [
-          { id: 1, date: '2025-01-15', withInstructor: false, exercises: [] },
-          { id: 2, date: '2025-01-10', withInstructor: false, exercises: [] },
-          { id: 3, date: '2025-01-05', withInstructor: false, exercises: [] },
+          { id: 1, date: '2025-01-15', withInstructor: false, userId: 1, exercises: [] },
+          { id: 2, date: '2025-01-10', withInstructor: false, userId: 1, exercises: [] },
+          { id: 3, date: '2025-01-05', withInstructor: false, userId: 1, exercises: [] },
         ],
         painScores: [],
         sleepScores: [],
         hasMore: true,
       };
 
-      const extendedData = {
+      const extendedData: TimelineResponse = {
         workouts: [
           ...initialData.workouts,
-          { id: 4, date: '2024-10-15', withInstructor: false, exercises: [] },
-          { id: 5, date: '2024-09-15', withInstructor: false, exercises: [] },
-          { id: 6, date: '2024-08-15', withInstructor: false, exercises: [] },
+          { id: 4, date: '2024-10-15', withInstructor: false, userId: 1, exercises: [] },
+          { id: 5, date: '2024-09-15', withInstructor: false, userId: 1, exercises: [] },
+          { id: 6, date: '2024-08-15', withInstructor: false, userId: 1, exercises: [] },
         ],
         painScores: [],
         sleepScores: [],
-        hasMore: false, // No more data after this
+        hasMore: false,
       };
 
-      const mockFetchTimeline = vi
-        .fn()
-        .mockResolvedValueOnce(initialData)
-        .mockResolvedValueOnce(extendedData);
-
-      vi.spyOn(api, 'fetchTimeline').mockImplementation(mockFetchTimeline);
+      let callCount = 0;
+      server.use(
+        http.get('/api/timeline', () => {
+          callCount++;
+          if (callCount === 1) {
+            return HttpResponse.json(initialData);
+          }
+          return HttpResponse.json(extendedData);
+        })
+      );
 
       renderWithRouter(<TimelinePage />);
 
-      // Wait for initial load to complete
       await waitFor(() => {
-        expect(mockFetchTimeline).toHaveBeenCalledTimes(1);
+        expect(callCount).toBe(1);
       });
-
-      // Verify initial data was fetched with hasMore: true
-      expect(mockFetchTimeline).toHaveBeenNthCalledWith(1, expect.any(String), expect.any(String));
-
-      // The component should have received hasMore: true from the first fetch
-      // When we implement the Load More functionality, it should:
-      // 1. Call fetchTimeline again with extended date range
-      // 2. Receive hasMore: false in the response
-      // 3. Update its internal state to reflect hasMore: false
-
-      // This test verifies the API mock is set up correctly
-      // The actual UI behavior will be tested in the e2e test
     });
   });
 });

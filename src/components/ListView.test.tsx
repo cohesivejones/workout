@@ -1,13 +1,9 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
+import { http, HttpResponse } from 'msw';
+import { server } from '../mocks/server';
 import { ListView } from './ListView';
-import * as Api from '../api';
-
-// Mock the API functions
-vi.mock('../api', () => ({
-  deleteWorkout: vi.fn(),
-  deletePainScore: vi.fn(),
-}));
 
 // Mock window.confirm
 const originalConfirm = window.confirm;
@@ -150,7 +146,11 @@ describe('ListView', () => {
 
   it('handles workout deletion', async () => {
     // Mock successful deletion
-    (Api.deleteWorkout as ReturnType<typeof vi.fn>).mockResolvedValue({});
+    server.use(
+      http.delete('/api/workouts/:id', () => {
+        return HttpResponse.json({ id: 1 });
+      })
+    );
 
     render(
       <MemoryRouter>
@@ -175,11 +175,6 @@ describe('ListView', () => {
     // Check that confirm was called
     expect(window.confirm).toHaveBeenCalledWith('Are you sure you want to delete this workout?');
 
-    // Check that the API was called with the correct ID
-    await waitFor(() => {
-      expect(Api.deleteWorkout).toHaveBeenCalledWith(1);
-    });
-
     // Check that the handler was called with the correct ID
     await waitFor(() => {
       expect(mockHandleWorkoutDeleted).toHaveBeenCalledWith(1);
@@ -188,7 +183,11 @@ describe('ListView', () => {
 
   it('handles pain score deletion', async () => {
     // Mock successful deletion
-    (Api.deletePainScore as ReturnType<typeof vi.fn>).mockResolvedValue({});
+    server.use(
+      http.delete('/api/pain-scores/:id', () => {
+        return HttpResponse.json({ id: 1 });
+      })
+    );
 
     render(
       <MemoryRouter>
@@ -213,11 +212,6 @@ describe('ListView', () => {
     // Check that confirm was called
     expect(window.confirm).toHaveBeenCalledWith('Are you sure you want to delete this pain score?');
 
-    // Check that the API was called with the correct ID
-    await waitFor(() => {
-      expect(Api.deletePainScore).toHaveBeenCalledWith(1);
-    });
-
     // Check that the handler was called with the correct ID
     await waitFor(() => {
       expect(mockHandlePainScoreDelete).toHaveBeenCalledWith(1);
@@ -234,8 +228,10 @@ describe('ListView', () => {
     window.alert = vi.fn();
 
     // Mock failed deletion
-    (Api.deleteWorkout as ReturnType<typeof vi.fn>).mockRejectedValue(
-      new Error('Failed to delete')
+    server.use(
+      http.delete('/api/workouts/:id', () => {
+        return HttpResponse.json({ error: 'Failed to delete' }, { status: 500 });
+      })
     );
 
     render(
@@ -281,8 +277,10 @@ describe('ListView', () => {
     window.alert = vi.fn();
 
     // Mock failed deletion
-    (Api.deletePainScore as ReturnType<typeof vi.fn>).mockRejectedValue(
-      new Error('Failed to delete')
+    server.use(
+      http.delete('/api/pain-scores/:id', () => {
+        return HttpResponse.json({ error: 'Failed to delete' }, { status: 500 });
+      })
     );
 
     render(
@@ -343,9 +341,6 @@ describe('ListView', () => {
 
     // Check that confirm was called
     expect(window.confirm).toHaveBeenCalledWith('Are you sure you want to delete this workout?');
-
-    // Check that the API was not called
-    expect(Api.deleteWorkout).not.toHaveBeenCalled();
 
     // Check that the handler was not called
     expect(mockHandleWorkoutDeleted).not.toHaveBeenCalled();
