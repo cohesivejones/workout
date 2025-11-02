@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import type { ReactElement } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import CalendarView from '../components/CalendarView';
-import { fetchTimeline, deletePainScore, deleteSleepScore } from '../api';
+import { fetchTimeline } from '../api';
 import { Workout, PainScore, SleepScore } from '../types';
 import classNames from 'classnames';
 import styles from './TimelinePage.module.css';
@@ -87,26 +87,12 @@ function TimelinePage(): ReactElement {
     setWorkouts((prevWorkouts) => prevWorkouts.filter((w) => w.id !== workoutId));
   };
 
-  const handlePainScoreDelete = async (painScoreId: number) => {
-    if (window.confirm('Are you sure you want to delete this pain score?')) {
-      try {
-        await deletePainScore(painScoreId);
-        setPainScores((prev) => prev.filter((ps) => ps.id !== painScoreId));
-      } catch (err) {
-        console.error('Failed to delete pain score:', err);
-      }
-    }
+  const handlePainScoreDeleted = (painScoreId: number) => {
+    setPainScores((prev) => prev.filter((ps) => ps.id !== painScoreId));
   };
 
-  const handleSleepScoreDelete = async (sleepScoreId: number) => {
-    if (window.confirm('Are you sure you want to delete this sleep score?')) {
-      try {
-        await deleteSleepScore(sleepScoreId);
-        setSleepScores((prev) => prev.filter((ss) => ss.id !== sleepScoreId));
-      } catch (err) {
-        console.error('Failed to delete sleep score:', err);
-      }
-    }
+  const handleSleepScoreDeleted = (sleepScoreId: number) => {
+    setSleepScores((prev) => prev.filter((ss) => ss.id !== sleepScoreId));
   };
 
   if (loading) {
@@ -148,8 +134,8 @@ function TimelinePage(): ReactElement {
           painScores={painScores}
           sleepScores={sleepScores}
           handleWorkoutDeleted={handleWorkoutDeleted}
-          handlePainScoreDelete={handlePainScoreDelete}
-          handleSleepScoreDelete={handleSleepScoreDelete}
+          handlePainScoreDeleted={handlePainScoreDeleted}
+          handleSleepScoreDeleted={handleSleepScoreDeleted}
           hasMore={hasMore}
           onLoadMore={handleLoadMore}
           isLoadingMore={isLoadingMore}

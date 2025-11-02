@@ -18,9 +18,9 @@ import buttonStyles from '../styles/common/buttons.module.css';
 
 interface ListViewProps {
   painScores: PainScore[];
-  handlePainScoreDelete: (painScoreId: number) => void;
+  handlePainScoreDeleted: (painScoreId: number) => void;
   sleepScores: SleepScore[];
-  handleSleepScoreDelete: (sleepScoreId: number) => void;
+  handleSleepScoreDeleted: (sleepScoreId: number) => void;
   workouts: Workout[];
   handleWorkoutDeleted: (workoutId: number) => void;
   hasMore?: boolean;
@@ -35,9 +35,9 @@ type ListItem =
 
 export const ListView = ({
   painScores,
-  handlePainScoreDelete,
+  handlePainScoreDeleted,
   sleepScores,
-  handleSleepScoreDelete,
+  handleSleepScoreDeleted,
   workouts,
   handleWorkoutDeleted,
   hasMore = false,
@@ -176,7 +176,7 @@ export const ListView = ({
       try {
         setIsDeleting({ type: 'painScore', id: painScoreId });
         await deletePainScore(painScoreId);
-        handlePainScoreDelete(painScoreId);
+        handlePainScoreDeleted(painScoreId);
       } catch (err) {
         console.error('Failed to delete pain score:', err);
         alert('Failed to delete pain score. Please try again.');
@@ -191,7 +191,7 @@ export const ListView = ({
       try {
         setIsDeleting({ type: 'sleepScore', id: sleepScoreId });
         await deleteSleepScore(sleepScoreId);
-        handleSleepScoreDelete(sleepScoreId);
+        handleSleepScoreDeleted(sleepScoreId);
       } catch (err) {
         console.error('Failed to delete sleep score:', err);
         alert('Failed to delete sleep score. Please try again.');
