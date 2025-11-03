@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from './CalendarView.module.css';
 import classNames from 'classnames';
 import { Workout, PainScore, SleepScore } from '../types';
 import { Link, useNavigate } from 'react-router-dom';
 import { toWorkoutPath, toPainScoreEditPath, toSleepScoreEditPath } from '../utils/paths';
 import { GenericCalendarView, CalendarItem } from './GenericCalendarView';
+import { fetchTimeline } from '../api';
+import { useUserContext } from '../contexts/useUserContext';
 
 // Type for workout calendar items
 export type WorkoutCalendarItem = Workout & {
@@ -51,15 +53,56 @@ const getSleepScoreColor = (score: number): string => {
   }
 };
 
-// Specific implementation for workouts, pain scores, and sleep scores
-interface WorkoutCalendarProps {
-  workouts: Workout[];
-  painScores: PainScore[];
-  sleepScores: SleepScore[];
-}
-
-const CalendarView: React.FC<WorkoutCalendarProps> = ({ workouts, painScores, sleepScores }) => {
+const CalendarView = () => {
   const navigate = useNavigate();
+  const { user } = useUserContext();
+
+  // State for data fetching
+  const [workouts, setWorkouts] = useState<Workout[]>([]);
+  const [painScores, setPainScores] = useState<PainScore[]>([]);
+  const [sleepScores, setSleepScores] = useState<SleepScore[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
+
+  // Calculate start and end dates for the current month
+  const year = currentMonth.getFullYear();
+  const month = currentMonth.getMonth();
+  const startDate = new Date(year, month, 1);
+  const endDate = new Date(year, month + 1, 0); // Last day of month
+
+  const startDateStr = startDate.toISOString().split('T')[0];
+  const endDateStr = endDate.toISOString().split('T')[0];
+
+  // Fetch data when user or date range changes
+  useEffect(() => {
+    const loadData = async () => {
+      if (!user) return;
+
+      setLoading(true);
+      setError(null);
+      try {
+        const timelineData = await fetchTimeline(startDateStr, endDateStr);
+        setWorkouts(timelineData.workouts);
+        setPainScores(timelineData.painScores);
+        setSleepScores(timelineData.sleepScores);
+      } catch (err) {
+        console.error('Failed to load data:', err);
+        setError('Failed to load data. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
+  }, [user, startDateStr, endDateStr]);
+
+  if (loading) {
+    return <div className={styles.loading}>Loading...</div>;
+  }
+
+  if (error) {
+    return <div className={styles.errorMessage}>{error}</div>;
+  }
 
   // Convert workouts, pain scores, and sleep scores to calendar items
   const workoutItems: WorkoutCalendarItem[] = workouts.map((workout) => ({
@@ -228,6 +271,8 @@ const CalendarView: React.FC<WorkoutCalendarProps> = ({ workouts, painScores, sl
       renderVerticalItem={renderVerticalItem}
       getItemsByDate={getItemsByDate}
       emptyStateMessage="No data"
+      currentMonth={currentMonth}
+      onMonthChange={setCurrentMonth}
     />
   );
 };

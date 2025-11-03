@@ -11,39 +11,31 @@ import {
   toSleepScoreNewPath,
   toSleepScoreEditPath,
 } from '../utils/paths';
-import { deletePainScore, deleteWorkout, deleteSleepScore } from '../api';
+import { deletePainScore, deleteWorkout, deleteSleepScore, fetchTimeline } from '../api';
 import classNames from 'classnames';
 import styles from './ListView.module.css';
 import buttonStyles from '../styles/common/buttons.module.css';
-
-interface ListViewProps {
-  painScores: PainScore[];
-  handlePainScoreDeleted: (painScoreId: number) => void;
-  sleepScores: SleepScore[];
-  handleSleepScoreDeleted: (sleepScoreId: number) => void;
-  workouts: Workout[];
-  handleWorkoutDeleted: (workoutId: number) => void;
-  hasMore?: boolean;
-  onLoadMore?: () => void;
-  isLoadingMore?: boolean;
-}
+import { useUserContext } from '../contexts/useUserContext';
 
 type ListItem =
   | { type: 'workout'; data: Workout }
   | { type: 'painScore'; data: PainScore }
   | { type: 'sleepScore'; data: SleepScore };
 
-export const ListView = ({
-  painScores,
-  handlePainScoreDeleted,
-  sleepScores,
-  handleSleepScoreDeleted,
-  workouts,
-  handleWorkoutDeleted,
-  hasMore = false,
-  onLoadMore,
-  isLoadingMore = false,
-}: ListViewProps) => {
+export const ListView = () => {
+  const { user } = useUserContext();
+
+  // State for data fetching
+  const [workouts, setWorkouts] = useState<Workout[]>([]);
+  const [painScores, setPainScores] = useState<PainScore[]>([]);
+  const [sleepScores, setSleepScores] = useState<SleepScore[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState<boolean>(false);
+  const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
+  const [startDate, setStartDate] = useState<string>('');
+  const [endDate, setEndDate] = useState<string>('');
+
   const [showWorkouts, setShowWorkouts] = useState(true);
   const [showPainScores, setShowPainScores] = useState(true);
   const [showSleepScores, setShowSleepScores] = useState(true);
@@ -55,6 +47,66 @@ export const ListView = ({
 
   const [fabOpen, setFabOpen] = useState(false);
   const fabRef = useRef<HTMLDivElement | null>(null);
+
+  // Fetch data on mount
+  useEffect(() => {
+    const loadData = async () => {
+      if (!user) return;
+
+      setLoading(true);
+      try {
+        // Calculate initial date range (last 3 months to next 3 months)
+        const threeMonthsAgo = new Date();
+        threeMonthsAgo.setDate(threeMonthsAgo.getDate() - 90);
+        const threeMonthsAhead = new Date();
+        threeMonthsAhead.setDate(threeMonthsAhead.getDate() + 90);
+
+        const startDateStr = threeMonthsAgo.toISOString().split('T')[0];
+        const endDateStr = threeMonthsAhead.toISOString().split('T')[0];
+
+        setStartDate(startDateStr);
+        setEndDate(endDateStr);
+
+        const timelineData = await fetchTimeline(startDateStr, endDateStr);
+        setWorkouts(timelineData.workouts);
+        setPainScores(timelineData.painScores);
+        setSleepScores(timelineData.sleepScores);
+        setHasMore(timelineData.hasMore);
+        setLoading(false);
+      } catch (err) {
+        console.error('Failed to load data:', err);
+        setError('Failed to load data. Please try again later.');
+        setLoading(false);
+      }
+    };
+    loadData();
+  }, [user]);
+
+  const handleLoadMore = async () => {
+    if (!user || isLoadingMore) return;
+
+    setIsLoadingMore(true);
+    try {
+      // Extend the date range by another 3 months backward
+      const newStartDate = new Date(startDate);
+      newStartDate.setDate(newStartDate.getDate() - 90);
+      const newStartDateStr = newStartDate.toISOString().split('T')[0];
+
+      setStartDate(newStartDateStr);
+
+      // Fetch data with extended date range
+      const timelineData = await fetchTimeline(newStartDateStr, endDate);
+      setWorkouts(timelineData.workouts);
+      setPainScores(timelineData.painScores);
+      setSleepScores(timelineData.sleepScores);
+      setHasMore(timelineData.hasMore);
+    } catch (err) {
+      console.error('Failed to load more data:', err);
+      setError('Failed to load more data. Please try again later.');
+    } finally {
+      setIsLoadingMore(false);
+    }
+  };
 
   // Close FAB menu when clicking outside
   useEffect(() => {
@@ -69,6 +121,26 @@ export const ListView = ({
       return () => document.removeEventListener('mousedown', handleClickOutside);
     }
   }, [fabOpen]);
+
+  const handleWorkoutDeleted = (workoutId: number) => {
+    setWorkouts((prevWorkouts) => prevWorkouts.filter((w) => w.id !== workoutId));
+  };
+
+  const handlePainScoreDeleted = (painScoreId: number) => {
+    setPainScores((prev) => prev.filter((ps) => ps.id !== painScoreId));
+  };
+
+  const handleSleepScoreDeleted = (sleepScoreId: number) => {
+    setSleepScores((prev) => prev.filter((ss) => ss.id !== sleepScoreId));
+  };
+
+  if (loading) {
+    return <div className={styles.loading}>Loading...</div>;
+  }
+
+  if (error) {
+    return <div className={styles.errorMessage}>{error}</div>;
+  }
 
   // Combine workouts, pain scores, and sleep scores into a single array
   const allItems: ListItem[] = [
@@ -433,10 +505,10 @@ export const ListView = ({
       )}
 
       {/* Load More Button */}
-      {hasMore && onLoadMore && (
+      {hasMore && (
         <div className={styles.loadMoreContainer}>
           <button
-            onClick={onLoadMore}
+            onClick={handleLoadMore}
             disabled={isLoadingMore}
             className={classNames(buttonStyles.secondaryBtn, styles.loadMoreBtn)}
           >
