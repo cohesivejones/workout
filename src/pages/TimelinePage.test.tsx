@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import { BrowserRouter } from 'react-router-dom';
+import { Router } from 'wouter';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import TimelinePage from './TimelinePage';
 
@@ -19,7 +19,7 @@ describe('TimelinePage', () => {
   });
 
   const renderWithRouter = (component: React.ReactElement) => {
-    return render(<BrowserRouter>{component}</BrowserRouter>);
+    return render(<Router>{component}</Router>);
   };
 
   describe('View Switching', () => {

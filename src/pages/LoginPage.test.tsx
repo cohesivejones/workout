@@ -145,6 +145,9 @@ describe('LoginPage', () => {
     });
 
     it('displays error message when login fails', async () => {
+      // Suppress expected console.error for this test
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
       mockLogin.mockRejectedValue(new Error('Invalid credentials'));
       render(<LoginPage />);
 
@@ -161,6 +164,8 @@ describe('LoginPage', () => {
           screen.getByText('Failed to login. Please check your email and password.')
         ).toBeInTheDocument();
       });
+
+      consoleErrorSpy.mockRestore();
     });
 
     it('disables button during submission', async () => {

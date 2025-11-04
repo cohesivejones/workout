@@ -79,6 +79,9 @@ describe('GenerateWorkoutPage', () => {
   });
 
   it('shows loading state during API call', async () => {
+    // Suppress expected console.error for network timeout
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
     server.use(
       http.post('/api/workouts/generate', () => {
         return new Promise((resolve) => setTimeout(resolve, 100));
@@ -93,6 +96,8 @@ describe('GenerateWorkoutPage', () => {
     expect(screen.getByText('Generating...')).toBeInTheDocument();
     expect(submitButton).toBeDisabled();
     expect(screen.getByLabelText('Additional Notes (Optional)')).toBeDisabled();
+
+    consoleErrorSpy.mockRestore();
   });
 
   it('displays generated workout after successful API call', async () => {
@@ -124,6 +129,9 @@ describe('GenerateWorkoutPage', () => {
   });
 
   it('displays error message on API failure', async () => {
+    // Suppress expected console.error for this test
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
     const errorMessage = 'Failed to generate workout';
 
     server.use(
@@ -142,6 +150,8 @@ describe('GenerateWorkoutPage', () => {
     });
 
     expect(screen.getByRole('button', { name: 'Start Over' })).toBeInTheDocument();
+
+    consoleErrorSpy.mockRestore();
   });
 
   it('resets form when Start Over button is clicked', async () => {

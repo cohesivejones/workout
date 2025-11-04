@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import styles from './CalendarView.module.css';
 import classNames from 'classnames';
 import { Workout, PainScore, SleepScore } from '../types';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'wouter';
 import { toWorkoutPath, toPainScoreEditPath, toSleepScoreEditPath } from '../utils/paths';
 import { GenericCalendarView, CalendarItem } from './GenericCalendarView';
 import { fetchTimeline } from '../api';
@@ -54,7 +54,7 @@ const getSleepScoreColor = (score: number): string => {
 };
 
 const CalendarView = () => {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   const { user } = useUserContext();
 
   // State for data fetching
@@ -148,13 +148,13 @@ const CalendarView = () => {
           style={{ backgroundColor: getPainScoreColor(painScore.score) }}
           onClick={(e) => {
             e.stopPropagation();
-            navigate(toPainScoreEditPath(painScore));
+            setLocation(toPainScoreEditPath(painScore));
           }}
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault();
               e.stopPropagation();
-              navigate(toPainScoreEditPath(painScore));
+              setLocation(toPainScoreEditPath(painScore));
             }
           }}
           aria-label={`Edit pain score ${painScore.score} for ${dateStr}`}
@@ -171,13 +171,13 @@ const CalendarView = () => {
           style={{ backgroundColor: getSleepScoreColor(sleepScore.score) }}
           onClick={(e) => {
             e.stopPropagation();
-            navigate(toSleepScoreEditPath(sleepScore));
+            setLocation(toSleepScoreEditPath(sleepScore));
           }}
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault();
               e.stopPropagation();
-              navigate(toSleepScoreEditPath(sleepScore));
+              setLocation(toSleepScoreEditPath(sleepScore));
             }
           }}
           aria-label={`Edit sleep score ${sleepScore.score} for ${dateStr}`}
@@ -218,7 +218,7 @@ const CalendarView = () => {
           key={`pain-${painScore.id}`}
           className={styles.verticalPainScore}
           style={{ backgroundColor: getPainScoreColor(painScore.score) }}
-          onClick={() => navigate(toPainScoreEditPath(painScore))}
+          onClick={() => setLocation(toPainScoreEditPath(painScore))}
           aria-label={`Edit pain score ${painScore.score} for ${dateStr}`}
         >
           Pain: {painScore.score}
@@ -231,7 +231,7 @@ const CalendarView = () => {
           key={`sleep-${sleepScore.id}`}
           className={styles.verticalSleepScore}
           style={{ backgroundColor: getSleepScoreColor(sleepScore.score) }}
-          onClick={() => navigate(toSleepScoreEditPath(sleepScore))}
+          onClick={() => setLocation(toSleepScoreEditPath(sleepScore))}
           aria-label={`Edit sleep score ${sleepScore.score} for ${dateStr}`}
         >
           Sleep: {sleepScore.score}

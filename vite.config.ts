@@ -30,7 +30,7 @@ export default defineConfig(({ mode }) => {
       rollupOptions: {
         output: {
           manualChunks: {
-            vendor: ['react', 'react-dom', 'react-router-dom'],
+            vendor: ['react', 'react-dom'],
           },
         },
       },
@@ -38,7 +38,7 @@ export default defineConfig(({ mode }) => {
     test: {
       globals: true,
       environment: 'jsdom',
-      setupFiles: './src/setupTests.ts',
+      setupFiles: path.resolve(__dirname, './src/setupTests.ts'),
       exclude: [
         '**/node_modules/**',
         '**/dist/**',

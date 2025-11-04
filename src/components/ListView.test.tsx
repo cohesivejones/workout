@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { MemoryRouter } from 'react-router-dom';
+import { Router } from 'wouter';
 import { http, HttpResponse } from 'msw';
 import { server } from '../mocks/server';
 import { ListView } from './ListView';
@@ -141,9 +141,9 @@ describe('ListView', () => {
       );
 
       render(
-        <MemoryRouter>
+        <Router>
           <ListView />
-        </MemoryRouter>
+        </Router>
       );
 
       await waitFor(() => {
@@ -160,15 +160,18 @@ describe('ListView', () => {
       );
 
       render(
-        <MemoryRouter>
+        <Router>
           <ListView />
-        </MemoryRouter>
+        </Router>
       );
 
       expect(screen.getByText('Loading...')).toBeInTheDocument();
     });
 
     it('should display error message when API call fails', async () => {
+      // Suppress expected console.error for this test
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
       server.use(
         http.get('/api/timeline', () => {
           return HttpResponse.json({ error: 'API Error' }, { status: 500 });
@@ -176,14 +179,16 @@ describe('ListView', () => {
       );
 
       render(
-        <MemoryRouter>
+        <Router>
           <ListView />
-        </MemoryRouter>
+        </Router>
       );
 
       await waitFor(() => {
         expect(screen.getByText(/Failed to load data/i)).toBeInTheDocument();
       });
+
+      consoleErrorSpy.mockRestore();
     });
 
     it('should not call fetchTimeline when user is not logged in', () => {
@@ -203,9 +208,9 @@ describe('ListView', () => {
       });
 
       render(
-        <MemoryRouter>
+        <Router>
           <ListView />
-        </MemoryRouter>
+        </Router>
       );
 
       expect(callCount).toBe(0);
@@ -225,9 +230,9 @@ describe('ListView', () => {
       );
 
       render(
-        <MemoryRouter>
+        <Router>
           <ListView />
-        </MemoryRouter>
+        </Router>
       );
 
       await waitFor(() => {
@@ -265,9 +270,9 @@ describe('ListView', () => {
       );
 
       render(
-        <MemoryRouter>
+        <Router>
           <ListView />
-        </MemoryRouter>
+        </Router>
       );
 
       // Wait for initial load
@@ -308,9 +313,9 @@ describe('ListView', () => {
     );
 
     render(
-      <MemoryRouter>
+      <Router>
         <ListView />
-      </MemoryRouter>
+      </Router>
     );
 
     // Wait for data to load
@@ -364,9 +369,9 @@ describe('ListView', () => {
     );
 
     render(
-      <MemoryRouter>
+      <Router>
         <ListView />
-      </MemoryRouter>
+      </Router>
     );
 
     // Wait for data to load
@@ -398,9 +403,9 @@ describe('ListView', () => {
     );
 
     render(
-      <MemoryRouter>
+      <Router>
         <ListView />
-      </MemoryRouter>
+      </Router>
     );
 
     // Wait for data to load
@@ -442,9 +447,9 @@ describe('ListView', () => {
     );
 
     render(
-      <MemoryRouter>
+      <Router>
         <ListView />
-      </MemoryRouter>
+      </Router>
     );
 
     // Wait for data to load
@@ -494,9 +499,9 @@ describe('ListView', () => {
     );
 
     render(
-      <MemoryRouter>
+      <Router>
         <ListView />
-      </MemoryRouter>
+      </Router>
     );
 
     // Wait for data to load
@@ -546,9 +551,9 @@ describe('ListView', () => {
     );
 
     render(
-      <MemoryRouter>
+      <Router>
         <ListView />
-      </MemoryRouter>
+      </Router>
     );
 
     // Wait for data to load
@@ -589,9 +594,9 @@ describe('ListView', () => {
     );
 
     render(
-      <MemoryRouter>
+      <Router>
         <ListView />
-      </MemoryRouter>
+      </Router>
     );
 
     // Wait for data to load
@@ -627,9 +632,9 @@ describe('ListView', () => {
     );
 
     render(
-      <MemoryRouter>
+      <Router>
         <ListView />
-      </MemoryRouter>
+      </Router>
     );
 
     // Wait for data to load
@@ -670,9 +675,9 @@ describe('ListView', () => {
     );
 
     render(
-      <MemoryRouter>
+      <Router>
         <ListView />
-      </MemoryRouter>
+      </Router>
     );
 
     // Wait for data to load
@@ -729,9 +734,9 @@ describe('ListView', () => {
     );
 
     render(
-      <MemoryRouter>
+      <Router>
         <ListView />
-      </MemoryRouter>
+      </Router>
     );
 
     // Wait for data to load
@@ -781,9 +786,9 @@ describe('ListView', () => {
     );
 
     render(
-      <MemoryRouter>
+      <Router>
         <ListView />
-      </MemoryRouter>
+      </Router>
     );
 
     // Wait for data to load
@@ -826,9 +831,9 @@ describe('ListView', () => {
       );
 
       render(
-        <MemoryRouter>
+        <Router>
           <ListView />
-        </MemoryRouter>
+        </Router>
       );
 
       // Wait for data to load
@@ -854,9 +859,9 @@ describe('ListView', () => {
       );
 
       render(
-        <MemoryRouter>
+        <Router>
           <ListView />
-        </MemoryRouter>
+        </Router>
       );
 
       // Wait for data to load
@@ -899,9 +904,9 @@ describe('ListView', () => {
       );
 
       render(
-        <MemoryRouter>
+        <Router>
           <ListView />
-        </MemoryRouter>
+        </Router>
       );
 
       // Wait for data to load
@@ -935,9 +940,9 @@ describe('ListView', () => {
       );
 
       render(
-        <MemoryRouter>
+        <Router>
           <ListView />
-        </MemoryRouter>
+        </Router>
       );
 
       // Wait for data to load
@@ -971,9 +976,9 @@ describe('ListView', () => {
       );
 
       render(
-        <MemoryRouter>
+        <Router>
           <ListView />
-        </MemoryRouter>
+        </Router>
       );
 
       // Wait for data to load

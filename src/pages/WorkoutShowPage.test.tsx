@@ -1,10 +1,11 @@
 import { render, screen, waitFor } from '@testing-library/react';
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { Route } from 'wouter';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { http, HttpResponse } from 'msw';
 import { server } from '../mocks/server';
 import WorkoutShowPage from './WorkoutShowPage';
 import * as UserContext from '../contexts/useUserContext';
+import { MemoryRouter } from '../test-utils/MemoryRouter';
 
 // Mock the UserContext
 vi.mock('../contexts/useUserContext', () => ({
@@ -43,10 +44,10 @@ describe('WorkoutShowPage', () => {
     );
 
     render(
-      <MemoryRouter initialEntries={['/workouts/1']}>
-        <Routes>
-          <Route path="/workouts/:id" element={<WorkoutShowPage />} />
-        </Routes>
+      <MemoryRouter initialPath="/workouts/1">
+        <Route path="/workouts/:id">
+          <WorkoutShowPage />
+        </Route>
       </MemoryRouter>
     );
 
@@ -63,10 +64,10 @@ describe('WorkoutShowPage', () => {
     );
 
     render(
-      <MemoryRouter initialEntries={['/workouts/1']}>
-        <Routes>
-          <Route path="/workouts/:id" element={<WorkoutShowPage />} />
-        </Routes>
+      <MemoryRouter initialPath="/workouts/1">
+        <Route path="/workouts/:id">
+          <WorkoutShowPage />
+        </Route>
       </MemoryRouter>
     );
 
@@ -91,6 +92,9 @@ describe('WorkoutShowPage', () => {
   });
 
   it('renders error state when API call fails', async () => {
+    // Suppress expected console.error for this test
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
     server.use(
       http.get('/api/workouts/:id', () => {
         return HttpResponse.json({ error: 'Failed to load workout' }, { status: 500 });
@@ -98,10 +102,10 @@ describe('WorkoutShowPage', () => {
     );
 
     render(
-      <MemoryRouter initialEntries={['/workouts/1']}>
-        <Routes>
-          <Route path="/workouts/:id" element={<WorkoutShowPage />} />
-        </Routes>
+      <MemoryRouter initialPath="/workouts/1">
+        <Route path="/workouts/:id">
+          <WorkoutShowPage />
+        </Route>
       </MemoryRouter>
     );
 
@@ -109,6 +113,8 @@ describe('WorkoutShowPage', () => {
     await waitFor(() => {
       expect(screen.getByText(/Failed to load workout/i)).toBeInTheDocument();
     });
+
+    consoleErrorSpy.mockRestore();
   });
 
   it("renders not found state when workout doesn't exist", async () => {
@@ -119,10 +125,10 @@ describe('WorkoutShowPage', () => {
     );
 
     render(
-      <MemoryRouter initialEntries={['/workouts/999']}>
-        <Routes>
-          <Route path="/workouts/:id" element={<WorkoutShowPage />} />
-        </Routes>
+      <MemoryRouter initialPath="/workouts/1">
+        <Route path="/workouts/:id">
+          <WorkoutShowPage />
+        </Route>
       </MemoryRouter>
     );
 
@@ -142,10 +148,10 @@ describe('WorkoutShowPage', () => {
     );
 
     render(
-      <MemoryRouter initialEntries={['/workouts/1']}>
-        <Routes>
-          <Route path="/workouts/:id" element={<WorkoutShowPage />} />
-        </Routes>
+      <MemoryRouter initialPath="/workouts/1">
+        <Route path="/workouts/:id">
+          <WorkoutShowPage />
+        </Route>
       </MemoryRouter>
     );
 
@@ -171,10 +177,10 @@ describe('WorkoutShowPage', () => {
     );
 
     render(
-      <MemoryRouter initialEntries={['/workouts/1']}>
-        <Routes>
-          <Route path="/workouts/:id" element={<WorkoutShowPage />} />
-        </Routes>
+      <MemoryRouter initialPath="/workouts/1">
+        <Route path="/workouts/:id">
+          <WorkoutShowPage />
+        </Route>
       </MemoryRouter>
     );
 
@@ -205,10 +211,10 @@ describe('WorkoutShowPage', () => {
     );
 
     render(
-      <MemoryRouter initialEntries={['/workouts/1']}>
-        <Routes>
-          <Route path="/workouts/:id" element={<WorkoutShowPage />} />
-        </Routes>
+      <MemoryRouter initialPath="/workouts/1">
+        <Route path="/workouts/:id">
+          <WorkoutShowPage />
+        </Route>
       </MemoryRouter>
     );
 

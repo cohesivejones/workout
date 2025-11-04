@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'wouter';
 import WorkoutForm from '../components/WorkoutForm';
 import { createWorkout, createExercise, fetchExercises } from '../api';
 import { Exercise, Workout } from '../types';
@@ -7,7 +7,7 @@ import { useUserContext } from '../contexts/useUserContext';
 import styles from '../components/WorkoutForm.module.css';
 
 export default function AddWorkoutPage() {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   const [savedExercises, setSavedExercises] = useState<Exercise[]>([]);
   const [error, setError] = useState<string | null>(null);
   const { user } = useUserContext();
@@ -30,7 +30,7 @@ export default function AddWorkoutPage() {
     try {
       setError(null);
       await createWorkout(workout as Workout);
-      navigate('/');
+      setLocation('/');
       return true;
     } catch (err) {
       console.error('Failed to add workout:', err);
@@ -57,7 +57,7 @@ export default function AddWorkoutPage() {
   };
 
   const handleCancel = () => {
-    navigate('/');
+    setLocation('/');
   };
 
   return (

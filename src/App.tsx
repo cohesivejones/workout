@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { Router, Route, Switch } from 'wouter';
 import TimelinePage from './pages/TimelinePage';
 import AddWorkoutPage from './pages/NewWorkoutPage';
 import EditWorkoutPage from './pages/EditWorkoutPage';
@@ -15,26 +15,80 @@ import { Layout } from './Layout';
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route element={<Layout />}>
-          <Route index path="/" element={<TimelinePage />} />
-          <Route path="/workouts/new" element={<AddWorkoutPage />} />
-          <Route path="/workouts/:id/edit" element={<EditWorkoutPage />} />
-          <Route path="/workouts/:id" element={<WorkoutShowPage />} />
-          <Route path="/pain-scores/new" element={<PainScorePage />} />
-          <Route path="/pain-scores/:id/edit" element={<PainScorePage />} />
-          <Route path="/sleep-scores/new" element={<SleepScorePage />} />
-          <Route path="/sleep-scores/:id/edit" element={<SleepScorePage />} />
-          <Route path="/exercises" element={<ExerciseListPage />} />
-          <Route path="/change-password" element={<ChangePasswordPage />} />
-          <Route path="/diagnostician" element={<DiagnosticianPage />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/workouts/generate" element={<GenerateWorkoutPage />} />
-          <Route path="*" element={<NotFoundPage />} />
+    <Router>
+      <Switch>
+        <Route path="/">
+          <Layout>
+            <TimelinePage />
+          </Layout>
         </Route>
-      </Routes>
-    </BrowserRouter>
+        <Route path="/workouts/new">
+          <Layout>
+            <AddWorkoutPage />
+          </Layout>
+        </Route>
+        <Route path="/workouts/:id/edit">
+          <Layout>
+            <EditWorkoutPage />
+          </Layout>
+        </Route>
+        <Route path="/workouts/:id">
+          <Layout>
+            <WorkoutShowPage />
+          </Layout>
+        </Route>
+        <Route path="/pain-scores/new">
+          <Layout>
+            <PainScorePage />
+          </Layout>
+        </Route>
+        <Route path="/pain-scores/:id/edit">
+          <Layout>
+            <PainScorePage />
+          </Layout>
+        </Route>
+        <Route path="/sleep-scores/new">
+          <Layout>
+            <SleepScorePage />
+          </Layout>
+        </Route>
+        <Route path="/sleep-scores/:id/edit">
+          <Layout>
+            <SleepScorePage />
+          </Layout>
+        </Route>
+        <Route path="/exercises">
+          <Layout>
+            <ExerciseListPage />
+          </Layout>
+        </Route>
+        <Route path="/change-password">
+          <Layout>
+            <ChangePasswordPage />
+          </Layout>
+        </Route>
+        <Route path="/diagnostician">
+          <Layout>
+            <DiagnosticianPage />
+          </Layout>
+        </Route>
+        <Route path="/dashboard">
+          <Layout>
+            <DashboardPage />
+          </Layout>
+        </Route>
+        <Route path="/workouts/generate">
+          <Layout>
+            <GenerateWorkoutPage />
+          </Layout>
+        </Route>
+        <Route>
+          <Layout>
+            <NotFoundPage />
+          </Layout>
+        </Route>
+      </Switch>
+    </Router>
   );
 }
 

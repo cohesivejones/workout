@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useLocation } from 'wouter';
 import { fetchWorkout, deleteWorkout } from '../api';
 import { Workout } from '../types';
 import styles from './WorkoutShowPage.module.css';
@@ -11,7 +11,7 @@ import { toHomePath, toWorkoutEditPath } from '../utils/paths';
 const WorkoutShowPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const workoutId = parseInt(id || '0');
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
 
   const [workout, setWorkout] = useState<Workout | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -41,7 +41,7 @@ const WorkoutShowPage: React.FC = () => {
       try {
         setIsDeleting(true);
         await deleteWorkout(workoutId);
-        navigate('/');
+        setLocation('/');
       } catch (err) {
         console.error('Failed to delete workout:', err);
         alert('Failed to delete workout. Please try again.');

@@ -1,4 +1,4 @@
-import { Outlet, Link } from 'react-router-dom';
+import { Link } from 'wouter';
 import { useState, useRef, useEffect } from 'react';
 import { FaBars } from 'react-icons/fa'; // Hamburger icon
 import { UserContextProvider } from './contexts/UserContextProvider';
@@ -99,23 +99,23 @@ const Header = () => {
   );
 };
 
-const AuthenticatedContent = () => {
+const AuthenticatedContent = ({ children }: { children: React.ReactNode }) => {
   const { user } = useUserContext();
 
   if (!user) {
     return <LoginPage />;
   }
 
-  return <Outlet />;
+  return <>{children}</>;
 };
 
-export const Layout = () => {
+export const Layout = ({ children }: { children: React.ReactNode }) => {
   return (
     <UserContextProvider>
       <div className={styles.app}>
         <Header />
         <main className={styles.appMain}>
-          <AuthenticatedContent />
+          <AuthenticatedContent>{children}</AuthenticatedContent>
         </main>
       </div>
     </UserContextProvider>

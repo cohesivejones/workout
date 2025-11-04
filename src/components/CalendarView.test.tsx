@@ -1,24 +1,35 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { MemoryRouter } from 'react-router-dom';
+import { Router, Route } from 'wouter';
 import { http, HttpResponse } from 'msw';
 import { server } from '../mocks/server';
 import CalendarView from './CalendarView';
 import * as UserContext from '../contexts/useUserContext';
 import MockDate from 'mockdate';
 
-// Mock react-router-dom's useNavigate
-const mockNavigate = vi.fn();
-vi.mock('react-router-dom', async () => {
-  const actual = await vi.importActual('react-router-dom');
+// Mock wouter's useLocation
+const mockSetLocation = vi.fn();
+vi.mock('wouter', async () => {
+  const actual = await vi.importActual('wouter');
   return {
     ...actual,
-    useNavigate: () => mockNavigate,
+    useLocation: () => ['/', mockSetLocation],
   };
 });
 
 // Mock the UserContext
 vi.mock('../contexts/useUserContext');
+
+// Helper function to render CalendarView with Router
+const renderCalendarView = () => {
+  return render(
+    <Router>
+      <Route path="/">
+        <CalendarView />
+      </Route>
+    </Router>
+  );
+};
 
 const mockUser = {
   id: 1,
@@ -124,11 +135,7 @@ describe('CalendarView', () => {
         })
       );
 
-      render(
-        <MemoryRouter>
-          <CalendarView />
-        </MemoryRouter>
-      );
+      renderCalendarView();
 
       await waitFor(() => {
         expect(callCount).toBe(1);
@@ -143,31 +150,28 @@ describe('CalendarView', () => {
         })
       );
 
-      render(
-        <MemoryRouter>
-          <CalendarView />
-        </MemoryRouter>
-      );
+      renderCalendarView();
 
       expect(screen.getByText('Loading...')).toBeInTheDocument();
     });
 
     it('should display error message when API call fails', async () => {
+      // Suppress expected console.error for this test
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
       server.use(
         http.get('/api/timeline', () => {
           return HttpResponse.json({ error: 'API Error' }, { status: 500 });
         })
       );
 
-      render(
-        <MemoryRouter>
-          <CalendarView />
-        </MemoryRouter>
-      );
+      renderCalendarView();
 
       await waitFor(() => {
         expect(screen.getByText(/Failed to load data/i)).toBeInTheDocument();
       });
+
+      consoleErrorSpy.mockRestore();
     });
 
     it('should not call fetchTimeline when user is not logged in', () => {
@@ -191,11 +195,7 @@ describe('CalendarView', () => {
         loading: false,
       });
 
-      render(
-        <MemoryRouter>
-          <CalendarView />
-        </MemoryRouter>
-      );
+      renderCalendarView();
 
       expect(callCount).toBe(0);
     });
@@ -218,11 +218,7 @@ describe('CalendarView', () => {
         })
       );
 
-      render(
-        <MemoryRouter>
-          <CalendarView />
-        </MemoryRouter>
-      );
+      renderCalendarView();
 
       await waitFor(() => {
         expect(capturedStartDate).not.toBeNull();
@@ -256,11 +252,7 @@ describe('CalendarView', () => {
         })
       );
 
-      render(
-        <MemoryRouter>
-          <CalendarView />
-        </MemoryRouter>
-      );
+      renderCalendarView();
 
       // Wait for initial load (May 2025)
       await waitFor(() => {
@@ -295,11 +287,7 @@ describe('CalendarView', () => {
       })
     );
 
-    render(
-      <MemoryRouter>
-        <CalendarView />
-      </MemoryRouter>
-    );
+    renderCalendarView();
 
     // Wait for data to load
     await waitFor(() => {
@@ -340,11 +328,7 @@ describe('CalendarView', () => {
       })
     );
 
-    render(
-      <MemoryRouter>
-        <CalendarView />
-      </MemoryRouter>
-    );
+    renderCalendarView();
 
     // Wait for data to load
     await waitFor(() => {
@@ -355,8 +339,8 @@ describe('CalendarView', () => {
     const painScore = screen.getByText('Pain: 3');
     fireEvent.click(painScore);
 
-    // Check that navigate was called with the correct path
-    expect(mockNavigate).toHaveBeenCalledWith('/pain-scores/1/edit');
+    // Check that setLocation was called with the correct path
+    expect(mockSetLocation).toHaveBeenCalledWith('/pain-scores/1/edit');
   });
 
   it('switches to mobile view when window width is small', async () => {
@@ -372,11 +356,7 @@ describe('CalendarView', () => {
     );
 
     // Render with desktop width first
-    const { rerender } = render(
-      <MemoryRouter>
-        <CalendarView />
-      </MemoryRouter>
-    );
+    const { rerender } = renderCalendarView();
 
     // Wait for data to load
     await waitFor(() => {
@@ -394,20 +374,25 @@ describe('CalendarView', () => {
       value: 600,
     });
 
-    // Trigger resize event callback
+    // Trigger resize event callback wrapped in act
     const addEventListenerMock = window.addEventListener as unknown as {
       mock: { calls: unknown[][] };
     };
     const resizeCallback = addEventListenerMock.mock.calls.find(
       (call: unknown[]) => call[0] === 'resize'
     )?.[1] as () => void;
-    resizeCallback();
+
+    await waitFor(() => {
+      resizeCallback();
+    });
 
     // Re-render to apply the state change
     rerender(
-      <MemoryRouter>
-        <CalendarView />
-      </MemoryRouter>
+      <Router>
+        <Route path="/">
+          <CalendarView />
+        </Route>
+      </Router>
     );
 
     // Wait for the view to update
@@ -437,11 +422,7 @@ describe('CalendarView', () => {
       })
     );
 
-    render(
-      <MemoryRouter>
-        <CalendarView />
-      </MemoryRouter>
-    );
+    renderCalendarView();
 
     // Wait for data to load
     await waitFor(() => {

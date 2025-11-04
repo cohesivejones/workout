@@ -61,6 +61,10 @@ describe('WorkoutForm', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+
+    // Suppress expected console.error for API errors in these tests
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+
     vi.spyOn(UserContext, 'useUserContext').mockReturnValue({
       user: { id: 1, name: 'Bob Jones', email: 'bob@example.com' },
       login: vi.fn(),

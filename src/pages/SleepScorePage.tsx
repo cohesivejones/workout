@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import { useParams, useLocation, useSearchParams } from 'wouter';
 import SleepScoreForm from '../components/SleepScoreForm';
 import { createSleepScore, updateSleepScore, fetchSleepScore } from '../api';
 import { SleepScore } from '../types';
@@ -8,16 +8,15 @@ import styles from './SleepScorePage.module.css';
 
 function SleepScorePage(): React.ReactElement {
   const { id } = useParams<{ id?: string }>();
-  const location = useLocation();
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
+  const [searchParams] = useSearchParams();
   const { user } = useUserContext();
   const [loading, setLoading] = useState<boolean>(!!id);
   const [sleepScore, setSleepScore] = useState<SleepScore | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   // Get the date from query params if available
-  const queryParams = new URLSearchParams(location.search);
-  const selectedDate = queryParams.get('date');
+  const selectedDate = searchParams.get('date');
 
   useEffect(() => {
     const loadSleepScore = async () => {
@@ -51,7 +50,7 @@ function SleepScorePage(): React.ReactElement {
         await createSleepScore(sleepScoreData);
       }
 
-      navigate('/');
+      setLocation('/');
       return true;
     } catch (err) {
       console.error('Failed to save sleep score:', err);
@@ -60,7 +59,7 @@ function SleepScorePage(): React.ReactElement {
   };
 
   const handleCancel = () => {
-    navigate('/');
+    setLocation('/');
   };
 
   if (loading) {
