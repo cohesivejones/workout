@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'wouter';
 import WorkoutForm from '../components/WorkoutForm';
 import { fetchWorkout, updateWorkout, createExercise, fetchExercises } from '../api';
 import { Exercise, Workout } from '../types';
@@ -8,7 +8,7 @@ import styles from '../components/WorkoutForm.module.css';
 import loadingStyles from '../App.module.css';
 
 export default function EditWorkoutPage() {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   const { id } = useParams<{ id: string }>();
   const workoutId = parseInt(id || '0');
   const { user } = useUserContext();
@@ -55,7 +55,7 @@ export default function EditWorkoutPage() {
     try {
       setError(null);
       await updateWorkout(workoutId, updatedWorkout);
-      navigate('/');
+      setLocation('/');
       return true;
     } catch (err) {
       console.error('Failed to update workout:', err);
@@ -90,7 +90,7 @@ export default function EditWorkoutPage() {
   }
 
   const handleCancel = () => {
-    navigate('/');
+    setLocation('/');
   };
 
   if (!workout) {

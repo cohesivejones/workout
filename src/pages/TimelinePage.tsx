@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'wouter';
 import CalendarView from '../components/CalendarView';
 import classNames from 'classnames';
 import styles from './TimelinePage.module.css';

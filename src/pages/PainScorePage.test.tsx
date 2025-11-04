@@ -1,11 +1,12 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { Route } from 'wouter';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { http, HttpResponse } from 'msw';
 import { server } from '../mocks/server';
 import PainScorePage from './PainScorePage';
 import * as UserContext from '../contexts/useUserContext';
 import { PainScore } from '../types';
+import { MemoryRouter } from '../test-utils/MemoryRouter';
 
 interface MockPainScoreFormProps {
   onSubmit: (painScore: Omit<PainScore, 'id'>) => Promise<boolean>;
@@ -62,10 +63,10 @@ describe('PainScorePage', () => {
 
   it('renders the form for creating a new pain score', () => {
     render(
-      <MemoryRouter initialEntries={['/pain-scores/new']}>
-        <Routes>
-          <Route path="/pain-scores/new" element={<PainScorePage />} />
-        </Routes>
+      <MemoryRouter initialPath="/pain-scores/new">
+        <Route path="/pain-scores/new">
+          <PainScorePage />
+        </Route>
       </MemoryRouter>
     );
 
@@ -90,10 +91,10 @@ describe('PainScorePage', () => {
     );
 
     render(
-      <MemoryRouter initialEntries={['/pain-scores/456/edit']}>
-        <Routes>
-          <Route path="/pain-scores/:id/edit" element={<PainScorePage />} />
-        </Routes>
+      <MemoryRouter initialPath="/pain-scores/456/edit">
+        <Route path="/pain-scores/:id/edit">
+          <PainScorePage />
+        </Route>
       </MemoryRouter>
     );
 
@@ -120,10 +121,10 @@ describe('PainScorePage', () => {
     );
 
     render(
-      <MemoryRouter initialEntries={['/pain-scores/new']}>
-        <Routes>
-          <Route path="/pain-scores/new" element={<PainScorePage />} />
-        </Routes>
+      <MemoryRouter initialPath="/pain-scores/new">
+        <Route path="/pain-scores/new">
+          <PainScorePage />
+        </Route>
       </MemoryRouter>
     );
 
@@ -161,10 +162,10 @@ describe('PainScorePage', () => {
     );
 
     render(
-      <MemoryRouter initialEntries={['/pain-scores/456/edit']}>
-        <Routes>
-          <Route path="/pain-scores/:id/edit" element={<PainScorePage />} />
-        </Routes>
+      <MemoryRouter initialPath="/pain-scores/456/edit">
+        <Route path="/pain-scores/:id/edit">
+          <PainScorePage />
+        </Route>
       </MemoryRouter>
     );
 
@@ -190,10 +191,10 @@ describe('PainScorePage', () => {
     );
 
     render(
-      <MemoryRouter initialEntries={['/pain-scores/456/edit']}>
-        <Routes>
-          <Route path="/pain-scores/:id/edit" element={<PainScorePage />} />
-        </Routes>
+      <MemoryRouter initialPath="/pain-scores/456/edit">
+        <Route path="/pain-scores/:id/edit">
+          <PainScorePage />
+        </Route>
       </MemoryRouter>
     );
 
@@ -211,10 +212,10 @@ describe('PainScorePage', () => {
     );
 
     render(
-      <MemoryRouter initialEntries={['/pain-scores/999/edit']}>
-        <Routes>
-          <Route path="/pain-scores/:id/edit" element={<PainScorePage />} />
-        </Routes>
+      <MemoryRouter initialPath="/pain-scores/999/edit">
+        <Route path="/pain-scores/:id/edit">
+          <PainScorePage />
+        </Route>
       </MemoryRouter>
     );
 

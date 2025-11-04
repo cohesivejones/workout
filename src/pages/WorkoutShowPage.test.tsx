@@ -1,10 +1,11 @@
 import { render, screen, waitFor } from '@testing-library/react';
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { Route } from 'wouter';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { http, HttpResponse } from 'msw';
 import { server } from '../mocks/server';
 import WorkoutShowPage from './WorkoutShowPage';
 import * as UserContext from '../contexts/useUserContext';
+import { MemoryRouter } from '../test-utils/MemoryRouter';
 
 // Mock the UserContext
 vi.mock('../contexts/useUserContext', () => ({
@@ -43,10 +44,10 @@ describe('WorkoutShowPage', () => {
     );
 
     render(
-      <MemoryRouter initialEntries={['/workouts/1']}>
-        <Routes>
-          <Route path="/workouts/:id" element={<WorkoutShowPage />} />
-        </Routes>
+      <MemoryRouter initialPath='/workouts/1'>
+        <Route path="/workouts/:id">
+          <WorkoutShowPage />
+        </Route>
       </MemoryRouter>
     );
 
@@ -63,10 +64,10 @@ describe('WorkoutShowPage', () => {
     );
 
     render(
-      <MemoryRouter initialEntries={['/workouts/1']}>
-        <Routes>
-          <Route path="/workouts/:id" element={<WorkoutShowPage />} />
-        </Routes>
+      <MemoryRouter initialPath='/workouts/1'>
+        <Route path="/workouts/:id">
+          <WorkoutShowPage />
+        </Route>
       </MemoryRouter>
     );
 
@@ -98,10 +99,10 @@ describe('WorkoutShowPage', () => {
     );
 
     render(
-      <MemoryRouter initialEntries={['/workouts/1']}>
-        <Routes>
-          <Route path="/workouts/:id" element={<WorkoutShowPage />} />
-        </Routes>
+      <MemoryRouter initialPath='/workouts/1'>
+          <Route path="/workouts/:id">
+            <WorkoutShowPage />
+          </Route>
       </MemoryRouter>
     );
 
@@ -119,10 +120,10 @@ describe('WorkoutShowPage', () => {
     );
 
     render(
-      <MemoryRouter initialEntries={['/workouts/999']}>
-        <Routes>
-          <Route path="/workouts/:id" element={<WorkoutShowPage />} />
-        </Routes>
+      <MemoryRouter initialPath='/workouts/1'>
+          <Route path="/workouts/:id">
+            <WorkoutShowPage />
+          </Route>
       </MemoryRouter>
     );
 
@@ -142,10 +143,10 @@ describe('WorkoutShowPage', () => {
     );
 
     render(
-      <MemoryRouter initialEntries={['/workouts/1']}>
-        <Routes>
-          <Route path="/workouts/:id" element={<WorkoutShowPage />} />
-        </Routes>
+      <MemoryRouter initialPath='/workouts/1'>
+          <Route path="/workouts/:id">
+            <WorkoutShowPage />
+          </Route>
       </MemoryRouter>
     );
 
@@ -171,10 +172,10 @@ describe('WorkoutShowPage', () => {
     );
 
     render(
-      <MemoryRouter initialEntries={['/workouts/1']}>
-        <Routes>
-          <Route path="/workouts/:id" element={<WorkoutShowPage />} />
-        </Routes>
+      <MemoryRouter initialPath='/workouts/1'>
+          <Route path="/workouts/:id">
+            <WorkoutShowPage />
+          </Route>
       </MemoryRouter>
     );
 
@@ -205,10 +206,10 @@ describe('WorkoutShowPage', () => {
     );
 
     render(
-      <MemoryRouter initialEntries={['/workouts/1']}>
-        <Routes>
-          <Route path="/workouts/:id" element={<WorkoutShowPage />} />
-        </Routes>
+      <MemoryRouter initialPath='/workouts/1'>
+          <Route path="/workouts/:id">
+            <WorkoutShowPage />
+          </Route>
       </MemoryRouter>
     );
 

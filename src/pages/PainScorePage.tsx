@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import { useParams, useLocation, useSearchParams } from 'wouter';
 import PainScoreForm from '../components/PainScoreForm';
 import { createPainScore, updatePainScore, fetchPainScore } from '../api';
 import { PainScore } from '../types';
@@ -8,16 +8,15 @@ import styles from './PainScorePage.module.css';
 
 function PainScorePage(): React.ReactElement {
   const { id } = useParams<{ id?: string }>();
-  const location = useLocation();
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
+  const [searchParams] = useSearchParams();
   const { user } = useUserContext();
   const [loading, setLoading] = useState<boolean>(!!id);
   const [painScore, setPainScore] = useState<PainScore | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   // Get the date from query params if available
-  const queryParams = new URLSearchParams(location.search);
-  const selectedDate = queryParams.get('date');
+  const selectedDate = searchParams.get('date');
 
   useEffect(() => {
     const loadPainScore = async () => {
@@ -51,7 +50,7 @@ function PainScorePage(): React.ReactElement {
         await createPainScore(painScoreData);
       }
 
-      navigate('/');
+      setLocation('/');
       return true;
     } catch (err) {
       console.error('Failed to save pain score:', err);
@@ -60,7 +59,7 @@ function PainScorePage(): React.ReactElement {
   };
 
   const handleCancel = () => {
-    navigate('/');
+    setLocation('/');
   };
 
   if (loading) {

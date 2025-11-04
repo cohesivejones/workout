@@ -1,19 +1,10 @@
 import { render, screen, waitFor } from '@testing-library/react';
-import { BrowserRouter } from 'react-router-dom';
+import { Router } from 'wouter';
 import { http, HttpResponse } from 'msw';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { server } from './mocks/server';
 import { Layout } from './Layout';
 import { UserContextProvider } from './contexts/UserContextProvider';
-
-// Mock react-router-dom
-vi.mock('react-router-dom', async () => {
-  const actual = await vi.importActual('react-router-dom');
-  return {
-    ...actual,
-    Outlet: () => <div>Outlet Content</div>,
-  };
-});
 
 describe('Layout - Header Navigation', () => {
   const navigationLinks = [
@@ -36,11 +27,13 @@ describe('Layout - Header Navigation', () => {
 
     it.each(navigationLinks)('hides $text link', async ({ text }) => {
       render(
-        <BrowserRouter>
+        <Router>
           <UserContextProvider>
-            <Layout />
+            <Layout>
+              <div>Test Content</div>
+            </Layout>
           </UserContextProvider>
-        </BrowserRouter>
+        </Router>
       );
 
       // Wait for auth check to complete
@@ -65,11 +58,13 @@ describe('Layout - Header Navigation', () => {
 
     it.each(navigationLinks)('shows $text link', async ({ text }) => {
       render(
-        <BrowserRouter>
+        <Router>
           <UserContextProvider>
-            <Layout />
+            <Layout>
+              <div>Test Content</div>
+            </Layout>
           </UserContextProvider>
-        </BrowserRouter>
+        </Router>
       );
 
       // Wait for auth check to complete and link to appear

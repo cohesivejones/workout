@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'wouter';
 import { format } from 'date-fns';
 import { MdOutlineEdit, MdAdd, MdFitnessCenter, MdLocalHospital, MdHotel } from 'react-icons/md';
 import { PainScore, Workout, SleepScore } from '../types';
