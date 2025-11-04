@@ -47,8 +47,17 @@ export async function addExercise(page: Page, exercise: Exercise): Promise<void>
   // Click Add Exercise button
   await page.getByRole('button', { name: 'Add Exercise' }).click();
 
+  // Build expected text based on provided fields
+  let expectedText = `${exercise.name} - ${exercise.reps} reps`;
+  if (exercise.weight) {
+    expectedText += ` - ${exercise.weight} lbs`;
+  }
+  if (exercise.time) {
+    expectedText += ` - ${exercise.time} sec`;
+  }
+
   // Wait for exercise to be added to the list
-  await expect(page.locator(`text=${exercise.name} - ${exercise.reps} reps`)).toBeVisible({
+  await expect(page.locator(`text=${expectedText}`)).toBeVisible({
     timeout: 3000,
   });
 }
