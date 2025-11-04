@@ -11,6 +11,30 @@ export interface Exercise {
 }
 
 /**
+ * Set the workout date in the workout form
+ * @param page - Playwright page object
+ * @param date - Date object or date string in YYYY-MM-DD format
+ */
+export async function setWorkoutDate(page: Page, date: Date | string): Promise<void> {
+  let dateStr: string;
+
+  if (date instanceof Date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    dateStr = `${year}-${month}-${day}`;
+  } else {
+    dateStr = date;
+  }
+
+  const dateInput = page.locator('#workout-date');
+  await dateInput.clear();
+  await dateInput.fill(dateStr);
+  await dateInput.press('Tab');
+  await page.waitForTimeout(500);
+}
+
+/**
  * Add an exercise to a workout form
  * This helper handles the complete flow of adding an exercise:
  * - Selecting/creating the exercise name
@@ -47,8 +71,17 @@ export async function addExercise(page: Page, exercise: Exercise): Promise<void>
   // Click Add Exercise button
   await page.getByRole('button', { name: 'Add Exercise' }).click();
 
+  // Build expected text based on provided fields
+  let expectedText = `${exercise.name} - ${exercise.reps} reps`;
+  if (exercise.weight) {
+    expectedText += ` - ${exercise.weight} lbs`;
+  }
+  if (exercise.time) {
+    expectedText += ` - ${exercise.time} sec`;
+  }
+
   // Wait for exercise to be added to the list
-  await expect(page.locator(`text=${exercise.name} - ${exercise.reps} reps`)).toBeVisible({
+  await expect(page.locator(`text=${expectedText}`)).toBeVisible({
     timeout: 3000,
   });
 }

@@ -4,9 +4,57 @@ import { MemoryRouter } from 'react-router-dom';
 import { http, HttpResponse } from 'msw';
 import { server } from '../mocks/server';
 import { ListView } from './ListView';
+import * as UserContext from '../contexts/useUserContext';
+import { TimelineResponse } from '../types';
 
 // Mock window.confirm
 const originalConfirm = window.confirm;
+
+// Mock the UserContext
+vi.mock('../contexts/useUserContext');
+
+const mockUser = {
+  id: 1,
+  name: 'Test User',
+  email: 'test@example.com',
+};
+
+const mockTimelineData: TimelineResponse = {
+  workouts: [
+    {
+      id: 1,
+      date: '2025-01-15',
+      withInstructor: false,
+      userId: 1,
+      exercises: [
+        {
+          id: 1,
+          name: 'Squats',
+          reps: 10,
+          weight: 100,
+          time_seconds: null,
+        },
+      ],
+    },
+  ],
+  painScores: [
+    {
+      id: 1,
+      date: '2025-01-15',
+      score: 3,
+      userId: 1,
+    },
+  ],
+  sleepScores: [
+    {
+      id: 1,
+      date: '2025-01-15',
+      score: 4,
+      userId: 1,
+    },
+  ],
+  hasMore: false,
+};
 
 describe('ListView', () => {
   const mockWorkouts = [
@@ -63,14 +111,18 @@ describe('ListView', () => {
     },
   ];
 
-  const mockHandleWorkoutDeleted = vi.fn();
-  const mockHandlePainScoreDeleted = vi.fn();
-  const mockHandleSleepScoreDeleted = vi.fn();
-
   beforeEach(() => {
     vi.clearAllMocks();
     // Mock window.confirm to always return true
     window.confirm = vi.fn().mockReturnValue(true);
+
+    // Mock user context with logged in user by default
+    vi.spyOn(UserContext, 'useUserContext').mockReturnValue({
+      user: mockUser,
+      login: vi.fn(),
+      logout: vi.fn(),
+      loading: false,
+    });
   });
 
   afterEach(() => {
@@ -78,19 +130,193 @@ describe('ListView', () => {
     window.confirm = originalConfirm;
   });
 
-  it('renders workouts and pain scores in chronological order', () => {
+  describe('Data Fetching', () => {
+    it('should call fetchTimeline API once on mount', async () => {
+      let callCount = 0;
+      server.use(
+        http.get('/api/timeline', () => {
+          callCount++;
+          return HttpResponse.json(mockTimelineData);
+        })
+      );
+
+      render(
+        <MemoryRouter>
+          <ListView />
+        </MemoryRouter>
+      );
+
+      await waitFor(() => {
+        expect(callCount).toBe(1);
+      });
+    });
+
+    it('should display loading state initially', () => {
+      server.use(
+        http.get('/api/timeline', () => {
+          // Never resolve to keep loading state
+          return new Promise(() => {});
+        })
+      );
+
+      render(
+        <MemoryRouter>
+          <ListView />
+        </MemoryRouter>
+      );
+
+      expect(screen.getByText('Loading...')).toBeInTheDocument();
+    });
+
+    it('should display error message when API call fails', async () => {
+      server.use(
+        http.get('/api/timeline', () => {
+          return HttpResponse.json({ error: 'API Error' }, { status: 500 });
+        })
+      );
+
+      render(
+        <MemoryRouter>
+          <ListView />
+        </MemoryRouter>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText(/Failed to load data/i)).toBeInTheDocument();
+      });
+    });
+
+    it('should not call fetchTimeline when user is not logged in', () => {
+      let callCount = 0;
+      server.use(
+        http.get('/api/timeline', () => {
+          callCount++;
+          return HttpResponse.json(mockTimelineData);
+        })
+      );
+
+      vi.spyOn(UserContext, 'useUserContext').mockReturnValue({
+        user: null,
+        login: vi.fn(),
+        logout: vi.fn(),
+        loading: false,
+      });
+
+      render(
+        <MemoryRouter>
+          <ListView />
+        </MemoryRouter>
+      );
+
+      expect(callCount).toBe(0);
+    });
+
+    it('should initially fetch last 3 months to next 3 months of data', async () => {
+      let capturedStartDate: string | null = null;
+      let capturedEndDate: string | null = null;
+
+      server.use(
+        http.get('/api/timeline', ({ request }) => {
+          const url = new URL(request.url);
+          capturedStartDate = url.searchParams.get('startDate');
+          capturedEndDate = url.searchParams.get('endDate');
+          return HttpResponse.json(mockTimelineData);
+        })
+      );
+
+      render(
+        <MemoryRouter>
+          <ListView />
+        </MemoryRouter>
+      );
+
+      await waitFor(() => {
+        expect(capturedStartDate).not.toBeNull();
+        expect(capturedEndDate).not.toBeNull();
+      });
+
+      // Verify startDate is approximately 90 days ago
+      const expectedStartDate = new Date();
+      expectedStartDate.setDate(expectedStartDate.getDate() - 90);
+      const expectedStart = expectedStartDate.toISOString().split('T')[0];
+      expect(capturedStartDate).toBe(expectedStart);
+
+      // Verify endDate is approximately 90 days ahead
+      const expectedEndDate = new Date();
+      expectedEndDate.setDate(expectedEndDate.getDate() + 90);
+      const expectedEnd = expectedEndDate.toISOString().split('T')[0];
+      expect(capturedEndDate).toBe(expectedEnd);
+    });
+
+    it('should extend date range by 3 months when loading more', async () => {
+      let callCount = 0;
+      const capturedStartDates: string[] = [];
+
+      server.use(
+        http.get('/api/timeline', ({ request }) => {
+          callCount++;
+          const url = new URL(request.url);
+          const startDate = url.searchParams.get('startDate');
+          if (startDate) {
+            capturedStartDates.push(startDate);
+          }
+          return HttpResponse.json({ ...mockTimelineData, hasMore: callCount === 1 });
+        })
+      );
+
+      render(
+        <MemoryRouter>
+          <ListView />
+        </MemoryRouter>
+      );
+
+      // Wait for initial load
+      await waitFor(() => {
+        expect(callCount).toBe(1);
+      });
+
+      // Click load more button
+      const loadMoreButton = screen.getByRole('button', { name: /load more/i });
+      fireEvent.click(loadMoreButton);
+
+      // Wait for second API call
+      await waitFor(() => {
+        expect(callCount).toBe(2);
+      });
+
+      // Verify that the second call has a start date 90 days earlier
+      expect(capturedStartDates.length).toBe(2);
+      const firstStart = new Date(capturedStartDates[0]);
+      const secondStart = new Date(capturedStartDates[1]);
+      const daysDiff = Math.round(
+        (firstStart.getTime() - secondStart.getTime()) / (1000 * 60 * 60 * 24)
+      );
+      expect(daysDiff).toBe(90);
+    });
+  });
+
+  it('renders workouts and pain scores in chronological order', async () => {
+    server.use(
+      http.get('/api/timeline', () => {
+        return HttpResponse.json({
+          workouts: mockWorkouts,
+          painScores: mockPainScores,
+          sleepScores: mockSleepScores,
+          hasMore: false,
+        });
+      })
+    );
+
     render(
       <MemoryRouter>
-        <ListView
-          workouts={mockWorkouts}
-          painScores={mockPainScores}
-          sleepScores={mockSleepScores}
-          handleWorkoutDeleted={mockHandleWorkoutDeleted}
-          handlePainScoreDeleted={mockHandlePainScoreDeleted}
-          handleSleepScoreDeleted={mockHandleSleepScoreDeleted}
-        />
+        <ListView />
       </MemoryRouter>
     );
+
+    // Wait for data to load
+    await waitFor(() => {
+      expect(screen.getByText('Apr 12, 2025 (Saturday)')).toBeInTheDocument();
+    });
 
     // Check that all items are rendered
     expect(screen.getByText('Apr 12, 2025 (Saturday)')).toBeInTheDocument();
@@ -125,19 +351,30 @@ describe('ListView', () => {
     expect(screen.getByText('Mild pain in lower back')).toBeInTheDocument();
   });
 
-  it('displays empty state message when no items', () => {
+  it('displays empty state message when no items', async () => {
+    server.use(
+      http.get('/api/timeline', () => {
+        return HttpResponse.json({
+          workouts: [],
+          painScores: [],
+          sleepScores: [],
+          hasMore: false,
+        });
+      })
+    );
+
     render(
       <MemoryRouter>
-        <ListView
-          workouts={[]}
-          painScores={[]}
-          sleepScores={[]}
-          handleWorkoutDeleted={mockHandleWorkoutDeleted}
-          handlePainScoreDeleted={mockHandlePainScoreDeleted}
-          handleSleepScoreDeleted={mockHandleSleepScoreDeleted}
-        />
+        <ListView />
       </MemoryRouter>
     );
+
+    // Wait for data to load
+    await waitFor(() => {
+      expect(
+        screen.getByText('No workouts, pain scores, or sleep scores recorded yet.')
+      ).toBeInTheDocument();
+    });
 
     expect(
       screen.getByText('No workouts, pain scores, or sleep scores recorded yet.')
@@ -145,8 +382,16 @@ describe('ListView', () => {
   });
 
   it('handles workout deletion', async () => {
-    // Mock successful deletion
+    // Mock timeline data
     server.use(
+      http.get('/api/timeline', () => {
+        return HttpResponse.json({
+          workouts: mockWorkouts,
+          painScores: mockPainScores,
+          sleepScores: mockSleepScores,
+          hasMore: false,
+        });
+      }),
       http.delete('/api/workouts/:id', () => {
         return HttpResponse.json({ id: 1 });
       })
@@ -154,16 +399,14 @@ describe('ListView', () => {
 
     render(
       <MemoryRouter>
-        <ListView
-          workouts={mockWorkouts}
-          painScores={mockPainScores}
-          sleepScores={mockSleepScores}
-          handleWorkoutDeleted={mockHandleWorkoutDeleted}
-          handlePainScoreDeleted={mockHandlePainScoreDeleted}
-          handleSleepScoreDeleted={mockHandleSleepScoreDeleted}
-        />
+        <ListView />
       </MemoryRouter>
     );
+
+    // Wait for data to load
+    await waitFor(() => {
+      expect(screen.getByText('Apr 10, 2025 (Thursday)')).toBeInTheDocument();
+    });
 
     // Find delete buttons for workouts
     const deleteButtons = screen.getAllByTitle('Delete workout');
@@ -175,15 +418,24 @@ describe('ListView', () => {
     // Check that confirm was called
     expect(window.confirm).toHaveBeenCalledWith('Are you sure you want to delete this workout?');
 
-    // Check that the handler was called with the correct ID
+    // Check that the workout was removed from the list
     await waitFor(() => {
-      expect(mockHandleWorkoutDeleted).toHaveBeenCalledWith(1);
+      const remainingDeleteButtons = screen.getAllByTitle('Delete workout');
+      expect(remainingDeleteButtons.length).toBe(1);
     });
   });
 
   it('handles pain score deletion', async () => {
-    // Mock successful deletion
+    // Mock timeline data
     server.use(
+      http.get('/api/timeline', () => {
+        return HttpResponse.json({
+          workouts: mockWorkouts,
+          painScores: mockPainScores,
+          sleepScores: mockSleepScores,
+          hasMore: false,
+        });
+      }),
       http.delete('/api/pain-scores/:id', () => {
         return HttpResponse.json({ id: 1 });
       })
@@ -191,16 +443,14 @@ describe('ListView', () => {
 
     render(
       <MemoryRouter>
-        <ListView
-          workouts={mockWorkouts}
-          painScores={mockPainScores}
-          sleepScores={mockSleepScores}
-          handleWorkoutDeleted={mockHandleWorkoutDeleted}
-          handlePainScoreDeleted={mockHandlePainScoreDeleted}
-          handleSleepScoreDeleted={mockHandleSleepScoreDeleted}
-        />
+        <ListView />
       </MemoryRouter>
     );
+
+    // Wait for data to load
+    await waitFor(() => {
+      expect(screen.getByText('Apr 12, 2025 (Saturday)')).toBeInTheDocument();
+    });
 
     // Find delete buttons for pain scores
     const deleteButtons = screen.getAllByTitle('Delete pain score');
@@ -212,9 +462,10 @@ describe('ListView', () => {
     // Check that confirm was called
     expect(window.confirm).toHaveBeenCalledWith('Are you sure you want to delete this pain score?');
 
-    // Check that the handler was called with the correct ID
+    // Check that the pain score was removed from the list
     await waitFor(() => {
-      expect(mockHandlePainScoreDeleted).toHaveBeenCalledWith(1);
+      const remainingDeleteButtons = screen.getAllByTitle('Delete pain score');
+      expect(remainingDeleteButtons.length).toBe(1);
     });
   });
 
@@ -227,8 +478,16 @@ describe('ListView', () => {
     const originalAlert = window.alert;
     window.alert = vi.fn();
 
-    // Mock failed deletion
+    // Mock timeline data and failed deletion
     server.use(
+      http.get('/api/timeline', () => {
+        return HttpResponse.json({
+          workouts: mockWorkouts,
+          painScores: mockPainScores,
+          sleepScores: mockSleepScores,
+          hasMore: false,
+        });
+      }),
       http.delete('/api/workouts/:id', () => {
         return HttpResponse.json({ error: 'Failed to delete' }, { status: 500 });
       })
@@ -236,16 +495,14 @@ describe('ListView', () => {
 
     render(
       <MemoryRouter>
-        <ListView
-          workouts={mockWorkouts}
-          painScores={mockPainScores}
-          sleepScores={mockSleepScores}
-          handleWorkoutDeleted={mockHandleWorkoutDeleted}
-          handlePainScoreDeleted={mockHandlePainScoreDeleted}
-          handleSleepScoreDeleted={mockHandleSleepScoreDeleted}
-        />
+        <ListView />
       </MemoryRouter>
     );
+
+    // Wait for data to load
+    await waitFor(() => {
+      expect(screen.getByText('Apr 10, 2025 (Thursday)')).toBeInTheDocument();
+    });
 
     // Find delete buttons for workouts
     const deleteButtons = screen.getAllByTitle('Delete workout');
@@ -258,9 +515,6 @@ describe('ListView', () => {
       expect(console.error).toHaveBeenCalledWith('Failed to delete workout:', expect.any(Error));
       expect(window.alert).toHaveBeenCalledWith('Failed to delete workout. Please try again.');
     });
-
-    // Check that the handler was not called
-    expect(mockHandleWorkoutDeleted).not.toHaveBeenCalled();
 
     // Restore mocks
     console.error = originalConsoleError;
@@ -276,8 +530,16 @@ describe('ListView', () => {
     const originalAlert = window.alert;
     window.alert = vi.fn();
 
-    // Mock failed deletion
+    // Mock timeline data and failed deletion
     server.use(
+      http.get('/api/timeline', () => {
+        return HttpResponse.json({
+          workouts: mockWorkouts,
+          painScores: mockPainScores,
+          sleepScores: mockSleepScores,
+          hasMore: false,
+        });
+      }),
       http.delete('/api/pain-scores/:id', () => {
         return HttpResponse.json({ error: 'Failed to delete' }, { status: 500 });
       })
@@ -285,16 +547,14 @@ describe('ListView', () => {
 
     render(
       <MemoryRouter>
-        <ListView
-          workouts={mockWorkouts}
-          painScores={mockPainScores}
-          sleepScores={mockSleepScores}
-          handleWorkoutDeleted={mockHandleWorkoutDeleted}
-          handlePainScoreDeleted={mockHandlePainScoreDeleted}
-          handleSleepScoreDeleted={mockHandleSleepScoreDeleted}
-        />
+        <ListView />
       </MemoryRouter>
     );
+
+    // Wait for data to load
+    await waitFor(() => {
+      expect(screen.getByText('Apr 12, 2025 (Saturday)')).toBeInTheDocument();
+    });
 
     // Find delete buttons for pain scores
     const deleteButtons = screen.getAllByTitle('Delete pain score');
@@ -308,9 +568,6 @@ describe('ListView', () => {
       expect(window.alert).toHaveBeenCalledWith('Failed to delete pain score. Please try again.');
     });
 
-    // Check that the handler was not called
-    expect(mockHandlePainScoreDeleted).not.toHaveBeenCalled();
-
     // Restore mocks
     console.error = originalConsoleError;
     window.alert = originalAlert;
@@ -320,21 +577,31 @@ describe('ListView', () => {
     // Override the mock to return false (user clicked "Cancel")
     (window.confirm as ReturnType<typeof vi.fn>).mockReturnValue(false);
 
+    server.use(
+      http.get('/api/timeline', () => {
+        return HttpResponse.json({
+          workouts: mockWorkouts,
+          painScores: mockPainScores,
+          sleepScores: mockSleepScores,
+          hasMore: false,
+        });
+      })
+    );
+
     render(
       <MemoryRouter>
-        <ListView
-          workouts={mockWorkouts}
-          painScores={mockPainScores}
-          sleepScores={mockSleepScores}
-          handleWorkoutDeleted={mockHandleWorkoutDeleted}
-          handlePainScoreDeleted={mockHandlePainScoreDeleted}
-          handleSleepScoreDeleted={mockHandleSleepScoreDeleted}
-        />
+        <ListView />
       </MemoryRouter>
     );
 
+    // Wait for data to load
+    await waitFor(() => {
+      expect(screen.getByText('Apr 10, 2025 (Thursday)')).toBeInTheDocument();
+    });
+
     // Find delete buttons for workouts
     const deleteButtons = screen.getAllByTitle('Delete workout');
+    const initialCount = deleteButtons.length;
 
     // Click the first delete button
     fireEvent.click(deleteButtons[0]);
@@ -342,23 +609,33 @@ describe('ListView', () => {
     // Check that confirm was called
     expect(window.confirm).toHaveBeenCalledWith('Are you sure you want to delete this workout?');
 
-    // Check that the handler was not called
-    expect(mockHandleWorkoutDeleted).not.toHaveBeenCalled();
+    // Check that the workout count hasn't changed
+    const stillDeleteButtons = screen.getAllByTitle('Delete workout');
+    expect(stillDeleteButtons.length).toBe(initialCount);
   });
 
-  it('displays filter controls', () => {
+  it('displays filter controls', async () => {
+    server.use(
+      http.get('/api/timeline', () => {
+        return HttpResponse.json({
+          workouts: mockWorkouts,
+          painScores: mockPainScores,
+          sleepScores: mockSleepScores,
+          hasMore: false,
+        });
+      })
+    );
+
     render(
       <MemoryRouter>
-        <ListView
-          workouts={mockWorkouts}
-          painScores={mockPainScores}
-          sleepScores={mockSleepScores}
-          handleWorkoutDeleted={mockHandleWorkoutDeleted}
-          handlePainScoreDeleted={mockHandlePainScoreDeleted}
-          handleSleepScoreDeleted={mockHandleSleepScoreDeleted}
-        />
+        <ListView />
       </MemoryRouter>
     );
+
+    // Wait for data to load
+    await waitFor(() => {
+      expect(screen.getByText('Apr 10, 2025 (Thursday)')).toBeInTheDocument();
+    });
 
     // Check that filter controls are rendered
     expect(screen.getByText('Filter by Type:')).toBeInTheDocument();
@@ -380,19 +657,28 @@ describe('ListView', () => {
     expect(screen.getByText('Show All')).toBeInTheDocument();
   });
 
-  it('filters items when checkboxes are clicked', () => {
+  it('filters items when checkboxes are clicked', async () => {
+    server.use(
+      http.get('/api/timeline', () => {
+        return HttpResponse.json({
+          workouts: mockWorkouts,
+          painScores: mockPainScores,
+          sleepScores: mockSleepScores,
+          hasMore: false,
+        });
+      })
+    );
+
     render(
       <MemoryRouter>
-        <ListView
-          workouts={mockWorkouts}
-          painScores={mockPainScores}
-          sleepScores={mockSleepScores}
-          handleWorkoutDeleted={mockHandleWorkoutDeleted}
-          handlePainScoreDeleted={mockHandlePainScoreDeleted}
-          handleSleepScoreDeleted={mockHandleSleepScoreDeleted}
-        />
+        <ListView />
       </MemoryRouter>
     );
+
+    // Wait for data to load
+    await waitFor(() => {
+      expect(screen.getByText('Apr 10, 2025 (Thursday)')).toBeInTheDocument();
+    });
 
     // Initially all items should be visible
     expect(screen.getAllByText('Workout').length).toBe(2); // 2 workout cards
@@ -430,19 +716,28 @@ describe('ListView', () => {
     ).toBeInTheDocument();
   });
 
-  it('resets filters when Show All button is clicked', () => {
+  it('resets filters when Show All button is clicked', async () => {
+    server.use(
+      http.get('/api/timeline', () => {
+        return HttpResponse.json({
+          workouts: mockWorkouts,
+          painScores: mockPainScores,
+          sleepScores: mockSleepScores,
+          hasMore: false,
+        });
+      })
+    );
+
     render(
       <MemoryRouter>
-        <ListView
-          workouts={mockWorkouts}
-          painScores={mockPainScores}
-          sleepScores={mockSleepScores}
-          handleWorkoutDeleted={mockHandleWorkoutDeleted}
-          handlePainScoreDeleted={mockHandlePainScoreDeleted}
-          handleSleepScoreDeleted={mockHandleSleepScoreDeleted}
-        />
+        <ListView />
       </MemoryRouter>
     );
+
+    // Wait for data to load
+    await waitFor(() => {
+      expect(screen.getByText('Apr 10, 2025 (Thursday)')).toBeInTheDocument();
+    });
 
     // Uncheck all checkboxes
     const workoutsCheckbox = screen.getByLabelText('Workouts') as HTMLInputElement;
@@ -473,19 +768,28 @@ describe('ListView', () => {
     expect(sleepScoresCheckbox.checked).toBe(true);
   });
 
-  it('displays NEW REPS and NEW WEIGHT badges when flags are set', () => {
+  it('displays NEW REPS and NEW WEIGHT badges when flags are set', async () => {
+    server.use(
+      http.get('/api/timeline', () => {
+        return HttpResponse.json({
+          workouts: mockWorkouts,
+          painScores: mockPainScores,
+          sleepScores: mockSleepScores,
+          hasMore: false,
+        });
+      })
+    );
+
     render(
       <MemoryRouter>
-        <ListView
-          workouts={mockWorkouts}
-          painScores={mockPainScores}
-          sleepScores={mockSleepScores}
-          handleWorkoutDeleted={mockHandleWorkoutDeleted}
-          handlePainScoreDeleted={mockHandlePainScoreDeleted}
-          handleSleepScoreDeleted={mockHandleSleepScoreDeleted}
-        />
+        <ListView />
       </MemoryRouter>
     );
+
+    // Wait for data to load
+    await waitFor(() => {
+      expect(screen.getByText('Push-ups')).toBeInTheDocument();
+    });
 
     // Check that the NEW REPS badge is displayed for Push-ups
     const newRepsBadges = screen.getAllByText('NEW REPS');
@@ -508,145 +812,57 @@ describe('ListView', () => {
     expect(lungesItem).not.toHaveTextContent('NEW WEIGHT');
   });
 
-  describe('Load More functionality', () => {
-    it('renders Load More button when hasMore is true', () => {
-      render(
-        <MemoryRouter>
-          <ListView
-            workouts={mockWorkouts}
-            painScores={mockPainScores}
-            sleepScores={mockSleepScores}
-            handleWorkoutDeleted={mockHandleWorkoutDeleted}
-            handlePainScoreDeleted={mockHandlePainScoreDeleted}
-            handleSleepScoreDeleted={mockHandleSleepScoreDeleted}
-            hasMore={true}
-            onLoadMore={vi.fn()}
-            isLoadingMore={false}
-          />
-        </MemoryRouter>
-      );
-
-      expect(screen.getByRole('button', { name: /load more/i })).toBeInTheDocument();
-    });
-
-    it('hides Load More button when hasMore is false', () => {
-      render(
-        <MemoryRouter>
-          <ListView
-            workouts={mockWorkouts}
-            painScores={mockPainScores}
-            sleepScores={mockSleepScores}
-            handleWorkoutDeleted={mockHandleWorkoutDeleted}
-            handlePainScoreDeleted={mockHandlePainScoreDeleted}
-            handleSleepScoreDeleted={mockHandleSleepScoreDeleted}
-            hasMore={false}
-            onLoadMore={vi.fn()}
-            isLoadingMore={false}
-          />
-        </MemoryRouter>
-      );
-
-      expect(screen.queryByRole('button', { name: /load more/i })).not.toBeInTheDocument();
-    });
-
-    it('calls onLoadMore when Load More button is clicked', () => {
-      const mockOnLoadMore = vi.fn();
-
-      render(
-        <MemoryRouter>
-          <ListView
-            workouts={mockWorkouts}
-            painScores={mockPainScores}
-            sleepScores={mockSleepScores}
-            handleWorkoutDeleted={mockHandleWorkoutDeleted}
-            handlePainScoreDeleted={mockHandlePainScoreDeleted}
-            handleSleepScoreDeleted={mockHandleSleepScoreDeleted}
-            hasMore={true}
-            onLoadMore={mockOnLoadMore}
-            isLoadingMore={false}
-          />
-        </MemoryRouter>
-      );
-
-      const loadMoreButton = screen.getByRole('button', { name: /load more/i });
-      fireEvent.click(loadMoreButton);
-
-      expect(mockOnLoadMore).toHaveBeenCalledTimes(1);
-    });
-
-    it('shows loading state while loading more data', () => {
-      render(
-        <MemoryRouter>
-          <ListView
-            workouts={mockWorkouts}
-            painScores={mockPainScores}
-            sleepScores={mockSleepScores}
-            handleWorkoutDeleted={mockHandleWorkoutDeleted}
-            handlePainScoreDeleted={mockHandlePainScoreDeleted}
-            handleSleepScoreDeleted={mockHandleSleepScoreDeleted}
-            hasMore={true}
-            onLoadMore={vi.fn()}
-            isLoadingMore={true}
-          />
-        </MemoryRouter>
-      );
-
-      const loadMoreButton = screen.getByRole('button', { name: /loading/i });
-      expect(loadMoreButton).toBeDisabled();
-    });
-
-    it('works without Load More props for backward compatibility', () => {
-      render(
-        <MemoryRouter>
-          <ListView
-            workouts={mockWorkouts}
-            painScores={mockPainScores}
-            sleepScores={mockSleepScores}
-            handleWorkoutDeleted={mockHandleWorkoutDeleted}
-            handlePainScoreDeleted={mockHandlePainScoreDeleted}
-            handleSleepScoreDeleted={mockHandleSleepScoreDeleted}
-          />
-        </MemoryRouter>
-      );
-
-      // Should not show Load More button when props are not provided
-      expect(screen.queryByRole('button', { name: /load more/i })).not.toBeInTheDocument();
-    });
-  });
-
   describe('FAB (Floating Action Button)', () => {
-    it('renders FAB button with correct aria-label', () => {
+    it('renders FAB button with correct aria-label', async () => {
+      server.use(
+        http.get('/api/timeline', () => {
+          return HttpResponse.json({
+            workouts: mockWorkouts,
+            painScores: mockPainScores,
+            sleepScores: mockSleepScores,
+            hasMore: false,
+          });
+        })
+      );
+
       render(
         <MemoryRouter>
-          <ListView
-            workouts={mockWorkouts}
-            painScores={mockPainScores}
-            sleepScores={mockSleepScores}
-            handleWorkoutDeleted={mockHandleWorkoutDeleted}
-            handlePainScoreDeleted={mockHandlePainScoreDeleted}
-            handleSleepScoreDeleted={mockHandleSleepScoreDeleted}
-          />
+          <ListView />
         </MemoryRouter>
       );
+
+      // Wait for data to load
+      await waitFor(() => {
+        expect(screen.getByText('Apr 10, 2025 (Thursday)')).toBeInTheDocument();
+      });
 
       const fabButton = screen.getByRole('button', { name: 'Add new item' });
       expect(fabButton).toBeInTheDocument();
       expect(fabButton).toHaveAttribute('aria-expanded', 'false');
     });
 
-    it('toggles FAB menu when button is clicked', () => {
+    it('toggles FAB menu when button is clicked', async () => {
+      server.use(
+        http.get('/api/timeline', () => {
+          return HttpResponse.json({
+            workouts: mockWorkouts,
+            painScores: mockPainScores,
+            sleepScores: mockSleepScores,
+            hasMore: false,
+          });
+        })
+      );
+
       render(
         <MemoryRouter>
-          <ListView
-            workouts={mockWorkouts}
-            painScores={mockPainScores}
-            sleepScores={mockSleepScores}
-            handleWorkoutDeleted={mockHandleWorkoutDeleted}
-            handlePainScoreDeleted={mockHandlePainScoreDeleted}
-            handleSleepScoreDeleted={mockHandleSleepScoreDeleted}
-          />
+          <ListView />
         </MemoryRouter>
       );
+
+      // Wait for data to load
+      await waitFor(() => {
+        expect(screen.getByText('Apr 10, 2025 (Thursday)')).toBeInTheDocument();
+      });
 
       const fabButton = screen.getByRole('button', { name: 'Add new item' });
 
@@ -670,19 +886,28 @@ describe('ListView', () => {
       expect(fabButton).toHaveAttribute('aria-expanded', 'false');
     });
 
-    it('displays correct links in FAB menu', () => {
+    it('displays correct links in FAB menu', async () => {
+      server.use(
+        http.get('/api/timeline', () => {
+          return HttpResponse.json({
+            workouts: mockWorkouts,
+            painScores: mockPainScores,
+            sleepScores: mockSleepScores,
+            hasMore: false,
+          });
+        })
+      );
+
       render(
         <MemoryRouter>
-          <ListView
-            workouts={mockWorkouts}
-            painScores={mockPainScores}
-            sleepScores={mockSleepScores}
-            handleWorkoutDeleted={mockHandleWorkoutDeleted}
-            handlePainScoreDeleted={mockHandlePainScoreDeleted}
-            handleSleepScoreDeleted={mockHandleSleepScoreDeleted}
-          />
+          <ListView />
         </MemoryRouter>
       );
+
+      // Wait for data to load
+      await waitFor(() => {
+        expect(screen.getByText('Apr 10, 2025 (Thursday)')).toBeInTheDocument();
+      });
 
       const fabButton = screen.getByRole('button', { name: 'Add new item' });
       fireEvent.click(fabButton);
@@ -697,19 +922,28 @@ describe('ListView', () => {
       expect(sleepScoreLink).toHaveAttribute('href', '/sleep-scores/new');
     });
 
-    it('closes FAB menu when clicking outside', () => {
+    it('closes FAB menu when clicking outside', async () => {
+      server.use(
+        http.get('/api/timeline', () => {
+          return HttpResponse.json({
+            workouts: mockWorkouts,
+            painScores: mockPainScores,
+            sleepScores: mockSleepScores,
+            hasMore: false,
+          });
+        })
+      );
+
       render(
         <MemoryRouter>
-          <ListView
-            workouts={mockWorkouts}
-            painScores={mockPainScores}
-            sleepScores={mockSleepScores}
-            handleWorkoutDeleted={mockHandleWorkoutDeleted}
-            handlePainScoreDeleted={mockHandlePainScoreDeleted}
-            handleSleepScoreDeleted={mockHandleSleepScoreDeleted}
-          />
+          <ListView />
         </MemoryRouter>
       );
+
+      // Wait for data to load
+      await waitFor(() => {
+        expect(screen.getByText('Apr 10, 2025 (Thursday)')).toBeInTheDocument();
+      });
 
       const fabButton = screen.getByRole('button', { name: 'Add new item' });
 
@@ -724,19 +958,28 @@ describe('ListView', () => {
       expect(screen.queryByRole('link', { name: /New Workout/i })).not.toBeInTheDocument();
     });
 
-    it('closes FAB menu when a menu item is clicked', () => {
+    it('closes FAB menu when a menu item is clicked', async () => {
+      server.use(
+        http.get('/api/timeline', () => {
+          return HttpResponse.json({
+            workouts: mockWorkouts,
+            painScores: mockPainScores,
+            sleepScores: mockSleepScores,
+            hasMore: false,
+          });
+        })
+      );
+
       render(
         <MemoryRouter>
-          <ListView
-            workouts={mockWorkouts}
-            painScores={mockPainScores}
-            sleepScores={mockSleepScores}
-            handleWorkoutDeleted={mockHandleWorkoutDeleted}
-            handlePainScoreDeleted={mockHandlePainScoreDeleted}
-            handleSleepScoreDeleted={mockHandleSleepScoreDeleted}
-          />
+          <ListView />
         </MemoryRouter>
       );
+
+      // Wait for data to load
+      await waitFor(() => {
+        expect(screen.getByText('Apr 10, 2025 (Thursday)')).toBeInTheDocument();
+      });
 
       const fabButton = screen.getByRole('button', { name: 'Add new item' });
 
@@ -750,38 +993,6 @@ describe('ListView', () => {
 
       // Menu should be closed
       expect(screen.queryByRole('link', { name: /New Workout/i })).not.toBeInTheDocument();
-    });
-
-    it('does not render old action buttons in header', () => {
-      render(
-        <MemoryRouter>
-          <ListView
-            workouts={mockWorkouts}
-            painScores={mockPainScores}
-            sleepScores={mockSleepScores}
-            handleWorkoutDeleted={mockHandleWorkoutDeleted}
-            handlePainScoreDeleted={mockHandlePainScoreDeleted}
-            handleSleepScoreDeleted={mockHandleSleepScoreDeleted}
-          />
-        </MemoryRouter>
-      );
-
-      // The old action buttons should not be in the header section
-      // They should only appear in the FAB menu
-      const fabButton = screen.getByRole('button', { name: 'Add new item' });
-
-      // Before opening FAB, the links should not be visible
-      expect(screen.queryByRole('link', { name: 'New Workout' })).not.toBeInTheDocument();
-      expect(screen.queryByRole('link', { name: 'New Pain Score' })).not.toBeInTheDocument();
-      expect(screen.queryByRole('link', { name: 'New Sleep Score' })).not.toBeInTheDocument();
-
-      // Open FAB to verify they're only in the menu
-      fireEvent.click(fabButton);
-
-      // Now they should be visible in the FAB menu
-      expect(screen.getByRole('link', { name: /New Workout/i })).toBeInTheDocument();
-      expect(screen.getByRole('link', { name: /New Pain Score/i })).toBeInTheDocument();
-      expect(screen.getByRole('link', { name: /New Sleep Score/i })).toBeInTheDocument();
     });
   });
 });

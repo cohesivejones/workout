@@ -79,6 +79,12 @@ describe('DashboardPage', () => {
     server.use(
       http.get('/api/dashboard/weight-progression', () => {
         return new Promise(() => {});
+      }),
+      http.get('/api/dashboard/pain-progression', () => {
+        return new Promise(() => {});
+      }),
+      http.get('/api/dashboard/sleep-progression', () => {
+        return new Promise(() => {});
       })
     );
 
@@ -126,6 +132,12 @@ describe('DashboardPage', () => {
     server.use(
       http.get('/api/dashboard/weight-progression', () => {
         return HttpResponse.json({ error: 'Failed to fetch data' }, { status: 500 });
+      }),
+      http.get('/api/dashboard/pain-progression', () => {
+        return HttpResponse.json({ dataPoints: [] });
+      }),
+      http.get('/api/dashboard/sleep-progression', () => {
+        return HttpResponse.json({ dataPoints: [] });
       })
     );
 
@@ -387,6 +399,12 @@ describe('DashboardPage', () => {
       server.use(
         http.get('/api/dashboard/weight-progression', () => {
           return HttpResponse.json(mockProgressionData);
+        }),
+        http.get('/api/dashboard/pain-progression', () => {
+          return HttpResponse.json({ dataPoints: [] });
+        }),
+        http.get('/api/dashboard/sleep-progression', () => {
+          return HttpResponse.json({ dataPoints: [] });
         })
       );
 

@@ -30,6 +30,10 @@ export interface GenericCalendarViewProps<T extends CalendarItem> {
   emptyStateMessage?: string;
   // For testing purposes only
   initialMobileView?: boolean;
+  // Controlled month (required)
+  currentMonth: Date;
+  // Callback when month changes (required)
+  onMonthChange: (month: Date) => void;
 }
 
 // Generic calendar component
@@ -40,8 +44,9 @@ export function GenericCalendarView<T extends CalendarItem>({
   getItemsByDate,
   emptyStateMessage = 'No items',
   initialMobileView = false,
+  currentMonth,
+  onMonthChange,
 }: GenericCalendarViewProps<T>) {
-  const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
   const [currentWeek, setCurrentWeek] = useState<Date>(new Date());
   const [isMobileView, setIsMobileView] = useState<boolean>(initialMobileView);
 
@@ -72,21 +77,21 @@ export function GenericCalendarView<T extends CalendarItem>({
         <div className={styles.navButtons}>
           <button
             className={styles.navButton}
-            onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
+            onClick={() => onMonthChange(subMonths(currentMonth, 1))}
             aria-label="Previous month"
           >
             <MdChevronLeft />
           </button>
           <button
             className={styles.todayButton}
-            onClick={() => setCurrentMonth(new Date())}
+            onClick={() => onMonthChange(new Date())}
             aria-label="Go to today"
           >
             Today
           </button>
           <button
             className={styles.navButton}
-            onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
+            onClick={() => onMonthChange(addMonths(currentMonth, 1))}
             aria-label="Next month"
           >
             <MdChevronRight />

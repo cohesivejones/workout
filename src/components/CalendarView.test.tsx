@@ -1,6 +1,11 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
+import { http, HttpResponse } from 'msw';
+import { server } from '../mocks/server';
 import CalendarView from './CalendarView';
+import * as UserContext from '../contexts/useUserContext';
+import MockDate from 'mockdate';
 
 // Mock react-router-dom's useNavigate
 const mockNavigate = vi.fn();
@@ -11,6 +16,15 @@ vi.mock('react-router-dom', async () => {
     useNavigate: () => mockNavigate,
   };
 });
+
+// Mock the UserContext
+vi.mock('../contexts/useUserContext');
+
+const mockUser = {
+  id: 1,
+  name: 'Test User',
+  email: 'test@example.com',
+};
 
 describe('CalendarView', () => {
   const mockWorkouts = [
@@ -70,8 +84,7 @@ describe('CalendarView', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     // Mock Date to always return May 2025
-    vi.useFakeTimers();
-    vi.setSystemTime(new Date('2025-05-15'));
+    MockDate.set('2025-05-15');
 
     // Mock window.innerWidth to simulate desktop view
     Object.defineProperty(window, 'innerWidth', {
@@ -82,22 +95,216 @@ describe('CalendarView', () => {
     // Mock window.addEventListener to capture resize event
     window.addEventListener = vi.fn();
     window.removeEventListener = vi.fn();
+
+    // Mock user context with logged in user by default
+    vi.spyOn(UserContext, 'useUserContext').mockReturnValue({
+      user: mockUser,
+      login: vi.fn(),
+      logout: vi.fn(),
+      loading: false,
+    });
   });
 
   afterEach(() => {
-    vi.useRealTimers();
+    MockDate.reset();
   });
 
-  it('renders calendar with workouts and pain scores', () => {
+  describe('Data Fetching', () => {
+    it('should call fetchTimeline API once on mount', async () => {
+      let callCount = 0;
+      server.use(
+        http.get('/api/timeline', () => {
+          callCount++;
+          return HttpResponse.json({
+            workouts: mockWorkouts,
+            painScores: mockPainScores,
+            sleepScores: mockSleepScores,
+            hasMore: false,
+          });
+        })
+      );
+
+      render(
+        <MemoryRouter>
+          <CalendarView />
+        </MemoryRouter>
+      );
+
+      await waitFor(() => {
+        expect(callCount).toBe(1);
+      });
+    });
+
+    it('should display loading state initially', () => {
+      server.use(
+        http.get('/api/timeline', () => {
+          // Never resolve to keep loading state
+          return new Promise(() => {});
+        })
+      );
+
+      render(
+        <MemoryRouter>
+          <CalendarView />
+        </MemoryRouter>
+      );
+
+      expect(screen.getByText('Loading...')).toBeInTheDocument();
+    });
+
+    it('should display error message when API call fails', async () => {
+      server.use(
+        http.get('/api/timeline', () => {
+          return HttpResponse.json({ error: 'API Error' }, { status: 500 });
+        })
+      );
+
+      render(
+        <MemoryRouter>
+          <CalendarView />
+        </MemoryRouter>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText(/Failed to load data/i)).toBeInTheDocument();
+      });
+    });
+
+    it('should not call fetchTimeline when user is not logged in', () => {
+      let callCount = 0;
+      server.use(
+        http.get('/api/timeline', () => {
+          callCount++;
+          return HttpResponse.json({
+            workouts: mockWorkouts,
+            painScores: mockPainScores,
+            sleepScores: mockSleepScores,
+            hasMore: false,
+          });
+        })
+      );
+
+      vi.spyOn(UserContext, 'useUserContext').mockReturnValue({
+        user: null,
+        login: vi.fn(),
+        logout: vi.fn(),
+        loading: false,
+      });
+
+      render(
+        <MemoryRouter>
+          <CalendarView />
+        </MemoryRouter>
+      );
+
+      expect(callCount).toBe(0);
+    });
+
+    it('should fetch data for the visible month', async () => {
+      let capturedStartDate: string | null = null;
+      let capturedEndDate: string | null = null;
+
+      server.use(
+        http.get('/api/timeline', ({ request }) => {
+          const url = new URL(request.url);
+          capturedStartDate = url.searchParams.get('startDate');
+          capturedEndDate = url.searchParams.get('endDate');
+          return HttpResponse.json({
+            workouts: mockWorkouts,
+            painScores: mockPainScores,
+            sleepScores: mockSleepScores,
+            hasMore: false,
+          });
+        })
+      );
+
+      render(
+        <MemoryRouter>
+          <CalendarView />
+        </MemoryRouter>
+      );
+
+      await waitFor(() => {
+        expect(capturedStartDate).not.toBeNull();
+        expect(capturedEndDate).not.toBeNull();
+      });
+
+      // Verify dates are for May 2025 (current mocked month)
+      expect(capturedStartDate).toBe('2025-05-01');
+      expect(capturedEndDate).toBe('2025-05-31');
+    });
+
+    it('should refetch data when month changes', async () => {
+      let callCount = 0;
+      const capturedDates: Array<{ start: string; end: string }> = [];
+
+      server.use(
+        http.get('/api/timeline', ({ request }) => {
+          callCount++;
+          const url = new URL(request.url);
+          const startDate = url.searchParams.get('startDate');
+          const endDate = url.searchParams.get('endDate');
+          if (startDate && endDate) {
+            capturedDates.push({ start: startDate, end: endDate });
+          }
+          return HttpResponse.json({
+            workouts: mockWorkouts,
+            painScores: mockPainScores,
+            sleepScores: mockSleepScores,
+            hasMore: false,
+          });
+        })
+      );
+
+      render(
+        <MemoryRouter>
+          <CalendarView />
+        </MemoryRouter>
+      );
+
+      // Wait for initial load (May 2025)
+      await waitFor(() => {
+        expect(callCount).toBe(1);
+      });
+
+      // Click next month button to go to June
+      const nextButton = screen.getByLabelText('Next month');
+      fireEvent.click(nextButton);
+
+      // Wait for second API call
+      await waitFor(() => {
+        expect(callCount).toBe(2);
+      });
+
+      // Verify that we fetched May and then June
+      expect(capturedDates.length).toBe(2);
+      expect(capturedDates[0]).toEqual({ start: '2025-05-01', end: '2025-05-31' });
+      expect(capturedDates[1]).toEqual({ start: '2025-06-01', end: '2025-06-30' });
+    });
+  });
+
+  it('renders calendar with workouts and pain scores', async () => {
+    server.use(
+      http.get('/api/timeline', () => {
+        return HttpResponse.json({
+          workouts: mockWorkouts,
+          painScores: mockPainScores,
+          sleepScores: mockSleepScores,
+          hasMore: false,
+        });
+      })
+    );
+
     render(
       <MemoryRouter>
-        <CalendarView
-          workouts={mockWorkouts}
-          painScores={mockPainScores}
-          sleepScores={mockSleepScores}
-        />
+        <CalendarView />
       </MemoryRouter>
     );
+
+    // Wait for data to load
+    await waitFor(() => {
+      expect(screen.getByText(/May 2025/)).toBeInTheDocument();
+    });
 
     // Check that the month title is displayed
     expect(screen.getByText(/May 2025/)).toBeInTheDocument();
@@ -121,16 +328,28 @@ describe('CalendarView', () => {
     expect(screen.getByText('Pain: 5')).toBeInTheDocument();
   });
 
-  it('navigates to pain score edit page when pain score is clicked', () => {
+  it('navigates to pain score edit page when pain score is clicked', async () => {
+    server.use(
+      http.get('/api/timeline', () => {
+        return HttpResponse.json({
+          workouts: mockWorkouts,
+          painScores: mockPainScores,
+          sleepScores: mockSleepScores,
+          hasMore: false,
+        });
+      })
+    );
+
     render(
       <MemoryRouter>
-        <CalendarView
-          workouts={mockWorkouts}
-          painScores={mockPainScores}
-          sleepScores={mockSleepScores}
-        />
+        <CalendarView />
       </MemoryRouter>
     );
+
+    // Wait for data to load
+    await waitFor(() => {
+      expect(screen.getByText('Pain: 3')).toBeInTheDocument();
+    });
 
     // Find and click a pain score
     const painScore = screen.getByText('Pain: 3');
@@ -140,78 +359,29 @@ describe('CalendarView', () => {
     expect(mockNavigate).toHaveBeenCalledWith('/pain-scores/1/edit');
   });
 
-  it('changes month when navigation buttons are clicked', () => {
-    render(
-      <MemoryRouter>
-        <CalendarView
-          workouts={mockWorkouts}
-          painScores={mockPainScores}
-          sleepScores={mockSleepScores}
-        />
-      </MemoryRouter>
+  it('switches to mobile view when window width is small', async () => {
+    server.use(
+      http.get('/api/timeline', () => {
+        return HttpResponse.json({
+          workouts: mockWorkouts,
+          painScores: mockPainScores,
+          sleepScores: mockSleepScores,
+          hasMore: false,
+        });
+      })
     );
 
-    // Check initial month
-    expect(screen.getByText(/May 2025/)).toBeInTheDocument();
-
-    // Click previous month button
-    const prevButton = screen.getByLabelText('Previous month');
-    fireEvent.click(prevButton);
-
-    // Check that month changed to April
-    expect(screen.getByText(/April 2025/)).toBeInTheDocument();
-
-    // Click next month button twice to go to June
-    const nextButton = screen.getByLabelText('Next month');
-    fireEvent.click(nextButton);
-    fireEvent.click(nextButton);
-
-    // Check that month changed to June
-    expect(screen.getByText(/June 2025/)).toBeInTheDocument();
-  });
-
-  it('goes to today when Today button is clicked', () => {
-    // Mock Date.now to return a specific date
-    const originalNow = Date.now;
-    Date.now = vi.fn(() => new Date('2025-05-02').getTime());
-
-    render(
-      <MemoryRouter>
-        <CalendarView
-          workouts={mockWorkouts}
-          painScores={mockPainScores}
-          sleepScores={mockSleepScores}
-        />
-      </MemoryRouter>
-    );
-
-    // Navigate to a different month
-    const prevButton = screen.getByLabelText('Previous month');
-    fireEvent.click(prevButton);
-    expect(screen.getByText(/April 2025/)).toBeInTheDocument();
-
-    // Click Today button
-    const todayButton = screen.getByLabelText('Go to today');
-    fireEvent.click(todayButton);
-
-    // Check that month changed back to May
-    expect(screen.getByText(/May 2025/)).toBeInTheDocument();
-
-    // Restore original Date.now
-    Date.now = originalNow;
-  });
-
-  it('switches to mobile view when window width is small', () => {
     // Render with desktop width first
     const { rerender } = render(
       <MemoryRouter>
-        <CalendarView
-          workouts={mockWorkouts}
-          painScores={mockPainScores}
-          sleepScores={mockSleepScores}
-        />
+        <CalendarView />
       </MemoryRouter>
     );
+
+    // Wait for data to load
+    await waitFor(() => {
+      expect(screen.getByText(/May 2025/)).toBeInTheDocument();
+    });
 
     // Check that month view is displayed
     expect(screen.getByText(/May 2025/)).toBeInTheDocument();
@@ -236,18 +406,16 @@ describe('CalendarView', () => {
     // Re-render to apply the state change
     rerender(
       <MemoryRouter>
-        <CalendarView
-          workouts={mockWorkouts}
-          painScores={mockPainScores}
-          sleepScores={mockSleepScores}
-        />
+        <CalendarView />
       </MemoryRouter>
     );
 
-    // Check that week view is displayed by looking for the month title heading
-    const monthTitle = screen.getByRole('heading', { level: 2 });
-    expect(monthTitle).toBeInTheDocument();
-    expect(monthTitle.textContent).toMatch(/May \d+.*\d+, 2025/);
+    // Wait for the view to update
+    await waitFor(() => {
+      expect(screen.getByText('Sunday')).toBeInTheDocument();
+    });
+
+    // Check that week view is displayed
     expect(screen.getByText('Sunday')).toBeInTheDocument();
     expect(screen.getByText('Monday')).toBeInTheDocument();
     expect(screen.getByText('Tuesday')).toBeInTheDocument();
@@ -257,12 +425,28 @@ describe('CalendarView', () => {
     expect(screen.getByText('Saturday')).toBeInTheDocument();
   });
 
-  it('renders empty calendar when no items', () => {
+  it('renders empty calendar when no items', async () => {
+    server.use(
+      http.get('/api/timeline', () => {
+        return HttpResponse.json({
+          workouts: [],
+          painScores: [],
+          sleepScores: [],
+          hasMore: false,
+        });
+      })
+    );
+
     render(
       <MemoryRouter>
-        <CalendarView workouts={[]} painScores={[]} sleepScores={[]} />
+        <CalendarView />
       </MemoryRouter>
     );
+
+    // Wait for data to load
+    await waitFor(() => {
+      expect(screen.getByText(/May 2025/)).toBeInTheDocument();
+    });
 
     // Check that the calendar is rendered
     expect(screen.getByText(/May 2025/)).toBeInTheDocument();

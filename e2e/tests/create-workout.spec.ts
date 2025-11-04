@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../helpers/auth';
 import { clearTestData } from '../helpers/testData';
-import { addExercise } from '../helpers/workout';
+import { addExercise, setWorkoutDate } from '../helpers/workout';
 import { clickFabMenuItem } from '../helpers/navigation';
 
 test.describe('Create Workout with Multiple Exercises', () => {
@@ -33,9 +33,9 @@ test.describe('Create Workout with Multiple Exercises', () => {
     const exercises = [
       // Weight exercises
       { name: 'Bench Press', reps: '10', weight: '135', time: '' },
-      { name: 'Squat', reps: '8', weight: '185', time: '' },
+      { name: 'Squats', reps: '8', weight: '185', time: '' },
       // Isometric/time exercises
-      { name: 'Plank', reps: '1', weight: '', time: '2' },
+      { name: 'Planks', reps: '1', weight: '', time: '2' },
       { name: 'Wall Sit', reps: '1', weight: '', time: '1.5' },
       // Bodyweight exercises
       { name: 'Push-ups', reps: '20', weight: '', time: '' },
@@ -52,8 +52,8 @@ test.describe('Create Workout with Multiple Exercises', () => {
 
     // Verify all 6 exercises are in the current exercises list
     await expect(page.locator('text=Bench Press - 10 reps - 135 lbs')).toBeVisible();
-    await expect(page.locator('text=Squat - 8 reps - 185 lbs')).toBeVisible();
-    await expect(page.locator('text=Plank - 1 reps - 2 sec')).toBeVisible();
+    await expect(page.locator('text=Squats - 8 reps - 185 lbs')).toBeVisible();
+    await expect(page.locator('text=Planks - 1 reps - 2 sec')).toBeVisible();
     await expect(page.locator('text=Wall Sit - 1 reps - 1.5 sec')).toBeVisible();
     await expect(page.locator('text=Push-ups - 20 reps')).toBeVisible();
     await expect(page.locator('text=Pull-ups - 12 reps')).toBeVisible();
@@ -76,8 +76,8 @@ test.describe('Create Workout with Multiple Exercises', () => {
     // Verify all exercises are visible in the list view
     // The ListView shows exercises in a compact format
     await expect(page.locator('text=Bench Press')).toBeVisible();
-    await expect(page.locator('text=Squat')).toBeVisible();
-    await expect(page.locator('text=Plank')).toBeVisible();
+    await expect(page.locator('text=Squats')).toBeVisible();
+    await expect(page.locator('text=Planks')).toBeVisible();
     await expect(page.locator('text=Wall Sit')).toBeVisible();
     await expect(page.locator('text=Push-ups')).toBeVisible();
     await expect(page.locator('text=Pull-ups')).toBeVisible();
@@ -122,12 +122,12 @@ test.describe('Create Workout with Multiple Exercises', () => {
     await expect(page.locator('text=10 reps').first()).toBeVisible();
     await expect(page.locator('text=135 lbs').first()).toBeVisible();
 
-    await expect(page.locator('text=Squat').first()).toBeVisible();
+    await expect(page.locator('text=Squats').first()).toBeVisible();
     await expect(page.locator('text=8 reps').first()).toBeVisible();
     await expect(page.locator('text=185 lbs').first()).toBeVisible();
 
     // Isometric/time exercises
-    await expect(page.locator('text=Plank').first()).toBeVisible();
+    await expect(page.locator('text=Planks').first()).toBeVisible();
     await expect(page.locator('text=1 reps').first()).toBeVisible();
     await expect(page.locator('text=2 sec').first()).toBeVisible();
 
@@ -151,29 +151,16 @@ test.describe('Create Workout with Multiple Exercises', () => {
     await clickFabMenuItem(page, 'New Workout');
     await expect(page.getByRole('heading', { name: 'New Workout' })).toBeVisible({ timeout: 5000 });
 
-    // Set date to tomorrow using local timezone
+    // Set date to tomorrow using helper
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
+    await setWorkoutDate(page, tomorrow);
+
+    // Get the date string for later verification
     const year = tomorrow.getFullYear();
     const month = String(tomorrow.getMonth() + 1).padStart(2, '0');
     const day = String(tomorrow.getDate()).padStart(2, '0');
-    const tomorrowDateStr = `${year}-${month}-${day}`; // Format: YYYY-MM-DD in local timezone
-
-    // Clear the date input first
-    const dateInput = page.locator('#workout-date');
-    await dateInput.clear();
-
-    // Use Playwright's fill method which properly handles date inputs
-    await dateInput.fill(tomorrowDateStr);
-
-    // Press Tab to trigger blur event and ensure react-hook-form registers the change
-    await dateInput.press('Tab');
-
-    // Wait a moment for react-hook-form to process the change
-    await page.waitForTimeout(500);
-
-    // Verify the date was set correctly
-    await expect(dateInput).toHaveValue(tomorrowDateStr);
+    const tomorrowDateStr = `${year}-${month}-${day}`;
 
     // Wait for the form to be fully loaded
     await page.waitForLoadState('networkidle');
@@ -183,9 +170,9 @@ test.describe('Create Workout with Multiple Exercises', () => {
       // Improved reps
       { name: 'Bench Press', reps: '12', weight: '135', time: '', expectedBadge: 'NEW REPS' },
       // Improved weight
-      { name: 'Squat', reps: '8', weight: '200', time: '', expectedBadge: 'NEW WEIGHT' },
+      { name: 'Squats', reps: '8', weight: '200', time: '', expectedBadge: 'NEW WEIGHT' },
       // Improved time
-      { name: 'Plank', reps: '1', weight: '', time: '2.5', expectedBadge: 'NEW TIME' },
+      { name: 'Planks', reps: '1', weight: '', time: '2.5', expectedBadge: 'NEW TIME' },
       // No improvement (same as before)
       { name: 'Push-ups', reps: '20', weight: '', time: '', expectedBadge: null },
     ];
@@ -247,10 +234,10 @@ test.describe('Create Workout with Multiple Exercises', () => {
     await expect(page.locator('text=Bench Press')).toBeVisible();
     await expect(page.locator('text=12 reps')).toBeVisible();
 
-    await expect(page.locator('text=Squat')).toBeVisible();
+    await expect(page.locator('text=Squats')).toBeVisible();
     await expect(page.locator('text=200 lbs')).toBeVisible();
 
-    await expect(page.locator('text=Plank')).toBeVisible();
+    await expect(page.locator('text=Planks')).toBeVisible();
     await expect(page.locator('text=2.5 sec')).toBeVisible();
   });
 });

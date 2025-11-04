@@ -105,6 +105,7 @@ describe('GenericCalendarView', () => {
   });
 
   it('renders in desktop mode with month view', () => {
+    const mockOnMonthChange = vi.fn();
     render(
       <GenericCalendarView
         items={testItems}
@@ -112,6 +113,8 @@ describe('GenericCalendarView', () => {
         renderVerticalItem={renderVerticalItem}
         getItemsByDate={getItemsByDate}
         emptyStateMessage="No items"
+        currentMonth={FIXED_DATE}
+        onMonthChange={mockOnMonthChange}
       />
     );
 
@@ -132,6 +135,7 @@ describe('GenericCalendarView', () => {
   });
 
   it('renders items on the correct dates', () => {
+    const mockOnMonthChange = vi.fn();
     render(
       <GenericCalendarView
         items={testItems}
@@ -139,6 +143,8 @@ describe('GenericCalendarView', () => {
         renderVerticalItem={renderVerticalItem}
         getItemsByDate={getItemsByDate}
         emptyStateMessage="No items"
+        currentMonth={FIXED_DATE}
+        onMonthChange={mockOnMonthChange}
       />
     );
 
@@ -152,13 +158,18 @@ describe('GenericCalendarView', () => {
   });
 
   it('changes month when navigation buttons are clicked', () => {
-    render(
+    const mockOnMonthChange = vi.fn();
+    let currentMonth = FIXED_DATE;
+
+    const { rerender } = render(
       <GenericCalendarView
         items={testItems}
         renderGridItem={renderGridItem}
         renderVerticalItem={renderVerticalItem}
         getItemsByDate={getItemsByDate}
         emptyStateMessage="No items"
+        currentMonth={currentMonth}
+        onMonthChange={mockOnMonthChange}
       />
     );
 
@@ -169,43 +180,122 @@ describe('GenericCalendarView', () => {
     const prevButton = screen.getByLabelText('Previous month');
     fireEvent.click(prevButton);
 
-    // Check that month changed to April
-    expect(screen.getByText(/April 2025/)).toBeInTheDocument();
+    // Verify onMonthChange was called
+    expect(mockOnMonthChange).toHaveBeenCalled();
+    const prevMonth = mockOnMonthChange.mock.calls[0][0];
 
-    // Click next month button twice to go to June
-    const nextButton = screen.getByLabelText('Next month');
-    fireEvent.click(nextButton);
-    fireEvent.click(nextButton);
-
-    // Check that month changed to June
-    expect(screen.getByText(/June 2025/)).toBeInTheDocument();
-  });
-
-  it('goes to today when Today button is clicked', () => {
-    render(
+    // Rerender with new month
+    currentMonth = prevMonth;
+    rerender(
       <GenericCalendarView
         items={testItems}
         renderGridItem={renderGridItem}
         renderVerticalItem={renderVerticalItem}
         getItemsByDate={getItemsByDate}
         emptyStateMessage="No items"
+        currentMonth={currentMonth}
+        onMonthChange={mockOnMonthChange}
+      />
+    );
+
+    // Check that month changed to April
+    expect(screen.getByText(/April 2025/)).toBeInTheDocument();
+
+    // Click next month button twice to go to June
+    const nextButton = screen.getByLabelText('Next month');
+    fireEvent.click(nextButton);
+
+    currentMonth = mockOnMonthChange.mock.calls[1][0];
+    rerender(
+      <GenericCalendarView
+        items={testItems}
+        renderGridItem={renderGridItem}
+        renderVerticalItem={renderVerticalItem}
+        getItemsByDate={getItemsByDate}
+        emptyStateMessage="No items"
+        currentMonth={currentMonth}
+        onMonthChange={mockOnMonthChange}
+      />
+    );
+
+    fireEvent.click(nextButton);
+
+    currentMonth = mockOnMonthChange.mock.calls[2][0];
+    rerender(
+      <GenericCalendarView
+        items={testItems}
+        renderGridItem={renderGridItem}
+        renderVerticalItem={renderVerticalItem}
+        getItemsByDate={getItemsByDate}
+        emptyStateMessage="No items"
+        currentMonth={currentMonth}
+        onMonthChange={mockOnMonthChange}
+      />
+    );
+
+    // Check that month changed to June
+    expect(screen.getByText(/June 2025/)).toBeInTheDocument();
+  });
+
+  it('goes to today when Today button is clicked', () => {
+    const mockOnMonthChange = vi.fn();
+    let currentMonth = FIXED_DATE;
+
+    const { rerender } = render(
+      <GenericCalendarView
+        items={testItems}
+        renderGridItem={renderGridItem}
+        renderVerticalItem={renderVerticalItem}
+        getItemsByDate={getItemsByDate}
+        emptyStateMessage="No items"
+        currentMonth={currentMonth}
+        onMonthChange={mockOnMonthChange}
       />
     );
 
     // Navigate to a different month
     const prevButton = screen.getByLabelText('Previous month');
     fireEvent.click(prevButton);
+
+    currentMonth = mockOnMonthChange.mock.calls[0][0];
+    rerender(
+      <GenericCalendarView
+        items={testItems}
+        renderGridItem={renderGridItem}
+        renderVerticalItem={renderVerticalItem}
+        getItemsByDate={getItemsByDate}
+        emptyStateMessage="No items"
+        currentMonth={currentMonth}
+        onMonthChange={mockOnMonthChange}
+      />
+    );
+
     expect(screen.getByText(/April 2025/)).toBeInTheDocument();
 
     // Click Today button
     const todayButton = screen.getByLabelText('Go to today');
     fireEvent.click(todayButton);
 
+    currentMonth = mockOnMonthChange.mock.calls[1][0];
+    rerender(
+      <GenericCalendarView
+        items={testItems}
+        renderGridItem={renderGridItem}
+        renderVerticalItem={renderVerticalItem}
+        getItemsByDate={getItemsByDate}
+        emptyStateMessage="No items"
+        currentMonth={currentMonth}
+        onMonthChange={mockOnMonthChange}
+      />
+    );
+
     // Check that month changed back to May
     expect(screen.getByText(/May 2025/)).toBeInTheDocument();
   });
 
   it('switches to mobile view when window width is small', () => {
+    const mockOnMonthChange = vi.fn();
+
     // Create items for each day of the week to ensure renderVerticalItem is called
     const weekItems: TestItem[] = [];
     for (let i = 0; i < 7; i++) {
@@ -234,6 +324,8 @@ describe('GenericCalendarView', () => {
         renderVerticalItem={renderVerticalItem}
         getItemsByDate={getItemsByDate}
         emptyStateMessage="No items"
+        currentMonth={FIXED_DATE}
+        onMonthChange={mockOnMonthChange}
       />
     );
 
@@ -256,6 +348,8 @@ describe('GenericCalendarView', () => {
   });
 
   it('navigates weeks in mobile view', () => {
+    const mockOnMonthChange = vi.fn();
+
     // Set window width to mobile size
     Object.defineProperty(window, 'innerWidth', {
       writable: true,
@@ -270,6 +364,8 @@ describe('GenericCalendarView', () => {
         renderVerticalItem={renderVerticalItem}
         getItemsByDate={getItemsByDate}
         emptyStateMessage="No items"
+        currentMonth={FIXED_DATE}
+        onMonthChange={mockOnMonthChange}
       />
     );
 
@@ -299,6 +395,8 @@ describe('GenericCalendarView', () => {
   });
 
   it('displays empty state message when no items for a day', () => {
+    const mockOnMonthChange = vi.fn();
+
     // Set window width to mobile size
     Object.defineProperty(window, 'innerWidth', {
       writable: true,
@@ -313,6 +411,8 @@ describe('GenericCalendarView', () => {
         renderVerticalItem={renderVerticalItem}
         getItemsByDate={getItemsByDate}
         emptyStateMessage="No items"
+        currentMonth={FIXED_DATE}
+        onMonthChange={mockOnMonthChange}
       />
     );
 
@@ -332,6 +432,8 @@ describe('GenericCalendarView', () => {
   });
 
   it('cleans up event listeners on unmount', () => {
+    const mockOnMonthChange = vi.fn();
+
     const { unmount } = render(
       <GenericCalendarView
         items={testItems}
@@ -339,6 +441,8 @@ describe('GenericCalendarView', () => {
         renderVerticalItem={renderVerticalItem}
         getItemsByDate={getItemsByDate}
         emptyStateMessage="No items"
+        currentMonth={FIXED_DATE}
+        onMonthChange={mockOnMonthChange}
       />
     );
 

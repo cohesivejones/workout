@@ -1,12 +1,10 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
+import { http, HttpResponse } from 'msw';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { server } from './mocks/server';
 import { Layout } from './Layout';
-import * as UserContext from './contexts/useUserContext';
-
-// Mock the UserContext
-vi.mock('./contexts/useUserContext', () => ({
-  useUserContext: vi.fn(),
-}));
+import { UserContextProvider } from './contexts/UserContextProvider';
 
 // Mock react-router-dom
 vi.mock('react-router-dom', async () => {
@@ -28,45 +26,57 @@ describe('Layout - Header Navigation', () => {
 
   describe('when user is not logged in', () => {
     beforeEach(() => {
-      vi.spyOn(UserContext, 'useUserContext').mockReturnValue({
-        user: null,
-        login: vi.fn(),
-        logout: vi.fn(),
-        loading: false,
-      });
+      // Mock API to return no user
+      server.use(
+        http.get('/api/auth/me', () => {
+          return HttpResponse.json({ user: null });
+        })
+      );
     });
 
-    it.each(navigationLinks)('hides $text link', ({ text }) => {
+    it.each(navigationLinks)('hides $text link', async ({ text }) => {
       render(
         <BrowserRouter>
-          <Layout />
+          <UserContextProvider>
+            <Layout />
+          </UserContextProvider>
         </BrowserRouter>
       );
 
-      const link = screen.queryByRole('link', { name: text });
-      expect(link).not.toBeInTheDocument();
+      // Wait for auth check to complete
+      await waitFor(() => {
+        const link = screen.queryByRole('link', { name: text });
+        expect(link).not.toBeInTheDocument();
+      });
     });
   });
 
   describe('when user is logged in', () => {
     beforeEach(() => {
-      vi.spyOn(UserContext, 'useUserContext').mockReturnValue({
-        user: { id: 1, name: 'Test User', email: 'test@example.com' },
-        login: vi.fn(),
-        logout: vi.fn(),
-        loading: false,
-      });
+      // Mock API to return a logged-in user
+      server.use(
+        http.get('/api/auth/me', () => {
+          return HttpResponse.json({
+            user: { id: 1, name: 'Test User', email: 'test@example.com' },
+          });
+        })
+      );
     });
 
-    it.each(navigationLinks)('shows $text link', ({ text }) => {
+    it.each(navigationLinks)('shows $text link', async ({ text }) => {
       render(
         <BrowserRouter>
-          <Layout />
+          <UserContextProvider>
+            <Layout />
+          </UserContextProvider>
         </BrowserRouter>
       );
 
-      const link = screen.getByRole('link', { name: text });
-      expect(link).toBeInTheDocument();
+      // Wait for auth check to complete and link to appear
+      await waitFor(() => {
+        const link = screen.getByRole('link', { name: text });
+        expect(link).toBeInTheDocument();
+      });
     });
   });
 });
