@@ -128,6 +128,9 @@ describe('DashboardPage', () => {
   });
 
   it('renders error message when API call fails', async () => {
+    // Suppress expected console.error for this test
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
     // Mock API failure
     server.use(
       http.get('/api/dashboard/weight-progression', () => {
@@ -147,6 +150,8 @@ describe('DashboardPage', () => {
     await waitFor(() => {
       expect(screen.getByText(/Failed to load dashboard data/i)).toBeInTheDocument();
     });
+
+    consoleErrorSpy.mockRestore();
   });
 
   it('renders empty state when no data is available', async () => {

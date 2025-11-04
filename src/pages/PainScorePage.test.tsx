@@ -184,6 +184,9 @@ describe('PainScorePage', () => {
   });
 
   it('handles error when fetching pain score fails', async () => {
+    // Suppress expected console.error for this test
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
     server.use(
       http.get('/api/pain-scores/:id', () => {
         return HttpResponse.json({ error: 'Failed to load pain score' }, { status: 500 });
@@ -202,6 +205,8 @@ describe('PainScorePage', () => {
     await waitFor(() => {
       expect(screen.getByText(/Failed to load pain score/i)).toBeInTheDocument();
     });
+
+    consoleErrorSpy.mockRestore();
   });
 
   it('renders form without existing pain score when pain score is not found', async () => {

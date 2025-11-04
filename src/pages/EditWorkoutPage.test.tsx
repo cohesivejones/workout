@@ -132,6 +132,9 @@ describe('EditWorkoutPage', () => {
   });
 
   it('renders error state when workout fetch fails', async () => {
+    // Suppress expected console.error for this test
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
     server.use(
       http.get('/api/workouts/:id', () => {
         return HttpResponse.json({ error: 'Failed to load workout' }, { status: 500 });
@@ -152,6 +155,8 @@ describe('EditWorkoutPage', () => {
     await waitFor(() => {
       expect(screen.getByText(/Failed to load data/i)).toBeInTheDocument();
     });
+
+    consoleErrorSpy.mockRestore();
   });
 
   it('renders error state when workout is not found', async () => {

@@ -44,7 +44,7 @@ describe('WorkoutShowPage', () => {
     );
 
     render(
-      <MemoryRouter initialPath='/workouts/1'>
+      <MemoryRouter initialPath="/workouts/1">
         <Route path="/workouts/:id">
           <WorkoutShowPage />
         </Route>
@@ -64,7 +64,7 @@ describe('WorkoutShowPage', () => {
     );
 
     render(
-      <MemoryRouter initialPath='/workouts/1'>
+      <MemoryRouter initialPath="/workouts/1">
         <Route path="/workouts/:id">
           <WorkoutShowPage />
         </Route>
@@ -92,6 +92,9 @@ describe('WorkoutShowPage', () => {
   });
 
   it('renders error state when API call fails', async () => {
+    // Suppress expected console.error for this test
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
     server.use(
       http.get('/api/workouts/:id', () => {
         return HttpResponse.json({ error: 'Failed to load workout' }, { status: 500 });
@@ -99,10 +102,10 @@ describe('WorkoutShowPage', () => {
     );
 
     render(
-      <MemoryRouter initialPath='/workouts/1'>
-          <Route path="/workouts/:id">
-            <WorkoutShowPage />
-          </Route>
+      <MemoryRouter initialPath="/workouts/1">
+        <Route path="/workouts/:id">
+          <WorkoutShowPage />
+        </Route>
       </MemoryRouter>
     );
 
@@ -110,6 +113,8 @@ describe('WorkoutShowPage', () => {
     await waitFor(() => {
       expect(screen.getByText(/Failed to load workout/i)).toBeInTheDocument();
     });
+
+    consoleErrorSpy.mockRestore();
   });
 
   it("renders not found state when workout doesn't exist", async () => {
@@ -120,10 +125,10 @@ describe('WorkoutShowPage', () => {
     );
 
     render(
-      <MemoryRouter initialPath='/workouts/1'>
-          <Route path="/workouts/:id">
-            <WorkoutShowPage />
-          </Route>
+      <MemoryRouter initialPath="/workouts/1">
+        <Route path="/workouts/:id">
+          <WorkoutShowPage />
+        </Route>
       </MemoryRouter>
     );
 
@@ -143,10 +148,10 @@ describe('WorkoutShowPage', () => {
     );
 
     render(
-      <MemoryRouter initialPath='/workouts/1'>
-          <Route path="/workouts/:id">
-            <WorkoutShowPage />
-          </Route>
+      <MemoryRouter initialPath="/workouts/1">
+        <Route path="/workouts/:id">
+          <WorkoutShowPage />
+        </Route>
       </MemoryRouter>
     );
 
@@ -172,10 +177,10 @@ describe('WorkoutShowPage', () => {
     );
 
     render(
-      <MemoryRouter initialPath='/workouts/1'>
-          <Route path="/workouts/:id">
-            <WorkoutShowPage />
-          </Route>
+      <MemoryRouter initialPath="/workouts/1">
+        <Route path="/workouts/:id">
+          <WorkoutShowPage />
+        </Route>
       </MemoryRouter>
     );
 
@@ -206,10 +211,10 @@ describe('WorkoutShowPage', () => {
     );
 
     render(
-      <MemoryRouter initialPath='/workouts/1'>
-          <Route path="/workouts/:id">
-            <WorkoutShowPage />
-          </Route>
+      <MemoryRouter initialPath="/workouts/1">
+        <Route path="/workouts/:id">
+          <WorkoutShowPage />
+        </Route>
       </MemoryRouter>
     );
 

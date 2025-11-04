@@ -156,6 +156,9 @@ describe('CalendarView', () => {
     });
 
     it('should display error message when API call fails', async () => {
+      // Suppress expected console.error for this test
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
       server.use(
         http.get('/api/timeline', () => {
           return HttpResponse.json({ error: 'API Error' }, { status: 500 });
@@ -167,6 +170,8 @@ describe('CalendarView', () => {
       await waitFor(() => {
         expect(screen.getByText(/Failed to load data/i)).toBeInTheDocument();
       });
+
+      consoleErrorSpy.mockRestore();
     });
 
     it('should not call fetchTimeline when user is not logged in', () => {
@@ -369,14 +374,17 @@ describe('CalendarView', () => {
       value: 600,
     });
 
-    // Trigger resize event callback
+    // Trigger resize event callback wrapped in act
     const addEventListenerMock = window.addEventListener as unknown as {
       mock: { calls: unknown[][] };
     };
     const resizeCallback = addEventListenerMock.mock.calls.find(
       (call: unknown[]) => call[0] === 'resize'
     )?.[1] as () => void;
-    resizeCallback();
+
+    await waitFor(() => {
+      resizeCallback();
+    });
 
     // Re-render to apply the state change
     rerender(

@@ -169,6 +169,9 @@ describe('ListView', () => {
     });
 
     it('should display error message when API call fails', async () => {
+      // Suppress expected console.error for this test
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
       server.use(
         http.get('/api/timeline', () => {
           return HttpResponse.json({ error: 'API Error' }, { status: 500 });
@@ -184,6 +187,8 @@ describe('ListView', () => {
       await waitFor(() => {
         expect(screen.getByText(/Failed to load data/i)).toBeInTheDocument();
       });
+
+      consoleErrorSpy.mockRestore();
     });
 
     it('should not call fetchTimeline when user is not logged in', () => {
