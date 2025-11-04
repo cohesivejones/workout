@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../helpers/auth';
 import { clearTestData } from '../helpers/testData';
-import { addExercise } from '../helpers/workout';
+import { addExercise, setWorkoutDate } from '../helpers/workout';
 
 test.describe('Timeline Pagination', () => {
   test.beforeEach(async ({ page }) => {
@@ -50,21 +50,14 @@ test.describe('Timeline Pagination', () => {
       await page.waitForLoadState('networkidle');
       await expect(page.getByPlaceholder('Reps')).toBeVisible({ timeout: 5000 });
 
-      // Calculate the date
+      // Calculate and set the date
       const workoutDate = new Date();
       workoutDate.setDate(workoutDate.getDate() - workout.daysAgo);
-      const year = workoutDate.getFullYear();
-      const month = String(workoutDate.getMonth() + 1).padStart(2, '0');
-      const day = String(workoutDate.getDate()).padStart(2, '0');
-      const dateStr = `${year}-${month}-${day}`;
-      console.log(`Creating workout ${workout.daysAgo} days ago: ${dateStr}`);
+      console.log(
+        `Creating workout ${workout.daysAgo} days ago: ${workoutDate.toISOString().split('T')[0]}`
+      );
 
-      // Set the date
-      const dateInput = page.locator('#workout-date');
-      await dateInput.clear();
-      await dateInput.fill(dateStr);
-      await dateInput.press('Tab');
-      await page.waitForTimeout(500);
+      await setWorkoutDate(page, workoutDate);
 
       // Add a simple exercise using the helper
       await addExercise(page, { name: 'Squats', reps: '10' });
@@ -147,22 +140,15 @@ test.describe('Timeline Pagination', () => {
       await page.waitForLoadState('networkidle');
       await expect(page.getByPlaceholder('Reps')).toBeVisible({ timeout: 5000 });
 
-      // Calculate the date - set to specific day of the target month
+      // Calculate and set the date - set to specific day of the target month
       const workoutDate = new Date(today);
       workoutDate.setMonth(workoutDate.getMonth() - workout.monthsAgo);
-      workoutDate.setDate(workout.dayOfMonth); // Set to specific day of month
-      const year = workoutDate.getFullYear();
-      const month = String(workoutDate.getMonth() + 1).padStart(2, '0');
-      const day = String(workoutDate.getDate()).padStart(2, '0');
-      const dateStr = `${year}-${month}-${day}`;
-      console.log(`Creating workout with ${workout.exerciseName}: ${dateStr}`);
+      workoutDate.setDate(workout.dayOfMonth);
+      console.log(
+        `Creating workout with ${workout.exerciseName}: ${workoutDate.toISOString().split('T')[0]}`
+      );
 
-      // Set the date
-      const dateInput = page.locator('#workout-date');
-      await dateInput.clear();
-      await dateInput.fill(dateStr);
-      await dateInput.press('Tab');
-      await page.waitForTimeout(500);
+      await setWorkoutDate(page, workoutDate);
 
       // Add a simple exercise using the helper
       await addExercise(page, { name: workout.exerciseName, reps: '10' });

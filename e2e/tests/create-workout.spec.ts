@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../helpers/auth';
 import { clearTestData } from '../helpers/testData';
-import { addExercise } from '../helpers/workout';
+import { addExercise, setWorkoutDate } from '../helpers/workout';
 import { clickFabMenuItem } from '../helpers/navigation';
 
 test.describe('Create Workout with Multiple Exercises', () => {
@@ -151,29 +151,16 @@ test.describe('Create Workout with Multiple Exercises', () => {
     await clickFabMenuItem(page, 'New Workout');
     await expect(page.getByRole('heading', { name: 'New Workout' })).toBeVisible({ timeout: 5000 });
 
-    // Set date to tomorrow using local timezone
+    // Set date to tomorrow using helper
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
+    await setWorkoutDate(page, tomorrow);
+
+    // Get the date string for later verification
     const year = tomorrow.getFullYear();
     const month = String(tomorrow.getMonth() + 1).padStart(2, '0');
     const day = String(tomorrow.getDate()).padStart(2, '0');
-    const tomorrowDateStr = `${year}-${month}-${day}`; // Format: YYYY-MM-DD in local timezone
-
-    // Clear the date input first
-    const dateInput = page.locator('#workout-date');
-    await dateInput.clear();
-
-    // Use Playwright's fill method which properly handles date inputs
-    await dateInput.fill(tomorrowDateStr);
-
-    // Press Tab to trigger blur event and ensure react-hook-form registers the change
-    await dateInput.press('Tab');
-
-    // Wait a moment for react-hook-form to process the change
-    await page.waitForTimeout(500);
-
-    // Verify the date was set correctly
-    await expect(dateInput).toHaveValue(tomorrowDateStr);
+    const tomorrowDateStr = `${year}-${month}-${day}`;
 
     // Wait for the form to be fully loaded
     await page.waitForLoadState('networkidle');
