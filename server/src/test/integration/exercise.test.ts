@@ -4,7 +4,7 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 import dataSource from '../../data-source';
 import { User, Exercise, Workout, WorkoutExercise } from '../../entities';
-import { generateToken, authenticateToken } from '../../middleware/auth';
+import { generateToken } from '../../middleware/auth';
 import * as bcrypt from 'bcrypt';
 import exercisesRouter from '../../routes/exercises.routes';
 

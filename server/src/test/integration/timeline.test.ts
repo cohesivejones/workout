@@ -27,8 +27,11 @@ function createTestApp() {
       const sleepScoreRepository = dataSource.getRepository(SleepScore);
 
       // If date range is provided, filter by it; otherwise return all data
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const workoutWhere: any = { userId: Number(userId) };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const painScoreWhere: any = { userId: Number(userId) };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const sleepScoreWhere: any = { userId: Number(userId) };
 
       if (startDate && endDate) {

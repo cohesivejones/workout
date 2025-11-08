@@ -16,6 +16,7 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction) =
   const originalEnd = res.end;
 
   // Override res.end to log response
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   res.end = function(chunk?: any, encoding?: any, callback?: any): Response {
     const duration = Date.now() - startTime;
     

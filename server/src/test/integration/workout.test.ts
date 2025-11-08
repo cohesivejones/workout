@@ -93,7 +93,7 @@ function createTestApp() {
           workoutExercise.new_time = false;
         }
 
-        const savedWorkoutExercise = await workoutExerciseRepository.save(workoutExercise);
+        await workoutExerciseRepository.save(workoutExercise);
         
         const reloadedWorkoutExercise = await workoutExerciseRepository.findOne({
           where: { 

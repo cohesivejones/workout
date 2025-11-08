@@ -4,7 +4,7 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 import dataSource from '../../data-source';
 import { User, SleepScore } from '../../entities';
-import { generateToken, authenticateToken } from '../../middleware/auth';
+import { generateToken } from '../../middleware/auth';
 import * as bcrypt from 'bcrypt';
 import sleepScoresRouter from '../../routes/sleep-scores.routes';
 

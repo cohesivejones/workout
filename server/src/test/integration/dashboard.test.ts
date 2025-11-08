@@ -290,7 +290,7 @@ describe('Dashboard API Routes', () => {
         .expect(200);
 
       expect(response.body).toHaveLength(2);
-      const exerciseNames = response.body.map((e: any) => e.exerciseName);
+      const exerciseNames = response.body.map((e: { exerciseName: string }) => e.exerciseName);
       expect(exerciseNames).toContain('Bench Press');
       expect(exerciseNames).toContain('Squat');
     });
@@ -409,7 +409,7 @@ describe('Dashboard API Routes', () => {
 
       expect(response.body.dataPoints).toHaveLength(3);
       // Verify dates are in ascending order
-      const responseDates = response.body.dataPoints.map((dp: any) => new Date(dp.date).getTime());
+      const responseDates = response.body.dataPoints.map((dp: { date: string }) => new Date(dp.date).getTime());
       for (let i = 1; i < responseDates.length; i++) {
         expect(responseDates[i]).toBeGreaterThan(responseDates[i - 1]);
       }
@@ -529,7 +529,7 @@ describe('Dashboard API Routes', () => {
 
       expect(response.body.dataPoints).toHaveLength(3);
       // Verify dates are in ascending order
-      const responseDates = response.body.dataPoints.map((dp: any) => new Date(dp.date).getTime());
+      const responseDates = response.body.dataPoints.map((dp: { date: string }) => new Date(dp.date).getTime());
       for (let i = 1; i < responseDates.length; i++) {
         expect(responseDates[i]).toBeGreaterThan(responseDates[i - 1]);
       }

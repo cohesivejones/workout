@@ -4,7 +4,7 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 import dataSource from '../../data-source';
 import { User, PainScore } from '../../entities';
-import { generateToken, authenticateToken } from '../../middleware/auth';
+import { generateToken } from '../../middleware/auth';
 import * as bcrypt from 'bcrypt';
 import painScoresRouter from '../../routes/pain-scores.routes';
 

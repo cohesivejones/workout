@@ -2,14 +2,6 @@ import express, { Request, Response } from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import path from "path";
-import {
-  DatabaseError,
-  WorkoutResponse,
-  CreateWorkoutRequest,
-  CreatePainScoreRequest,
-  CreateSleepScoreRequest,
-  LoginRequest,
-} from "./types";
 import * as dotenv from "dotenv";
 import dataSource from "./data-source";
 import router from "./routes";

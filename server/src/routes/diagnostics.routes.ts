@@ -57,6 +57,7 @@ router.get("/data", authenticateToken, async (req: Request, res: Response) => {
 
 router.post("/analyze", authenticateToken, async (req: Request, res: Response) => {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { diagnosticData } = req.body as { diagnosticData: any };
     if (!diagnosticData) return res.status(400).json({ error: "Diagnostic data is required" });
 

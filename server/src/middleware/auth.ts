@@ -5,6 +5,7 @@ import dataSource from "../data-source";
 
 // Extend Express Request type to include user
 declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Express {
     interface Request {
       user?: User;
@@ -50,7 +51,7 @@ export const authenticateToken = async (
     // Attach user to request object
     req.user = user;
     next();
-  } catch (error) {
+  } catch {
     return res.status(401).json({ error: "Invalid token" });
   }
 };
@@ -82,7 +83,7 @@ export const optionalAuth = async (
     }
 
     next();
-  } catch (error) {
+  } catch {
     // Continue without authentication if token is invalid
     next();
   }
