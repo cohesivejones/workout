@@ -9,7 +9,6 @@ import dashboard from "./dashboard.routes";
 import timeline from "./timeline.routes";
 import dataSource from "../data-source";
 import logger from "../logger";
-import { authenticateToken } from "../middleware/auth";
 
 const router = Router();
 

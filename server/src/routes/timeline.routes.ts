@@ -17,8 +17,11 @@ router.get("/", authenticateToken, async (req: Request, res: Response) => {
     const painScoreRepository = dataSource.getRepository(PainScore);
     const sleepScoreRepository = dataSource.getRepository(SleepScore);
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const workoutWhere: any = { userId: Number(userId) };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const painScoreWhere: any = { userId: Number(userId) };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sleepScoreWhere: any = { userId: Number(userId) };
 
     if (startDate && endDate) {
