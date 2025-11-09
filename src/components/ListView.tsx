@@ -48,7 +48,17 @@ export const ListView = () => {
       setLoading(true);
       try {
         const activityData = await fetchActivity(0);
-        setActivityItems(activityData.items);
+        // Normalize & dedupe initial set (defensive in case API returns duplicates)
+        const seen = new Set<string>();
+        const normalized: ActivityItem[] = [];
+        for (const item of activityData.items) {
+          const key = `${item.type}-${item.id}`;
+          if (!seen.has(key)) {
+            seen.add(key);
+            normalized.push(item);
+          }
+        }
+        setActivityItems(normalized);
         setCurrentOffset(0);
         setTotalCount(activityData.total || 0);
         setLoading(false);
@@ -69,8 +79,21 @@ export const ListView = () => {
       const nextOffset = currentOffset + 1;
       const activityData = await fetchActivity(nextOffset);
 
-      // Append new month's data to existing items
-      setActivityItems((prev) => [...prev, ...activityData.items]);
+      // Append new month's data to existing items, deduping by composite key
+      setActivityItems((prev) => {
+        const seen = new Set<string>();
+        const merged: ActivityItem[] = [];
+        const pushIfNew = (item: ActivityItem) => {
+          const key = `${item.type}-${item.id}`;
+          if (!seen.has(key)) {
+            seen.add(key);
+            merged.push(item);
+          }
+        };
+        prev.forEach(pushIfNew);
+        activityData.items.forEach(pushIfNew);
+        return merged;
+      });
       setCurrentOffset(nextOffset);
       // total is stable; if API returns it again, update to be safe
       if (typeof activityData.total === 'number') {

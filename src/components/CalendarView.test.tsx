@@ -585,6 +585,8 @@ describe('CalendarView', () => {
       });
 
       renderCalendarView();
+      // Dispatch resize event after rendering
+      window.dispatchEvent(new Event('resize'));
 
       // Wait for initial data load
       await waitFor(() => {
