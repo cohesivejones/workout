@@ -16,18 +16,19 @@ router.get("/", authenticateToken, async (req: Request, res: Response) => {
     const rawOffset = req.query.offset as string | undefined;
     const monthOffset = Number.isFinite(Number(rawOffset)) ? Math.max(0, Number(rawOffset)) : 0;
 
-    // Find the most recent (earliest/future) month with any activity
-    const maxDateSql = `
-      SELECT MAX(date) AS max_date FROM (
-        SELECT date FROM workouts WHERE "userId" = $1
+    // Get both max date and total count in a single query
+    const metadataSql = `
+      SELECT MAX(date) AS max_date, COUNT(*) AS total FROM (
+        SELECT id, date FROM workouts WHERE "userId" = $1
         UNION ALL
-        SELECT date FROM pain_scores WHERE "userId" = $1
+        SELECT id, date FROM pain_scores WHERE "userId" = $1
         UNION ALL
-        SELECT date FROM sleep_scores WHERE "userId" = $1
+        SELECT id, date FROM sleep_scores WHERE "userId" = $1
       ) AS combined
     `;
-    const maxDateResult = await dataSource.query(maxDateSql, [userId]);
-    const maxDateStr = maxDateResult[0]?.max_date;
+    const metadataResult = await dataSource.query(metadataSql, [userId]);
+    const maxDateStr = metadataResult[0]?.max_date;
+    const total = Number(metadataResult[0]?.total || 0);
 
     if (!maxDateStr) {
       // No activity at all, return empty
@@ -58,20 +59,7 @@ router.get("/", authenticateToken, async (req: Request, res: Response) => {
       ORDER BY date DESC, id DESC
     `;
 
-    const items: { type: FeedType; id: number; date: string }[] = await dataSource.query(sql, [userId, startDate, endDate]);
-
-    // Get total count across all months
-    const totalSql = `
-      SELECT COUNT(*) AS total FROM (
-        SELECT id FROM workouts WHERE "userId" = $1
-        UNION ALL
-        SELECT id FROM pain_scores WHERE "userId" = $1
-        UNION ALL
-        SELECT id FROM sleep_scores WHERE "userId" = $1
-      ) AS combined
-    `;
-    const totalResult = await dataSource.query(totalSql, [userId]);
-    const total = Number(totalResult[0].total);    // Enrich items so each record matches the same shape used by timeline
+    const items: { type: FeedType; id: number; date: string }[] = await dataSource.query(sql, [userId, startDate, endDate]);    // Enrich items so each record matches the same shape used by timeline
     const workoutIds = items.filter((i) => i.type === "workout").map((i) => i.id);
     const painIds = items.filter((i) => i.type === "painScore").map((i) => i.id);
     const sleepIds = items.filter((i) => i.type === "sleepScore").map((i) => i.id);
