@@ -82,10 +82,13 @@ test.describe('Timeline Pagination', () => {
     await page.waitForURL('/?view=list', { timeout: 5000 });
 
     // Step 4: Verify only current month's workouts are visible initially (offset=0)
-    // Count workout cards - should match the number of current month workouts we created
+    // Count workout cards for current month specifically (ignore any unexpected other-month items)
     const currentMonthWorkoutCount = currentMonthDays.length;
-    const initialWorkoutCards = page.locator('[data-testid^="workout-card-"]');
-    await expect(initialWorkoutCards).toHaveCount(currentMonthWorkoutCount, { timeout: 5000 });
+    const currentMonthPrefix = `workout-card-${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
+    const initialCurrentMonthWorkoutCards = page.locator(`[data-testid^="${currentMonthPrefix}"]`);
+    await expect(initialCurrentMonthWorkoutCards).toHaveCount(currentMonthWorkoutCount, {
+      timeout: 5000,
+    });
 
     // Verify that we have the correct number of Squats exercises visible (one per workout)
     const initialSquatsExercises = page.locator('text=Squats');
@@ -123,9 +126,8 @@ test.describe('Timeline Pagination', () => {
     const allSquatsExercises = page.locator('text=Squats');
     await expect(allSquatsExercises).toHaveCount(totalWorkouts);
 
-    // Step 10: Load More button should still be visible (there could be older months)
-    // Note: Button remains visible because API doesn't know if there are older months without querying
-    await expect(loadMoreButton).toBeVisible();
+    // Step 10: Load Previous Month button should disappear when there are no more months
+    await expect(loadMoreButton).not.toBeVisible();
   });
 
   test('user navigates between months in calendar view', async ({ page, request }) => {

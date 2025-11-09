@@ -229,7 +229,8 @@ describe('ListView', () => {
             capturedOffsets.push(offset);
           }
           // Return mockActivityData with month set to indicate more data available
-          return HttpResponse.json({ ...mockActivityData, month: '2025-04' });
+          // Set total greater than items length so the Load button is visible
+          return HttpResponse.json({ ...mockActivityData, month: '2025-04', total: 12 });
         })
       );
 
@@ -257,6 +258,91 @@ describe('ListView', () => {
       expect(capturedOffsets.length).toBe(2);
       expect(capturedOffsets[0]).toBe('0');
       expect(capturedOffsets[1]).toBe('1');
+    });
+
+    it('should hide load button when all items loaded (total === items.length)', async () => {
+      // Provide a response where total equals number of items, so button should not render
+      server.use(
+        http.get('/api/activity', () => {
+          return HttpResponse.json(mockActivityData); // total: 6, items.length: 6
+        })
+      );
+
+      render(
+        <Router>
+          <ListView />
+        </Router>
+      );
+
+      // Wait for data to load
+      await waitFor(() => {
+        expect(screen.getByText('Apr 12, 2025 (Saturday)')).toBeInTheDocument();
+      });
+
+      // Assert the load previous month button is not present
+      expect(
+        screen.queryByRole('button', { name: /load (more|previous month)/i })
+      ).not.toBeInTheDocument();
+    });
+
+    it('should show load button when more items available (total > items.length)', async () => {
+      // First call returns fewer items than total so button should appear
+      let callIndex = 0;
+      const firstPage = {
+        ...mockActivityData,
+        items: mockActivityData.items.slice(0, 3),
+        total: 6,
+      };
+      const secondPage = {
+        ...mockActivityData,
+        offset: 1,
+        items: mockActivityData.items.slice(3),
+        total: 6,
+      };
+
+      server.use(
+        http.get('/api/activity', ({ request }) => {
+          const url = new URL(request.url);
+          const offset = url.searchParams.get('offset');
+          if (offset === '0') {
+            callIndex++;
+            return HttpResponse.json(firstPage);
+          } else if (offset === '1') {
+            callIndex++;
+            return HttpResponse.json(secondPage);
+          }
+          return HttpResponse.json(mockActivityData);
+        })
+      );
+
+      render(
+        <Router>
+          <ListView />
+        </Router>
+      );
+
+      // Wait for first page
+      await waitFor(() => {
+        expect(screen.getByText('Apr 12, 2025 (Saturday)')).toBeInTheDocument();
+      });
+
+      // Button should be visible because total (6) > rendered (3)
+      const loadMoreButton = screen.getByRole('button', { name: /load (more|previous month)/i });
+      expect(loadMoreButton).toBeInTheDocument();
+
+      // Click to load next page
+      fireEvent.click(loadMoreButton);
+
+      // Wait for second page to append
+      await waitFor(() => {
+        expect(screen.getByText('Apr 5, 2025 (Saturday)')).toBeInTheDocument();
+      });
+
+      // Now all 6 items should be present; button should disappear
+      expect(
+        screen.queryByRole('button', { name: /load (more|previous month)/i })
+      ).not.toBeInTheDocument();
+      expect(callIndex).toBe(2);
     });
   });
 

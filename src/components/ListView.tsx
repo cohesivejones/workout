@@ -25,8 +25,8 @@ export const ListView = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [currentOffset, setCurrentOffset] = useState<number>(0);
-  const [currentMonth, setCurrentMonth] = useState<string | null>(null);
   const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
+  const [totalCount, setTotalCount] = useState<number>(0);
 
   const [showWorkouts, setShowWorkouts] = useState(true);
   const [showPainScores, setShowPainScores] = useState(true);
@@ -50,7 +50,7 @@ export const ListView = () => {
         const activityData = await fetchActivity(0);
         setActivityItems(activityData.items);
         setCurrentOffset(0);
-        setCurrentMonth(activityData.month);
+        setTotalCount(activityData.total || 0);
         setLoading(false);
       } catch (err) {
         console.error('Failed to load data:', err);
@@ -72,7 +72,10 @@ export const ListView = () => {
       // Append new month's data to existing items
       setActivityItems((prev) => [...prev, ...activityData.items]);
       setCurrentOffset(nextOffset);
-      setCurrentMonth(activityData.month);
+      // total is stable; if API returns it again, update to be safe
+      if (typeof activityData.total === 'number') {
+        setTotalCount(activityData.total);
+      }
     } catch (err) {
       console.error('Failed to load more data:', err);
       setError('Failed to load more data. Please try again later.');
@@ -466,7 +469,7 @@ export const ListView = () => {
       )}
 
       {/* Load More Button */}
-      {currentMonth && (
+      {activityItems.length < totalCount && (
         <div className={styles.loadMoreContainer}>
           <button
             onClick={handleLoadMore}
