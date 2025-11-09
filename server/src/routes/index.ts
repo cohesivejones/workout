@@ -7,6 +7,7 @@ import sleepScores from "./sleep-scores.routes";
 import diagnostics from "./diagnostics.routes";
 import dashboard from "./dashboard.routes";
 import timeline from "./timeline.routes";
+import activity from "./activity.routes";
 import dataSource from "../data-source";
 import logger from "../logger";
 
@@ -20,6 +21,7 @@ router.use("/sleep-scores", sleepScores);
 router.use("/diagnostics", diagnostics);
 router.use("/dashboard", dashboard);
 router.use("/timeline", timeline);
+router.use("/activity", activity);
 
 // Test-only routes
 if (process.env.NODE_ENV === "test") {
