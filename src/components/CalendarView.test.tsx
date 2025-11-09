@@ -502,7 +502,7 @@ describe('CalendarView', () => {
 
       // Wait for initial May data to load and week view to render
       await waitFor(() => {
-        expect(screen.getByRole('heading', { name: /May 14/ })).toBeInTheDocument();
+        expect(screen.getByRole('heading', { name: /May 11 - May 17/ })).toBeInTheDocument();
       });
 
       // Verify May workout is visible

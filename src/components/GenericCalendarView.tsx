@@ -161,8 +161,11 @@ export function GenericCalendarView<T extends CalendarItem>({
           </button>
         </div>
         <h2 className={styles.monthTitle} data-testid="calendar-week-title">
-          {format(currentWeek, 'MMMM d')} -{' '}
-          {format(new Date(currentWeek.getTime() + 6 * 24 * 60 * 60 * 1000), 'MMMM d, yyyy')}
+          {format(startOfWeek(currentWeek), 'MMMM d')} -{' '}
+          {format(
+            new Date(startOfWeek(currentWeek).getTime() + 6 * 24 * 60 * 60 * 1000),
+            'MMMM d, yyyy'
+          )}
         </h2>
       </div>
     );
@@ -238,7 +241,7 @@ export function GenericCalendarView<T extends CalendarItem>({
         >
           <div className={styles.verticalDayHeader}>
             <div className={styles.verticalDayName}>{format(day, 'EEEE')}</div>
-            <div className={styles.verticalDayDate}>{format(day, 'MMMM d, yyyy')}</div>
+            <h3 className={styles.verticalDayDate}>{format(day, 'MMMM d, yyyy')}</h3>
           </div>
 
           <div className={styles.verticalItems}>
