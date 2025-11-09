@@ -5,7 +5,7 @@ import { http, HttpResponse } from 'msw';
 import { server } from '../mocks/server';
 import { ListView } from './ListView';
 import * as UserContext from '../contexts/useUserContext';
-import { TimelineResponse } from '../types';
+import { ActivityResponse } from '../types';
 
 // Mock window.confirm
 const originalConfirm = window.confirm;
@@ -17,43 +17,6 @@ const mockUser = {
   id: 1,
   name: 'Test User',
   email: 'test@example.com',
-};
-
-const mockTimelineData: TimelineResponse = {
-  workouts: [
-    {
-      id: 1,
-      date: '2025-01-15',
-      withInstructor: false,
-      userId: 1,
-      exercises: [
-        {
-          id: 1,
-          name: 'Squats',
-          reps: 10,
-          weight: 100,
-          time_seconds: null,
-        },
-      ],
-    },
-  ],
-  painScores: [
-    {
-      id: 1,
-      date: '2025-01-15',
-      score: 3,
-      userId: 1,
-    },
-  ],
-  sleepScores: [
-    {
-      id: 1,
-      date: '2025-01-15',
-      score: 4,
-      userId: 1,
-    },
-  ],
-  hasMore: false,
 };
 
 describe('ListView', () => {
@@ -111,6 +74,21 @@ describe('ListView', () => {
     },
   ];
 
+  // Helper to convert mock data to activity response format
+  const mockActivityData: ActivityResponse = {
+    items: [
+      { type: 'painScore', id: 1, date: '2025-04-12', painScore: mockPainScores[0] },
+      { type: 'sleepScore', id: 1, date: '2025-04-11', sleepScore: mockSleepScores[0] },
+      { type: 'workout', id: 1, date: '2025-04-10', workout: mockWorkouts[0] },
+      { type: 'painScore', id: 2, date: '2025-04-08', painScore: mockPainScores[1] },
+      { type: 'sleepScore', id: 2, date: '2025-04-07', sleepScore: mockSleepScores[1] },
+      { type: 'workout', id: 2, date: '2025-04-05', workout: mockWorkouts[1] },
+    ],
+    total: 6,
+    offset: 0,
+    month: '2025-04',
+  };
+
   beforeEach(() => {
     vi.clearAllMocks();
     // Mock window.confirm to always return true
@@ -131,12 +109,12 @@ describe('ListView', () => {
   });
 
   describe('Data Fetching', () => {
-    it('should call fetchTimeline API once on mount', async () => {
+    it('should call fetchActivity API once on mount', async () => {
       let callCount = 0;
       server.use(
-        http.get('/api/timeline', () => {
+        http.get('/api/activity', () => {
           callCount++;
-          return HttpResponse.json(mockTimelineData);
+          return HttpResponse.json(mockActivityData);
         })
       );
 
@@ -153,7 +131,7 @@ describe('ListView', () => {
 
     it('should display loading state initially', () => {
       server.use(
-        http.get('/api/timeline', () => {
+        http.get('/api/activity', () => {
           // Never resolve to keep loading state
           return new Promise(() => {});
         })
@@ -173,7 +151,7 @@ describe('ListView', () => {
       const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       server.use(
-        http.get('/api/timeline', () => {
+        http.get('/api/activity', () => {
           return HttpResponse.json({ error: 'API Error' }, { status: 500 });
         })
       );
@@ -191,12 +169,12 @@ describe('ListView', () => {
       consoleErrorSpy.mockRestore();
     });
 
-    it('should not call fetchTimeline when user is not logged in', () => {
+    it('should not call fetchActivity when user is not logged in', () => {
       let callCount = 0;
       server.use(
-        http.get('/api/timeline', () => {
+        http.get('/api/activity', () => {
           callCount++;
-          return HttpResponse.json(mockTimelineData);
+          return HttpResponse.json(mockActivityData);
         })
       );
 
@@ -216,16 +194,14 @@ describe('ListView', () => {
       expect(callCount).toBe(0);
     });
 
-    it('should initially fetch last 3 months to next 3 months of data', async () => {
-      let capturedStartDate: string | null = null;
-      let capturedEndDate: string | null = null;
+    it('should initially fetch with offset=0 for most recent activity month', async () => {
+      let capturedOffset: string | null = null;
 
       server.use(
-        http.get('/api/timeline', ({ request }) => {
+        http.get('/api/activity', ({ request }) => {
           const url = new URL(request.url);
-          capturedStartDate = url.searchParams.get('startDate');
-          capturedEndDate = url.searchParams.get('endDate');
-          return HttpResponse.json(mockTimelineData);
+          capturedOffset = url.searchParams.get('offset');
+          return HttpResponse.json(mockActivityData);
         })
       );
 
@@ -236,36 +212,25 @@ describe('ListView', () => {
       );
 
       await waitFor(() => {
-        expect(capturedStartDate).not.toBeNull();
-        expect(capturedEndDate).not.toBeNull();
+        expect(capturedOffset).toBe('0');
       });
-
-      // Verify startDate is approximately 90 days ago
-      const expectedStartDate = new Date();
-      expectedStartDate.setDate(expectedStartDate.getDate() - 90);
-      const expectedStart = expectedStartDate.toISOString().split('T')[0];
-      expect(capturedStartDate).toBe(expectedStart);
-
-      // Verify endDate is approximately 90 days ahead
-      const expectedEndDate = new Date();
-      expectedEndDate.setDate(expectedEndDate.getDate() + 90);
-      const expectedEnd = expectedEndDate.toISOString().split('T')[0];
-      expect(capturedEndDate).toBe(expectedEnd);
     });
 
-    it('should extend date range by 3 months when loading more', async () => {
+    it('should increment offset when loading more', async () => {
       let callCount = 0;
-      const capturedStartDates: string[] = [];
+      const capturedOffsets: string[] = [];
 
       server.use(
-        http.get('/api/timeline', ({ request }) => {
+        http.get('/api/activity', ({ request }) => {
           callCount++;
           const url = new URL(request.url);
-          const startDate = url.searchParams.get('startDate');
-          if (startDate) {
-            capturedStartDates.push(startDate);
+          const offset = url.searchParams.get('offset');
+          if (offset) {
+            capturedOffsets.push(offset);
           }
-          return HttpResponse.json({ ...mockTimelineData, hasMore: callCount === 1 });
+          // Return mockActivityData with month set to indicate more data available
+          // Set total greater than items length so the Load button is visible
+          return HttpResponse.json({ ...mockActivityData, month: '2025-04', total: 12 });
         })
       );
 
@@ -281,7 +246,7 @@ describe('ListView', () => {
       });
 
       // Click load more button
-      const loadMoreButton = screen.getByRole('button', { name: /load more/i });
+      const loadMoreButton = screen.getByRole('button', { name: /load (more|previous month)/i });
       fireEvent.click(loadMoreButton);
 
       // Wait for second API call
@@ -289,26 +254,102 @@ describe('ListView', () => {
         expect(callCount).toBe(2);
       });
 
-      // Verify that the second call has a start date 90 days earlier
-      expect(capturedStartDates.length).toBe(2);
-      const firstStart = new Date(capturedStartDates[0]);
-      const secondStart = new Date(capturedStartDates[1]);
-      const daysDiff = Math.round(
-        (firstStart.getTime() - secondStart.getTime()) / (1000 * 60 * 60 * 24)
+      // Verify that offsets were 0 and 1
+      expect(capturedOffsets.length).toBe(2);
+      expect(capturedOffsets[0]).toBe('0');
+      expect(capturedOffsets[1]).toBe('1');
+    });
+
+    it('should hide load button when all items loaded (total === items.length)', async () => {
+      // Provide a response where total equals number of items, so button should not render
+      server.use(
+        http.get('/api/activity', () => {
+          return HttpResponse.json(mockActivityData); // total: 6, items.length: 6
+        })
       );
-      expect(daysDiff).toBe(90);
+
+      render(
+        <Router>
+          <ListView />
+        </Router>
+      );
+
+      // Wait for data to load
+      await waitFor(() => {
+        expect(screen.getByText('Apr 12, 2025 (Saturday)')).toBeInTheDocument();
+      });
+
+      // Assert the load previous month button is not present
+      expect(
+        screen.queryByRole('button', { name: /load (more|previous month)/i })
+      ).not.toBeInTheDocument();
+    });
+
+    it('should show load button when more items available (total > items.length)', async () => {
+      // First call returns fewer items than total so button should appear
+      let callIndex = 0;
+      const firstPage = {
+        ...mockActivityData,
+        items: mockActivityData.items.slice(0, 3),
+        total: 6,
+      };
+      const secondPage = {
+        ...mockActivityData,
+        offset: 1,
+        items: mockActivityData.items.slice(3),
+        total: 6,
+      };
+
+      server.use(
+        http.get('/api/activity', ({ request }) => {
+          const url = new URL(request.url);
+          const offset = url.searchParams.get('offset');
+          if (offset === '0') {
+            callIndex++;
+            return HttpResponse.json(firstPage);
+          } else if (offset === '1') {
+            callIndex++;
+            return HttpResponse.json(secondPage);
+          }
+          return HttpResponse.json(mockActivityData);
+        })
+      );
+
+      render(
+        <Router>
+          <ListView />
+        </Router>
+      );
+
+      // Wait for first page
+      await waitFor(() => {
+        expect(screen.getByText('Apr 12, 2025 (Saturday)')).toBeInTheDocument();
+      });
+
+      // Button should be visible because total (6) > rendered (3)
+      const loadMoreButton = screen.getByRole('button', { name: /load (more|previous month)/i });
+      expect(loadMoreButton).toBeInTheDocument();
+
+      // Click to load next page
+      fireEvent.click(loadMoreButton);
+
+      // Wait for second page to append
+      await waitFor(() => {
+        expect(screen.getByText('Apr 5, 2025 (Saturday)')).toBeInTheDocument();
+      });
+
+      // Now all 6 items should be present; button should disappear
+      expect(
+        screen.queryByRole('button', { name: /load (more|previous month)/i })
+      ).not.toBeInTheDocument();
+      expect(callIndex).toBe(2);
     });
   });
 
   it('renders workouts and pain scores in chronological order', async () => {
     server.use(
-      http.get('/api/timeline', () => {
-        return HttpResponse.json({
-          workouts: mockWorkouts,
-          painScores: mockPainScores,
-          sleepScores: mockSleepScores,
-          hasMore: false,
-        });
+      http.get('/api/activity', () => {
+        return HttpResponse.json(mockActivityData);
       })
     );
 
@@ -358,12 +399,12 @@ describe('ListView', () => {
 
   it('displays empty state message when no items', async () => {
     server.use(
-      http.get('/api/timeline', () => {
+      http.get('/api/activity', () => {
         return HttpResponse.json({
-          workouts: [],
-          painScores: [],
-          sleepScores: [],
-          hasMore: false,
+          items: [],
+          total: 0,
+          offset: 0,
+          month: null,
         });
       })
     );
@@ -389,13 +430,8 @@ describe('ListView', () => {
   it('handles workout deletion', async () => {
     // Mock timeline data
     server.use(
-      http.get('/api/timeline', () => {
-        return HttpResponse.json({
-          workouts: mockWorkouts,
-          painScores: mockPainScores,
-          sleepScores: mockSleepScores,
-          hasMore: false,
-        });
+      http.get('/api/activity', () => {
+        return HttpResponse.json(mockActivityData);
       }),
       http.delete('/api/workouts/:id', () => {
         return HttpResponse.json({ id: 1 });
@@ -433,13 +469,8 @@ describe('ListView', () => {
   it('handles pain score deletion', async () => {
     // Mock timeline data
     server.use(
-      http.get('/api/timeline', () => {
-        return HttpResponse.json({
-          workouts: mockWorkouts,
-          painScores: mockPainScores,
-          sleepScores: mockSleepScores,
-          hasMore: false,
-        });
+      http.get('/api/activity', () => {
+        return HttpResponse.json(mockActivityData);
       }),
       http.delete('/api/pain-scores/:id', () => {
         return HttpResponse.json({ id: 1 });
@@ -485,13 +516,8 @@ describe('ListView', () => {
 
     // Mock timeline data and failed deletion
     server.use(
-      http.get('/api/timeline', () => {
-        return HttpResponse.json({
-          workouts: mockWorkouts,
-          painScores: mockPainScores,
-          sleepScores: mockSleepScores,
-          hasMore: false,
-        });
+      http.get('/api/activity', () => {
+        return HttpResponse.json(mockActivityData);
       }),
       http.delete('/api/workouts/:id', () => {
         return HttpResponse.json({ error: 'Failed to delete' }, { status: 500 });
@@ -537,13 +563,8 @@ describe('ListView', () => {
 
     // Mock timeline data and failed deletion
     server.use(
-      http.get('/api/timeline', () => {
-        return HttpResponse.json({
-          workouts: mockWorkouts,
-          painScores: mockPainScores,
-          sleepScores: mockSleepScores,
-          hasMore: false,
-        });
+      http.get('/api/activity', () => {
+        return HttpResponse.json(mockActivityData);
       }),
       http.delete('/api/pain-scores/:id', () => {
         return HttpResponse.json({ error: 'Failed to delete' }, { status: 500 });
@@ -583,13 +604,8 @@ describe('ListView', () => {
     (window.confirm as ReturnType<typeof vi.fn>).mockReturnValue(false);
 
     server.use(
-      http.get('/api/timeline', () => {
-        return HttpResponse.json({
-          workouts: mockWorkouts,
-          painScores: mockPainScores,
-          sleepScores: mockSleepScores,
-          hasMore: false,
-        });
+      http.get('/api/activity', () => {
+        return HttpResponse.json(mockActivityData);
       })
     );
 
@@ -621,13 +637,8 @@ describe('ListView', () => {
 
   it('displays filter controls', async () => {
     server.use(
-      http.get('/api/timeline', () => {
-        return HttpResponse.json({
-          workouts: mockWorkouts,
-          painScores: mockPainScores,
-          sleepScores: mockSleepScores,
-          hasMore: false,
-        });
+      http.get('/api/activity', () => {
+        return HttpResponse.json(mockActivityData);
       })
     );
 
@@ -664,13 +675,8 @@ describe('ListView', () => {
 
   it('filters items when checkboxes are clicked', async () => {
     server.use(
-      http.get('/api/timeline', () => {
-        return HttpResponse.json({
-          workouts: mockWorkouts,
-          painScores: mockPainScores,
-          sleepScores: mockSleepScores,
-          hasMore: false,
-        });
+      http.get('/api/activity', () => {
+        return HttpResponse.json(mockActivityData);
       })
     );
 
@@ -723,13 +729,8 @@ describe('ListView', () => {
 
   it('resets filters when Show All button is clicked', async () => {
     server.use(
-      http.get('/api/timeline', () => {
-        return HttpResponse.json({
-          workouts: mockWorkouts,
-          painScores: mockPainScores,
-          sleepScores: mockSleepScores,
-          hasMore: false,
-        });
+      http.get('/api/activity', () => {
+        return HttpResponse.json(mockActivityData);
       })
     );
 
@@ -775,13 +776,8 @@ describe('ListView', () => {
 
   it('displays NEW REPS and NEW WEIGHT badges when flags are set', async () => {
     server.use(
-      http.get('/api/timeline', () => {
-        return HttpResponse.json({
-          workouts: mockWorkouts,
-          painScores: mockPainScores,
-          sleepScores: mockSleepScores,
-          hasMore: false,
-        });
+      http.get('/api/activity', () => {
+        return HttpResponse.json(mockActivityData);
       })
     );
 
@@ -820,13 +816,8 @@ describe('ListView', () => {
   describe('FAB (Floating Action Button)', () => {
     it('renders FAB button with correct aria-label', async () => {
       server.use(
-        http.get('/api/timeline', () => {
-          return HttpResponse.json({
-            workouts: mockWorkouts,
-            painScores: mockPainScores,
-            sleepScores: mockSleepScores,
-            hasMore: false,
-          });
+        http.get('/api/activity', () => {
+          return HttpResponse.json(mockActivityData);
         })
       );
 
@@ -848,13 +839,8 @@ describe('ListView', () => {
 
     it('toggles FAB menu when button is clicked', async () => {
       server.use(
-        http.get('/api/timeline', () => {
-          return HttpResponse.json({
-            workouts: mockWorkouts,
-            painScores: mockPainScores,
-            sleepScores: mockSleepScores,
-            hasMore: false,
-          });
+        http.get('/api/activity', () => {
+          return HttpResponse.json(mockActivityData);
         })
       );
 
@@ -893,13 +879,8 @@ describe('ListView', () => {
 
     it('displays correct links in FAB menu', async () => {
       server.use(
-        http.get('/api/timeline', () => {
-          return HttpResponse.json({
-            workouts: mockWorkouts,
-            painScores: mockPainScores,
-            sleepScores: mockSleepScores,
-            hasMore: false,
-          });
+        http.get('/api/activity', () => {
+          return HttpResponse.json(mockActivityData);
         })
       );
 
@@ -929,13 +910,8 @@ describe('ListView', () => {
 
     it('closes FAB menu when clicking outside', async () => {
       server.use(
-        http.get('/api/timeline', () => {
-          return HttpResponse.json({
-            workouts: mockWorkouts,
-            painScores: mockPainScores,
-            sleepScores: mockSleepScores,
-            hasMore: false,
-          });
+        http.get('/api/activity', () => {
+          return HttpResponse.json(mockActivityData);
         })
       );
 
@@ -965,13 +941,8 @@ describe('ListView', () => {
 
     it('closes FAB menu when a menu item is clicked', async () => {
       server.use(
-        http.get('/api/timeline', () => {
-          return HttpResponse.json({
-            workouts: mockWorkouts,
-            painScores: mockPainScores,
-            sleepScores: mockSleepScores,
-            hasMore: false,
-          });
+        http.get('/api/activity', () => {
+          return HttpResponse.json(mockActivityData);
         })
       );
 

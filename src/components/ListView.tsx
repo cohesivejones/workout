@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Link } from 'wouter';
 import { format } from 'date-fns';
 import { MdOutlineEdit, MdAdd, MdFitnessCenter, MdLocalHospital, MdHotel } from 'react-icons/md';
-import { PainScore, Workout, SleepScore } from '../types';
+import { ActivityItem } from '../types';
 import {
   toPainScoreNewPath,
   toPainScoreEditPath,
@@ -11,30 +11,22 @@ import {
   toSleepScoreNewPath,
   toSleepScoreEditPath,
 } from '../utils/paths';
-import { deletePainScore, deleteWorkout, deleteSleepScore, fetchTimeline } from '../api';
+import { deletePainScore, deleteWorkout, deleteSleepScore, fetchActivity } from '../api';
 import classNames from 'classnames';
 import styles from './ListView.module.css';
 import buttonStyles from '../styles/common/buttons.module.css';
 import { useUserContext } from '../contexts/useUserContext';
 
-type ListItem =
-  | { type: 'workout'; data: Workout }
-  | { type: 'painScore'; data: PainScore }
-  | { type: 'sleepScore'; data: SleepScore };
-
 export const ListView = () => {
   const { user } = useUserContext();
 
   // State for data fetching
-  const [workouts, setWorkouts] = useState<Workout[]>([]);
-  const [painScores, setPainScores] = useState<PainScore[]>([]);
-  const [sleepScores, setSleepScores] = useState<SleepScore[]>([]);
+  const [activityItems, setActivityItems] = useState<ActivityItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [hasMore, setHasMore] = useState<boolean>(false);
+  const [currentOffset, setCurrentOffset] = useState<number>(0);
   const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
-  const [startDate, setStartDate] = useState<string>('');
-  const [endDate, setEndDate] = useState<string>('');
+  const [totalCount, setTotalCount] = useState<number>(0);
 
   const [showWorkouts, setShowWorkouts] = useState(true);
   const [showPainScores, setShowPainScores] = useState(true);
@@ -55,23 +47,10 @@ export const ListView = () => {
 
       setLoading(true);
       try {
-        // Calculate initial date range (last 3 months to next 3 months)
-        const threeMonthsAgo = new Date();
-        threeMonthsAgo.setDate(threeMonthsAgo.getDate() - 90);
-        const threeMonthsAhead = new Date();
-        threeMonthsAhead.setDate(threeMonthsAhead.getDate() + 90);
-
-        const startDateStr = threeMonthsAgo.toISOString().split('T')[0];
-        const endDateStr = threeMonthsAhead.toISOString().split('T')[0];
-
-        setStartDate(startDateStr);
-        setEndDate(endDateStr);
-
-        const timelineData = await fetchTimeline(startDateStr, endDateStr);
-        setWorkouts(timelineData.workouts);
-        setPainScores(timelineData.painScores);
-        setSleepScores(timelineData.sleepScores);
-        setHasMore(timelineData.hasMore);
+        const activityData = await fetchActivity(0);
+        setActivityItems(activityData.items);
+        setCurrentOffset(0);
+        setTotalCount(activityData.total || 0);
         setLoading(false);
       } catch (err) {
         console.error('Failed to load data:', err);
@@ -87,19 +66,16 @@ export const ListView = () => {
 
     setIsLoadingMore(true);
     try {
-      // Extend the date range by another 3 months backward
-      const newStartDate = new Date(startDate);
-      newStartDate.setDate(newStartDate.getDate() - 90);
-      const newStartDateStr = newStartDate.toISOString().split('T')[0];
+      const nextOffset = currentOffset + 1;
+      const activityData = await fetchActivity(nextOffset);
 
-      setStartDate(newStartDateStr);
-
-      // Fetch data with extended date range
-      const timelineData = await fetchTimeline(newStartDateStr, endDate);
-      setWorkouts(timelineData.workouts);
-      setPainScores(timelineData.painScores);
-      setSleepScores(timelineData.sleepScores);
-      setHasMore(timelineData.hasMore);
+      // Append new month's data to existing items
+      setActivityItems((prev) => [...prev, ...activityData.items]);
+      setCurrentOffset(nextOffset);
+      // total is stable; if API returns it again, update to be safe
+      if (typeof activityData.total === 'number') {
+        setTotalCount(activityData.total);
+      }
     } catch (err) {
       console.error('Failed to load more data:', err);
       setError('Failed to load more data. Please try again later.');
@@ -123,15 +99,21 @@ export const ListView = () => {
   }, [fabOpen]);
 
   const handleWorkoutDeleted = (workoutId: number) => {
-    setWorkouts((prevWorkouts) => prevWorkouts.filter((w) => w.id !== workoutId));
+    setActivityItems((prev) =>
+      prev.filter((item) => !(item.type === 'workout' && item.id === workoutId))
+    );
   };
 
   const handlePainScoreDeleted = (painScoreId: number) => {
-    setPainScores((prev) => prev.filter((ps) => ps.id !== painScoreId));
+    setActivityItems((prev) =>
+      prev.filter((item) => !(item.type === 'painScore' && item.id === painScoreId))
+    );
   };
 
   const handleSleepScoreDeleted = (sleepScoreId: number) => {
-    setSleepScores((prev) => prev.filter((ss) => ss.id !== sleepScoreId));
+    setActivityItems((prev) =>
+      prev.filter((item) => !(item.type === 'sleepScore' && item.id === sleepScoreId))
+    );
   };
 
   if (loading) {
@@ -142,33 +124,15 @@ export const ListView = () => {
     return <div className={styles.errorMessage}>{error}</div>;
   }
 
-  // Combine workouts, pain scores, and sleep scores into a single array
-  const allItems: ListItem[] = [
-    ...workouts.map((workout) => ({ type: 'workout' as const, data: workout })),
-    ...painScores.map((painScore) => ({
-      type: 'painScore' as const,
-      data: painScore,
-    })),
-    ...sleepScores.map((sleepScore) => ({
-      type: 'sleepScore' as const,
-      data: sleepScore,
-    })),
-  ];
-
   // Filter items based on filter state
-  const items = allItems.filter((item) => {
+  const items = activityItems.filter((item) => {
     if (item.type === 'workout' && !showWorkouts) return false;
     if (item.type === 'painScore' && !showPainScores) return false;
     if (item.type === 'sleepScore' && !showSleepScores) return false;
     return true;
   });
 
-  // Sort by date in descending order (newest first)
-  items.sort((a, b) => {
-    const dateA = new Date(a.type === 'workout' ? a.data.date : a.data.date);
-    const dateB = new Date(b.type === 'workout' ? b.data.date : b.data.date);
-    return dateB.getTime() - dateA.getTime();
-  });
+  // Items are already sorted by date descending from the API
 
   // Function to get color based on pain score
   const getPainScoreColor = (score: number): string => {
@@ -325,8 +289,8 @@ export const ListView = () => {
       ) : (
         <div className={styles.listItems}>
           {items.map((item) => {
-            if (item.type === 'workout') {
-              const workout = item.data;
+            if (item.type === 'workout' && item.workout) {
+              const workout = item.workout;
               return (
                 <div
                   key={`workout-${workout.id}`}
@@ -392,8 +356,8 @@ export const ListView = () => {
                   </div>
                 </div>
               );
-            } else if (item.type === 'painScore') {
-              const painScore = item.data;
+            } else if (item.type === 'painScore' && item.painScore) {
+              const painScore = item.painScore;
               return (
                 <div
                   key={`pain-score-${painScore.id}`}
@@ -443,8 +407,8 @@ export const ListView = () => {
                   </div>
                 </div>
               );
-            } else {
-              const sleepScore = item.data;
+            } else if (item.type === 'sleepScore' && item.sleepScore) {
+              const sleepScore = item.sleepScore;
               return (
                 <div
                   key={`sleep-score-${sleepScore.id}`}
@@ -505,14 +469,14 @@ export const ListView = () => {
       )}
 
       {/* Load More Button */}
-      {hasMore && (
+      {activityItems.length < totalCount && (
         <div className={styles.loadMoreContainer}>
           <button
             onClick={handleLoadMore}
             disabled={isLoadingMore}
             className={classNames(buttonStyles.secondaryBtn, styles.loadMoreBtn)}
           >
-            {isLoadingMore ? 'Loading...' : 'Load More'}
+            {isLoadingMore ? 'Loading...' : 'Load Previous Month'}
           </button>
         </div>
       )}

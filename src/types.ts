@@ -67,3 +67,21 @@ export interface TimelineResponse {
   sleepScores: SleepScore[];
   hasMore: boolean;
 }
+
+export type ActivityItemType = 'workout' | 'painScore' | 'sleepScore';
+
+export interface ActivityItem {
+  type: ActivityItemType;
+  id: number;
+  date: string;
+  workout?: Workout;
+  painScore?: PainScore;
+  sleepScore?: SleepScore;
+}
+
+export interface ActivityResponse {
+  items: ActivityItem[];
+  total: number;
+  offset: number;
+  month: string | null;
+}
