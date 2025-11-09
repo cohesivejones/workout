@@ -65,6 +65,50 @@ const CalendarView = () => {
   const [error, setError] = useState<string | null>(null);
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
 
+  // Track which months we've already fetched to avoid duplicate requests
+  const [fetchedMonths, setFetchedMonths] = useState<Set<string>>(new Set());
+
+  // Helper to get month key for tracking
+  const getMonthKey = (date: Date): string => {
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+  };
+
+  // Helper to fetch data for a specific month
+  const fetchMonthData = async (targetMonth: Date) => {
+    if (!user) return;
+
+    const monthKey = getMonthKey(targetMonth);
+
+    // Skip if we've already fetched this month
+    if (fetchedMonths.has(monthKey)) {
+      return;
+    }
+
+    const year = targetMonth.getFullYear();
+    const month = targetMonth.getMonth();
+    const startDate = new Date(year, month, 1);
+    const endDate = new Date(year, month + 1, 0); // Last day of month
+
+    const startDateStr = startDate.toISOString().split('T')[0];
+    const endDateStr = endDate.toISOString().split('T')[0];
+
+    try {
+      const timelineData = await fetchTimeline(startDateStr, endDateStr);
+
+      // Append new data to existing data (accumulate across months)
+      setWorkouts((prev) => [...prev, ...timelineData.workouts]);
+      setPainScores((prev) => [...prev, ...timelineData.painScores]);
+      setSleepScores((prev) => [...prev, ...timelineData.sleepScores]);
+
+      // Mark this month as fetched
+      setFetchedMonths((prev) => new Set(prev).add(monthKey));
+    } catch (err) {
+      console.error('Failed to load data for month:', monthKey, err);
+      setError('Failed to load data. Please try again later.');
+    }
+  };
+
+  // Calculate start and end dates for the current month
   // Calculate start and end dates for the current month
   const year = currentMonth.getFullYear();
   const month = currentMonth.getMonth();
@@ -74,27 +118,38 @@ const CalendarView = () => {
   const startDateStr = startDate.toISOString().split('T')[0];
   const endDateStr = endDate.toISOString().split('T')[0];
 
-  // Fetch data when user or date range changes
+  // Fetch data when user or current month changes
   useEffect(() => {
     const loadData = async () => {
       if (!user) return;
 
       setLoading(true);
       setError(null);
-      try {
-        const timelineData = await fetchTimeline(startDateStr, endDateStr);
-        setWorkouts(timelineData.workouts);
-        setPainScores(timelineData.painScores);
-        setSleepScores(timelineData.sleepScores);
-      } catch (err) {
-        console.error('Failed to load data:', err);
-        setError('Failed to load data. Please try again later.');
-      } finally {
-        setLoading(false);
-      }
+
+      // Fetch the current month's data
+      await fetchMonthData(currentMonth);
+
+      setLoading(false);
     };
     loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, startDateStr, endDateStr]);
+
+  // Handle week changes in mobile view - fetch new month data if needed
+  const handleWeekChange = async (newWeek: Date) => {
+    if (!user) return;
+
+    const weekMonth = new Date(newWeek.getFullYear(), newWeek.getMonth(), 1);
+
+    // Check if this week is in a different month than currentMonth
+    if (
+      weekMonth.getMonth() !== currentMonth.getMonth() ||
+      weekMonth.getFullYear() !== currentMonth.getFullYear()
+    ) {
+      // Fetch the new month's data if we haven't already
+      await fetchMonthData(weekMonth);
+    }
+  };
 
   if (loading) {
     return <div className={styles.loading}>Loading...</div>;
@@ -273,6 +328,7 @@ const CalendarView = () => {
       emptyStateMessage="No data"
       currentMonth={currentMonth}
       onMonthChange={setCurrentMonth}
+      onWeekChange={handleWeekChange}
     />
   );
 };
