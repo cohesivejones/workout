@@ -16,21 +16,32 @@ test.describe('Timeline Pagination', () => {
     // Clear test data
     await clearTestData(request);
 
-    // Step 2: Create workouts spanning 9+ months
-    // Initial window is 90 days back to 90 days forward (6 months total)
-    // We need workouts older than 90 days to test pagination
+    // Step 2: Create workouts spanning multiple months
+    // With month-based pagination, offset=0 shows most recent month, offset=1 shows previous month, etc.
+    // Create workouts using specific dates to ensure they're in the correct months
+    const today = new Date();
+    const currentYear = today.getFullYear();
+    const currentMonth = today.getMonth();
+    const currentDay = today.getDate();
+
+    // Choose days in current month that are <= today to avoid future dates
+    const currentMonthDays = [
+      Math.min(2, currentDay),
+      Math.min(5, currentDay),
+      Math.min(7, currentDay),
+    ].filter((day, index, arr) => arr.indexOf(day) === index && day > 0); // Remove duplicates and ensure positive
+
     const workoutDates = [
-      // Recent workouts (within 90 days back)
-      { daysAgo: 10 },
-      { daysAgo: 45 },
-      { daysAgo: 80 },
-      // Older workouts (beyond 90 days back - outside initial window)
-      { daysAgo: 120 },
-      { daysAgo: 150 },
-      { daysAgo: 180 },
+      // Current month workouts (up to 3 workouts on safe days)
+      ...currentMonthDays.map((day) => new Date(currentYear, currentMonth, day)),
+      // Previous month workouts (2 workouts on days 10, 20)
+      new Date(currentYear, currentMonth - 1, 10),
+      new Date(currentYear, currentMonth - 1, 20),
+      // 2 months ago (1 workout on day 15)
+      new Date(currentYear, currentMonth - 2, 15),
     ];
 
-    for (const workout of workoutDates) {
+    for (const workoutDate of workoutDates) {
       // Navigate to new workout page
       await page.goto('/');
       await page.getByRole('button', { name: 'List' }).click();
@@ -50,12 +61,8 @@ test.describe('Timeline Pagination', () => {
       await page.waitForLoadState('networkidle');
       await expect(page.getByPlaceholder('Reps')).toBeVisible({ timeout: 5000 });
 
-      // Calculate and set the date
-      const workoutDate = new Date();
-      workoutDate.setDate(workoutDate.getDate() - workout.daysAgo);
-      console.log(
-        `Creating workout ${workout.daysAgo} days ago: ${workoutDate.toISOString().split('T')[0]}`
-      );
+      // Set the workout date
+      console.log(`Creating workout for date: ${workoutDate.toISOString().split('T')[0]}`);
 
       await setWorkoutDate(page, workoutDate);
 
@@ -74,35 +81,51 @@ test.describe('Timeline Pagination', () => {
     await page.getByRole('button', { name: 'List' }).click();
     await page.waitForURL('/?view=list', { timeout: 5000 });
 
-    // Step 4: Verify only recent 3 months of workouts are visible initially
-    // Count workout cards - should be 3 (recent workouts only)
+    // Step 4: Verify only current month's workouts are visible initially (offset=0)
+    // Count workout cards - should match the number of current month workouts we created
+    const currentMonthWorkoutCount = currentMonthDays.length;
     const initialWorkoutCards = page.locator('[data-testid^="workout-card-"]');
-    await expect(initialWorkoutCards).toHaveCount(3, { timeout: 5000 });
+    await expect(initialWorkoutCards).toHaveCount(currentMonthWorkoutCount, { timeout: 5000 });
 
-    // Verify that we have exactly 3 Squats exercises visible (one per workout)
+    // Verify that we have the correct number of Squats exercises visible (one per workout)
     const initialSquatsExercises = page.locator('text=Squats');
-    await expect(initialSquatsExercises).toHaveCount(3);
+    await expect(initialSquatsExercises).toHaveCount(currentMonthWorkoutCount);
 
-    // Step 5: Verify Load More button is present
-    const loadMoreButton = page.getByRole('button', { name: /load more/i });
+    // Step 5: Verify Load Previous Month button is present
+    const loadMoreButton = page.getByRole('button', { name: /load (more|previous month)/i });
     await expect(loadMoreButton).toBeVisible({ timeout: 5000 });
 
-    // Step 6: Click Load More button
+    // Step 6: Click Load Previous Month button to get previous month's data
     await loadMoreButton.click();
 
     // Wait for loading to complete (Loading... text disappears)
     await expect(page.getByRole('button', { name: /loading/i })).not.toBeVisible();
 
-    // Step 7: Verify all 6 workouts are now visible
+    // Step 7: Verify current month + previous month workouts are now visible
+    const expectedAfterFirstLoad = currentMonthWorkoutCount + 2; // +2 from previous month
+    const afterFirstLoadCards = page.locator('[data-testid^="workout-card-"]');
+    await expect(afterFirstLoadCards).toHaveCount(expectedAfterFirstLoad, { timeout: 5000 });
+
+    // Verify that we now have the expected number of Squats exercises visible
+    const afterFirstLoadSquats = page.locator('text=Squats');
+    await expect(afterFirstLoadSquats).toHaveCount(expectedAfterFirstLoad);
+
+    // Step 8: Click Load Previous Month again to get 2 months ago data
+    await loadMoreButton.click();
+    await expect(page.getByRole('button', { name: /loading/i })).not.toBeVisible();
+
+    // Step 9: Verify all workouts are now visible
+    const totalWorkouts = workoutDates.length;
     const allWorkoutCards = page.locator('[data-testid^="workout-card-"]');
-    await expect(allWorkoutCards).toHaveCount(6, { timeout: 5000 });
+    await expect(allWorkoutCards).toHaveCount(totalWorkouts, { timeout: 5000 });
 
-    // Verify that we now have 6 Squats exercises visible (one per workout)
+    // Verify that we now have all Squats exercises visible (one per workout)
     const allSquatsExercises = page.locator('text=Squats');
-    await expect(allSquatsExercises).toHaveCount(6);
+    await expect(allSquatsExercises).toHaveCount(totalWorkouts);
 
-    // Step 8: Verify Load More button disappears (no more data)
-    await expect(loadMoreButton).not.toBeVisible();
+    // Step 10: Load More button should still be visible (there could be older months)
+    // Note: Button remains visible because API doesn't know if there are older months without querying
+    await expect(loadMoreButton).toBeVisible();
   });
 
   test('user navigates between months in calendar view', async ({ page, request }) => {

@@ -1,5 +1,13 @@
 import axios from 'axios';
-import { Workout, Exercise, PainScore, SleepScore, User, TimelineResponse } from './types';
+import {
+  Workout,
+  Exercise,
+  PainScore,
+  SleepScore,
+  User,
+  TimelineResponse,
+  ActivityResponse,
+} from './types';
 
 // Auth types
 export interface AuthResponse {
@@ -185,4 +193,9 @@ export const fetchTimeline = (startDate?: string, endDate?: string): Promise<Tim
 
   const queryString = params.toString();
   return api.get(`/timeline${queryString ? `?${queryString}` : ''}`);
+};
+
+// Activity feed API function (month-based pagination)
+export const fetchActivity = (offset = 0): Promise<ActivityResponse> => {
+  return api.get(`/activity?offset=${offset}`);
 };
