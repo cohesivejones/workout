@@ -8,28 +8,35 @@ import styles from './App.module.css';
 
 const Header = () => {
   const { user, logout } = useUserContext();
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement | null>(null);
+  const [aiDropdownOpen, setAIDropdownOpen] = useState(false);
+  const aiDropdownRef = useRef<HTMLDivElement | null>(null);
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const userDropdownRef = useRef<HTMLDivElement | null>(null);
 
-  // Close dropdown when clicking outside
+  // Close AI and user dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setDropdownOpen(false);
+      if (aiDropdownRef.current && !aiDropdownRef.current.contains(event.target as Node)) {
+        setAIDropdownOpen(false);
+      }
+      if (userDropdownRef.current && !userDropdownRef.current.contains(event.target as Node)) {
+        setUserDropdownOpen(false);
       }
     };
-
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const handleLogout = async () => {
     await logout();
-    setDropdownOpen(false);
+    setUserDropdownOpen(false);
   };
 
-  const toggleDropdown = () => {
-    setDropdownOpen(!dropdownOpen);
+  const toggleAIDropdown = () => {
+    setAIDropdownOpen((open) => !open);
+  };
+  const toggleUserDropdown = () => {
+    setUserDropdownOpen((open) => !open);
   };
 
   return (
@@ -62,29 +69,53 @@ const Header = () => {
             <Link to="/exercises" className={styles.navLink}>
               Exercises
             </Link>
-            <Link to="/workouts/generate" className={styles.navLink}>
-              Generate Workout
-            </Link>
-            <Link to="/diagnostician" className={styles.navLink}>
-              Diagnostician
-            </Link>
+            <div
+              className={`${styles.navDropdown} ${aiDropdownOpen ? styles.open : ''}`}
+              ref={aiDropdownRef}
+            >
+              <button
+                className={styles.navLink}
+                type="button"
+                aria-haspopup="true"
+                aria-expanded={aiDropdownOpen}
+                onClick={toggleAIDropdown}
+              >
+                AI
+              </button>
+              <div className={styles.dropdownMenu}>
+                <Link
+                  to="/workouts/generate"
+                  className={styles.dropdownMenuItem}
+                  onClick={() => setAIDropdownOpen(false)}
+                >
+                  Generate Workout
+                </Link>
+                <Link
+                  to="/diagnostician"
+                  className={styles.dropdownMenuItem}
+                  onClick={() => setAIDropdownOpen(false)}
+                >
+                  Diagnostician
+                </Link>
+              </div>
+            </div>
           </nav>
         )}
       </div>
 
       {user && (
-        <div className={styles.userDropdown} ref={dropdownRef}>
-          <button className={styles.dropdownToggle} onClick={toggleDropdown}>
+        <div className={styles.userDropdown} ref={userDropdownRef}>
+          <button className={styles.dropdownToggle} onClick={toggleUserDropdown}>
             <span>{user.name}</span>
             <FaBars className={styles.hamburgerIcon} />
           </button>
 
-          {dropdownOpen && (
+          {userDropdownOpen && (
             <div className={styles.dropdownMenu}>
               <Link
                 to="/change-password"
                 className={styles.dropdownItem}
-                onClick={() => setDropdownOpen(false)}
+                onClick={() => setUserDropdownOpen(false)}
               >
                 Change Password
               </Link>

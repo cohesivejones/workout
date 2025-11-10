@@ -1,3 +1,51 @@
+/* AI Dropdown styles */
+.navDropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.navDropdown .navLink {
+  cursor: pointer;
+  background: none;
+  border: none;
+}
+
+.navDropdown .dropdownMenu {
+  display: none;
+  position: absolute;
+  left: 0;
+  top: 100%;
+  background: #222;
+  min-width: 180px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+  z-index: 100;
+}
+
+.navDropdown.open .dropdownMenu {
+  display: block;
+}
+
+/* Note: we toggle a plain 'open' className from React (not CSS Modules),
+   so no separate .open ruleset is required here. */
+
+.dropdownMenuItem {
+  display: block;
+  padding: 10px 18px;
+  color: #fff;
+  text-decoration: none;
+  font-size: 1rem;
+  border-bottom: 1px solid #333;
+  transition: background 0.2s;
+}
+
+.dropdownMenuItem:last-child {
+  border-bottom: none;
+}
+
+.dropdownMenuItem:hover {
+  background: #333;
+}
 .app {
   text-align: center;
 }

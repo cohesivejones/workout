@@ -56,7 +56,7 @@ describe('Layout - Header Navigation', () => {
       );
     });
 
-    it.each(navigationLinks)('shows $text link', async ({ text }) => {
+    it('shows AI dropdown with Generate Workout and Diagnostician', async () => {
       render(
         <Router>
           <UserContextProvider>
@@ -67,10 +67,21 @@ describe('Layout - Header Navigation', () => {
         </Router>
       );
 
-      // Wait for auth check to complete and link to appear
+      // Wait for auth check to complete
       await waitFor(() => {
-        const link = screen.getByRole('link', { name: text });
-        expect(link).toBeInTheDocument();
+        // AI dropdown button
+        const aiButton = screen.getByRole('button', { name: /AI/i });
+        expect(aiButton).toBeInTheDocument();
+      });
+
+      // Simulate click to open dropdown
+      const aiButton = screen.getByRole('button', { name: /AI/i });
+      aiButton.click();
+
+      // Check for menu items
+      await waitFor(() => {
+        expect(screen.getByRole('link', { name: 'Generate Workout' })).toBeInTheDocument();
+        expect(screen.getByRole('link', { name: 'Diagnostician' })).toBeInTheDocument();
       });
     });
   });
