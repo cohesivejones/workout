@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import { GenericCalendarView, CalendarItem } from './GenericCalendarView';
 
 // Fixed date for testing
@@ -468,5 +468,96 @@ describe('GenericCalendarView', () => {
 
     expect(removeEventListenerCall?.[0]).toBe('resize');
     expect(removeEventListenerCall?.[1]).toBe(addEventListenerCall?.[1]);
+  });
+
+  it('syncs currentWeek with currentMonth when switching from desktop to mobile view', () => {
+    const mockOnMonthChange = vi.fn();
+
+    // Create items for November 2nd
+    const novemberItems: TestItem[] = [
+      {
+        id: 1,
+        date: '2025-11-02',
+        type: 'test',
+        content: 'November 2nd Item',
+      },
+    ];
+
+    // Start in desktop view (month view) on November 2025
+    Object.defineProperty(window, 'innerWidth', {
+      writable: true,
+      configurable: true,
+      value: 1024,
+    });
+
+    const novemberMonth = new Date('2025-11-02T12:00:00Z');
+
+    const { rerender } = render(
+      <GenericCalendarView
+        items={novemberItems}
+        renderGridItem={renderGridItem}
+        renderVerticalItem={renderVerticalItem}
+        getItemsByDate={getItemsByDate}
+        emptyStateMessage="No items"
+        currentMonth={novemberMonth}
+        onMonthChange={mockOnMonthChange}
+      />
+    );
+
+    // Verify we're in month view showing November
+    expect(screen.getByText(/November 2025/)).toBeInTheDocument();
+
+    // Get the resize handler that was registered
+    const addEventListenerMock = window.addEventListener as unknown as {
+      mock: { calls: unknown[][] };
+    };
+    const resizeCall = addEventListenerMock.mock.calls.find(
+      (call: unknown[]) => call[0] === 'resize'
+    );
+    const resizeHandler = resizeCall?.[1] as () => void;
+
+    // Simulate window resize to mobile width
+    Object.defineProperty(window, 'innerWidth', {
+      writable: true,
+      configurable: true,
+      value: 600,
+    });
+
+    // Trigger the resize handler wrapped in act()
+    act(() => {
+      resizeHandler();
+    });
+
+    // Force re-render to pick up state changes
+    rerender(
+      <GenericCalendarView
+        items={novemberItems}
+        renderGridItem={renderGridItem}
+        renderVerticalItem={renderVerticalItem}
+        getItemsByDate={getItemsByDate}
+        emptyStateMessage="No items"
+        currentMonth={novemberMonth}
+        onMonthChange={mockOnMonthChange}
+      />
+    );
+
+    // Check we're now in week view
+    const weekTitle = screen.getByRole('heading', { level: 2 });
+    expect(weekTitle.textContent).toMatch(/November/);
+
+    // Get all day headers - should have exactly 7 unique dates
+    const dayDates = screen.getAllByRole('heading', { level: 3 });
+    expect(dayDates).toHaveLength(7);
+
+    // Extract unique dates to ensure no duplicates
+    const dateTexts = dayDates.map((el) => el.textContent);
+    const uniqueDates = new Set(dateTexts);
+
+    // Should have 7 unique dates, not duplicates
+    expect(uniqueDates.size).toBe(7);
+
+    // Verify November 2nd appears at most once
+    const nov2Count = dateTexts.filter((text) => text?.includes('November 2,')).length;
+    expect(nov2Count).toBeLessThanOrEqual(1);
   });
 });
