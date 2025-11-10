@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, act } from '@testing-library/react';
+import { render, screen, fireEvent, act, waitFor } from '@testing-library/react';
 import { GenericCalendarView, CalendarItem } from './GenericCalendarView';
 
 // Fixed date for testing
@@ -470,7 +470,7 @@ describe('GenericCalendarView', () => {
     expect(removeEventListenerCall?.[1]).toBe(addEventListenerCall?.[1]);
   });
 
-  it('syncs currentWeek with currentMonth when switching from desktop to mobile view', () => {
+  it('syncs currentWeek with currentMonth when switching from desktop to mobile view', async () => {
     const mockOnMonthChange = vi.fn();
 
     // Create items for November 2nd
@@ -523,27 +523,30 @@ describe('GenericCalendarView', () => {
       value: 600,
     });
 
-    // Trigger the resize handler wrapped in act()
+    // Trigger the resize handler and re-render wrapped in act()
     act(() => {
       resizeHandler();
+
+      // Force re-render to pick up state changes
+      rerender(
+        <GenericCalendarView
+          items={novemberItems}
+          renderGridItem={renderGridItem}
+          renderVerticalItem={renderVerticalItem}
+          getItemsByDate={getItemsByDate}
+          emptyStateMessage="No items"
+          currentMonth={novemberMonth}
+          onMonthChange={mockOnMonthChange}
+        />
+      );
     });
 
-    // Force re-render to pick up state changes
-    rerender(
-      <GenericCalendarView
-        items={novemberItems}
-        renderGridItem={renderGridItem}
-        renderVerticalItem={renderVerticalItem}
-        getItemsByDate={getItemsByDate}
-        emptyStateMessage="No items"
-        currentMonth={novemberMonth}
-        onMonthChange={mockOnMonthChange}
-      />
-    );
-
-    // Check we're now in week view
-    const weekTitle = screen.getByRole('heading', { level: 2 });
-    expect(weekTitle.textContent).toMatch(/November/);
+    // Wait for the useEffect to sync currentWeek with currentMonth
+    await waitFor(() => {
+      // Check we're now in week view
+      const weekTitle = screen.getByRole('heading', { level: 2 });
+      expect(weekTitle.textContent).toMatch(/November/);
+    });
 
     // Get all day headers - should have exactly 7 unique dates
     const dayDates = screen.getAllByRole('heading', { level: 3 });

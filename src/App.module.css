@@ -70,6 +70,123 @@
   gap: 20px;
 }
 
+/* Mobile navigation */
+.mobileActions {
+  display: none;
+  align-items: center;
+  gap: 12px;
+}
+
+.mobileNavToggle {
+  display: none;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 6px 12px;
+  border-radius: 4px;
+}
+
+.mobileNavToggle:focus {
+  outline: 2px solid #888;
+  outline-offset: 2px;
+}
+
+.mobileMenuBackdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 1000;
+}
+
+.mobileMenuPanel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100vh;
+  width: 80vw;
+  max-width: 320px;
+  background: #1e1e1e;
+  color: white;
+  z-index: 1001;
+  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  gap: 8px;
+}
+
+.mobileMenuHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.mobileMenuTitle {
+  margin: 0;
+  font-size: 18px;
+}
+
+.mobileCloseButton {
+  background: none;
+  border: 1px solid #444;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.mobileMenuLinks {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mobileMenuLink {
+  color: white;
+  text-decoration: none;
+  padding: 10px 8px;
+  border-radius: 4px;
+}
+
+.mobileMenuLink:hover {
+  background: #2a2a2a;
+}
+
+.mobileMenuSection {
+  margin-top: 12px;
+  border-top: 1px solid #2c2c2c;
+  padding-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mobileMenuSectionTitle {
+  font-size: 12px;
+  color: #bbbbbb;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 6px 0 4px;
+}
+
+@media (max-width: 768px) {
+  .mainNav {
+    display: none;
+  }
+  .mobileActions {
+    display: flex;
+  }
+  .mobileNavToggle {
+    display: inline-block;
+  }
+  .desktopOnly {
+    display: none !important;
+  }
+}
+
 .navLink {
   color: white;
   text-decoration: none;
@@ -100,64 +217,33 @@
 /* User dropdown styles */
 .userDropdown {
   position: relative;
+  display: inline-block;
 }
 
-.dropdownToggle {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.userDropdown .navLink {
+  cursor: pointer;
   background: none;
   border: none;
-  color: white;
-  cursor: pointer;
-  padding: 5px 10px;
-  border-radius: 4px;
-  font-size: 16px;
 }
 
-.dropdownToggle:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-}
-
-.hamburgerIcon {
-  font-size: 18px;
-  margin-left: 5px;
-}
-
-.dropdownMenu {
+.userDropdown .dropdownMenu {
+  display: none;
   position: absolute;
-  top: 100%;
   right: 0;
-  background-color: white;
-  border-radius: 4px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  top: 100%;
+  background: #222;
   min-width: 180px;
-  z-index: 10;
-  margin-top: 5px;
-  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+  z-index: 100;
 }
 
-.dropdownItem {
+.userDropdown.open .dropdownMenu {
   display: block;
-  width: 100%;
-  text-align: left;
-  padding: 10px 15px;
-  color: #333;
-  text-decoration: none;
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 14px;
 }
 
-.dropdownItem:hover {
-  background-color: #f5f5f5;
-}
-
-/* Add a divider between items */
-.dropdownItem + .dropdownItem {
-  border-top: 1px solid #eee;
-}
+/* Note: we toggle a plain 'open' className from React (not CSS Modules),
+   so no separate .open ruleset is required here. */
 
 .appMain {
   padding: 20px;

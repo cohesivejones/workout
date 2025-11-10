@@ -42,13 +42,13 @@ test.describe('Logout', () => {
     // Log in first using helper
     await login(page);
 
-    // Verify user dropdown is visible (indicates logged in state)
-    await expect(page.locator('button.dropdownToggle, button:has-text("test")')).toBeVisible();
+    // Verify user dropdown button is visible (indicates logged in state)
+    await expect(page.getByTestId('user-dropdown-button')).toBeVisible();
 
     // Log out using helper
     await logout(page);
 
     // Verify user dropdown is no longer visible (indicates logged out state)
-    await expect(page.locator('button.dropdownToggle, button:has-text("test")')).not.toBeVisible();
+    await expect(page.getByTestId('user-dropdown-button')).not.toBeVisible();
   });
 });
