@@ -65,6 +65,9 @@ This will start:
 - Vite dev server (frontend) on port 3000 (proxied through Nginx)
 - API server (backend) on port 5001 (proxied through Nginx)
 - PostgreSQL database on port 5432 (in Docker)
+  - Database: `workout_dev`
+  - User: `postgres`
+  - Password: `password`
 - HTTP requests are automatically redirected to HTTPS
 
 ### Test User Credentials
