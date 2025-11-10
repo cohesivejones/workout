@@ -1,4 +1,5 @@
 import { ActivityItem } from '../types';
+import { mergeUniqueByKey } from '../utils/collections';
 
 export type ListViewState = {
   activityItems: ActivityItem[];
@@ -60,15 +61,16 @@ export function listViewReducer(state: ListViewState, action: ListViewAction): L
       return { ...state, fabOpen: action.payload };
     case 'SET_DELETING':
       return { ...state, isDeleting: action.payload };
-    case 'TOGGLE_FILTER':
-      if (action.payload === 'workouts') {
-        return { ...state, showWorkouts: !state.showWorkouts };
-      } else if (action.payload === 'painScores') {
-        return { ...state, showPainScores: !state.showPainScores };
-      } else if (action.payload === 'sleepScores') {
-        return { ...state, showSleepScores: !state.showSleepScores };
-      }
-      return state;
+    case 'TOGGLE_FILTER': {
+      // Map the payload to the corresponding state key and toggle it
+      const keyMap = {
+        workouts: 'showWorkouts',
+        painScores: 'showPainScores',
+        sleepScores: 'showSleepScores',
+      } as const;
+      const key = keyMap[action.payload];
+      return { ...state, [key]: !state[key] } as ListViewState;
+    }
     case 'SHOW_ALL_FILTERS':
       return {
         ...state,
@@ -76,55 +78,31 @@ export function listViewReducer(state: ListViewState, action: ListViewAction): L
         showPainScores: true,
         showSleepScores: true,
       };
-    case 'LOAD_INITIAL_DATA': {
-      // Dedupe initial data
-      const seen = new Set<string>();
-      const deduped: ActivityItem[] = [];
-      for (const item of action.payload.items) {
-        const key = `${item.type}-${item.id}`;
-        if (!seen.has(key)) {
-          seen.add(key);
-          deduped.push(item);
-        }
-      }
+    case 'LOAD_INITIAL_DATA':
       return {
         ...state,
-        activityItems: deduped,
+        activityItems: mergeUniqueByKey(
+          state.activityItems,
+          action.payload.items,
+          (i) => `${i.type}-${i.id}`
+        ),
         totalCount: action.payload.total,
         currentOffset: 0,
         loading: false,
         error: null,
       };
-    }
-    case 'APPEND_DATA': {
-      // Dedupe when appending
-      const seen = new Set<string>();
-      const merged: ActivityItem[] = [];
-
-      // Add existing items
-      for (const item of state.activityItems) {
-        const key = `${item.type}-${item.id}`;
-        seen.add(key);
-        merged.push(item);
-      }
-
-      // Add new items (skip duplicates)
-      for (const item of action.payload.items) {
-        const key = `${item.type}-${item.id}`;
-        if (!seen.has(key)) {
-          seen.add(key);
-          merged.push(item);
-        }
-      }
-
+    case 'APPEND_DATA':
       return {
         ...state,
-        activityItems: merged,
+        activityItems: mergeUniqueByKey(
+          state.activityItems,
+          action.payload.items,
+          (i) => `${i.type}-${i.id}`
+        ),
         currentOffset: state.currentOffset + 1,
         totalCount: action.payload.total ?? state.totalCount,
         isLoadingMore: false,
       };
-    }
     case 'DELETE_ITEM': {
       return {
         ...state,

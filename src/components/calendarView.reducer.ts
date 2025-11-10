@@ -1,4 +1,5 @@
 import { Workout, PainScore, SleepScore } from '../types';
+import { mergeUniqueById } from '../utils/collections';
 
 export type CalendarState = {
   workouts: Workout[];
@@ -45,20 +46,13 @@ export function calendarReducer(state: CalendarState, action: CalendarAction): C
       return { ...state, error: action.payload };
     case 'SET_MONTH':
       return { ...state, currentMonth: action.payload };
-    case 'APPEND_MONTH_DATA': {
-      const existingWorkoutIds = new Set(state.workouts.map((w) => w.id));
-      const newWorkouts = action.payload.workouts.filter((w) => !existingWorkoutIds.has(w.id));
-      const existingPainIds = new Set(state.painScores.map((p) => p.id));
-      const newPainScores = action.payload.painScores.filter((p) => !existingPainIds.has(p.id));
-      const existingSleepIds = new Set(state.sleepScores.map((s) => s.id));
-      const newSleepScores = action.payload.sleepScores.filter((s) => !existingSleepIds.has(s.id));
+    case 'APPEND_MONTH_DATA':
       return {
         ...state,
-        workouts: [...state.workouts, ...newWorkouts],
-        painScores: [...state.painScores, ...newPainScores],
-        sleepScores: [...state.sleepScores, ...newSleepScores],
+        workouts: mergeUniqueById(state.workouts, action.payload.workouts),
+        painScores: mergeUniqueById(state.painScores, action.payload.painScores),
+        sleepScores: mergeUniqueById(state.sleepScores, action.payload.sleepScores),
       };
-    }
     case 'MARK_MONTH_FETCHED': {
       const updated = new Set(state.fetchedMonths);
       updated.add(action.payload);

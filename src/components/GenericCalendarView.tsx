@@ -12,6 +12,8 @@ import {
   addMonths,
   subMonths,
   isToday,
+  eachDayOfInterval,
+  addDays,
 } from 'date-fns';
 
 // Generic interface for calendar items
@@ -70,6 +72,13 @@ export function GenericCalendarView<T extends CalendarItem>({
       window.removeEventListener('resize', checkScreenSize);
     };
   }, []);
+
+  // Sync currentWeek with currentMonth when switching to mobile view
+  useEffect(() => {
+    if (isMobileView) {
+      setCurrentWeek(currentMonth);
+    }
+  }, [isMobileView, currentMonth]);
 
   // Group items by date
   const itemsByDate = getItemsByDate(items);
@@ -222,40 +231,41 @@ export function GenericCalendarView<T extends CalendarItem>({
   };
 
   const renderVerticalDays = () => {
-    // Start from the beginning of the current week
-    const startDate = startOfWeek(currentWeek);
-    const days = [];
+    // Generate exactly 7 days for the week using eachDayOfInterval
+    const weekStart = startOfWeek(currentWeek);
+    const weekEnd = addDays(weekStart, 6);
+    const daysInWeek = eachDayOfInterval({ start: weekStart, end: weekEnd });
 
-    // Generate 7 days (a full week)
-    for (let i = 0; i < 7; i++) {
-      const day = new Date(startDate.getTime() + i * 24 * 60 * 60 * 1000);
-      const dateStr = format(day, 'yyyy-MM-dd');
-      const dayItems = itemsByDate[dateStr] || [];
+    return (
+      <div className={styles.verticalDaysList}>
+        {daysInWeek.map((day) => {
+          const dateStr = format(day, 'yyyy-MM-dd');
+          const dayItems = itemsByDate[dateStr] || [];
 
-      days.push(
-        <div
-          key={dateStr}
-          className={classNames(styles.verticalDay, {
-            [styles.today]: isToday(day),
-          })}
-        >
-          <div className={styles.verticalDayHeader}>
-            <div className={styles.verticalDayName}>{format(day, 'EEEE')}</div>
-            <h3 className={styles.verticalDayDate}>{format(day, 'MMMM d, yyyy')}</h3>
-          </div>
+          return (
+            <div
+              key={`week-${dateStr}`}
+              className={classNames(styles.verticalDay, {
+                [styles.today]: isToday(day),
+              })}
+            >
+              <div className={styles.verticalDayHeader}>
+                <div className={styles.verticalDayName}>{format(day, 'EEEE')}</div>
+                <h3 className={styles.verticalDayDate}>{format(day, 'MMMM d, yyyy')}</h3>
+              </div>
 
-          <div className={styles.verticalItems}>
-            {dayItems.length > 0 ? (
-              dayItems.map((item) => renderVerticalItem(item, dateStr))
-            ) : (
-              <div className={styles.noItems}>{emptyStateMessage}</div>
-            )}
-          </div>
-        </div>
-      );
-    }
-
-    return <div className={styles.verticalDaysList}>{days}</div>;
+              <div className={styles.verticalItems}>
+                {dayItems.length > 0 ? (
+                  dayItems.map((item) => renderVerticalItem(item, dateStr))
+                ) : (
+                  <div className={styles.noItems}>{emptyStateMessage}</div>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
   };
 
   return (
