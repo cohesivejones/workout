@@ -333,39 +333,121 @@ test.describe('Timeline Pagination', () => {
     const prevWeekCount = await prevWeekWorkouts.count();
     console.log(`Workouts visible after navigating to previous week: ${prevWeekCount}`);
 
-    // Step 9: Navigate back several weeks to ensure we're in the previous month
-    for (let i = 0; i < 3; i++) {
-      await prevWeekButton.click();
+    // Step 9: Navigate to the week containing the previous month workouts (25th-27th)
+    // Parse week header to find the right week dynamically
+    const targetDate = new Date(currentYear, currentMonth - 1, 25);
+    let foundTargetWeek = false;
+    let attempts = 0;
+    const maxAttempts = 10;
+
+    while (!foundTargetWeek && attempts < maxAttempts) {
       await page.waitForTimeout(500);
+      const weekHeader = await page.getByTestId('calendar-week-title').textContent();
+      console.log(`Current week header: ${weekHeader}`);
+
+      if (weekHeader) {
+        // Parse the week range: "Month day - Month day, year"
+        const match = weekHeader.match(/(\w+)\s+(\d+)\s+-\s+(\w+)\s+(\d+),\s+(\d+)/);
+        if (match) {
+          const [, startMonth, startDay, endMonth, endDay, year] = match;
+          const months: { [key: string]: number } = {
+            January: 0,
+            February: 1,
+            March: 2,
+            April: 3,
+            May: 4,
+            June: 5,
+            July: 6,
+            August: 7,
+            September: 8,
+            October: 9,
+            November: 10,
+            December: 11,
+          };
+
+          const weekStart = new Date(parseInt(year), months[startMonth], parseInt(startDay));
+          const weekEnd = new Date(parseInt(year), months[endMonth], parseInt(endDay));
+
+          // Check if target date falls in this week
+          if (targetDate >= weekStart && targetDate <= weekEnd) {
+            foundTargetWeek = true;
+            console.log(`Found target week containing ${targetDate.toISOString().split('T')[0]}`);
+          }
+        }
+      }
+
+      if (!foundTargetWeek) {
+        await prevWeekButton.click();
+        attempts++;
+      }
     }
 
+    expect(foundTargetWeek).toBe(true);
+
     // Step 10: Verify we can see workouts from the previous month (Deadlifts, Pull-ups)
-    // This will fail if data fetching doesn't account for week navigation
     const oldMonthWorkouts = page.locator('[data-testid^="calendar-workout-"]');
     const oldMonthCount = await oldMonthWorkouts.count();
     console.log(`Workouts visible in previous month's week: ${oldMonthCount}`);
+    expect(oldMonthCount).toBeGreaterThan(0);
 
-    // We should be able to see Deadlifts or Pull-ups if we're in the right week
-    const hasOldMonthWorkouts = oldMonthCount > 0;
-    expect(hasOldMonthWorkouts).toBe(true);
-
-    // Step 11: Navigate forward to a week in the second week of current month
+    // Step 11: Navigate to a week in the second week of current month containing the later workouts
     const todayButton = page.getByRole('button', { name: 'Go to today' });
     await todayButton.click();
     await page.waitForTimeout(1000);
 
-    // Navigate forward to second week
-    for (let i = 0; i < 2; i++) {
-      await nextWeekButton.click();
+    // Navigate to week containing the 10th-12th of current month
+    const laterTargetDate = new Date(currentYear, currentMonth, 10);
+    let foundLaterWeek = false;
+    attempts = 0;
+
+    while (!foundLaterWeek && attempts < maxAttempts) {
       await page.waitForTimeout(500);
+      const weekHeader = await page.getByTestId('calendar-week-title').textContent();
+      console.log(`Current week header (looking for later week): ${weekHeader}`);
+
+      if (weekHeader) {
+        const match = weekHeader.match(/(\w+)\s+(\d+)\s+-\s+(\w+)\s+(\d+),\s+(\d+)/);
+        if (match) {
+          const [, startMonth, startDay, endMonth, endDay, year] = match;
+          const months: { [key: string]: number } = {
+            January: 0,
+            February: 1,
+            March: 2,
+            April: 3,
+            May: 4,
+            June: 5,
+            July: 6,
+            August: 7,
+            September: 8,
+            October: 9,
+            November: 10,
+            December: 11,
+          };
+
+          const weekStart = new Date(parseInt(year), months[startMonth], parseInt(startDay));
+          const weekEnd = new Date(parseInt(year), months[endMonth], parseInt(endDay));
+
+          if (laterTargetDate >= weekStart && laterTargetDate <= weekEnd) {
+            foundLaterWeek = true;
+            console.log(
+              `Found later week containing ${laterTargetDate.toISOString().split('T')[0]}`
+            );
+          }
+        }
+      }
+
+      if (!foundLaterWeek) {
+        await nextWeekButton.click();
+        attempts++;
+      }
     }
+
+    expect(foundLaterWeek).toBe(true);
 
     // Step 12: Verify we can see workouts from the second week (Lunges, Rows)
     const laterWeekWorkouts = page.locator('[data-testid^="calendar-workout-"]');
     const laterWeekCount = await laterWeekWorkouts.count();
     console.log(`Workouts visible in later week: ${laterWeekCount}`);
-
-    // We should see some workouts in this later week
     expect(laterWeekCount).toBeGreaterThan(0);
   });
 
