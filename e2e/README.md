@@ -51,8 +51,8 @@ The test database uses these credentials (configured in `server/.env.test`):
 
 - **Host**: localhost
 - **Port**: 5433 (different from dev database on 5432)
-- **User**: test_user
-- **Password**: test_password
+- **User**: postgres
+- **Password**: password
 - **Database**: workout_test
 
 The migrations will automatically create a test user with these credentials:

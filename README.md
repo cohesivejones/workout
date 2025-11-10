@@ -25,10 +25,10 @@ This application uses a consolidated single-server approach:
 npm install
 ```
 
-2. Copy `server/.env.example` to `server/.env`:
+2. Copy `.env.example` to `.env` in the project root:
 
 ```bash
-cp server/.env.example server/.env
+cp .env.example .env
 ```
 
 3. Generate SSL certificates (first time only):
@@ -65,6 +65,9 @@ This will start:
 - Vite dev server (frontend) on port 3000 (proxied through Nginx)
 - API server (backend) on port 5001 (proxied through Nginx)
 - PostgreSQL database on port 5432 (in Docker)
+  - Database: `workout_dev`
+  - User: `postgres`
+  - Password: `password`
 - HTTP requests are automatically redirected to HTTPS
 
 ### Test User Credentials

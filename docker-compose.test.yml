@@ -3,15 +3,15 @@ services:
     image: postgres:15-alpine
     container_name: workout-test-db
     environment:
-      POSTGRES_USER: test_user
-      POSTGRES_PASSWORD: test_password
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
       POSTGRES_DB: workout_test
     ports:
       - "5433:5432"
     volumes:
       - postgres-test-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U test_user -d workout_test"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d workout_test"]
       interval: 5s
       timeout: 5s
       retries: 5

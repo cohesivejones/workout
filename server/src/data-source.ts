@@ -4,9 +4,9 @@ import * as entities from "./entities";
 import dotenv from "dotenv";
 import path from "path";
 
-// Load environment variables from the appropriate .env file
+// Load environment variables from the project root (two levels up from src/)
 const envFile = process.env.NODE_ENV === 'test' ? '.env.test' : '.env';
-const envPath = path.join(__dirname, '..', envFile);
+const envPath = path.join(__dirname, '..', '..', envFile);
 dotenv.config({ path: envPath });
 
 // Parse DATABASE_URL if provided (Heroku), otherwise use individual config vars
