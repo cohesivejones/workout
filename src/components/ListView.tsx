@@ -1,8 +1,7 @@
-import { useState, useRef, useEffect } from 'react';
+import { useRef, useEffect, useReducer } from 'react';
 import { Link } from 'wouter';
 import { format } from 'date-fns';
 import { MdOutlineEdit, MdAdd, MdFitnessCenter, MdLocalHospital, MdHotel } from 'react-icons/md';
-import { ActivityItem } from '../types';
 import {
   toPainScoreNewPath,
   toPainScoreEditPath,
@@ -16,28 +15,25 @@ import classNames from 'classnames';
 import styles from './ListView.module.css';
 import buttonStyles from '../styles/common/buttons.module.css';
 import { useUserContext } from '../contexts/useUserContext';
+import { listViewReducer, createInitialListViewState } from './listView.reducer';
 
 export const ListView = () => {
   const { user } = useUserContext();
+  const [state, dispatch] = useReducer(listViewReducer, undefined, createInitialListViewState);
+  const {
+    activityItems,
+    loading,
+    error,
+    currentOffset,
+    isLoadingMore,
+    totalCount,
+    showWorkouts,
+    showPainScores,
+    showSleepScores,
+    isDeleting,
+    fabOpen,
+  } = state;
 
-  // State for data fetching
-  const [activityItems, setActivityItems] = useState<ActivityItem[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-  const [currentOffset, setCurrentOffset] = useState<number>(0);
-  const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
-  const [totalCount, setTotalCount] = useState<number>(0);
-
-  const [showWorkouts, setShowWorkouts] = useState(true);
-  const [showPainScores, setShowPainScores] = useState(true);
-  const [showSleepScores, setShowSleepScores] = useState(true);
-
-  const [isDeleting, setIsDeleting] = useState<{
-    type: string;
-    id: number;
-  } | null>(null);
-
-  const [fabOpen, setFabOpen] = useState(false);
   const fabRef = useRef<HTMLDivElement | null>(null);
 
   // Fetch data on mount
@@ -45,17 +41,17 @@ export const ListView = () => {
     const loadData = async () => {
       if (!user) return;
 
-      setLoading(true);
+      dispatch({ type: 'SET_LOADING', payload: true });
       try {
         const activityData = await fetchActivity(0);
-        setActivityItems(activityData.items);
-        setCurrentOffset(0);
-        setTotalCount(activityData.total || 0);
-        setLoading(false);
+        dispatch({
+          type: 'LOAD_INITIAL_DATA',
+          payload: { items: activityData.items, total: activityData.total || 0 },
+        });
       } catch (err) {
         console.error('Failed to load data:', err);
-        setError('Failed to load data. Please try again later.');
-        setLoading(false);
+        dispatch({ type: 'SET_ERROR', payload: 'Failed to load data. Please try again later.' });
+        dispatch({ type: 'SET_LOADING', payload: false });
       }
     };
     loadData();
@@ -64,23 +60,19 @@ export const ListView = () => {
   const handleLoadMore = async () => {
     if (!user || isLoadingMore) return;
 
-    setIsLoadingMore(true);
+    dispatch({ type: 'SET_LOADING_MORE', payload: true });
     try {
       const nextOffset = currentOffset + 1;
       const activityData = await fetchActivity(nextOffset);
 
-      // Append new month's data to existing items
-      setActivityItems((prev) => [...prev, ...activityData.items]);
-      setCurrentOffset(nextOffset);
-      // total is stable; if API returns it again, update to be safe
-      if (typeof activityData.total === 'number') {
-        setTotalCount(activityData.total);
-      }
+      dispatch({
+        type: 'APPEND_DATA',
+        payload: { items: activityData.items, total: activityData.total },
+      });
     } catch (err) {
       console.error('Failed to load more data:', err);
-      setError('Failed to load more data. Please try again later.');
-    } finally {
-      setIsLoadingMore(false);
+      dispatch({ type: 'SET_ERROR', payload: 'Failed to load more data. Please try again later.' });
+      dispatch({ type: 'SET_LOADING_MORE', payload: false });
     }
   };
 
@@ -88,7 +80,7 @@ export const ListView = () => {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (fabRef.current && !fabRef.current.contains(event.target as Node)) {
-        setFabOpen(false);
+        dispatch({ type: 'SET_FAB_OPEN', payload: false });
       }
     };
 
@@ -99,21 +91,15 @@ export const ListView = () => {
   }, [fabOpen]);
 
   const handleWorkoutDeleted = (workoutId: number) => {
-    setActivityItems((prev) =>
-      prev.filter((item) => !(item.type === 'workout' && item.id === workoutId))
-    );
+    dispatch({ type: 'DELETE_ITEM', payload: { type: 'workout', id: workoutId } });
   };
 
   const handlePainScoreDeleted = (painScoreId: number) => {
-    setActivityItems((prev) =>
-      prev.filter((item) => !(item.type === 'painScore' && item.id === painScoreId))
-    );
+    dispatch({ type: 'DELETE_ITEM', payload: { type: 'painScore', id: painScoreId } });
   };
 
   const handleSleepScoreDeleted = (sleepScoreId: number) => {
-    setActivityItems((prev) =>
-      prev.filter((item) => !(item.type === 'sleepScore' && item.id === sleepScoreId))
-    );
+    dispatch({ type: 'DELETE_ITEM', payload: { type: 'sleepScore', id: sleepScoreId } });
   };
 
   if (loading) {
@@ -195,14 +181,14 @@ export const ListView = () => {
   const handleDeleteWorkout = async (workoutId: number) => {
     if (window.confirm('Are you sure you want to delete this workout?')) {
       try {
-        setIsDeleting({ type: 'workout', id: workoutId });
+        dispatch({ type: 'SET_DELETING', payload: { type: 'workout', id: workoutId } });
         await deleteWorkout(workoutId);
         handleWorkoutDeleted(workoutId);
       } catch (err) {
         console.error('Failed to delete workout:', err);
         alert('Failed to delete workout. Please try again.');
       } finally {
-        setIsDeleting(null);
+        dispatch({ type: 'SET_DELETING', payload: null });
       }
     }
   };
@@ -210,14 +196,14 @@ export const ListView = () => {
   const handleDeletePainScore = async (painScoreId: number) => {
     if (window.confirm('Are you sure you want to delete this pain score?')) {
       try {
-        setIsDeleting({ type: 'painScore', id: painScoreId });
+        dispatch({ type: 'SET_DELETING', payload: { type: 'painScore', id: painScoreId } });
         await deletePainScore(painScoreId);
         handlePainScoreDeleted(painScoreId);
       } catch (err) {
         console.error('Failed to delete pain score:', err);
         alert('Failed to delete pain score. Please try again.');
       } finally {
-        setIsDeleting(null);
+        dispatch({ type: 'SET_DELETING', payload: null });
       }
     }
   };
@@ -225,23 +211,21 @@ export const ListView = () => {
   const handleDeleteSleepScore = async (sleepScoreId: number) => {
     if (window.confirm('Are you sure you want to delete this sleep score?')) {
       try {
-        setIsDeleting({ type: 'sleepScore', id: sleepScoreId });
+        dispatch({ type: 'SET_DELETING', payload: { type: 'sleepScore', id: sleepScoreId } });
         await deleteSleepScore(sleepScoreId);
         handleSleepScoreDeleted(sleepScoreId);
       } catch (err) {
         console.error('Failed to delete sleep score:', err);
         alert('Failed to delete sleep score. Please try again.');
       } finally {
-        setIsDeleting(null);
+        dispatch({ type: 'SET_DELETING', payload: null });
       }
     }
   };
 
   // Reset all filters to show everything
   const showAll = () => {
-    setShowWorkouts(true);
-    setShowPainScores(true);
-    setShowSleepScores(true);
+    dispatch({ type: 'SHOW_ALL_FILTERS' });
   };
 
   return (
@@ -254,7 +238,7 @@ export const ListView = () => {
               <input
                 type="checkbox"
                 checked={showWorkouts}
-                onChange={(e) => setShowWorkouts(e.target.checked)}
+                onChange={() => dispatch({ type: 'TOGGLE_FILTER', payload: 'workouts' })}
               />
               Workouts
             </label>
@@ -262,7 +246,7 @@ export const ListView = () => {
               <input
                 type="checkbox"
                 checked={showPainScores}
-                onChange={(e) => setShowPainScores(e.target.checked)}
+                onChange={() => dispatch({ type: 'TOGGLE_FILTER', payload: 'painScores' })}
               />
               Pain Scores
             </label>
@@ -270,7 +254,7 @@ export const ListView = () => {
               <input
                 type="checkbox"
                 checked={showSleepScores}
-                onChange={(e) => setShowSleepScores(e.target.checked)}
+                onChange={() => dispatch({ type: 'TOGGLE_FILTER', payload: 'sleepScores' })}
               />
               Sleep Scores
             </label>
@@ -485,7 +469,7 @@ export const ListView = () => {
       <div className={styles.fabContainer} ref={fabRef}>
         <button
           className={classNames(styles.fab, { [styles.fabOpen]: fabOpen })}
-          onClick={() => setFabOpen(!fabOpen)}
+          onClick={() => dispatch({ type: 'SET_FAB_OPEN', payload: !fabOpen })}
           aria-label="Add new item"
           aria-expanded={fabOpen}
         >
@@ -496,21 +480,21 @@ export const ListView = () => {
             <Link
               to={toWorkoutNewPath()}
               className={styles.fabMenuItem}
-              onClick={() => setFabOpen(false)}
+              onClick={() => dispatch({ type: 'SET_FAB_OPEN', payload: false })}
             >
               <MdFitnessCenter /> New Workout
             </Link>
             <Link
               to={toPainScoreNewPath()}
               className={styles.fabMenuItem}
-              onClick={() => setFabOpen(false)}
+              onClick={() => dispatch({ type: 'SET_FAB_OPEN', payload: false })}
             >
               <MdLocalHospital /> New Pain Score
             </Link>
             <Link
               to={toSleepScoreNewPath()}
               className={styles.fabMenuItem}
-              onClick={() => setFabOpen(false)}
+              onClick={() => dispatch({ type: 'SET_FAB_OPEN', payload: false })}
             >
               <MdHotel /> New Sleep Score
             </Link>

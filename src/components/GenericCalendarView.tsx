@@ -34,6 +34,8 @@ export interface GenericCalendarViewProps<T extends CalendarItem> {
   currentMonth: Date;
   // Callback when month changes (required)
   onMonthChange: (month: Date) => void;
+  // Callback when week changes in mobile view (optional)
+  onWeekChange?: (week: Date) => void | Promise<void>;
 }
 
 // Generic calendar component
@@ -46,6 +48,7 @@ export function GenericCalendarView<T extends CalendarItem>({
   initialMobileView = false,
   currentMonth,
   onMonthChange,
+  onWeekChange,
 }: GenericCalendarViewProps<T>) {
   const [currentWeek, setCurrentWeek] = useState<Date>(new Date());
   const [isMobileView, setIsMobileView] = useState<boolean>(initialMobileView);
@@ -97,7 +100,9 @@ export function GenericCalendarView<T extends CalendarItem>({
             <MdChevronRight />
           </button>
         </div>
-        <h2 className={styles.monthTitle}>{format(currentMonth, 'MMMM yyyy')}</h2>
+        <h2 className={styles.monthTitle} data-testid="calendar-month-title">
+          {format(currentMonth, 'MMMM yyyy')}
+        </h2>
       </div>
     );
   };
@@ -125,6 +130,7 @@ export function GenericCalendarView<T extends CalendarItem>({
               const prevWeek = new Date(currentWeek);
               prevWeek.setDate(prevWeek.getDate() - 7);
               setCurrentWeek(prevWeek);
+              onWeekChange?.(prevWeek);
             }}
             aria-label="Previous week"
           >
@@ -132,7 +138,11 @@ export function GenericCalendarView<T extends CalendarItem>({
           </button>
           <button
             className={styles.todayButton}
-            onClick={() => setCurrentWeek(new Date())}
+            onClick={() => {
+              const today = new Date();
+              setCurrentWeek(today);
+              onWeekChange?.(today);
+            }}
             aria-label="Go to today"
           >
             Today
@@ -143,15 +153,19 @@ export function GenericCalendarView<T extends CalendarItem>({
               const nextWeek = new Date(currentWeek);
               nextWeek.setDate(nextWeek.getDate() + 7);
               setCurrentWeek(nextWeek);
+              onWeekChange?.(nextWeek);
             }}
             aria-label="Next week"
           >
             <MdChevronRight />
           </button>
         </div>
-        <h2 className={styles.monthTitle}>
-          {format(currentWeek, 'MMMM d')} -{' '}
-          {format(new Date(currentWeek.getTime() + 6 * 24 * 60 * 60 * 1000), 'MMMM d, yyyy')}
+        <h2 className={styles.monthTitle} data-testid="calendar-week-title">
+          {format(startOfWeek(currentWeek), 'MMMM d')} -{' '}
+          {format(
+            new Date(startOfWeek(currentWeek).getTime() + 6 * 24 * 60 * 60 * 1000),
+            'MMMM d, yyyy'
+          )}
         </h2>
       </div>
     );
@@ -177,7 +191,7 @@ export function GenericCalendarView<T extends CalendarItem>({
 
         days.push(
           <div
-            key={day.toString()}
+            key={dateStr}
             className={classNames(styles.calendarCell, {
               [styles.disabled]: !isSameMonth(day, monthStart),
               [styles.today]: isToday(day),
@@ -196,8 +210,9 @@ export function GenericCalendarView<T extends CalendarItem>({
         );
         day = new Date(day.getTime() + 24 * 60 * 60 * 1000); // Add one day
       }
+      const rowStartDate = format(new Date(day.getTime() - 7 * 24 * 60 * 60 * 1000), 'yyyy-MM-dd');
       rows.push(
-        <div className={styles.calendarRow} key={day.toString()}>
+        <div className={styles.calendarRow} key={`row-${rowStartDate}`}>
           {days}
         </div>
       );
@@ -226,7 +241,7 @@ export function GenericCalendarView<T extends CalendarItem>({
         >
           <div className={styles.verticalDayHeader}>
             <div className={styles.verticalDayName}>{format(day, 'EEEE')}</div>
-            <div className={styles.verticalDayDate}>{format(day, 'MMMM d, yyyy')}</div>
+            <h3 className={styles.verticalDayDate}>{format(day, 'MMMM d, yyyy')}</h3>
           </div>
 
           <div className={styles.verticalItems}>

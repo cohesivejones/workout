@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useReducer } from 'react';
 import styles from './CalendarView.module.css';
 import classNames from 'classnames';
 import { Workout, PainScore, SleepScore } from '../types';
+import { calendarReducer, createInitialCalendarState } from './calendarView.reducer';
 import { Link, useLocation } from 'wouter';
 import { toWorkoutPath, toPainScoreEditPath, toSleepScoreEditPath } from '../utils/paths';
 import { GenericCalendarView, CalendarItem } from './GenericCalendarView';
@@ -57,14 +58,56 @@ const CalendarView = () => {
   const [, setLocation] = useLocation();
   const { user } = useUserContext();
 
-  // State for data fetching
-  const [workouts, setWorkouts] = useState<Workout[]>([]);
-  const [painScores, setPainScores] = useState<PainScore[]>([]);
-  const [sleepScores, setSleepScores] = useState<SleepScore[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-  const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
+  const [state, dispatch] = useReducer(calendarReducer, undefined, () =>
+    createInitialCalendarState()
+  );
+  const { workouts, painScores, sleepScores, loading, error, currentMonth, fetchedMonths } = state;
 
+  // Helper to get month key for tracking
+  const getMonthKey = (date: Date): string => {
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+  };
+
+  // Helper to fetch data for a specific month
+  const fetchMonthData = async (targetMonth: Date) => {
+    if (!user) return;
+
+    const monthKey = getMonthKey(targetMonth);
+
+    // Skip if we've already fetched this month
+    if (fetchedMonths.has(monthKey)) {
+      return;
+    }
+
+    const year = targetMonth.getFullYear();
+    const month = targetMonth.getMonth();
+    const startDate = new Date(year, month, 1);
+    const endDate = new Date(year, month + 1, 0); // Last day of month
+
+    const startDateStr = startDate.toISOString().split('T')[0];
+    const endDateStr = endDate.toISOString().split('T')[0];
+
+    try {
+      const timelineData = await fetchTimeline(startDateStr, endDateStr);
+
+      // Append new data to existing data (accumulate across months)
+      dispatch({
+        type: 'APPEND_MONTH_DATA',
+        payload: {
+          monthKey,
+          workouts: timelineData.workouts,
+          painScores: timelineData.painScores,
+          sleepScores: timelineData.sleepScores,
+        },
+      });
+      dispatch({ type: 'MARK_MONTH_FETCHED', payload: monthKey });
+    } catch (err) {
+      console.error('Failed to load data for month:', monthKey, err);
+      dispatch({ type: 'SET_ERROR', payload: 'Failed to load data. Please try again later.' });
+    }
+  };
+
+  // Calculate start and end dates for the current month
   // Calculate start and end dates for the current month
   const year = currentMonth.getFullYear();
   const month = currentMonth.getMonth();
@@ -74,27 +117,34 @@ const CalendarView = () => {
   const startDateStr = startDate.toISOString().split('T')[0];
   const endDateStr = endDate.toISOString().split('T')[0];
 
-  // Fetch data when user or date range changes
+  // Fetch data when user or current month changes
   useEffect(() => {
     const loadData = async () => {
       if (!user) return;
-
-      setLoading(true);
-      setError(null);
-      try {
-        const timelineData = await fetchTimeline(startDateStr, endDateStr);
-        setWorkouts(timelineData.workouts);
-        setPainScores(timelineData.painScores);
-        setSleepScores(timelineData.sleepScores);
-      } catch (err) {
-        console.error('Failed to load data:', err);
-        setError('Failed to load data. Please try again later.');
-      } finally {
-        setLoading(false);
-      }
+      dispatch({ type: 'SET_LOADING', payload: true });
+      dispatch({ type: 'SET_ERROR', payload: null });
+      await fetchMonthData(currentMonth);
+      dispatch({ type: 'SET_LOADING', payload: false });
     };
     loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, startDateStr, endDateStr]);
+
+  // Handle week changes in mobile view - fetch new month data if needed
+  const handleWeekChange = async (newWeek: Date) => {
+    if (!user) return;
+
+    const weekMonth = new Date(newWeek.getFullYear(), newWeek.getMonth(), 1);
+
+    // Check if this week is in a different month than currentMonth
+    if (
+      weekMonth.getMonth() !== currentMonth.getMonth() ||
+      weekMonth.getFullYear() !== currentMonth.getFullYear()
+    ) {
+      // Fetch the new month's data if we haven't already
+      await fetchMonthData(weekMonth);
+    }
+  };
 
   if (loading) {
     return <div className={styles.loading}>Loading...</div>;
@@ -272,7 +322,8 @@ const CalendarView = () => {
       getItemsByDate={getItemsByDate}
       emptyStateMessage="No data"
       currentMonth={currentMonth}
-      onMonthChange={setCurrentMonth}
+      onMonthChange={(m) => dispatch({ type: 'SET_MONTH', payload: m })}
+      onWeekChange={handleWeekChange}
     />
   );
 };

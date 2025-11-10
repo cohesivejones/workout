@@ -436,4 +436,177 @@ describe('CalendarView', () => {
     // but we can verify that no workout or pain score content is displayed
     expect(screen.queryByText(/Pain:/)).not.toBeInTheDocument();
   });
+
+  describe('Week Navigation in Mobile View', () => {
+    it('should fetch data for new month when week navigation crosses month boundary', async () => {
+      // Mock April and May data
+      // May 15 is mocked as "today", which falls in the week of May 11-17
+      // We'll put workouts in the displayed weeks
+      const aprilWorkouts = [
+        {
+          id: 3,
+          userId: 1,
+          date: '2025-04-25', // This should be in a week that we navigate to
+          withInstructor: false,
+          exercises: [{ id: 4, name: 'April Workout', reps: 10 }],
+        },
+      ];
+
+      const mayWorkouts = [
+        {
+          id: 1,
+          userId: 1,
+          date: '2025-05-14', // Wednesday in the current week (May 11-17)
+          withInstructor: true,
+          exercises: [{ id: 1, name: 'May Workout', reps: 10 }],
+        },
+      ];
+
+      const apiCalls: string[] = [];
+
+      server.use(
+        http.get('/api/timeline', ({ request }) => {
+          const url = new URL(request.url);
+          const startDate = url.searchParams.get('startDate');
+          const endDate = url.searchParams.get('endDate');
+          apiCalls.push(`${startDate} to ${endDate}`);
+
+          // Return April data for April requests
+          if (startDate?.startsWith('2025-04')) {
+            return HttpResponse.json({
+              workouts: aprilWorkouts,
+              painScores: [],
+              sleepScores: [],
+              hasMore: false,
+            });
+          }
+
+          // Return May data for May requests
+          return HttpResponse.json({
+            workouts: mayWorkouts,
+            painScores: [],
+            sleepScores: [],
+            hasMore: false,
+          });
+        })
+      );
+
+      // Set window to mobile size to trigger week view
+      Object.defineProperty(window, 'innerWidth', {
+        writable: true,
+        configurable: true,
+        value: 375,
+      });
+
+      renderCalendarView();
+
+      // Wait for initial May data to load and week view to render
+      await waitFor(() => {
+        expect(screen.getByRole('heading', { name: /May 11 - May 17/ })).toBeInTheDocument();
+      });
+
+      // Verify May workout is visible
+      await waitFor(() => {
+        expect(screen.getByText('May Workout')).toBeInTheDocument();
+      });
+
+      // Should have fetched May data initially
+      expect(apiCalls.length).toBe(1);
+      expect(apiCalls[0]).toContain('2025-05-01');
+
+      // Navigate to previous week (multiple times to get into April)
+      const prevWeekButton = screen.getByRole('button', { name: 'Previous week' });
+
+      // Click 3 times to go back ~3 weeks into April (from mid-May to late April)
+      fireEvent.click(prevWeekButton);
+      await waitFor(() => {}, { timeout: 100 });
+
+      fireEvent.click(prevWeekButton);
+      await waitFor(() => {}, { timeout: 100 });
+
+      fireEvent.click(prevWeekButton);
+
+      // Wait for April data to be fetched
+      await waitFor(
+        () => {
+          expect(apiCalls.length).toBeGreaterThan(1);
+        },
+        { timeout: 2000 }
+      );
+
+      // Verify that April data was fetched
+      const aprilFetch = apiCalls.find((call) => call.includes('2025-04-01'));
+      expect(aprilFetch).toBeDefined();
+
+      // Verify April workout is now visible
+      await waitFor(
+        () => {
+          expect(screen.getByText('April Workout')).toBeInTheDocument();
+        },
+        { timeout: 2000 }
+      );
+
+      // Both workouts should be visible (accumulated data)
+      // Note: May workout may not be visible anymore since we navigated to a different week,
+      // but the data should still be in memory
+      expect(screen.getByText('April Workout')).toBeInTheDocument();
+    });
+
+    it('should not refetch data for a month that was already fetched', async () => {
+      const mayWorkouts = [
+        {
+          id: 1,
+          userId: 1,
+          date: '2025-05-10',
+          withInstructor: true,
+          exercises: [{ id: 1, name: 'May Workout', reps: 10 }],
+        },
+      ];
+
+      let fetchCount = 0;
+
+      server.use(
+        http.get('/api/timeline', () => {
+          fetchCount++;
+          return HttpResponse.json({
+            workouts: mayWorkouts,
+            painScores: [],
+            sleepScores: [],
+            hasMore: false,
+          });
+        })
+      );
+
+      // Set window to mobile size
+      Object.defineProperty(window, 'innerWidth', {
+        writable: true,
+        configurable: true,
+        value: 375,
+      });
+
+      renderCalendarView();
+      // Dispatch resize event after rendering
+      window.dispatchEvent(new Event('resize'));
+
+      // Wait for initial data load
+      await waitFor(() => {
+        expect(screen.getByText('May Workout')).toBeInTheDocument();
+      });
+
+      expect(fetchCount).toBe(1);
+
+      // Navigate forward and backward within the same month
+      const prevWeekButton = screen.getByRole('button', { name: 'Previous week' });
+      const nextWeekButton = screen.getByRole('button', { name: 'Next week' });
+
+      fireEvent.click(prevWeekButton);
+      await waitFor(() => {}, { timeout: 100 });
+
+      fireEvent.click(nextWeekButton);
+      await waitFor(() => {}, { timeout: 100 });
+
+      // Should still be only 1 fetch (no refetch for same month)
+      expect(fetchCount).toBe(1);
+    });
+  });
 });
