@@ -25,10 +25,10 @@ This application uses a consolidated single-server approach:
 npm install
 ```
 
-2. Copy `server/.env.example` to `server/.env`:
+2. Copy `.env.example` to `.env` in the project root:
 
 ```bash
-cp server/.env.example server/.env
+cp .env.example .env
 ```
 
 3. Generate SSL certificates (first time only):

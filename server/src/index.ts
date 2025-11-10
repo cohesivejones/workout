@@ -11,11 +11,11 @@ import "reflect-metadata";
 import logger from "./logger";
 
 // Load environment variables from the appropriate .env file
-// Use path.join to resolve relative to the server directory
+// Look for .env in the project root (two levels up from src/)
 const envFile = process.env.NODE_ENV === 'test' ? '.env.test' : '.env';
-// When running with ts-node, __dirname is in src/, so we need to go up one level
-// When running compiled code, __dirname is in dist/, so we also go up one level
-const envPath = path.join(__dirname, '..', envFile);
+// When running with ts-node, __dirname is in src/, so we need to go up two levels to project root
+// When running compiled code, __dirname is in dist/, so we also go up two levels to project root
+const envPath = path.join(__dirname, '..', '..', envFile);
 dotenv.config({ path: envPath });
 
 logger.info('Environment loaded', { 
