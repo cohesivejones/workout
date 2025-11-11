@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, act } from '@testing-library/react';
 import { Router } from 'wouter';
 import { http, HttpResponse } from 'msw';
 import { describe, it, expect, beforeEach } from 'vitest';
@@ -11,8 +11,6 @@ describe('Layout - Header Navigation', () => {
     { text: 'Timeline', href: '/' },
     { text: 'Dashboard', href: '/dashboard' },
     { text: 'Exercises', href: '/exercises' },
-    { text: 'Generate Workout', href: '/workouts/generate' },
-    { text: 'Diagnostician', href: '/diagnostician' },
   ];
 
   describe('when user is not logged in', () => {
@@ -67,10 +65,41 @@ describe('Layout - Header Navigation', () => {
         </Router>
       );
 
-      // Wait for auth check to complete and link to appear
+      // Wait for auth check to complete
       await waitFor(() => {
-        const link = screen.getByRole('link', { name: text });
+        const link = screen.queryByRole('link', { name: text });
         expect(link).toBeInTheDocument();
+      });
+    });
+
+    it('shows AI dropdown with Generate Workout and Diagnostician', async () => {
+      render(
+        <Router>
+          <UserContextProvider>
+            <Layout>
+              <div>Test Content</div>
+            </Layout>
+          </UserContextProvider>
+        </Router>
+      );
+
+      // Wait for auth check to complete
+      await waitFor(() => {
+        // AI dropdown button
+        const aiButton = screen.getByRole('button', { name: /AI/i });
+        expect(aiButton).toBeInTheDocument();
+      });
+
+      // Simulate click to open dropdown
+      const aiButton = screen.getByRole('button', { name: /AI/i });
+      await act(async () => {
+        aiButton.click();
+      });
+
+      // Check for menu items
+      await waitFor(() => {
+        expect(screen.getByRole('link', { name: 'Generate Workout' })).toBeInTheDocument();
+        expect(screen.getByRole('link', { name: 'Diagnostician' })).toBeInTheDocument();
       });
     });
   });
