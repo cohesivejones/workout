@@ -26,9 +26,6 @@
   display: block;
 }
 
-/* Note: we toggle a plain 'open' className from React (not CSS Modules),
-   so no separate .open ruleset is required here. */
-
 .dropdownMenuItem {
   display: block;
   padding: 10px 18px;
@@ -241,9 +238,6 @@
 .userDropdown.open .dropdownMenu {
   display: block;
 }
-
-/* Note: we toggle a plain 'open' className from React (not CSS Modules),
-   so no separate .open ruleset is required here. */
 
 .appMain {
   padding: 20px;
