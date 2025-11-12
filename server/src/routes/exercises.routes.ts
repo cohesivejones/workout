@@ -71,4 +71,83 @@ router.put("/:id", authenticateToken, async (req: Request, res: Response) => {
   }
 });
 
+router.post("/:id/suggest", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const exerciseId = parseInt(req.params.id);
+    const userId = req.user!.id;
+    const exerciseRepository = dataSource.getRepository(Exercise);
+    const exercise = await exerciseRepository.findOne({ where: { id: exerciseId, userId } });
+    
+    if (!exercise) {
+      return res.status(404).json({ error: "Exercise not found" });
+    }
+
+    // AI suggestion logic: generate variations of the exercise name
+    const suggestions = generateExerciseSuggestions(exercise.name);
+    const suggestedName = suggestions[0]; // Return the first suggestion
+
+    logger.info("Exercise name suggestion generated", { 
+      exerciseId: exercise.id, 
+      originalName: exercise.name, 
+      suggestedName,
+      userId 
+    });
+
+    res.json({ suggestedName });
+  } catch (err) {
+    logger.error("Suggest exercise name error", { error: err, exerciseId: req.params.id, userId: req.user?.id });
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// Helper function to generate exercise name suggestions
+function generateExerciseSuggestions(currentName: string): string[] {
+  const name = currentName.toLowerCase().trim();
+  
+  // Common exercise variations and improvements
+  const variations: Record<string, string[]> = {
+    'bench': ['Barbell Bench Press', 'Flat Bench Press', 'Bench Press (Barbell)'],
+    'squat': ['Barbell Back Squat', 'Back Squat', 'Squat (Barbell)'],
+    'deadlift': ['Conventional Deadlift', 'Barbell Deadlift', 'Deadlift (Barbell)'],
+    'press': ['Overhead Press', 'Military Press', 'Shoulder Press'],
+    'row': ['Barbell Row', 'Bent Over Row', 'Barbell Bent Over Row'],
+    'curl': ['Barbell Curl', 'Bicep Curl (Barbell)', 'Standing Barbell Curl'],
+    'pullup': ['Pull-Up', 'Bodyweight Pull-Up', 'Wide Grip Pull-Up'],
+    'chinup': ['Chin-Up', 'Bodyweight Chin-Up', 'Close Grip Chin-Up'],
+    'dip': ['Parallel Bar Dips', 'Bodyweight Dips', 'Chest Dips'],
+    'lunge': ['Walking Lunges', 'Dumbbell Lunges', 'Forward Lunges'],
+  };
+
+  // Check if the name contains any keywords
+  for (const [keyword, suggestions] of Object.entries(variations)) {
+    if (name.includes(keyword)) {
+      // Filter out suggestions that are too similar to current name
+      const filtered = suggestions.filter(s => s.toLowerCase() !== name);
+      if (filtered.length > 0) return filtered;
+    }
+  }
+
+  // Generic improvements if no specific match
+  if (name.length < 3) {
+    return [currentName]; // Too short, don't modify
+  }
+
+  // Capitalize properly
+  const words = currentName.split(' ');
+  const capitalized = words.map(word => 
+    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+  ).join(' ');
+
+  // If already well-formatted, add descriptive modifiers
+  if (capitalized === currentName) {
+    return [
+      `Barbell ${currentName}`,
+      `Dumbbell ${currentName}`,
+      `${currentName} (Machine)`,
+    ];
+  }
+
+  return [capitalized];
+}
+
 export default router;

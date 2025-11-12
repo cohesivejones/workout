@@ -118,6 +118,12 @@
   white-space: nowrap;
 }
 
+.exerciseActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
 /* Sort button in header: looks like text, aligns left */
 .sortButton {
   background: none;
@@ -150,7 +156,9 @@
   width: 10px;
   text-align: center;
   color: #6c757d;
-  transition: transform 0.15s ease, color 0.15s ease;
+  transition:
+    transform 0.15s ease,
+    color 0.15s ease;
 }
 
 .sortButton:hover .sortIndicator {
@@ -162,6 +170,33 @@
 }
 
 /* Button styles are now imported from common styles */
+
+.suggestBtn {
+  background-color: white;
+  border: none;
+  color: #28a745;
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.suggestBtn:hover:not(:disabled) {
+  background-color: #e8f5e9;
+  color: #218838;
+  text-decoration: none;
+}
+
+.suggestBtn:focus {
+  box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.3);
+  outline: none;
+}
+
+.suggestBtn:disabled {
+  color: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
 
 .editBtn {
   background-color: white;

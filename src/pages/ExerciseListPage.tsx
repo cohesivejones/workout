@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import type { ReactElement } from 'react';
-import { fetchExercises, updateExercise } from '../api';
+import { fetchExercises, updateExercise, suggestExerciseName } from '../api';
 import { Exercise } from '../types';
 import { useUserContext } from '../contexts/useUserContext';
 import classNames from 'classnames';
@@ -14,6 +14,7 @@ function ExerciseListPage(): ReactElement {
   const [editingExercise, setEditingExercise] = useState<Exercise | null>(null);
   const [newName, setNewName] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [isSuggesting, setIsSuggesting] = useState<number | null>(null);
   const [sortDirection, setSortDirection] = useState<'none' | 'ascending' | 'descending'>('none');
   const { user } = useUserContext();
 
@@ -66,6 +67,23 @@ function ExerciseListPage(): ReactElement {
     }
   };
 
+  const handleSuggestName = async (exercise: Exercise) => {
+    try {
+      setIsSuggesting(exercise.id);
+      setError(null);
+      const { suggestedName } = await suggestExerciseName(exercise.id);
+
+      // Enter edit mode with suggested name pre-filled
+      setEditingExercise(exercise);
+      setNewName(suggestedName);
+    } catch (err) {
+      console.error('Failed to suggest exercise name:', err);
+      setError('Failed to generate name suggestion. Please try again.');
+    } finally {
+      setIsSuggesting(null);
+    }
+  };
+
   const toggleNameSort = () => {
     setSortDirection((prev) => (prev === 'ascending' ? 'descending' : 'ascending'));
   };
@@ -107,7 +125,9 @@ function ExerciseListPage(): ReactElement {
                     <button
                       type="button"
                       onClick={toggleNameSort}
-                      className={classNames(styles.sortButton, { [styles.sortActive]: sortDirection !== 'none' })}
+                      className={classNames(styles.sortButton, {
+                        [styles.sortActive]: sortDirection !== 'none',
+                      })}
                       aria-label="Sort by Exercise Name"
                     >
                       <span>Exercise Name</span>
@@ -156,13 +176,23 @@ function ExerciseListPage(): ReactElement {
                           </button>
                         </div>
                       ) : (
-                        <button
-                          onClick={() => handleEditClick(exercise)}
-                          className={classNames(styles.editBtn, buttonStyles.tertiaryBtn)}
-                          aria-label={`Edit ${exercise.name}`}
-                        >
-                          Edit
-                        </button>
+                        <div className={styles.exerciseActions}>
+                          <button
+                            onClick={() => handleSuggestName(exercise)}
+                            className={classNames(styles.suggestBtn, buttonStyles.tertiaryBtn)}
+                            aria-label={`Suggest name for ${exercise.name}`}
+                            disabled={isSuggesting === exercise.id}
+                          >
+                            {isSuggesting === exercise.id ? 'Suggesting...' : 'Suggest Name'}
+                          </button>
+                          <button
+                            onClick={() => handleEditClick(exercise)}
+                            className={classNames(styles.editBtn, buttonStyles.tertiaryBtn)}
+                            aria-label={`Edit ${exercise.name}`}
+                          >
+                            Edit
+                          </button>
+                        </div>
                       )}
                     </td>
                   </tr>

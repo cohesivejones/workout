@@ -22,6 +22,11 @@ const server = setupServer(
       name: 'Updated Name',
       createdAt: '2024-01-01T00:00:00Z',
     });
+  }),
+  http.post('/api/exercises/:id/suggest', () => {
+    return HttpResponse.json({
+      suggestedName: 'Barbell Bench Press',
+    });
   })
 );
 
@@ -152,6 +157,17 @@ describe('ExerciseListPage - Table Layout', () => {
       expect(editButtons).toHaveLength(3);
     });
 
+    it('shows suggest name button for each exercise', async () => {
+      renderWithContext();
+
+      await waitFor(() => {
+        expect(screen.getByText('Bench Press')).toBeInTheDocument();
+      });
+
+      const suggestButtons = screen.getAllByRole('button', { name: /suggest name/i });
+      expect(suggestButtons).toHaveLength(3);
+    });
+
     it('allows editing exercise name inline', async () => {
       renderWithContext();
 
@@ -246,6 +262,54 @@ describe('ExerciseListPage - Table Layout', () => {
       // Should show "Saving..." briefly
       await waitFor(() => {
         expect(screen.getByText('Saving...')).toBeInTheDocument();
+      });
+    });
+
+    it('fetches and fills suggested name when suggest button is clicked', async () => {
+      renderWithContext();
+
+      await waitFor(() => {
+        expect(screen.getByText('Bench Press')).toBeInTheDocument();
+      });
+
+      const suggestButton = screen.getByRole('button', { name: /suggest name for bench press/i });
+      suggestButton.click();
+
+      // Should show "Suggesting..." while loading
+      await waitFor(() => {
+        expect(screen.getByText('Suggesting...')).toBeInTheDocument();
+      });
+
+      // After loading, should enter edit mode with suggested name
+      await waitFor(() => {
+        const input = screen.getByDisplayValue('Barbell Bench Press');
+        expect(input).toBeInTheDocument();
+      });
+
+      // Should show Save and Cancel buttons
+      expect(screen.getByRole('button', { name: /save/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /cancel/i })).toBeInTheDocument();
+    });
+
+    it('handles suggestion error gracefully', async () => {
+      server.use(
+        http.post('/api/exercises/:id/suggest', () => {
+          return HttpResponse.json({ error: 'Failed' }, { status: 500 });
+        })
+      );
+
+      renderWithContext();
+
+      await waitFor(() => {
+        expect(screen.getByText('Bench Press')).toBeInTheDocument();
+      });
+
+      const suggestButton = screen.getByRole('button', { name: /suggest name for bench press/i });
+      suggestButton.click();
+
+      // Should show error message
+      await waitFor(() => {
+        expect(screen.getByText(/failed to generate name suggestion/i)).toBeInTheDocument();
       });
     });
   });
