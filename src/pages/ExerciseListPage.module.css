@@ -1,7 +1,7 @@
 .exerciseListPage {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 32px;
 }
 
 .pageHeader {
@@ -9,6 +9,12 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
+}
+
+.subtitle {
+  margin: 0;
+  color: #6c757d;
+  font-size: 14px;
 }
 
 .errorMessage {
@@ -38,34 +44,233 @@
   margin-top: 20px;
 }
 
-.exerciseCards {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 16px;
+/* Table styles */
+.tableWrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin: 0 auto;
+  padding: 12px 16px;
+  max-width: 900px;
 }
 
-.exerciseCard {
-  background-color: white;
-  border-radius: 8px;
-  padding: 16px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  display: flex;
-  flex-direction: column;
+.exerciseTable {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 400px;
+}
+
+.exerciseTable thead {
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.exerciseTable th {
+  text-align: left;
+  padding: 12px 16px;
+  font-weight: 600;
+  color: #212529;
+  font-size: 14px;
+}
+
+.nameHeader {
+  text-align: left;
+}
+
+.actionsHeader {
+  text-align: right;
+}
+
+/* Increase specificity to ensure header alignment overrides any defaults */
+.exerciseTable thead th.actionsHeader {
+  text-align: right;
+}
+
+.exerciseTable tbody tr {
+  border-bottom: 1px solid #e9ecef;
+  transition: background-color 0.15s ease;
+}
+
+.exerciseTable tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.exerciseTable td {
+  padding: 12px 16px;
+  color: #212529;
+}
+
+.nameCell {
+  text-align: left;
+  font-weight: 500;
 }
 
 .exerciseName {
-  font-size: 1.1rem;
-  font-weight: 500;
-  margin-bottom: 12px;
+  display: block;
+  color: #212529;
+  font-size: 15px;
+}
+
+.actionsCell {
+  text-align: right;
+  white-space: nowrap;
 }
 
 .exerciseActions {
   display: flex;
   justify-content: flex-end;
-  margin-top: auto;
+  gap: 8px;
+}
+
+/* Sort button in header: looks like text, aligns left */
+.sortButton {
+  background: none;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sortButton:focus-visible {
+  outline: 2px solid #80bdff;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.sortButton:hover span {
+  color: #0056b3;
+}
+
+.sortIndicator {
+  font-size: 10px;
+  line-height: 1;
+  display: inline-block;
+  width: 10px;
+  text-align: center;
+  color: #6c757d;
+  transition:
+    transform 0.15s ease,
+    color 0.15s ease;
+}
+
+.sortButton:hover .sortIndicator {
+  color: #0056b3;
+}
+
+.sortActive .sortIndicator {
+  color: #007bff;
 }
 
 /* Button styles are now imported from common styles */
+
+.suggestBtn {
+  background-color: white;
+  border: none;
+  color: #28a745;
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.suggestBtn:hover:not(:disabled) {
+  background-color: #e8f5e9;
+  color: #218838;
+  text-decoration: none;
+}
+
+.suggestBtn:focus {
+  box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.3);
+  outline: none;
+}
+
+.suggestBtn:disabled {
+  color: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.suggestionsDropdown {
+  position: relative;
+  background: white;
+  border: 1px solid #28a745;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 12px;
+  min-width: 250px;
+  z-index: 10;
+}
+
+.suggestionsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.suggestionsTitle {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #28a745;
+}
+
+.closeSuggestionsBtn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: #6c757d;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.closeSuggestionsBtn:hover {
+  color: #dc3545;
+}
+
+.suggestionsList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.suggestionItem {
+  background: white;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+  padding: 8px 12px;
+  text-align: left;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: #212529;
+  transition: all 0.15s ease;
+}
+
+.suggestionItem:hover {
+  background: #e8f5e9;
+  border-color: #28a745;
+  color: #218838;
+}
+
+.suggestionItem:focus {
+  outline: 2px solid #28a745;
+  outline-offset: 2px;
+}
 
 .editBtn {
   background-color: white;
@@ -167,7 +372,24 @@
     gap: 16px;
   }
 
-  .exerciseCards {
-    grid-template-columns: 1fr;
+  .exerciseTable {
+    min-width: 100%;
+  }
+
+  .exerciseListPage {
+    padding: 0 12px;
+  }
+
+  .tableWrapper {
+    max-width: 100%;
+    padding: 8px;
+    box-shadow: none;
+    border-radius: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .exerciseListPage {
+    padding: 0 8px;
   }
 }

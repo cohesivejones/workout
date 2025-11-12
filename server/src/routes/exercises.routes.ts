@@ -2,6 +2,7 @@ import { Router, Request, Response } from "express";
 import dataSource from "../data-source";
 import { Exercise, WorkoutExercise } from "../entities";
 import { authenticateToken } from "../middleware/auth";
+import { openai } from "../services/openai";
 import logger from "../logger";
 
 const router = Router();
@@ -67,6 +68,64 @@ router.put("/:id", authenticateToken, async (req: Request, res: Response) => {
     res.json(exercise);
   } catch (err) {
     logger.error("Update exercise error", { error: err, exerciseId: req.params.id, userId: req.user?.id });
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+router.post("/:id/suggest", authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const exerciseId = parseInt(req.params.id);
+    const userId = req.user!.id;
+    const exerciseRepository = dataSource.getRepository(Exercise);
+    const exercise = await exerciseRepository.findOne({ where: { id: exerciseId, userId } });
+    
+    if (!exercise) {
+      return res.status(404).json({ error: "Exercise not found" });
+    }
+
+    // Use OpenAI to suggest improved exercise names
+    const systemPrompt = `You are a fitness expert specializing in exercise naming conventions. Your task is to suggest more precise, professional, and standardized names for exercises. Use proper fitness industry terminology and be specific about equipment and variation when applicable.`;
+
+    const userPrompt = `Given the exercise name "${exercise.name}", suggest 3 improved, more professional versions of this name. Consider:
+- Proper capitalization
+- Equipment specification (Barbell, Dumbbell, Cable, Machine, Bodyweight, etc.)
+- Exercise variation details (Incline, Decline, Close Grip, Wide Grip, etc.)
+- Common fitness industry naming conventions
+
+Respond with ONLY 3 suggested exercise names, one per line. No numbering, bullets, or extra text.`;
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt },
+      ],
+      temperature: 0.8,
+      max_tokens: 100,
+    });
+
+    const suggestionsText = response.choices[0].message.content?.trim() || exercise.name;
+    const suggestions = suggestionsText
+      .split('\n')
+      .map(s => s.trim())
+      .filter(s => s.length > 0)
+      .slice(0, 3); // Ensure max 3 suggestions
+
+    // Fallback if OpenAI didn't return enough suggestions
+    if (suggestions.length === 0) {
+      suggestions.push(exercise.name);
+    }
+
+    logger.info("Exercise name suggestions generated via OpenAI", { 
+      exerciseId: exercise.id, 
+      originalName: exercise.name, 
+      suggestions,
+      userId 
+    });
+
+    res.json({ suggestions });
+  } catch (err) {
+    logger.error("Suggest exercise name error", { error: err, exerciseId: req.params.id, userId: req.user?.id });
     res.status(500).json({ error: "Server error" });
   }
 });

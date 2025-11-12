@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import type { ReactElement } from 'react';
-import { fetchExercises, updateExercise } from '../api';
+import { fetchExercises, updateExercise, suggestExerciseName } from '../api';
 import { Exercise } from '../types';
 import { useUserContext } from '../contexts/useUserContext';
 import classNames from 'classnames';
@@ -14,6 +14,10 @@ function ExerciseListPage(): ReactElement {
   const [editingExercise, setEditingExercise] = useState<Exercise | null>(null);
   const [newName, setNewName] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [isSuggesting, setIsSuggesting] = useState<number | null>(null);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState<number | null>(null);
+  const [sortDirection, setSortDirection] = useState<'none' | 'ascending' | 'descending'>('none');
   const { user } = useUserContext();
 
   useEffect(() => {
@@ -65,6 +69,48 @@ function ExerciseListPage(): ReactElement {
     }
   };
 
+  const handleSuggestName = async (exercise: Exercise) => {
+    try {
+      setIsSuggesting(exercise.id);
+      setError(null);
+      const { suggestions: newSuggestions } = await suggestExerciseName(exercise.id);
+
+      // Show suggestions dropdown for this exercise
+      setSuggestions(newSuggestions);
+      setShowSuggestions(exercise.id);
+    } catch (err) {
+      console.error('Failed to suggest exercise name:', err);
+      setError('Failed to generate name suggestion. Please try again.');
+    } finally {
+      setIsSuggesting(null);
+    }
+  };
+
+  const handleSelectSuggestion = (exercise: Exercise, suggestion: string) => {
+    // Enter edit mode with selected suggestion pre-filled
+    setEditingExercise(exercise);
+    setNewName(suggestion);
+    setShowSuggestions(null);
+    setSuggestions([]);
+  };
+
+  const handleCancelSuggestions = () => {
+    setShowSuggestions(null);
+    setSuggestions([]);
+  };
+
+  const toggleNameSort = () => {
+    setSortDirection((prev) => (prev === 'ascending' ? 'descending' : 'ascending'));
+  };
+
+  const visibleExercises = useMemo(() => {
+    if (sortDirection === 'none') return exercises;
+    const sorted = [...exercises].sort((a, b) =>
+      a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
+    );
+    return sortDirection === 'ascending' ? sorted : sorted.reverse();
+  }, [exercises, sortDirection]);
+
   if (loading) {
     return <div className={styles.loading}>Loading...</div>;
   }
@@ -73,6 +119,9 @@ function ExerciseListPage(): ReactElement {
     <div className={styles.exerciseListPage}>
       <div className={styles.pageHeader}>
         <h2>Exercises</h2>
+        <p className={styles.subtitle}>
+          Manage your exercise library ({exercises.length} exercises)
+        </p>
       </div>
 
       {error && <div className={styles.errorMessage}>{error}</div>}
@@ -83,50 +132,118 @@ function ExerciseListPage(): ReactElement {
             No exercises found. Add exercises when creating a workout.
           </p>
         ) : (
-          <div className={styles.exerciseCards}>
-            {exercises.map((exercise) => (
-              <div key={exercise.id} className={styles.exerciseCard}>
-                {editingExercise?.id === exercise.id ? (
-                  <div className={styles.exerciseEditForm}>
-                    <input
-                      type="text"
-                      value={newName}
-                      onChange={(e) => setNewName(e.target.value)}
-                      className={styles.exerciseNameInput}
-                      placeholder="Exercise name"
-                    />
-                    <div className={styles.exerciseEditActions}>
-                      <button
-                        onClick={handleSaveEdit}
-                        disabled={!newName.trim() || isSubmitting}
-                        className={classNames(styles.saveBtn, buttonStyles.primaryBtn)}
-                      >
-                        {isSubmitting ? 'Saving...' : 'Save'}
-                      </button>
-                      <button
-                        onClick={handleCancelEdit}
-                        className={classNames(styles.cancelBtn, buttonStyles.secondaryBtn)}
-                        disabled={isSubmitting}
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    <div className={styles.exerciseName}>{exercise.name}</div>
-                    <div className={styles.exerciseActions}>
-                      <button
-                        onClick={() => handleEditClick(exercise)}
-                        className={classNames(styles.editBtn, buttonStyles.tertiaryBtn)}
-                      >
-                        Edit
-                      </button>
-                    </div>
-                  </>
-                )}
-              </div>
-            ))}
+          <div className={styles.tableWrapper}>
+            <table className={styles.exerciseTable} role="table">
+              <thead>
+                <tr>
+                  <th scope="col" aria-sort={sortDirection} className={styles.nameHeader}>
+                    <button
+                      type="button"
+                      onClick={toggleNameSort}
+                      className={classNames(styles.sortButton, {
+                        [styles.sortActive]: sortDirection !== 'none',
+                      })}
+                      aria-label="Sort by Exercise Name"
+                    >
+                      <span>Exercise Name</span>
+                      <span aria-hidden="true" className={styles.sortIndicator}>
+                        {sortDirection === 'descending' ? '▼' : '▲'}
+                      </span>
+                    </button>
+                  </th>
+                  <th scope="col" className={styles.actionsHeader}>
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {visibleExercises.map((exercise) => (
+                  <tr key={exercise.id}>
+                    <td className={styles.nameCell}>
+                      {editingExercise?.id === exercise.id ? (
+                        <input
+                          type="text"
+                          value={newName}
+                          onChange={(e) => setNewName(e.target.value)}
+                          className={styles.exerciseNameInput}
+                          placeholder="Exercise name"
+                        />
+                      ) : (
+                        <span className={styles.exerciseName}>{exercise.name}</span>
+                      )}
+                    </td>
+                    <td className={styles.actionsCell}>
+                      {editingExercise?.id === exercise.id ? (
+                        <div className={styles.exerciseEditActions}>
+                          <button
+                            onClick={handleSaveEdit}
+                            disabled={!newName.trim() || isSubmitting}
+                            className={classNames(styles.saveBtn, buttonStyles.primaryBtn)}
+                          >
+                            {isSubmitting ? 'Saving...' : 'Save'}
+                          </button>
+                          <button
+                            onClick={handleCancelEdit}
+                            className={classNames(styles.cancelBtn, buttonStyles.secondaryBtn)}
+                            disabled={isSubmitting}
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      ) : (
+                        <div className={styles.exerciseActions}>
+                          {showSuggestions === exercise.id ? (
+                            <div className={styles.suggestionsDropdown}>
+                              <div className={styles.suggestionsHeader}>
+                                <span className={styles.suggestionsTitle}>
+                                  Select a suggestion:
+                                </span>
+                                <button
+                                  onClick={handleCancelSuggestions}
+                                  className={styles.closeSuggestionsBtn}
+                                  aria-label="Close suggestions"
+                                >
+                                  ×
+                                </button>
+                              </div>
+                              <div className={styles.suggestionsList}>
+                                {suggestions.map((suggestion, idx) => (
+                                  <button
+                                    key={idx}
+                                    onClick={() => handleSelectSuggestion(exercise, suggestion)}
+                                    className={styles.suggestionItem}
+                                  >
+                                    {suggestion}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          ) : (
+                            <>
+                              <button
+                                onClick={() => handleSuggestName(exercise)}
+                                className={classNames(styles.suggestBtn, buttonStyles.tertiaryBtn)}
+                                aria-label={`Suggest name for ${exercise.name}`}
+                                disabled={isSuggesting === exercise.id}
+                              >
+                                {isSuggesting === exercise.id ? 'Suggesting...' : 'Suggest Name'}
+                              </button>
+                              <button
+                                onClick={() => handleEditClick(exercise)}
+                                className={classNames(styles.editBtn, buttonStyles.tertiaryBtn)}
+                                aria-label={`Edit ${exercise.name}`}
+                              >
+                                Edit
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </div>
