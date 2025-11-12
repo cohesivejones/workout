@@ -502,4 +502,184 @@ describe('DashboardPage', () => {
       expect(screen.getByText('Previous Rep')).toBeInTheDocument();
     });
   });
+
+  describe('Alphabetical Navigation', () => {
+    const mockMultipleExercises = [
+      {
+        exerciseName: 'Bench Press',
+        dataPoints: [
+          { date: '2025-02-15', weight: 135, reps: 8, new_reps: false, new_weight: false },
+        ],
+      },
+      {
+        exerciseName: 'Deadlift',
+        dataPoints: [
+          { date: '2025-02-15', weight: 225, reps: 5, new_reps: false, new_weight: false },
+        ],
+      },
+      {
+        exerciseName: 'Squat',
+        dataPoints: [
+          { date: '2025-02-15', weight: 185, reps: 8, new_reps: false, new_weight: false },
+        ],
+      },
+      {
+        exerciseName: 'Pull-ups',
+        dataPoints: [
+          { date: '2025-02-15', weight: 0, reps: 12, new_reps: false, new_weight: false },
+        ],
+      },
+    ];
+
+    it('renders alphabetical navigation with available letters', async () => {
+      server.use(
+        http.get('/api/dashboard/weight-progression', () => {
+          return HttpResponse.json(mockMultipleExercises);
+        }),
+        http.get('/api/dashboard/pain-progression', () => {
+          return HttpResponse.json({ dataPoints: [] });
+        }),
+        http.get('/api/dashboard/sleep-progression', () => {
+          return HttpResponse.json({ dataPoints: [] });
+        })
+      );
+
+      render(<DashboardPage />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Bench Press')).toBeInTheDocument();
+      });
+
+      // Check that alphabet navigation is present
+      const alphabetNav = screen.getByRole('navigation', { name: /jump to exercise by letter/i });
+      expect(alphabetNav).toBeInTheDocument();
+
+      // Check for letters that have exercises
+      expect(
+        screen.getByRole('button', { name: /jump to exercises starting with B/i })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: /jump to exercises starting with D/i })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: /jump to exercises starting with P/i })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: /jump to exercises starting with S/i })
+      ).toBeInTheDocument();
+    });
+
+    it('scrolls to exercise section when clicking letter', async () => {
+      server.use(
+        http.get('/api/dashboard/weight-progression', () => {
+          return HttpResponse.json(mockMultipleExercises);
+        }),
+        http.get('/api/dashboard/pain-progression', () => {
+          return HttpResponse.json({ dataPoints: [] });
+        }),
+        http.get('/api/dashboard/sleep-progression', () => {
+          return HttpResponse.json({ dataPoints: [] });
+        })
+      );
+
+      render(<DashboardPage />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Bench Press')).toBeInTheDocument();
+      });
+
+      // Mock scrollIntoView
+      const scrollIntoViewMock = vi.fn();
+      Element.prototype.scrollIntoView = scrollIntoViewMock;
+
+      // Click on 'D' to jump to Deadlift
+      const dButton = screen.getByRole('button', { name: /jump to exercises starting with D/i });
+      dButton.click();
+
+      // Verify scrollIntoView was called
+      expect(scrollIntoViewMock).toHaveBeenCalledWith({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    });
+
+    it('groups exercises by first letter', async () => {
+      server.use(
+        http.get('/api/dashboard/weight-progression', () => {
+          return HttpResponse.json(mockMultipleExercises);
+        }),
+        http.get('/api/dashboard/pain-progression', () => {
+          return HttpResponse.json({ dataPoints: [] });
+        }),
+        http.get('/api/dashboard/sleep-progression', () => {
+          return HttpResponse.json({ dataPoints: [] });
+        })
+      );
+
+      render(<DashboardPage />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Bench Press')).toBeInTheDocument();
+      });
+
+      // Check that letter headings are present
+      const letterHeadings = screen.getAllByRole('heading', { level: 3 });
+      const letterHeadingTexts = letterHeadings.map((h) => h.textContent);
+
+      expect(letterHeadingTexts).toContain('B');
+      expect(letterHeadingTexts).toContain('D');
+      expect(letterHeadingTexts).toContain('P');
+      expect(letterHeadingTexts).toContain('S');
+    });
+
+    it('renders exercises in alphabetical order within each letter group', async () => {
+      const exercisesWithSameLetter = [
+        {
+          exerciseName: 'Bench Press',
+          dataPoints: [
+            { date: '2025-02-15', weight: 135, reps: 8, new_reps: false, new_weight: false },
+          ],
+        },
+        {
+          exerciseName: 'Bicep Curls',
+          dataPoints: [
+            { date: '2025-02-15', weight: 30, reps: 12, new_reps: false, new_weight: false },
+          ],
+        },
+        {
+          exerciseName: 'Bulgarian Split Squat',
+          dataPoints: [
+            { date: '2025-02-15', weight: 60, reps: 10, new_reps: false, new_weight: false },
+          ],
+        },
+      ];
+
+      server.use(
+        http.get('/api/dashboard/weight-progression', () => {
+          return HttpResponse.json(exercisesWithSameLetter);
+        }),
+        http.get('/api/dashboard/pain-progression', () => {
+          return HttpResponse.json({ dataPoints: [] });
+        }),
+        http.get('/api/dashboard/sleep-progression', () => {
+          return HttpResponse.json({ dataPoints: [] });
+        })
+      );
+
+      render(<DashboardPage />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Bench Press')).toBeInTheDocument();
+      });
+
+      // Get all exercise headings (level 4)
+      const exerciseHeadings = screen.getAllByRole('heading', { level: 4 });
+      const exerciseNames = exerciseHeadings.map((h) => h.textContent);
+
+      // Verify they're in alphabetical order
+      expect(exerciseNames[0]).toBe('Bench Press');
+      expect(exerciseNames[1]).toBe('Bicep Curls');
+      expect(exerciseNames[2]).toBe('Bulgarian Split Squat');
+    });
+  });
 });
