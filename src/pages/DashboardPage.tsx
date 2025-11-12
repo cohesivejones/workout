@@ -151,6 +151,39 @@ function DashboardPage() {
   // Get standard date range for x-axis
   const dateRange = useMemo(() => getStandardDateRange(), []);
 
+  // Group exercises by first letter for alphabetical index
+  const exercisesByLetter = useMemo(() => {
+    const grouped = new Map<string, ExerciseWeightProgression[]>();
+
+    progressionData.forEach((exercise) => {
+      const firstLetter = exercise.exerciseName.charAt(0).toUpperCase();
+      if (!grouped.has(firstLetter)) {
+        grouped.set(firstLetter, []);
+      }
+      grouped.get(firstLetter)!.push(exercise);
+    });
+
+    // Sort exercises within each letter group
+    grouped.forEach((exercises) => {
+      exercises.sort((a, b) => a.exerciseName.localeCompare(b.exerciseName));
+    });
+
+    return new Map([...grouped.entries()].sort());
+  }, [progressionData]);
+
+  // Get all available letters for the index
+  const availableLetters = useMemo(() => {
+    return Array.from(exercisesByLetter.keys());
+  }, [exercisesByLetter]);
+
+  // Function to scroll to a specific letter section
+  const scrollToLetter = (letter: string) => {
+    const element = document.getElementById(`letter-${letter}`);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -230,191 +263,220 @@ function DashboardPage() {
   }
 
   return (
-    <div>
-      <div className={styles.pageHeader}>
-        <h2>Exercise Weight Progression</h2>
-        <p className={styles.subtitle}>Tracking your strength gains over the past 12 weeks</p>
-      </div>
+    <div className={styles.dashboardContainer}>
+      {/* Alphabetical Index Navigation */}
+      {availableLetters.length > 0 && (
+        <nav className={styles.alphabetNav} aria-label="Jump to exercise by letter">
+          {availableLetters.map((letter) => (
+            <button
+              key={letter}
+              className={styles.letterButton}
+              onClick={() => scrollToLetter(letter)}
+              aria-label={`Jump to exercises starting with ${letter}`}
+            >
+              {letter}
+            </button>
+          ))}
+        </nav>
+      )}
 
-      <div className={styles.chartsContainer}>
-        {progressionData.map((exercise) => (
-          <div key={exercise.exerciseName} className={styles.chartCard}>
-            <h3>{exercise.exerciseName}</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={exercise.dataPoints}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis
-                  dataKey="date"
-                  tickFormatter={(date) => `Week ${getWeekNumber(date, dateRange.startDate)}`}
-                  tick={{ fontSize: 12 }}
-                  domain={[dateRange.startDateStr, dateRange.endDateStr]}
-                  type="category"
-                  allowDataOverflow={true}
-                  ticks={Array.from({ length: 12 }, (_, i) => {
-                    const weekDate = new Date(dateRange.startDate);
-                    weekDate.setDate(weekDate.getDate() + i * 7);
-                    return weekDate.toISOString().split('T')[0];
-                  })}
-                />
-                <YAxis
-                  label={{
-                    value: 'Weight (lbs)',
-                    angle: -90,
-                    position: 'insideLeft',
-                    style: { textAnchor: 'middle', fontSize: 12 },
-                  }}
-                  domain={['dataMin - 10', 'dataMax + 10']}
-                  tick={{ fontSize: 12 }}
-                  width={50}
-                />
-                <Tooltip
-                  formatter={formatTooltip}
-                  labelFormatter={(date) => format(new Date(date), 'MMM d, yyyy')}
-                  contentStyle={{ fontSize: '12px', padding: '8px' }}
-                  wrapperStyle={{ zIndex: 1000 }}
-                  isAnimationActive={false}
-                />
-                <Legend wrapperStyle={{ fontSize: '12px', marginTop: '5px' }} />
-                <Line
-                  type="monotone"
-                  dataKey="weight"
-                  stroke="#8884d8"
-                  activeDot={{ r: 8 }}
-                  connectNulls={true}
-                  name="Weight"
-                  dot={<CustomDot />}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-            <div className={styles.prLegend}>
-              <div className={styles.legendItem}>
-                <div className={styles.legendDot} style={{ backgroundColor: '#8884d8' }}></div>
-                <span>Previous Rep</span>
-              </div>
-              <div className={styles.legendItem}>
-                <div className={styles.legendDot} style={{ backgroundColor: '#ffd700' }}></div>
-                <span>New Rep PR</span>
-              </div>
+      <div className={styles.dashboardContent}>
+        <div className={styles.pageHeader}>
+          <h2>Exercise Weight Progression</h2>
+          <p className={styles.subtitle}>Tracking your strength gains over the past 12 weeks</p>
+        </div>
+
+        <div className={styles.chartsContainer}>
+          {Array.from(exercisesByLetter.entries()).map(([letter, exercises]) => (
+            <div key={letter} id={`letter-${letter}`} className={styles.letterSection}>
+              <h3 className={styles.letterHeading}>{letter}</h3>
+              {exercises.map((exercise) => (
+                <div key={exercise.exerciseName} className={styles.chartCard}>
+                  <h4>{exercise.exerciseName}</h4>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <LineChart data={exercise.dataPoints}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis
+                        dataKey="date"
+                        tickFormatter={(date) => `Week ${getWeekNumber(date, dateRange.startDate)}`}
+                        tick={{ fontSize: 12 }}
+                        domain={[dateRange.startDateStr, dateRange.endDateStr]}
+                        type="category"
+                        allowDataOverflow={true}
+                        ticks={Array.from({ length: 12 }, (_, i) => {
+                          const weekDate = new Date(dateRange.startDate);
+                          weekDate.setDate(weekDate.getDate() + i * 7);
+                          return weekDate.toISOString().split('T')[0];
+                        })}
+                      />
+                      <YAxis
+                        label={{
+                          value: 'Weight (lbs)',
+                          angle: -90,
+                          position: 'insideLeft',
+                          style: { textAnchor: 'middle', fontSize: 12 },
+                        }}
+                        domain={['dataMin - 10', 'dataMax + 10']}
+                        tick={{ fontSize: 12 }}
+                        width={50}
+                      />
+                      <Tooltip
+                        formatter={formatTooltip}
+                        labelFormatter={(date) => format(new Date(date), 'MMM d, yyyy')}
+                        contentStyle={{ fontSize: '12px', padding: '8px' }}
+                        wrapperStyle={{ zIndex: 1000 }}
+                        isAnimationActive={false}
+                      />
+                      <Legend wrapperStyle={{ fontSize: '12px', marginTop: '5px' }} />
+                      <Line
+                        type="monotone"
+                        dataKey="weight"
+                        stroke="#8884d8"
+                        activeDot={{ r: 8 }}
+                        connectNulls={true}
+                        name="Weight"
+                        dot={<CustomDot />}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                  <div className={styles.prLegend}>
+                    <div className={styles.legendItem}>
+                      <div
+                        className={styles.legendDot}
+                        style={{ backgroundColor: '#8884d8' }}
+                      ></div>
+                      <span>Previous Rep</span>
+                    </div>
+                    <div className={styles.legendItem}>
+                      <div
+                        className={styles.legendDot}
+                        style={{ backgroundColor: '#ffd700' }}
+                      ></div>
+                      <span>New Rep PR</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
+
+        {/* Pain Score Chart */}
+        {!painLoading && painData && painData.dataPoints.length > 0 && (
+          <>
+            <div className={styles.pageHeader}>
+              <h2>Pain Score Progression</h2>
+              <p className={styles.subtitle}>Tracking your pain levels over the past 12 weeks</p>
+            </div>
+
+            <div className={styles.chartCard}>
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={painData.dataPoints}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis
+                    dataKey="date"
+                    tickFormatter={(date) => `Week ${getWeekNumber(date, dateRange.startDate)}`}
+                    tick={{ fontSize: 12 }}
+                    domain={[dateRange.startDateStr, dateRange.endDateStr]}
+                    type="category"
+                    allowDataOverflow={true}
+                    ticks={Array.from({ length: 12 }, (_, i) => {
+                      const weekDate = new Date(dateRange.startDate);
+                      weekDate.setDate(weekDate.getDate() + i * 7);
+                      return weekDate.toISOString().split('T')[0];
+                    })}
+                  />
+                  <YAxis
+                    label={{
+                      value: 'Pain Score (0-10)',
+                      angle: -90,
+                      position: 'insideLeft',
+                      style: { textAnchor: 'middle', fontSize: 12 },
+                    }}
+                    domain={[0, 10]}
+                    tick={{ fontSize: 12 }}
+                    width={50}
+                  />
+                  <Tooltip
+                    formatter={(value) => [`${value}/10`, 'Pain Level']}
+                    labelFormatter={(date) => format(new Date(date), 'MMM d, yyyy')}
+                    contentStyle={{ fontSize: '12px', padding: '8px' }}
+                    wrapperStyle={{ zIndex: 1000 }}
+                    isAnimationActive={false}
+                  />
+                  <Legend wrapperStyle={{ fontSize: '12px', marginTop: '5px' }} />
+                  <Line
+                    type="monotone"
+                    dataKey="score"
+                    stroke="#ff5252"
+                    activeDot={{ r: 8 }}
+                    connectNulls={true}
+                    name="Pain Level"
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </>
+        )}
+
+        {/* Sleep Score Chart */}
+        {!sleepLoading && sleepData && sleepData.dataPoints.length > 0 && (
+          <>
+            <div className={styles.pageHeader}>
+              <h2>Sleep Quality Progression</h2>
+              <p className={styles.subtitle}>Tracking your sleep quality over the past 12 weeks</p>
+            </div>
+
+            <div className={styles.chartCard}>
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={sleepData.dataPoints}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis
+                    dataKey="date"
+                    tickFormatter={(date) => `Week ${getWeekNumber(date, dateRange.startDate)}`}
+                    tick={{ fontSize: 12 }}
+                    domain={[dateRange.startDateStr, dateRange.endDateStr]}
+                    type="category"
+                    allowDataOverflow={true}
+                    ticks={Array.from({ length: 12 }, (_, i) => {
+                      const weekDate = new Date(dateRange.startDate);
+                      weekDate.setDate(weekDate.getDate() + i * 7);
+                      return weekDate.toISOString().split('T')[0];
+                    })}
+                  />
+                  <YAxis
+                    label={{
+                      value: 'Sleep Score (1-5)',
+                      angle: -90,
+                      position: 'insideLeft',
+                      style: { textAnchor: 'middle', fontSize: 12 },
+                    }}
+                    domain={[1, 5]}
+                    tick={{ fontSize: 12 }}
+                    width={50}
+                  />
+                  <Tooltip
+                    formatter={(value) => [`${value}/5`, 'Sleep Quality']}
+                    labelFormatter={(date) => format(new Date(date), 'MMM d, yyyy')}
+                    contentStyle={{ fontSize: '12px', padding: '8px' }}
+                    wrapperStyle={{ zIndex: 1000 }}
+                    isAnimationActive={false}
+                  />
+                  <Legend wrapperStyle={{ fontSize: '12px', marginTop: '5px' }} />
+                  <Line
+                    type="monotone"
+                    dataKey="score"
+                    stroke="#4caf50"
+                    activeDot={{ r: 8 }}
+                    connectNulls={true}
+                    name="Sleep Quality"
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </>
+        )}
       </div>
-
-      {/* Pain Score Chart */}
-      {!painLoading && painData && painData.dataPoints.length > 0 && (
-        <>
-          <div className={styles.pageHeader}>
-            <h2>Pain Score Progression</h2>
-            <p className={styles.subtitle}>Tracking your pain levels over the past 12 weeks</p>
-          </div>
-
-          <div className={styles.chartCard}>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={painData.dataPoints}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis
-                  dataKey="date"
-                  tickFormatter={(date) => `Week ${getWeekNumber(date, dateRange.startDate)}`}
-                  tick={{ fontSize: 12 }}
-                  domain={[dateRange.startDateStr, dateRange.endDateStr]}
-                  type="category"
-                  allowDataOverflow={true}
-                  ticks={Array.from({ length: 12 }, (_, i) => {
-                    const weekDate = new Date(dateRange.startDate);
-                    weekDate.setDate(weekDate.getDate() + i * 7);
-                    return weekDate.toISOString().split('T')[0];
-                  })}
-                />
-                <YAxis
-                  label={{
-                    value: 'Pain Score (0-10)',
-                    angle: -90,
-                    position: 'insideLeft',
-                    style: { textAnchor: 'middle', fontSize: 12 },
-                  }}
-                  domain={[0, 10]}
-                  tick={{ fontSize: 12 }}
-                  width={50}
-                />
-                <Tooltip
-                  formatter={(value) => [`${value}/10`, 'Pain Level']}
-                  labelFormatter={(date) => format(new Date(date), 'MMM d, yyyy')}
-                  contentStyle={{ fontSize: '12px', padding: '8px' }}
-                  wrapperStyle={{ zIndex: 1000 }}
-                  isAnimationActive={false}
-                />
-                <Legend wrapperStyle={{ fontSize: '12px', marginTop: '5px' }} />
-                <Line
-                  type="monotone"
-                  dataKey="score"
-                  stroke="#ff5252"
-                  activeDot={{ r: 8 }}
-                  connectNulls={true}
-                  name="Pain Level"
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </>
-      )}
-
-      {/* Sleep Score Chart */}
-      {!sleepLoading && sleepData && sleepData.dataPoints.length > 0 && (
-        <>
-          <div className={styles.pageHeader}>
-            <h2>Sleep Quality Progression</h2>
-            <p className={styles.subtitle}>Tracking your sleep quality over the past 12 weeks</p>
-          </div>
-
-          <div className={styles.chartCard}>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={sleepData.dataPoints}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis
-                  dataKey="date"
-                  tickFormatter={(date) => `Week ${getWeekNumber(date, dateRange.startDate)}`}
-                  tick={{ fontSize: 12 }}
-                  domain={[dateRange.startDateStr, dateRange.endDateStr]}
-                  type="category"
-                  allowDataOverflow={true}
-                  ticks={Array.from({ length: 12 }, (_, i) => {
-                    const weekDate = new Date(dateRange.startDate);
-                    weekDate.setDate(weekDate.getDate() + i * 7);
-                    return weekDate.toISOString().split('T')[0];
-                  })}
-                />
-                <YAxis
-                  label={{
-                    value: 'Sleep Score (1-5)',
-                    angle: -90,
-                    position: 'insideLeft',
-                    style: { textAnchor: 'middle', fontSize: 12 },
-                  }}
-                  domain={[1, 5]}
-                  tick={{ fontSize: 12 }}
-                  width={50}
-                />
-                <Tooltip
-                  formatter={(value) => [`${value}/5`, 'Sleep Quality']}
-                  labelFormatter={(date) => format(new Date(date), 'MMM d, yyyy')}
-                  contentStyle={{ fontSize: '12px', padding: '8px' }}
-                  wrapperStyle={{ zIndex: 1000 }}
-                  isAnimationActive={false}
-                />
-                <Legend wrapperStyle={{ fontSize: '12px', marginTop: '5px' }} />
-                <Line
-                  type="monotone"
-                  dataKey="score"
-                  stroke="#4caf50"
-                  activeDot={{ r: 8 }}
-                  connectNulls={true}
-                  name="Sleep Quality"
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </>
-      )}
     </div>
   );
 }

@@ -9,14 +9,119 @@
   margin-top: 0;
 }
 
-.chartsContainer {
+/* Dashboard container with alphabet nav */
+.dashboardContainer {
+  display: flex;
+  gap: 20px;
+  position: relative;
+}
+
+.dashboardContent {
+  flex: 1;
+  min-width: 0; /* Prevent flex item from overflowing */
+}
+
+/* Alphabetical navigation */
+.alphabetNav {
+  position: sticky;
+  top: 80px;
+  height: fit-content;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.letterButton {
+  width: 36px;
+  height: 36px;
+  border: none;
+  background-color: #f5f5f5;
+  color: #333;
+  font-weight: 600;
+  font-size: 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.letterButton:hover {
+  background-color: #1976d2;
+  color: white;
+  transform: scale(1.1);
+}
+
+.letterButton:active {
+  transform: scale(0.95);
+}
+
+/* Letter section headers */
+.letterSection {
+  margin-bottom: 40px;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
   gap: 20px;
 }
 
+.letterHeading {
+  grid-column: 1 / -1;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1976d2;
+  margin: 0 0 10px 0;
+  padding-bottom: 10px;
+  border-bottom: 3px solid #1976d2;
+}
+
+.chartsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
 /* Media query for mobile devices */
 @media (max-width: 768px) {
+  .dashboardContainer {
+    flex-direction: column;
+  }
+
+  .alphabetNav {
+    position: sticky;
+    top: 60px;
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: hidden;
+    width: 100%;
+    padding: 8px;
+    gap: 6px;
+    z-index: 10;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  .alphabetNav::-webkit-scrollbar {
+    height: 4px;
+  }
+
+  .alphabetNav::-webkit-scrollbar-thumb {
+    background-color: #1976d2;
+    border-radius: 2px;
+  }
+
+  .letterButton {
+    flex-shrink: 0;
+  }
+
+  .letterSection {
+    grid-template-columns: 1fr;
+  }
+
+  .letterHeading {
+    font-size: 1.5rem;
+  }
+
   .chartsContainer {
     grid-template-columns: 1fr;
   }
@@ -30,6 +135,10 @@
     font-size: 1.2rem;
     margin-top: 0;
     margin-bottom: 10px;
+  }
+
+  .chartCard h4 {
+    font-size: 1.1rem;
   }
 
   .pageHeader h2 {
