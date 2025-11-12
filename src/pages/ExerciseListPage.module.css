@@ -198,6 +198,80 @@
   opacity: 0.6;
 }
 
+.suggestionsDropdown {
+  position: relative;
+  background: white;
+  border: 1px solid #28a745;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 12px;
+  min-width: 250px;
+  z-index: 10;
+}
+
+.suggestionsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.suggestionsTitle {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #28a745;
+}
+
+.closeSuggestionsBtn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: #6c757d;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.closeSuggestionsBtn:hover {
+  color: #dc3545;
+}
+
+.suggestionsList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.suggestionItem {
+  background: white;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+  padding: 8px 12px;
+  text-align: left;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: #212529;
+  transition: all 0.15s ease;
+}
+
+.suggestionItem:hover {
+  background: #e8f5e9;
+  border-color: #28a745;
+  color: #218838;
+}
+
+.suggestionItem:focus {
+  outline: 2px solid #28a745;
+  outline-offset: 2px;
+}
+
 .editBtn {
   background-color: white;
   border: none;

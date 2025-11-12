@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, beforeEach, vi, type Mock } from 'vitest';
 import request from 'supertest';
 import express from 'express';
 import cookieParser from 'cookie-parser';
@@ -7,6 +7,21 @@ import { User, Exercise, Workout, WorkoutExercise } from '../../entities';
 import { generateToken } from '../../middleware/auth';
 import * as bcrypt from 'bcrypt';
 import exercisesRouter from '../../routes/exercises.routes';
+import { openai } from '../../services/openai';
+
+// Mock the OpenAI client
+vi.mock('../../services/openai', () => ({
+  openai: {
+    chat: {
+      completions: {
+        create: vi.fn(),
+      },
+    },
+  },
+}));
+
+// Type the mocked function
+const mockOpenAICreate = openai.chat.completions.create as Mock;
 
 // Create a minimal test app with exercise routes
 function createTestApp() {
@@ -420,6 +435,133 @@ describe('Exercise API Routes', () => {
       expect(response.body.reps).toBe(1);
       expect(response.body.weight).toBeNull();
       expect(response.body.time_seconds).toBe(2.5);
+    });
+  });
+
+  describe('POST /api/exercises/:id/suggest', () => {
+    it('should require authentication', async () => {
+      const response = await request(app)
+        .post('/api/exercises/1/suggest')
+        .expect(401);
+      
+      expect(response.body.error).toBeDefined();
+    });
+
+    it('should return 404 for non-existent exercise', async () => {
+      const response = await request(app)
+        .post('/api/exercises/99999/suggest')
+        .set('Cookie', [`token=${authToken}`])
+        .expect(404);
+
+      expect(response.body.error).toBe('Exercise not found');
+    });
+
+    it('should return 404 when exercise belongs to different user', async () => {
+      const exerciseRepository = dataSource.getRepository(Exercise);
+      const userRepository = dataSource.getRepository(User);
+      
+      // Create another user
+      const hashedPassword = await bcrypt.hash('otherpass123', 10);
+      const otherUser = userRepository.create({
+        email: 'suggest-other-user@example.com',
+        name: 'Other Suggest User',
+        password: hashedPassword,
+      });
+      await userRepository.save(otherUser);
+
+      // Create exercise for other user
+      const otherExercise = exerciseRepository.create({ 
+        name: 'Other User Exercise', 
+        userId: otherUser.id 
+      });
+      await exerciseRepository.save(otherExercise);
+
+      const response = await request(app)
+        .post(`/api/exercises/${otherExercise.id}/suggest`)
+        .set('Cookie', [`token=${authToken}`])
+        .expect(404);
+
+      expect(response.body.error).toBe('Exercise not found');
+
+      // Cleanup
+      await dataSource.query('DELETE FROM exercises WHERE "userId" = $1', [otherUser.id]);
+      await userRepository.remove(otherUser);
+    });
+
+    it('should return 3 AI-generated suggestions', async () => {
+      const exerciseRepository = dataSource.getRepository(Exercise);
+      const exercise = exerciseRepository.create({ 
+        name: 'bench press', 
+        userId: testUser.id 
+      });
+      await exerciseRepository.save(exercise);
+
+      // Mock OpenAI response
+      mockOpenAICreate.mockResolvedValueOnce({
+        choices: [{
+          message: {
+            content: 'Barbell Bench Press\nFlat Bench Press\nBarbell Flat Bench Press'
+          }
+        }]
+      });
+
+      const response = await request(app)
+        .post(`/api/exercises/${exercise.id}/suggest`)
+        .set('Cookie', [`token=${authToken}`])
+        .expect(200);
+
+      expect(response.body.suggestions).toHaveLength(3);
+      expect(response.body.suggestions).toEqual([
+        'Barbell Bench Press',
+        'Flat Bench Press',
+        'Barbell Flat Bench Press'
+      ]);
+    });
+
+    it('should handle OpenAI API errors gracefully', async () => {
+      const exerciseRepository = dataSource.getRepository(Exercise);
+      const exercise = exerciseRepository.create({ 
+        name: 'squats', 
+        userId: testUser.id 
+      });
+      await exerciseRepository.save(exercise);
+
+      // Mock OpenAI error
+      mockOpenAICreate.mockRejectedValueOnce(new Error('OpenAI API error'));
+
+      const response = await request(app)
+        .post(`/api/exercises/${exercise.id}/suggest`)
+        .set('Cookie', [`token=${authToken}`])
+        .expect(500);
+
+      expect(response.body.error).toBe('Server error');
+    });
+
+    it('should fallback to original name if OpenAI returns invalid response', async () => {
+      const exerciseRepository = dataSource.getRepository(Exercise);
+      const exercise = exerciseRepository.create({ 
+        name: 'deadlift', 
+        userId: testUser.id 
+      });
+      await exerciseRepository.save(exercise);
+
+      // Mock OpenAI response with only 1 suggestion
+      mockOpenAICreate.mockResolvedValueOnce({
+        choices: [{
+          message: {
+            content: 'Romanian Deadlift'
+          }
+        }]
+      });
+
+      const response = await request(app)
+        .post(`/api/exercises/${exercise.id}/suggest`)
+        .set('Cookie', [`token=${authToken}`])
+        .expect(200);
+
+      // Should return the single suggestion (implementation doesn't pad to 3)
+      expect(response.body.suggestions).toHaveLength(1);
+      expect(response.body.suggestions[0]).toBe('Romanian Deadlift');
     });
   });
 });

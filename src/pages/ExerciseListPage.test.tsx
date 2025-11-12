@@ -25,7 +25,7 @@ const server = setupServer(
   }),
   http.post('/api/exercises/:id/suggest', () => {
     return HttpResponse.json({
-      suggestedName: 'Barbell Bench Press',
+      suggestions: ['Barbell Bench Press', 'Flat Bench Press', 'Dumbbell Bench Press'],
     });
   })
 );
@@ -265,7 +265,7 @@ describe('ExerciseListPage - Table Layout', () => {
       });
     });
 
-    it('fetches and fills suggested name when suggest button is clicked', async () => {
+    it('fetches and shows suggestions dropdown when suggest button is clicked', async () => {
       renderWithContext();
 
       await waitFor(() => {
@@ -280,15 +280,70 @@ describe('ExerciseListPage - Table Layout', () => {
         expect(screen.getByText('Suggesting...')).toBeInTheDocument();
       });
 
-      // After loading, should enter edit mode with suggested name
+      // After loading, should show suggestions dropdown
       await waitFor(() => {
-        const input = screen.getByDisplayValue('Barbell Bench Press');
+        expect(screen.getByText('Select a suggestion:')).toBeInTheDocument();
+      });
+
+      // Should show all three suggestions
+      expect(screen.getByText('Barbell Bench Press')).toBeInTheDocument();
+      expect(screen.getByText('Flat Bench Press')).toBeInTheDocument();
+      expect(screen.getByText('Dumbbell Bench Press')).toBeInTheDocument();
+    });
+
+    it('enters edit mode with selected suggestion when clicking a suggestion', async () => {
+      renderWithContext();
+
+      await waitFor(() => {
+        expect(screen.getByText('Bench Press')).toBeInTheDocument();
+      });
+
+      const suggestButton = screen.getByRole('button', { name: /suggest name for bench press/i });
+      suggestButton.click();
+
+      // Wait for suggestions to appear
+      await waitFor(() => {
+        expect(screen.getByText('Barbell Bench Press')).toBeInTheDocument();
+      });
+
+      // Click on a suggestion
+      const suggestion = screen.getByText('Flat Bench Press');
+      suggestion.click();
+
+      // Should enter edit mode with the selected suggestion
+      await waitFor(() => {
+        const input = screen.getByDisplayValue('Flat Bench Press');
         expect(input).toBeInTheDocument();
       });
 
       // Should show Save and Cancel buttons
       expect(screen.getByRole('button', { name: /save/i })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /cancel/i })).toBeInTheDocument();
+    });
+
+    it('closes suggestions dropdown when close button is clicked', async () => {
+      renderWithContext();
+
+      await waitFor(() => {
+        expect(screen.getByText('Bench Press')).toBeInTheDocument();
+      });
+
+      const suggestButton = screen.getByRole('button', { name: /suggest name for bench press/i });
+      suggestButton.click();
+
+      // Wait for suggestions to appear
+      await waitFor(() => {
+        expect(screen.getByText('Select a suggestion:')).toBeInTheDocument();
+      });
+
+      // Click the close button
+      const closeButton = screen.getByRole('button', { name: /close suggestions/i });
+      closeButton.click();
+
+      // Suggestions should be hidden
+      await waitFor(() => {
+        expect(screen.queryByText('Select a suggestion:')).not.toBeInTheDocument();
+      });
     });
 
     it('handles suggestion error gracefully', async () => {
