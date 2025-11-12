@@ -139,6 +139,28 @@
   border-radius: 4px;
 }
 
+.sortButton:hover span {
+  color: #0056b3;
+}
+
+.sortIndicator {
+  font-size: 10px;
+  line-height: 1;
+  display: inline-block;
+  width: 10px;
+  text-align: center;
+  color: #6c757d;
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+
+.sortButton:hover .sortIndicator {
+  color: #0056b3;
+}
+
+.sortActive .sortIndicator {
+  color: #007bff;
+}
+
 /* Button styles are now imported from common styles */
 
 .editBtn {

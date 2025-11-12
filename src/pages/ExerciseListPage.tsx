@@ -107,10 +107,13 @@ function ExerciseListPage(): ReactElement {
                     <button
                       type="button"
                       onClick={toggleNameSort}
-                      className={styles.sortButton}
+                      className={classNames(styles.sortButton, { [styles.sortActive]: sortDirection !== 'none' })}
                       aria-label="Sort by Exercise Name"
                     >
                       <span>Exercise Name</span>
+                      <span aria-hidden="true" className={styles.sortIndicator}>
+                        {sortDirection === 'descending' ? '▼' : '▲'}
+                      </span>
                     </button>
                   </th>
                   <th scope="col" className={styles.actionsHeader}>
