@@ -11,6 +11,12 @@
   margin-bottom: 20px;
 }
 
+.subtitle {
+  margin: 0;
+  color: #6c757d;
+  font-size: 14px;
+}
+
 .errorMessage {
   color: #dc3545;
   margin-bottom: 16px;
@@ -38,31 +44,61 @@
   margin-top: 20px;
 }
 
-.exerciseCards {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 16px;
+/* Table styles */
+.tableWrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.exerciseCard {
-  background-color: white;
-  border-radius: 8px;
-  padding: 16px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  display: flex;
-  flex-direction: column;
+.exerciseTable {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 400px;
+}
+
+.exerciseTable thead {
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.exerciseTable th {
+  text-align: left;
+  padding: 12px 16px;
+  font-weight: 600;
+  color: #212529;
+  font-size: 14px;
+}
+
+.exerciseTable tbody tr {
+  border-bottom: 1px solid #e9ecef;
+  transition: background-color 0.15s ease;
+}
+
+.exerciseTable tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.exerciseTable td {
+  padding: 12px 16px;
+  color: #212529;
+}
+
+.nameCell {
+  font-weight: 500;
 }
 
 .exerciseName {
-  font-size: 1.1rem;
-  font-weight: 500;
-  margin-bottom: 12px;
+  display: block;
+  color: #212529;
+  font-size: 15px;
 }
 
-.exerciseActions {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: auto;
+.actionsCell {
+  text-align: right;
+  white-space: nowrap;
 }
 
 /* Button styles are now imported from common styles */
@@ -167,7 +203,7 @@
     gap: 16px;
   }
 
-  .exerciseCards {
-    grid-template-columns: 1fr;
+  .exerciseTable {
+    min-width: 100%;
   }
 }
