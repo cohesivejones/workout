@@ -103,12 +103,19 @@ function ExerciseListPage(): ReactElement {
             <table className={styles.exerciseTable} role="table">
               <thead>
                 <tr>
-                  <th scope="col" aria-sort={sortDirection}>
-                    <button type="button" onClick={toggleNameSort}>
-                      Exercise Name
+                  <th scope="col" aria-sort={sortDirection} className={styles.nameHeader}>
+                    <button
+                      type="button"
+                      onClick={toggleNameSort}
+                      className={styles.sortButton}
+                      aria-label="Sort by Exercise Name"
+                    >
+                      <span>Exercise Name</span>
                     </button>
                   </th>
-                  <th scope="col">Actions</th>
+                  <th scope="col" className={styles.actionsHeader}>
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody>

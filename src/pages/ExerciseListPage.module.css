@@ -1,7 +1,7 @@
 .exerciseListPage {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 32px;
 }
 
 .pageHeader {
@@ -51,6 +51,9 @@
   background: #fff;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin: 0 auto;
+  padding: 12px 16px;
+  max-width: 900px;
 }
 
 .exerciseTable {
@@ -72,6 +75,19 @@
   font-size: 14px;
 }
 
+.nameHeader {
+  text-align: left;
+}
+
+.actionsHeader {
+  text-align: right;
+}
+
+/* Increase specificity to ensure header alignment overrides any defaults */
+.exerciseTable thead th.actionsHeader {
+  text-align: right;
+}
+
 .exerciseTable tbody tr {
   border-bottom: 1px solid #e9ecef;
   transition: background-color 0.15s ease;
@@ -87,6 +103,7 @@
 }
 
 .nameCell {
+  text-align: left;
   font-weight: 500;
 }
 
@@ -99,6 +116,27 @@
 .actionsCell {
   text-align: right;
   white-space: nowrap;
+}
+
+/* Sort button in header: looks like text, aligns left */
+.sortButton {
+  background: none;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sortButton:focus-visible {
+  outline: 2px solid #80bdff;
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 /* Button styles are now imported from common styles */
@@ -205,5 +243,22 @@
 
   .exerciseTable {
     min-width: 100%;
+  }
+
+  .exerciseListPage {
+    padding: 0 12px;
+  }
+
+  .tableWrapper {
+    max-width: 100%;
+    padding: 8px;
+    box-shadow: none;
+    border-radius: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .exerciseListPage {
+    padding: 0 8px;
   }
 }
