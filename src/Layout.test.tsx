@@ -72,7 +72,7 @@ describe('Layout - Header Navigation', () => {
       });
     });
 
-    it('shows AI dropdown with Generate Workout and Diagnostician', async () => {
+    it('shows AI dropdown with Workout Coach and Diagnostician', async () => {
       render(
         <Router>
           <UserContextProvider>
@@ -98,7 +98,7 @@ describe('Layout - Header Navigation', () => {
 
       // Check for menu items
       await waitFor(() => {
-        expect(screen.getByRole('link', { name: 'Generate Workout' })).toBeInTheDocument();
+        expect(screen.getByRole('link', { name: 'Workout Coach' })).toBeInTheDocument();
         expect(screen.getByRole('link', { name: 'Diagnostician' })).toBeInTheDocument();
       });
     });

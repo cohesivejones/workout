@@ -175,19 +175,6 @@ export const fetchPainProgressionData = (): Promise<PainScoreProgression> =>
 export const fetchSleepProgressionData = (): Promise<SleepScoreProgression> =>
   api.get('/dashboard/sleep-progression');
 
-// Generate workout API functions
-export interface GenerateWorkoutRequest {
-  additionalNotes?: string;
-}
-
-export interface GenerateWorkoutResponse {
-  generatedWorkout: string;
-}
-
-export const generateWorkout = (
-  request: GenerateWorkoutRequest
-): Promise<GenerateWorkoutResponse> => api.post('/workouts/generate', request);
-
 // Timeline API function
 export const fetchTimeline = (startDate?: string, endDate?: string): Promise<TimelineResponse> => {
   const params = new URLSearchParams();
@@ -201,4 +188,21 @@ export const fetchTimeline = (startDate?: string, endDate?: string): Promise<Tim
 // Activity feed API function (month-based pagination)
 export const fetchActivity = (offset = 0): Promise<ActivityResponse> => {
   return api.get(`/activity?offset=${offset}`);
+};
+
+// Workout Coach API functions
+export interface CoachSessionResponse {
+  sessionId: string;
+  message: string;
+}
+
+export const startCoachSession = (): Promise<CoachSessionResponse> => {
+  return api.post('/workout-coach/start');
+};
+
+export const respondToCoachWorkout = (
+  sessionId: string,
+  response: 'yes' | 'no'
+): Promise<{ message: string }> => {
+  return api.post('/workout-coach/respond', { sessionId, response });
 };

@@ -425,7 +425,7 @@ describe('WorkoutCoachGraph', () => {
       // Create session with mock SSE response
       sessionStore.create(sessionId, userId);
       const mockWrite = vi.fn();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      sessionStore.update(sessionId, { 
         sseResponse: { write: mockWrite } as unknown as Response 
       });
 

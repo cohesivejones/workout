@@ -4,8 +4,6 @@ import { Exercise, Workout, WorkoutExercise } from "../entities";
 import { authenticateToken } from "../middleware/auth";
 import { DatabaseError, WorkoutResponse, CreateWorkoutRequest } from "../types";
 import logger from "../logger";
-import { Between } from "typeorm";
-import { openai } from "../services/openai";
 
 const router = Router();
 
@@ -228,50 +226,6 @@ router.delete("/:id", authenticateToken, async (req: Request, res: Response) => 
     res.status(500).json({ error: error.message || "Server error" });
   } finally {
     await queryRunner.release();
-  }
-});
-
-router.post("/generate", authenticateToken, async (req: Request, res: Response) => {
-  try {
-    const { additionalNotes } = req.body;
-    const userId = req.user!.id;
-    const endDate = new Date();
-    const startDate = new Date();
-    startDate.setDate(endDate.getDate() - 30);
-    const startDateStr = startDate.toISOString().split("T")[0];
-    const endDateStr = endDate.toISOString().split("T")[0];
-    const workoutRepository = dataSource.getRepository(Workout);
-    const workouts = await workoutRepository.find({
-      where: { userId: Number(userId), date: Between(startDateStr, endDateStr) },
-      relations: { workoutExercises: { exercise: true } },
-      order: { date: "DESC" },
-    });
-    const workoutData = workouts.map((workout) => ({
-      date_of_workout: workout.date,
-      exercises: workout.workoutExercises.map((we) => ({
-        name: we.exercise.name,
-        reps: we.reps,
-        sets: 3,
-        ...(we.weight && { weight: we.weight }),
-      })),
-    }));
-    const basePrompt = "Generally I do 6 full body exercises every workout covering legs core and upper body, generate a workout for me based on the following exercises over the last month";
-    let fullPrompt = `${basePrompt}:\n\n${JSON.stringify(workoutData, null, 2)}`;
-    if (additionalNotes && additionalNotes.trim()) fullPrompt += `\n\nAdditional notes: ${additionalNotes.trim()}`;
-    fullPrompt += "\n\nPlease generate a balanced full-body workout with 6 exercises, including suggested reps and weights based on my recent performance. Focus on covering legs, core, and upper body as requested.";
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
-        { role: "system", content: "You are a fitness trainer assistant. Generate practical workout routines based on the user's exercise history. Provide specific rep ranges and weight suggestions when possible. Format your response clearly with exercise names, reps, and weights." },
-        { role: "user", content: fullPrompt },
-      ],
-      temperature: 0.7,
-    });
-    logger.info("Workout generated", { userId: req.user?.id });
-    res.json({ generatedWorkout: response.choices[0].message.content });
-  } catch (err) {
-    logger.error("Generate workout error", { error: err, userId: req.user?.id });
-    res.status(500).json({ error: "Failed to generate workout" });
   }
 });
 
