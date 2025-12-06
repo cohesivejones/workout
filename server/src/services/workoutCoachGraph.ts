@@ -242,4 +242,127 @@ export class WorkoutCoachGraph {
 
     return lines.join("\n");
   }
+
+  /**
+   * Generate a workout and stream it via SSE
+   */
+  public async generateWorkout(userId: number, sessionId: string): Promise<void> {
+    try {
+      const session = this.sessionStore.get(sessionId);
+      if (!session) {
+        throw new Error("Session not found");
+      }
+
+      // Send generating status
+      if (session.sseResponse) {
+        session.sseResponse.write(
+          `data: ${JSON.stringify({ type: "generating" })}\n\n`
+        );
+      }
+
+      // Fetch workout history
+      const history = await this.fetchWorkoutHistory(userId);
+
+      // Generate workout with AI
+      const plan = await this.generateWorkoutWithAI(history);
+
+      // Update session with the plan
+      this.sessionStore.update(sessionId, { currentWorkoutPlan: plan });
+
+      // Stream the workout plan
+      if (session.sseResponse) {
+        session.sseResponse.write(
+          `data: ${JSON.stringify({ type: "workout", plan })}\n\n`
+        );
+      }
+
+      logger.info("Workout generated and streamed", { sessionId, userId });
+    } catch (error) {
+      logger.error("Failed to generate workout", { error, sessionId, userId });
+
+      const session = this.sessionStore.get(sessionId);
+      if (session?.sseResponse) {
+        session.sseResponse.write(
+          `data: ${JSON.stringify({
+            type: "error",
+            message: "Failed to generate workout",
+          })}\n\n`
+        );
+      }
+
+      throw error;
+    }
+  }
+
+  /**
+   * Handle user response (yes/no) to a workout
+   */
+  public async handleUserResponse(
+    userId: number,
+    sessionId: string,
+    response: "yes" | "no"
+  ): Promise<void> {
+    try {
+      const session = this.sessionStore.get(sessionId);
+      if (!session) {
+        throw new Error("Session not found");
+      }
+
+      if (response === "no") {
+        // User rejected the workout, regenerate
+        logger.info("User rejected workout, regenerating", { sessionId, userId });
+        await this.generateWorkout(userId, sessionId);
+      } else {
+        // User accepted the workout, save to database
+        logger.info("User accepted workout, saving to database", {
+          sessionId,
+          userId,
+        });
+
+        if (!session.currentWorkoutPlan) {
+          throw new Error("No workout plan to save");
+        }
+
+        const workoutId = await this.createWorkoutInDB(
+          userId,
+          session.currentWorkoutPlan
+        );
+
+        // Send saved event
+        if (session.sseResponse) {
+          session.sseResponse.write(
+            `data: ${JSON.stringify({ type: "saved", workoutId })}\n\n`
+          );
+        }
+
+        logger.info("Workout saved successfully", {
+          sessionId,
+          userId,
+          workoutId,
+        });
+      }
+    } catch (error) {
+      logger.error("Failed to handle user response", {
+        error,
+        sessionId,
+        userId,
+        response,
+      });
+
+      const session = this.sessionStore.get(sessionId);
+      if (session?.sseResponse) {
+        session.sseResponse.write(
+          `data: ${JSON.stringify({
+            type: "error",
+            message:
+              response === "yes"
+                ? "Failed to save workout"
+                : "Failed to generate workout",
+          })}\n\n`
+        );
+      }
+
+      throw error;
+    }
+  }
 }

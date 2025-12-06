@@ -6,7 +6,7 @@ import { WorkoutCoachGraph } from "../services/workoutCoachGraph";
 import logger from "../logger";
 
 const router = Router();
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+ 
 const workoutCoach = new WorkoutCoachGraph(sessionStore);
 
 /**
@@ -68,7 +68,7 @@ router.post("/respond", authenticateToken, async (req: Request, res: Response) =
       return res.status(403).json({ error: "Unauthorized" });
     }
 
-    // Update session with response
+    // Update session with response and handle via workoutCoach
     if (response === "no") {
       sessionStore.update(sessionId, {
         userResponse: "no",
@@ -85,6 +85,9 @@ router.post("/respond", authenticateToken, async (req: Request, res: Response) =
       response,
       userId: req.user!.id,
     });
+
+    // Handle the response (regenerate or save)
+    await workoutCoach.handleUserResponse(req.user!.id, sessionId, response);
 
     res.json({ message: "Response recorded" });
   } catch (err) {
@@ -128,6 +131,15 @@ router.get(
 
       // Send initial connection message
       res.write(`data: ${JSON.stringify({ type: "connected" })}\n\n`);
+
+      // Generate workout automatically on connection
+      workoutCoach.generateWorkout(req.user!.id, sessionId).catch((error) => {
+        logger.error("Failed to auto-generate workout on stream connect", {
+          error,
+          sessionId,
+          userId: req.user!.id,
+        });
+      });
 
       // Keep connection alive
       const keepAlive = setInterval(() => {

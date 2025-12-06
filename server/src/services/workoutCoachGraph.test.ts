@@ -397,4 +397,224 @@ describe('WorkoutCoachGraph', () => {
       expect(formatted).toContain('10');
     });
   });
+
+  describe('generateWorkout (public SSE method)', () => {
+    it('should generate workout and stream via SSE', async () => {
+      const sessionId = 'session-123';
+      const userId = 1;
+
+      const mockHistory = [
+        {
+          date: '2024-01-15',
+          exercises: [{ name: 'Squats', reps: 10, weight: 135 }],
+        },
+      ];
+
+      const mockWorkoutPlan = {
+        date: '2024-01-16',
+        exercises: [
+          { name: 'Squats', reps: 12, weight: 140 },
+          { name: 'Bench Press', reps: 10, weight: 155 },
+        ],
+      };
+
+      // Mock dependencies
+      graph['fetchWorkoutHistory'] = vi.fn().mockResolvedValue(mockHistory);
+      graph['generateWorkoutWithAI'] = vi.fn().mockResolvedValue(mockWorkoutPlan);
+
+      // Create session with mock SSE response
+      sessionStore.create(sessionId, userId);
+      const mockWrite = vi.fn();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        sseResponse: { write: mockWrite } as unknown as Response 
+      });
+
+      // Generate workout
+      await graph.generateWorkout(userId, sessionId);
+
+      // Verify SSE events were sent
+      expect(mockWrite).toHaveBeenCalledWith(
+        expect.stringContaining('"type":"generating"')
+      );
+      expect(mockWrite).toHaveBeenCalledWith(
+        expect.stringContaining('"type":"workout"')
+      );
+      expect(mockWrite).toHaveBeenCalledWith(
+        expect.stringContaining('"plan"')
+      );
+
+      // Verify session was updated with workout plan
+      const session = sessionStore.get(sessionId);
+      expect(session?.currentWorkoutPlan).toEqual(mockWorkoutPlan);
+    });
+
+    it('should handle errors and stream error event', async () => {
+      const sessionId = 'session-123';
+      const userId = 1;
+
+      // Mock error
+      graph['fetchWorkoutHistory'] = vi.fn().mockRejectedValue(new Error('DB error'));
+
+      // Create session with mock SSE response
+      sessionStore.create(sessionId, userId);
+      const mockWrite = vi.fn();
+      sessionStore.update(sessionId, { 
+        sseResponse: { write: mockWrite } as unknown as Response 
+      });
+
+      // Generate workout should throw
+      await expect(graph.generateWorkout(userId, sessionId)).rejects.toThrow('DB error');
+
+      // Verify error event was streamed
+      expect(mockWrite).toHaveBeenCalledWith(
+        expect.stringContaining('"type":"error"')
+      );
+    });
+
+    it('should throw if session not found', async () => {
+      const sessionId = 'non-existent';
+      const userId = 1;
+
+      await expect(graph.generateWorkout(userId, sessionId)).rejects.toThrow(
+        'Session not found'
+      );
+    });
+  });
+
+  describe('handleUserResponse (public SSE method)', () => {
+    it('should regenerate workout when user says no', async () => {
+      const sessionId = 'session-123';
+      const userId = 1;
+
+      const mockHistory = [
+        {
+          date: '2024-01-15',
+          exercises: [{ name: 'Squats', reps: 10, weight: 135 }],
+        },
+      ];
+
+      const mockWorkoutPlan = {
+        date: '2024-01-16',
+        exercises: [{ name: 'Deadlifts', reps: 5, weight: 225 }],
+      };
+
+      // Mock dependencies
+      graph['fetchWorkoutHistory'] = vi.fn().mockResolvedValue(mockHistory);
+      graph['generateWorkoutWithAI'] = vi.fn().mockResolvedValue(mockWorkoutPlan);
+
+      // Create session with mock SSE response
+      sessionStore.create(sessionId, userId);
+      const mockWrite = vi.fn();
+      sessionStore.update(sessionId, { 
+        sseResponse: { write: mockWrite } as unknown as Response 
+      });
+
+      // Handle "no" response
+      await graph.handleUserResponse(userId, sessionId, 'no');
+
+      // Verify new workout was generated
+      expect(graph['fetchWorkoutHistory']).toHaveBeenCalledWith(userId);
+      expect(graph['generateWorkoutWithAI']).toHaveBeenCalled();
+
+      // Verify SSE events were sent
+      expect(mockWrite).toHaveBeenCalledWith(
+        expect.stringContaining('"type":"generating"')
+      );
+      expect(mockWrite).toHaveBeenCalledWith(
+        expect.stringContaining('"type":"workout"')
+      );
+    });
+
+    it('should save workout when user says yes', async () => {
+      const sessionId = 'session-123';
+      const userId = 1;
+
+      const mockWorkoutPlan = {
+        date: '2024-01-16',
+        exercises: [{ name: 'Squats', reps: 12, weight: 140 }],
+      };
+
+      const mockWorkoutId = 42;
+
+      // Mock dependencies
+      graph['createWorkoutInDB'] = vi.fn().mockResolvedValue(mockWorkoutId);
+
+      // Create session with mock SSE response and current workout
+      sessionStore.create(sessionId, userId);
+      const mockWrite = vi.fn();
+      sessionStore.update(sessionId, {
+        sseResponse: { write: mockWrite } as unknown as Response,
+        currentWorkoutPlan: mockWorkoutPlan,
+      });
+
+      // Handle "yes" response
+      await graph.handleUserResponse(userId, sessionId, 'yes');
+
+      // Verify workout was saved
+      expect(graph['createWorkoutInDB']).toHaveBeenCalledWith(userId, mockWorkoutPlan);
+
+      // Verify saved event was sent
+      expect(mockWrite).toHaveBeenCalledWith(
+        expect.stringContaining('"type":"saved"')
+      );
+      expect(mockWrite).toHaveBeenCalledWith(
+        expect.stringContaining(`"workoutId":${mockWorkoutId}`)
+      );
+    });
+
+    it('should throw if session not found', async () => {
+      const sessionId = 'non-existent';
+      const userId = 1;
+
+      await expect(graph.handleUserResponse(userId, sessionId, 'yes')).rejects.toThrow(
+        'Session not found'
+      );
+    });
+
+    it('should throw if no workout plan to save when user says yes', async () => {
+      const sessionId = 'session-123';
+      const userId = 1;
+
+      // Create session without workout plan
+      sessionStore.create(sessionId, userId);
+
+      await expect(graph.handleUserResponse(userId, sessionId, 'yes')).rejects.toThrow(
+        'No workout plan to save'
+      );
+    });
+
+    it('should handle save errors and stream error event', async () => {
+      const sessionId = 'session-123';
+      const userId = 1;
+
+      const mockWorkoutPlan = {
+        date: '2024-01-16',
+        exercises: [{ name: 'Squats', reps: 12, weight: 140 }],
+      };
+
+      // Mock error
+      graph['createWorkoutInDB'] = vi.fn().mockRejectedValue(new Error('DB error'));
+
+      // Create session with mock SSE response and workout plan
+      sessionStore.create(sessionId, userId);
+      const mockWrite = vi.fn();
+      sessionStore.update(sessionId, {
+        sseResponse: { write: mockWrite } as unknown as Response,
+        currentWorkoutPlan: mockWorkoutPlan,
+      });
+
+      // Handle "yes" response should throw
+      await expect(graph.handleUserResponse(userId, sessionId, 'yes')).rejects.toThrow(
+        'DB error'
+      );
+
+      // Verify error event was streamed
+      expect(mockWrite).toHaveBeenCalledWith(
+        expect.stringContaining('"type":"error"')
+      );
+      expect(mockWrite).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to save workout')
+      );
+    });
+  });
 });

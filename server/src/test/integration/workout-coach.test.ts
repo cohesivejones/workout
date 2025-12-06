@@ -202,6 +202,16 @@ describe('Workout Coach API Routes', () => {
     });
 
     it('should update session with "yes" response', async () => {
+      // Add a workout plan to the session first
+      const mockWorkoutPlan = {
+        date: new Date().toISOString().split('T')[0],
+        exercises: [
+          { name: 'Squats', reps: 12, weight: 140 },
+          { name: 'Bench Press', reps: 10, weight: 155 },
+        ],
+      };
+      sessionStore.update(sessionId, { currentWorkoutPlan: mockWorkoutPlan });
+
       const response = await request(app)
         .post('/api/workout-coach/respond')
         .set('Cookie', [`token=${authToken}`])
@@ -549,6 +559,24 @@ describe('Workout Coach API Routes', () => {
 
       // Sessions should be independent
       expect(sessionId1).not.toBe(sessionId2);
+
+      // Add workout plans to both sessions
+      const mockWorkoutPlan1 = {
+        date: new Date().toISOString().split('T')[0],
+        exercises: [
+          { name: 'Squats', reps: 12, weight: 140 },
+          { name: 'Bench Press', reps: 10, weight: 155 },
+        ],
+      };
+      const mockWorkoutPlan2 = {
+        date: new Date().toISOString().split('T')[0],
+        exercises: [
+          { name: 'Deadlifts', reps: 5, weight: 225 },
+          { name: 'Pull-ups', reps: 10 },
+        ],
+      };
+      sessionStore.update(sessionId1, { currentWorkoutPlan: mockWorkoutPlan1 });
+      sessionStore.update(sessionId2, { currentWorkoutPlan: mockWorkoutPlan2 });
 
       // Respond to session 1
       await request(app)
