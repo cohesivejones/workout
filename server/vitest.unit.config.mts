@@ -9,8 +9,9 @@ export default defineConfig({
       '**/node_modules/**',
       '**/dist/**',
       '**/migrations/**',
+      '**/test/**', // Exclude integration tests
     ],
-    // Only run unit tests (no database required)
-    include: ['src/test/unit/**/*.test.ts'],
+    // Run unit tests co-located with source files (no database required)
+    include: ['src/**/*.test.ts'],
   },
 });
