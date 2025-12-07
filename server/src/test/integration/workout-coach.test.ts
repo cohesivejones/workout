@@ -84,9 +84,7 @@ describe('Workout Coach API Routes', () => {
 
   describe('POST /api/workout-coach/start', () => {
     it('should require authentication', async () => {
-      const response = await request(app)
-        .post('/api/workout-coach/start')
-        .expect(401);
+      const response = await request(app).post('/api/workout-coach/start').expect(401);
 
       expect(response.body.error).toBeDefined();
     });
@@ -313,9 +311,7 @@ describe('Workout Coach API Routes', () => {
     });
 
     it('should require authentication', async () => {
-      const response = await request(app)
-        .get(`/api/workout-coach/stream/${sessionId}`)
-        .expect(401);
+      const response = await request(app).get(`/api/workout-coach/stream/${sessionId}`).expect(401);
 
       expect(response.body.error).toBeDefined();
     });
@@ -343,7 +339,7 @@ describe('Workout Coach API Routes', () => {
               expect(res.headers['content-type']).toBe('text/event-stream');
               expect(res.headers['cache-control']).toBe('no-cache');
               expect(res.headers['connection']).toBe('keep-alive');
-              
+
               res.destroy(); // Close the connection
               resolve();
             } catch (error) {
@@ -377,7 +373,7 @@ describe('Workout Coach API Routes', () => {
           .on('response', (res) => {
             res.on('data', (chunk: Buffer) => {
               data += chunk.toString();
-              
+
               // Check for connection message
               if (data.includes('{"type":"connected"}')) {
                 try {

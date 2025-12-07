@@ -64,7 +64,7 @@ describe('SessionStore', () => {
 
     it('should update timestamp on access', () => {
       vi.useFakeTimers();
-      
+
       const sessionId = 'session-123';
       sessionStore.create(sessionId, 1);
 
@@ -76,7 +76,7 @@ describe('SessionStore', () => {
 
       const retrieved = sessionStore.get(sessionId)!;
       expect(retrieved.timestamp).toBeGreaterThanOrEqual(originalTimestamp);
-      
+
       vi.useRealTimers();
     });
   });
@@ -88,14 +88,12 @@ describe('SessionStore', () => {
 
       const workoutPlan = {
         date: '2024-01-15',
-        exercises: [
-          { name: 'Squats', reps: 10, weight: 135 }
-        ]
+        exercises: [{ name: 'Squats', reps: 10, weight: 135 }],
       };
 
       sessionStore.update(sessionId, {
         currentWorkoutPlan: workoutPlan,
-        regenerationCount: 1
+        regenerationCount: 1,
       });
 
       const updated = sessionStore.get(sessionId)!;
@@ -105,7 +103,7 @@ describe('SessionStore', () => {
 
     it('should update timestamp on update', () => {
       vi.useFakeTimers();
-      
+
       const sessionId = 'session-123';
       sessionStore.create(sessionId, 1);
 
@@ -117,7 +115,7 @@ describe('SessionStore', () => {
 
       const updated = sessionStore.get(sessionId)!;
       expect(updated.timestamp).toBeGreaterThanOrEqual(originalTimestamp);
-      
+
       vi.useRealTimers();
     });
 
@@ -134,7 +132,7 @@ describe('SessionStore', () => {
 
       const messages = [
         { role: 'assistant' as const, content: 'Hello!' },
-        { role: 'user' as const, content: 'Hi!' }
+        { role: 'user' as const, content: 'Hi!' },
       ];
 
       sessionStore.update(sessionId, { messages });
@@ -168,7 +166,7 @@ describe('SessionStore', () => {
       sessionStore.create(sessionId, 1);
 
       const mockResponse = {
-        end: vi.fn()
+        end: vi.fn(),
       } as unknown as Response;
 
       sessionStore.update(sessionId, { sseResponse: mockResponse });
@@ -185,7 +183,7 @@ describe('SessionStore', () => {
       const mockResponse = {
         end: vi.fn(() => {
           throw new Error('Response already closed');
-        })
+        }),
       } as unknown as Response;
 
       sessionStore.update(sessionId, { sseResponse: mockResponse });
@@ -223,10 +221,10 @@ describe('SessionStore', () => {
       sessionStore.create(sessionId, 1);
 
       const originalTimestamp = sessionStore.get(sessionId)!.timestamp;
-      
+
       // Small delay
       setTimeout(() => {}, 10);
-      
+
       // Access again
       const newTimestamp = sessionStore.get(sessionId)!.timestamp;
       expect(newTimestamp).toBeGreaterThanOrEqual(originalTimestamp);
@@ -236,7 +234,7 @@ describe('SessionStore', () => {
   describe('periodic cleanup', () => {
     it('should have cleanup interval configured', () => {
       const localStore = new SessionStore();
-      
+
       // Verify cleanup can be started
       expect(() => {
         localStore.startPeriodicCleanup();
@@ -247,13 +245,13 @@ describe('SessionStore', () => {
       const localStore = new SessionStore();
       const session1Id = 'session-1';
       const session2Id = 'session-2';
-      
+
       localStore.create(session1Id, 1);
       localStore.create(session2Id, 2);
 
       // Manually set one session to be expired (old timestamp)
       localStore.update(session1Id, {
-        timestamp: Date.now() - (31 * 60 * 1000) // 31 minutes ago
+        timestamp: Date.now() - 31 * 60 * 1000, // 31 minutes ago
       });
 
       // Manually delete expired session (simulating what cleanup does)
@@ -278,8 +276,8 @@ describe('SessionStore', () => {
         date: '2024-01-15',
         exercises: [
           { name: 'Squats', reps: 10, weight: 135 },
-          { name: 'Bench Press', reps: 8, weight: 155 }
-        ]
+          { name: 'Bench Press', reps: 8, weight: 155 },
+        ],
       };
 
       sessionStore.update(sessionId, { currentWorkoutPlan: workoutPlan });
@@ -288,7 +286,7 @@ describe('SessionStore', () => {
       // User says no, regenerate
       sessionStore.update(sessionId, {
         userResponse: 'no',
-        regenerationCount: 1
+        regenerationCount: 1,
       });
 
       expect(sessionStore.get(sessionId)!.userResponse).toBe('no');
@@ -299,25 +297,25 @@ describe('SessionStore', () => {
         date: '2024-01-15',
         exercises: [
           { name: 'Deadlifts', reps: 5, weight: 225 },
-          { name: 'Pull-ups', reps: 10 }
-        ]
+          { name: 'Pull-ups', reps: 10 },
+        ],
       };
 
       sessionStore.update(sessionId, {
         currentWorkoutPlan: newWorkoutPlan,
-        userResponse: null
+        userResponse: null,
       });
 
       // User says yes
       sessionStore.update(sessionId, {
-        userResponse: 'yes'
+        userResponse: 'yes',
       });
 
       expect(sessionStore.get(sessionId)!.userResponse).toBe('yes');
 
       // Workout created
       sessionStore.update(sessionId, {
-        createdWorkoutId: 42
+        createdWorkoutId: 42,
       });
 
       expect(sessionStore.get(sessionId)!.createdWorkoutId).toBe(42);
@@ -329,7 +327,7 @@ describe('SessionStore', () => {
 
       const message1 = { role: 'assistant' as const, content: 'Here is your workout...' };
       sessionStore.update(sessionId, {
-        messages: [message1]
+        messages: [message1],
       });
 
       expect(sessionStore.get(sessionId)!.messages).toHaveLength(1);
@@ -337,7 +335,7 @@ describe('SessionStore', () => {
       const message2 = { role: 'user' as const, content: 'No' };
       const session = sessionStore.get(sessionId)!;
       sessionStore.update(sessionId, {
-        messages: [...session.messages, message2]
+        messages: [...session.messages, message2],
       });
 
       expect(sessionStore.get(sessionId)!.messages).toHaveLength(2);

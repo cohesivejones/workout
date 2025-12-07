@@ -1,16 +1,16 @@
-import { Router, Request, Response } from "express";
-import dataSource from "../data-source";
-import { Workout, PainScore, SleepScore } from "../entities";
-import { In } from "typeorm";
-import { authenticateToken } from "../middleware/auth";
-import logger from "../logger";
-import { WorkoutResponse, PainScoreResponse, SleepScoreResponse } from "../types";
+import { Router, Request, Response } from 'express';
+import dataSource from '../data-source';
+import { Workout, PainScore, SleepScore } from '../entities';
+import { In } from 'typeorm';
+import { authenticateToken } from '../middleware/auth';
+import logger from '../logger';
+import { WorkoutResponse, PainScoreResponse, SleepScoreResponse } from '../types';
 
 const router = Router();
 
-type FeedType = "workout" | "painScore" | "sleepScore";
+type FeedType = 'workout' | 'painScore' | 'sleepScore';
 
-router.get("/", authenticateToken, async (req: Request, res: Response) => {
+router.get('/', authenticateToken, async (req: Request, res: Response) => {
   try {
     const userId = req.user!.id;
     const rawOffset = req.query.offset as string | undefined;
@@ -59,10 +59,14 @@ router.get("/", authenticateToken, async (req: Request, res: Response) => {
       ORDER BY date DESC, id DESC
     `;
 
-    const items: { type: FeedType; id: number; date: string }[] = await dataSource.query(sql, [userId, startDate, endDate]);    // Enrich items so each record matches the same shape used by timeline
-    const workoutIds = items.filter((i) => i.type === "workout").map((i) => i.id);
-    const painIds = items.filter((i) => i.type === "painScore").map((i) => i.id);
-    const sleepIds = items.filter((i) => i.type === "sleepScore").map((i) => i.id);
+    const items: { type: FeedType; id: number; date: string }[] = await dataSource.query(sql, [
+      userId,
+      startDate,
+      endDate,
+    ]); // Enrich items so each record matches the same shape used by timeline
+    const workoutIds = items.filter((i) => i.type === 'workout').map((i) => i.id);
+    const painIds = items.filter((i) => i.type === 'painScore').map((i) => i.id);
+    const sleepIds = items.filter((i) => i.type === 'sleepScore').map((i) => i.id);
 
     const workoutRepository = dataSource.getRepository(Workout);
     const painScoreRepository = dataSource.getRepository(PainScore);
@@ -126,16 +130,16 @@ router.get("/", authenticateToken, async (req: Request, res: Response) => {
     }
 
     const enrichedItems = items.map((i) => {
-      if (i.type === "workout") {
+      if (i.type === 'workout') {
         return { ...i, workout: workoutMap.get(i.id) };
       }
-      if (i.type === "painScore") {
+      if (i.type === 'painScore') {
         return { ...i, painScore: painMap.get(i.id) };
       }
       return { ...i, sleepScore: sleepMap.get(i.id) };
     });
 
-    logger.debug("Activity feed fetched", {
+    logger.debug('Activity feed fetched', {
       userId,
       total,
       monthOffset,
@@ -143,12 +147,16 @@ router.get("/", authenticateToken, async (req: Request, res: Response) => {
       returned: enrichedItems.length,
     });
 
-    return res.json({ items: enrichedItems, total, offset: monthOffset, month: `${targetYear}-${String(targetMonth).padStart(2, '0')}` });
+    return res.json({
+      items: enrichedItems,
+      total,
+      offset: monthOffset,
+      month: `${targetYear}-${String(targetMonth).padStart(2, '0')}`,
+    });
   } catch (err) {
-    logger.error("Get activity feed error", { error: err, userId: req.user?.id });
-    return res.status(500).json({ error: "Server error" });
+    logger.error('Get activity feed error', { error: err, userId: req.user?.id });
+    return res.status(500).json({ error: 'Server error' });
   }
 });
-
 
 export default router;

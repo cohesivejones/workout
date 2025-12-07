@@ -44,9 +44,7 @@ describe('WorkoutCoachGraph', () => {
         },
         {
           date: '2024-01-13',
-          exercises: [
-            { name: 'Deadlifts', reps: 5, weight: 225 },
-          ],
+          exercises: [{ name: 'Deadlifts', reps: 5, weight: 225 }],
         },
       ];
 
@@ -77,9 +75,7 @@ describe('WorkoutCoachGraph', () => {
       const mockHistory = [
         {
           date: '2024-01-15',
-          exercises: [
-            { name: 'Squats', reps: 10, weight: 135 },
-          ],
+          exercises: [{ name: 'Squats', reps: 10, weight: 135 }],
         },
       ];
 
@@ -426,23 +422,17 @@ describe('WorkoutCoachGraph', () => {
       // Create session with mock SSE response
       sessionStore.create(sessionId, userId);
       const mockWrite = vi.fn();
-      sessionStore.update(sessionId, { 
-        sseResponse: { write: mockWrite } as any 
+      sessionStore.update(sessionId, {
+        sseResponse: { write: mockWrite } as any,
       });
 
       // Generate workout
       await graph.generateWorkout(userId, sessionId);
 
       // Verify SSE events were sent
-      expect(mockWrite).toHaveBeenCalledWith(
-        expect.stringContaining('"type":"generating"')
-      );
-      expect(mockWrite).toHaveBeenCalledWith(
-        expect.stringContaining('"type":"workout"')
-      );
-      expect(mockWrite).toHaveBeenCalledWith(
-        expect.stringContaining('"plan"')
-      );
+      expect(mockWrite).toHaveBeenCalledWith(expect.stringContaining('"type":"generating"'));
+      expect(mockWrite).toHaveBeenCalledWith(expect.stringContaining('"type":"workout"'));
+      expect(mockWrite).toHaveBeenCalledWith(expect.stringContaining('"plan"'));
 
       // Verify session was updated with workout plan
       const session = sessionStore.get(sessionId);
@@ -459,26 +449,22 @@ describe('WorkoutCoachGraph', () => {
       // Create session with mock SSE response
       sessionStore.create(sessionId, userId);
       const mockWrite = vi.fn();
-      sessionStore.update(sessionId, { 
-        sseResponse: { write: mockWrite } as any 
+      sessionStore.update(sessionId, {
+        sseResponse: { write: mockWrite } as any,
       });
 
       // Generate workout should throw
       await expect(graph.generateWorkout(userId, sessionId)).rejects.toThrow('DB error');
 
       // Verify error event was streamed
-      expect(mockWrite).toHaveBeenCalledWith(
-        expect.stringContaining('"type":"error"')
-      );
+      expect(mockWrite).toHaveBeenCalledWith(expect.stringContaining('"type":"error"'));
     });
 
     it('should throw if session not found', async () => {
       const sessionId = 'non-existent';
       const userId = 1;
 
-      await expect(graph.generateWorkout(userId, sessionId)).rejects.toThrow(
-        'Session not found'
-      );
+      await expect(graph.generateWorkout(userId, sessionId)).rejects.toThrow('Session not found');
     });
   });
 
@@ -506,8 +492,8 @@ describe('WorkoutCoachGraph', () => {
       // Create session with mock SSE response
       sessionStore.create(sessionId, userId);
       const mockWrite = vi.fn();
-      sessionStore.update(sessionId, { 
-        sseResponse: { write: mockWrite } as any 
+      sessionStore.update(sessionId, {
+        sseResponse: { write: mockWrite } as any,
       });
 
       // Handle "no" response
@@ -518,12 +504,8 @@ describe('WorkoutCoachGraph', () => {
       expect(graph['generateWorkoutWithAI']).toHaveBeenCalled();
 
       // Verify SSE events were sent
-      expect(mockWrite).toHaveBeenCalledWith(
-        expect.stringContaining('"type":"generating"')
-      );
-      expect(mockWrite).toHaveBeenCalledWith(
-        expect.stringContaining('"type":"workout"')
-      );
+      expect(mockWrite).toHaveBeenCalledWith(expect.stringContaining('"type":"generating"'));
+      expect(mockWrite).toHaveBeenCalledWith(expect.stringContaining('"type":"workout"'));
     });
 
     it('should save workout when user says yes', async () => {
@@ -555,9 +537,7 @@ describe('WorkoutCoachGraph', () => {
       expect(graph['createWorkoutInDB']).toHaveBeenCalledWith(userId, mockWorkoutPlan);
 
       // Verify saved event was sent
-      expect(mockWrite).toHaveBeenCalledWith(
-        expect.stringContaining('"type":"saved"')
-      );
+      expect(mockWrite).toHaveBeenCalledWith(expect.stringContaining('"type":"saved"'));
       expect(mockWrite).toHaveBeenCalledWith(
         expect.stringContaining(`"workoutId":${mockWorkoutId}`)
       );
@@ -605,17 +585,11 @@ describe('WorkoutCoachGraph', () => {
       });
 
       // Handle "yes" response should throw
-      await expect(graph.handleUserResponse(userId, sessionId, 'yes')).rejects.toThrow(
-        'DB error'
-      );
+      await expect(graph.handleUserResponse(userId, sessionId, 'yes')).rejects.toThrow('DB error');
 
       // Verify error event was streamed
-      expect(mockWrite).toHaveBeenCalledWith(
-        expect.stringContaining('"type":"error"')
-      );
-      expect(mockWrite).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to save workout')
-      );
+      expect(mockWrite).toHaveBeenCalledWith(expect.stringContaining('"type":"error"'));
+      expect(mockWrite).toHaveBeenCalledWith(expect.stringContaining('Failed to save workout'));
     });
   });
 });

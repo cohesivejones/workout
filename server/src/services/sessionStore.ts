@@ -1,4 +1,4 @@
-import { Response } from "express";
+import { Response } from 'express';
 
 export interface WorkoutPlan {
   date: string;
@@ -10,7 +10,7 @@ export interface WorkoutPlan {
 }
 
 export interface ChatMessage {
-  role: "user" | "assistant";
+  role: 'user' | 'assistant';
   content: string;
 }
 
@@ -30,7 +30,7 @@ export interface SessionData {
   messages: ChatMessage[];
   workoutHistory: WorkoutHistoryItem[];
   currentWorkoutPlan: WorkoutPlan | null;
-  userResponse: "yes" | "no" | null;
+  userResponse: 'yes' | 'no' | null;
   createdWorkoutId: number | null;
   regenerationCount: number;
   timestamp: number;
@@ -97,14 +97,17 @@ export class SessionStore {
 
   // Clean up old sessions periodically
   startPeriodicCleanup(): void {
-    setInterval(() => {
-      const now = Date.now();
-      for (const [sessionId, session] of this.sessions.entries()) {
-        if (now - session.timestamp > this.SESSION_TIMEOUT) {
-          this.delete(sessionId);
+    setInterval(
+      () => {
+        const now = Date.now();
+        for (const [sessionId, session] of this.sessions.entries()) {
+          if (now - session.timestamp > this.SESSION_TIMEOUT) {
+            this.delete(sessionId);
+          }
         }
-      }
-    }, 5 * 60 * 1000); // Check every 5 minutes
+      },
+      5 * 60 * 1000
+    ); // Check every 5 minutes
   }
 }
 

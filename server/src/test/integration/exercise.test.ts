@@ -28,9 +28,9 @@ function createTestApp() {
   const app = express();
   app.use(express.json());
   app.use(cookieParser());
-  
-  app.use("/api/exercises", exercisesRouter);
-  
+
+  app.use('/api/exercises', exercisesRouter);
+
   return app;
 }
 
@@ -41,16 +41,16 @@ describe('Exercise API Routes', () => {
 
   beforeAll(async () => {
     app = createTestApp();
-    
+
     const userRepository = dataSource.getRepository(User);
     const hashedPassword = await bcrypt.hash('testpass123', 10);
-    
+
     testUser = userRepository.create({
       email: 'exercise-test@example.com',
       name: 'Exercise Test User',
       password: hashedPassword,
     });
-    
+
     await userRepository.save(testUser);
     authToken = generateToken(testUser);
   });
@@ -63,7 +63,7 @@ describe('Exercise API Routes', () => {
       );
       await dataSource.query('DELETE FROM workouts WHERE "userId" = $1', [testUser.id]);
       await dataSource.query('DELETE FROM exercises WHERE "userId" = $1', [testUser.id]);
-      
+
       const userRepository = dataSource.getRepository(User);
       await userRepository.remove(testUser);
     }
@@ -79,10 +79,8 @@ describe('Exercise API Routes', () => {
 
   describe('GET /api/exercises', () => {
     it('should require authentication', async () => {
-      const response = await request(app)
-        .get('/api/exercises')
-        .expect(401);
-      
+      const response = await request(app).get('/api/exercises').expect(401);
+
       expect(response.body.error).toBeDefined();
     });
 
@@ -97,7 +95,7 @@ describe('Exercise API Routes', () => {
 
     it('should return all exercises for authenticated user', async () => {
       const exerciseRepository = dataSource.getRepository(Exercise);
-      
+
       // Create test exercises
       const exercise1 = exerciseRepository.create({ name: 'Bench Press', userId: testUser.id });
       const exercise2 = exerciseRepository.create({ name: 'Squats', userId: testUser.id });
@@ -115,7 +113,7 @@ describe('Exercise API Routes', () => {
 
     it('should return exercises sorted alphabetically by name', async () => {
       const exerciseRepository = dataSource.getRepository(Exercise);
-      
+
       // Create exercises in non-alphabetical order
       const exercises = [
         exerciseRepository.create({ name: 'Squats', userId: testUser.id }),
@@ -138,7 +136,7 @@ describe('Exercise API Routes', () => {
     it('should only return exercises for authenticated user', async () => {
       const exerciseRepository = dataSource.getRepository(Exercise);
       const userRepository = dataSource.getRepository(User);
-      
+
       // Create another user
       const hashedPassword = await bcrypt.hash('otherpass123', 10);
       const otherUser = userRepository.create({
@@ -149,8 +147,14 @@ describe('Exercise API Routes', () => {
       await userRepository.save(otherUser);
 
       // Create exercises for both users
-      const testUserExercise = exerciseRepository.create({ name: 'My Exercise', userId: testUser.id });
-      const otherUserExercise = exerciseRepository.create({ name: 'Other Exercise', userId: otherUser.id });
+      const testUserExercise = exerciseRepository.create({
+        name: 'My Exercise',
+        userId: testUser.id,
+      });
+      const otherUserExercise = exerciseRepository.create({
+        name: 'Other Exercise',
+        userId: otherUser.id,
+      });
       await exerciseRepository.save([testUserExercise, otherUserExercise]);
 
       const response = await request(app)
@@ -173,7 +177,7 @@ describe('Exercise API Routes', () => {
         .post('/api/exercises')
         .send({ name: 'New Exercise' })
         .expect(401);
-      
+
       expect(response.body.error).toBeDefined();
     });
 
@@ -191,9 +195,9 @@ describe('Exercise API Routes', () => {
 
     it('should return existing exercise if already exists', async () => {
       const exerciseRepository = dataSource.getRepository(Exercise);
-      const existingExercise = exerciseRepository.create({ 
-        name: 'Squats', 
-        userId: testUser.id 
+      const existingExercise = exerciseRepository.create({
+        name: 'Squats',
+        userId: testUser.id,
       });
       await exerciseRepository.save(existingExercise);
 
@@ -207,8 +211,8 @@ describe('Exercise API Routes', () => {
       expect(response.body.name).toBe('Squats');
 
       // Verify only one exercise exists
-      const allExercises = await exerciseRepository.find({ 
-        where: { name: 'Squats', userId: testUser.id } 
+      const allExercises = await exerciseRepository.find({
+        where: { name: 'Squats', userId: testUser.id },
       });
       expect(allExercises).toHaveLength(1);
     });
@@ -222,7 +226,7 @@ describe('Exercise API Routes', () => {
 
       const exerciseRepository = dataSource.getRepository(Exercise);
       const savedExercise = await exerciseRepository.findOne({
-        where: { id: response.body.id }
+        where: { id: response.body.id },
       });
 
       expect(savedExercise).toBeDefined();
@@ -237,15 +241,15 @@ describe('Exercise API Routes', () => {
         .put('/api/exercises/1')
         .send({ name: 'Updated Exercise' })
         .expect(401);
-      
+
       expect(response.body.error).toBeDefined();
     });
 
     it('should update an existing exercise', async () => {
       const exerciseRepository = dataSource.getRepository(Exercise);
-      const exercise = exerciseRepository.create({ 
-        name: 'Old Name', 
-        userId: testUser.id 
+      const exercise = exerciseRepository.create({
+        name: 'Old Name',
+        userId: testUser.id,
       });
       await exerciseRepository.save(exercise);
 
@@ -271,9 +275,9 @@ describe('Exercise API Routes', () => {
 
     it('should return 400 when name is missing', async () => {
       const exerciseRepository = dataSource.getRepository(Exercise);
-      const exercise = exerciseRepository.create({ 
-        name: 'Test Exercise', 
-        userId: testUser.id 
+      const exercise = exerciseRepository.create({
+        name: 'Test Exercise',
+        userId: testUser.id,
       });
       await exerciseRepository.save(exercise);
 
@@ -288,9 +292,9 @@ describe('Exercise API Routes', () => {
 
     it('should persist changes to database', async () => {
       const exerciseRepository = dataSource.getRepository(Exercise);
-      const exercise = exerciseRepository.create({ 
-        name: 'Old Name', 
-        userId: testUser.id 
+      const exercise = exerciseRepository.create({
+        name: 'Old Name',
+        userId: testUser.id,
       });
       await exerciseRepository.save(exercise);
 
@@ -301,7 +305,7 @@ describe('Exercise API Routes', () => {
         .expect(200);
 
       const updatedExercise = await exerciseRepository.findOne({
-        where: { id: exercise.id }
+        where: { id: exercise.id },
       });
 
       expect(updatedExercise!.name).toBe('Updated Name');
@@ -310,10 +314,8 @@ describe('Exercise API Routes', () => {
 
   describe('GET /api/exercises/recent', () => {
     it('should require authentication', async () => {
-      const response = await request(app)
-        .get('/api/exercises/recent?exerciseId=1')
-        .expect(401);
-      
+      const response = await request(app).get('/api/exercises/recent?exerciseId=1').expect(401);
+
       expect(response.body.error).toBeDefined();
     });
 
@@ -328,9 +330,9 @@ describe('Exercise API Routes', () => {
 
     it('should return 404 when no workout found with exercise', async () => {
       const exerciseRepository = dataSource.getRepository(Exercise);
-      const exercise = exerciseRepository.create({ 
-        name: 'Bench Press', 
-        userId: testUser.id 
+      const exercise = exerciseRepository.create({
+        name: 'Bench Press',
+        userId: testUser.id,
       });
       await exerciseRepository.save(exercise);
 
@@ -348,9 +350,9 @@ describe('Exercise API Routes', () => {
       const workoutExerciseRepository = dataSource.getRepository(WorkoutExercise);
 
       // Create exercise
-      const exercise = exerciseRepository.create({ 
-        name: 'Bench Press', 
-        userId: testUser.id 
+      const exercise = exerciseRepository.create({
+        name: 'Bench Press',
+        userId: testUser.id,
       });
       await exerciseRepository.save(exercise);
 
@@ -404,9 +406,9 @@ describe('Exercise API Routes', () => {
       const workoutExerciseRepository = dataSource.getRepository(WorkoutExercise);
 
       // Create exercise
-      const exercise = exerciseRepository.create({ 
-        name: 'Plank', 
-        userId: testUser.id 
+      const exercise = exerciseRepository.create({
+        name: 'Plank',
+        userId: testUser.id,
       });
       await exerciseRepository.save(exercise);
 
@@ -440,10 +442,8 @@ describe('Exercise API Routes', () => {
 
   describe('POST /api/exercises/:id/suggest', () => {
     it('should require authentication', async () => {
-      const response = await request(app)
-        .post('/api/exercises/1/suggest')
-        .expect(401);
-      
+      const response = await request(app).post('/api/exercises/1/suggest').expect(401);
+
       expect(response.body.error).toBeDefined();
     });
 
@@ -459,7 +459,7 @@ describe('Exercise API Routes', () => {
     it('should return 404 when exercise belongs to different user', async () => {
       const exerciseRepository = dataSource.getRepository(Exercise);
       const userRepository = dataSource.getRepository(User);
-      
+
       // Create another user
       const hashedPassword = await bcrypt.hash('otherpass123', 10);
       const otherUser = userRepository.create({
@@ -470,9 +470,9 @@ describe('Exercise API Routes', () => {
       await userRepository.save(otherUser);
 
       // Create exercise for other user
-      const otherExercise = exerciseRepository.create({ 
-        name: 'Other User Exercise', 
-        userId: otherUser.id 
+      const otherExercise = exerciseRepository.create({
+        name: 'Other User Exercise',
+        userId: otherUser.id,
       });
       await exerciseRepository.save(otherExercise);
 
@@ -490,19 +490,21 @@ describe('Exercise API Routes', () => {
 
     it('should return 3 AI-generated suggestions', async () => {
       const exerciseRepository = dataSource.getRepository(Exercise);
-      const exercise = exerciseRepository.create({ 
-        name: 'bench press', 
-        userId: testUser.id 
+      const exercise = exerciseRepository.create({
+        name: 'bench press',
+        userId: testUser.id,
       });
       await exerciseRepository.save(exercise);
 
       // Mock OpenAI response
       mockOpenAICreate.mockResolvedValueOnce({
-        choices: [{
-          message: {
-            content: 'Barbell Bench Press\nFlat Bench Press\nBarbell Flat Bench Press'
-          }
-        }]
+        choices: [
+          {
+            message: {
+              content: 'Barbell Bench Press\nFlat Bench Press\nBarbell Flat Bench Press',
+            },
+          },
+        ],
       });
 
       const response = await request(app)
@@ -514,15 +516,15 @@ describe('Exercise API Routes', () => {
       expect(response.body.suggestions).toEqual([
         'Barbell Bench Press',
         'Flat Bench Press',
-        'Barbell Flat Bench Press'
+        'Barbell Flat Bench Press',
       ]);
     });
 
     it('should handle OpenAI API errors gracefully', async () => {
       const exerciseRepository = dataSource.getRepository(Exercise);
-      const exercise = exerciseRepository.create({ 
-        name: 'squats', 
-        userId: testUser.id 
+      const exercise = exerciseRepository.create({
+        name: 'squats',
+        userId: testUser.id,
       });
       await exerciseRepository.save(exercise);
 
@@ -539,19 +541,21 @@ describe('Exercise API Routes', () => {
 
     it('should fallback to original name if OpenAI returns invalid response', async () => {
       const exerciseRepository = dataSource.getRepository(Exercise);
-      const exercise = exerciseRepository.create({ 
-        name: 'deadlift', 
-        userId: testUser.id 
+      const exercise = exerciseRepository.create({
+        name: 'deadlift',
+        userId: testUser.id,
       });
       await exerciseRepository.save(exercise);
 
       // Mock OpenAI response with only 1 suggestion
       mockOpenAICreate.mockResolvedValueOnce({
-        choices: [{
-          message: {
-            content: 'Romanian Deadlift'
-          }
-        }]
+        choices: [
+          {
+            message: {
+              content: 'Romanian Deadlift',
+            },
+          },
+        ],
       });
 
       const response = await request(app)

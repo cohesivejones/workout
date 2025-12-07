@@ -1,7 +1,7 @@
-import { Request, Response, NextFunction } from "express";
-import jwt from "jsonwebtoken";
-import { User } from "../entities";
-import dataSource from "../data-source";
+import { Request, Response, NextFunction } from 'express';
+import jwt from 'jsonwebtoken';
+import { User } from '../entities';
+import dataSource from '../data-source';
 
 // Extend Express Request type to include user
 declare global {
@@ -14,27 +14,23 @@ declare global {
 }
 
 // JWT secret key from environment variables
-const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
 // Generate JWT token
 export const generateToken = (user: User): string => {
   return jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, {
-    expiresIn: "2h",
+    expiresIn: '2h',
   });
 };
 
 // Verify JWT token middleware
-export const authenticateToken = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
+export const authenticateToken = async (req: Request, res: Response, next: NextFunction) => {
   try {
     // Get token from cookies only (no bearer token support)
     const token = req.cookies?.token;
 
     if (!token) {
-      return res.status(401).json({ error: "Authentication required" });
+      return res.status(401).json({ error: 'Authentication required' });
     }
 
     // Verify token
@@ -45,23 +41,19 @@ export const authenticateToken = async (
     const user = await userRepository.findOne({ where: { id: decoded.id } });
 
     if (!user) {
-      return res.status(401).json({ error: "User not found" });
+      return res.status(401).json({ error: 'User not found' });
     }
 
     // Attach user to request object
     req.user = user;
     next();
   } catch {
-    return res.status(401).json({ error: "Invalid token" });
+    return res.status(401).json({ error: 'Invalid token' });
   }
 };
 
 // Optional authentication middleware - doesn't require authentication but attaches user if token is valid
-export const optionalAuth = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
+export const optionalAuth = async (req: Request, res: Response, next: NextFunction) => {
   try {
     // Get token from cookies only (no bearer token support)
     const token = req.cookies?.token;

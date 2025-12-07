@@ -1,9 +1,9 @@
-import { ChatOpenAI } from "@langchain/openai";
-import { SessionStore, WorkoutHistoryItem, WorkoutPlan } from "./sessionStore";
-import dataSource from "../data-source";
-import { Workout, Exercise, WorkoutExercise } from "../entities";
-import { Between } from "typeorm";
-import logger from "../logger";
+import { ChatOpenAI } from '@langchain/openai';
+import { SessionStore, WorkoutHistoryItem, WorkoutPlan } from './sessionStore';
+import dataSource from '../data-source';
+import { Workout, Exercise, WorkoutExercise } from '../entities';
+import { Between } from 'typeorm';
+import logger from '../logger';
 
 export class WorkoutCoachGraph {
   private sessionStore: SessionStore;
@@ -12,7 +12,7 @@ export class WorkoutCoachGraph {
   constructor(sessionStore: SessionStore) {
     this.sessionStore = sessionStore;
     this.llm = new ChatOpenAI({
-      modelName: "gpt-4o-mini",
+      modelName: 'gpt-4o-mini',
       temperature: 0.7,
     });
   }
@@ -26,8 +26,8 @@ export class WorkoutCoachGraph {
       const startDate = new Date();
       startDate.setDate(endDate.getDate() - 30);
 
-      const startDateStr = startDate.toISOString().split("T")[0];
-      const endDateStr = endDate.toISOString().split("T")[0];
+      const startDateStr = startDate.toISOString().split('T')[0];
+      const endDateStr = endDate.toISOString().split('T')[0];
 
       const workoutRepository = dataSource.getRepository(Workout);
       const workouts = await workoutRepository.find({
@@ -41,7 +41,7 @@ export class WorkoutCoachGraph {
           },
         },
         order: {
-          date: "DESC",
+          date: 'DESC',
         },
       });
 
@@ -55,7 +55,7 @@ export class WorkoutCoachGraph {
         })),
       }));
     } catch (error) {
-      logger.error("Failed to fetch workout history", { error, userId });
+      logger.error('Failed to fetch workout history', { error, userId });
       throw error;
     }
   }
@@ -63,14 +63,12 @@ export class WorkoutCoachGraph {
   /**
    * Generate a workout plan using OpenAI based on workout history
    */
-  private async generateWorkoutWithAI(
-    history: WorkoutHistoryItem[]
-  ): Promise<WorkoutPlan> {
+  private async generateWorkoutWithAI(history: WorkoutHistoryItem[]): Promise<WorkoutPlan> {
     try {
-      const today = new Date().toISOString().split("T")[0];
+      const today = new Date().toISOString().split('T')[0];
 
       const basePrompt =
-        "You are a fitness trainer. Generate a balanced full-body workout with 6 exercises covering legs, core, and upper body. Return ONLY a JSON object with this exact structure: {\"exercises\": [{\"name\": \"Exercise Name\", \"reps\": number, \"weight\": number}]}. Do not include any other text, explanation, or markdown formatting.";
+        'You are a fitness trainer. Generate a balanced full-body workout with 6 exercises covering legs, core, and upper body. Return ONLY a JSON object with this exact structure: {"exercises": [{"name": "Exercise Name", "reps": number, "weight": number}]}. Do not include any other text, explanation, or markdown formatting.';
 
       let prompt = basePrompt;
 
@@ -78,9 +76,9 @@ export class WorkoutCoachGraph {
         const historyText = history
           .map(
             (w) =>
-              `${w.date}: ${w.exercises.map((e) => `${e.name} ${e.reps} reps${e.weight ? ` @ ${e.weight} lbs` : ""}`).join(", ")}`
+              `${w.date}: ${w.exercises.map((e) => `${e.name} ${e.reps} reps${e.weight ? ` @ ${e.weight} lbs` : ''}`).join(', ')}`
           )
-          .join("\n");
+          .join('\n');
 
         prompt = `${basePrompt}\n\nRecent workout history:\n${historyText}\n\nBased on this history, suggest progressive overload where appropriate.`;
       }
@@ -104,7 +102,7 @@ export class WorkoutCoachGraph {
           if (objectMatch) {
             parsed = JSON.parse(objectMatch[0]);
           } else {
-            throw new Error("Could not parse workout plan from AI response");
+            throw new Error('Could not parse workout plan from AI response');
           }
         }
       }
@@ -118,7 +116,7 @@ export class WorkoutCoachGraph {
         })),
       };
     } catch (error) {
-      logger.error("Failed to generate workout with AI", { error });
+      logger.error('Failed to generate workout with AI', { error });
       throw error;
     }
   }
@@ -126,10 +124,7 @@ export class WorkoutCoachGraph {
   /**
    * Create a workout in the database
    */
-  private async createWorkoutInDB(
-    userId: number,
-    plan: WorkoutPlan
-  ): Promise<number> {
+  private async createWorkoutInDB(userId: number, plan: WorkoutPlan): Promise<number> {
     const queryRunner = dataSource.createQueryRunner();
 
     try {
@@ -147,8 +142,7 @@ export class WorkoutCoachGraph {
       await workoutRepository.save(workout);
 
       const exerciseRepository = queryRunner.manager.getRepository(Exercise);
-      const workoutExerciseRepository =
-        queryRunner.manager.getRepository(WorkoutExercise);
+      const workoutExerciseRepository = queryRunner.manager.getRepository(WorkoutExercise);
 
       for (const exerciseData of plan.exercises) {
         // Get or create exercise
@@ -193,10 +187,8 @@ export class WorkoutCoachGraph {
         );
 
         if (previousWorkoutExercise.length > 0) {
-          workoutExercise.new_reps =
-            workoutExercise.reps !== previousWorkoutExercise[0].reps;
-          workoutExercise.new_weight =
-            workoutExercise.weight !== previousWorkoutExercise[0].weight;
+          workoutExercise.new_reps = workoutExercise.reps !== previousWorkoutExercise[0].reps;
+          workoutExercise.new_weight = workoutExercise.weight !== previousWorkoutExercise[0].weight;
           workoutExercise.new_time =
             workoutExercise.time_seconds !== previousWorkoutExercise[0].time_seconds;
         } else {
@@ -210,7 +202,7 @@ export class WorkoutCoachGraph {
 
       await queryRunner.commitTransaction();
 
-      logger.info("Workout created via coach", {
+      logger.info('Workout created via coach', {
         workoutId: workout.id,
         userId,
         exerciseCount: plan.exercises.length,
@@ -219,7 +211,7 @@ export class WorkoutCoachGraph {
       return workout.id;
     } catch (error) {
       await queryRunner.rollbackTransaction();
-      logger.error("Failed to create workout in DB", { error, userId });
+      logger.error('Failed to create workout in DB', { error, userId });
       throw error;
     } finally {
       await queryRunner.release();
@@ -230,7 +222,7 @@ export class WorkoutCoachGraph {
    * Format a workout plan for display in the chat
    */
   public formatWorkoutForDisplay(plan: WorkoutPlan): string {
-    const lines = ["Here's your workout for today:", ""];
+    const lines = ["Here's your workout for today:", ''];
 
     plan.exercises.forEach((exercise, index) => {
       let line = `${index + 1}. ${exercise.name} - ${exercise.reps} reps`;
@@ -240,7 +232,7 @@ export class WorkoutCoachGraph {
       lines.push(line);
     });
 
-    return lines.join("\n");
+    return lines.join('\n');
   }
 
   /**
@@ -250,14 +242,12 @@ export class WorkoutCoachGraph {
     try {
       const session = this.sessionStore.get(sessionId);
       if (!session) {
-        throw new Error("Session not found");
+        throw new Error('Session not found');
       }
 
       // Send generating status
       if (session.sseResponse) {
-        session.sseResponse.write(
-          `data: ${JSON.stringify({ type: "generating" })}\n\n`
-        );
+        session.sseResponse.write(`data: ${JSON.stringify({ type: 'generating' })}\n\n`);
       }
 
       // Fetch workout history
@@ -271,21 +261,19 @@ export class WorkoutCoachGraph {
 
       // Stream the workout plan
       if (session.sseResponse) {
-        session.sseResponse.write(
-          `data: ${JSON.stringify({ type: "workout", plan })}\n\n`
-        );
+        session.sseResponse.write(`data: ${JSON.stringify({ type: 'workout', plan })}\n\n`);
       }
 
-      logger.info("Workout generated and streamed", { sessionId, userId });
+      logger.info('Workout generated and streamed', { sessionId, userId });
     } catch (error) {
-      logger.error("Failed to generate workout", { error, sessionId, userId });
+      logger.error('Failed to generate workout', { error, sessionId, userId });
 
       const session = this.sessionStore.get(sessionId);
       if (session?.sseResponse) {
         session.sseResponse.write(
           `data: ${JSON.stringify({
-            type: "error",
-            message: "Failed to generate workout",
+            type: 'error',
+            message: 'Failed to generate workout',
           })}\n\n`
         );
       }
@@ -300,49 +288,44 @@ export class WorkoutCoachGraph {
   public async handleUserResponse(
     userId: number,
     sessionId: string,
-    response: "yes" | "no"
+    response: 'yes' | 'no'
   ): Promise<void> {
     try {
       const session = this.sessionStore.get(sessionId);
       if (!session) {
-        throw new Error("Session not found");
+        throw new Error('Session not found');
       }
 
-      if (response === "no") {
+      if (response === 'no') {
         // User rejected the workout, regenerate
-        logger.info("User rejected workout, regenerating", { sessionId, userId });
+        logger.info('User rejected workout, regenerating', { sessionId, userId });
         await this.generateWorkout(userId, sessionId);
       } else {
         // User accepted the workout, save to database
-        logger.info("User accepted workout, saving to database", {
+        logger.info('User accepted workout, saving to database', {
           sessionId,
           userId,
         });
 
         if (!session.currentWorkoutPlan) {
-          throw new Error("No workout plan to save");
+          throw new Error('No workout plan to save');
         }
 
-        const workoutId = await this.createWorkoutInDB(
-          userId,
-          session.currentWorkoutPlan
-        );
+        const workoutId = await this.createWorkoutInDB(userId, session.currentWorkoutPlan);
 
         // Send saved event
         if (session.sseResponse) {
-          session.sseResponse.write(
-            `data: ${JSON.stringify({ type: "saved", workoutId })}\n\n`
-          );
+          session.sseResponse.write(`data: ${JSON.stringify({ type: 'saved', workoutId })}\n\n`);
         }
 
-        logger.info("Workout saved successfully", {
+        logger.info('Workout saved successfully', {
           sessionId,
           userId,
           workoutId,
         });
       }
     } catch (error) {
-      logger.error("Failed to handle user response", {
+      logger.error('Failed to handle user response', {
         error,
         sessionId,
         userId,
@@ -353,11 +336,8 @@ export class WorkoutCoachGraph {
       if (session?.sseResponse) {
         session.sseResponse.write(
           `data: ${JSON.stringify({
-            type: "error",
-            message:
-              response === "yes"
-                ? "Failed to save workout"
-                : "Failed to generate workout",
+            type: 'error',
+            message: response === 'yes' ? 'Failed to save workout' : 'Failed to generate workout',
           })}\n\n`
         );
       }

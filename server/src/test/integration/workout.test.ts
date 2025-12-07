@@ -13,11 +13,11 @@ function createTestApp() {
   const app = express();
   app.use(express.json());
   app.use(cookieParser());
-  
+
   const apiRouter = express.Router();
-  
+
   // POST /workouts endpoint implementation
-  apiRouter.post("/workouts", authenticateToken, async (req, res) => {
+  apiRouter.post('/workouts', authenticateToken, async (req, res) => {
     const queryRunner = dataSource.createQueryRunner();
 
     try {
@@ -71,7 +71,8 @@ function createTestApp() {
         await workoutExerciseRepository.save(workoutExercise);
 
         // Find the most recent previous workout exercise for this exercise
-        const previousWorkoutExercise = await workoutExerciseRepository.query(`
+        const previousWorkoutExercise = await workoutExerciseRepository.query(
+          `
           SELECT we.reps, we.weight, we.time_seconds
           FROM workout_exercises we
           JOIN workouts w ON we.workout_id = w.id
@@ -80,13 +81,16 @@ function createTestApp() {
           AND w.date < $3
           ORDER BY w.date DESC
           LIMIT 1
-        `, [exercise.id, userId, date]);
+        `,
+          [exercise.id, userId, date]
+        );
 
         // Set flags based on comparison
         if (previousWorkoutExercise.length > 0) {
           workoutExercise.new_reps = workoutExercise.reps !== previousWorkoutExercise[0].reps;
           workoutExercise.new_weight = workoutExercise.weight !== previousWorkoutExercise[0].weight;
-          workoutExercise.new_time = workoutExercise.time_seconds !== previousWorkoutExercise[0].time_seconds;
+          workoutExercise.new_time =
+            workoutExercise.time_seconds !== previousWorkoutExercise[0].time_seconds;
         } else {
           workoutExercise.new_reps = false;
           workoutExercise.new_weight = false;
@@ -94,15 +98,15 @@ function createTestApp() {
         }
 
         await workoutExerciseRepository.save(workoutExercise);
-        
+
         const reloadedWorkoutExercise = await workoutExerciseRepository.findOne({
-          where: { 
+          where: {
             workout_id: workout.id,
-            exercise_id: exercise.id
+            exercise_id: exercise.id,
           },
-          relations: ['exercise']
+          relations: ['exercise'],
         });
-        
+
         if (reloadedWorkoutExercise) {
           workout.workoutExercises.push(reloadedWorkoutExercise);
           createdWorkoutExercises.push(reloadedWorkoutExercise);
@@ -134,18 +138,18 @@ function createTestApp() {
       console.error(err);
       const error = err as DatabaseError;
 
-      if (error.code === "23505" && error.constraint === "workouts_date_user_id_key") {
-        res.status(400).json({ error: "A workout already exists for this date" });
+      if (error.code === '23505' && error.constraint === 'workouts_date_user_id_key') {
+        res.status(400).json({ error: 'A workout already exists for this date' });
       } else {
-        res.status(500).json({ error: error.message || "Server error" });
+        res.status(500).json({ error: error.message || 'Server error' });
       }
     } finally {
       await queryRunner.release();
     }
   });
-  
-  app.use("/api", apiRouter);
-  
+
+  app.use('/api', apiRouter);
+
   return app;
 }
 
@@ -156,16 +160,16 @@ describe('Workout API Routes', () => {
 
   beforeAll(async () => {
     app = createTestApp();
-    
+
     const userRepository = dataSource.getRepository(User);
     const hashedPassword = await bcrypt.hash('testpass123', 10);
-    
+
     testUser = userRepository.create({
       email: 'workout-test@example.com',
       name: 'Workout Test User',
       password: hashedPassword,
     });
-    
+
     await userRepository.save(testUser);
     authToken = generateToken(testUser);
   });
@@ -178,7 +182,7 @@ describe('Workout API Routes', () => {
       );
       await dataSource.query('DELETE FROM workouts WHERE "userId" = $1', [testUser.id]);
       await dataSource.query('DELETE FROM exercises WHERE "userId" = $1', [testUser.id]);
-      
+
       const userRepository = dataSource.getRepository(User);
       await userRepository.remove(testUser);
     }
@@ -198,16 +202,11 @@ describe('Workout API Routes', () => {
       const workoutData = {
         date: '2024-01-15',
         withInstructor: false,
-        exercises: [
-          { name: 'Squats', reps: 10, weight: 100 }
-        ]
+        exercises: [{ name: 'Squats', reps: 10, weight: 100 }],
       };
 
-      const response = await request(app)
-        .post('/api/workouts')
-        .send(workoutData)
-        .expect(401);
-      
+      const response = await request(app).post('/api/workouts').send(workoutData).expect(401);
+
       expect(response.body.error).toBeDefined();
     });
 
@@ -217,8 +216,8 @@ describe('Workout API Routes', () => {
         withInstructor: false,
         exercises: [
           { name: 'Bench Press', reps: 10, weight: 135 },
-          { name: 'Squat', reps: 8, weight: 185 }
-        ]
+          { name: 'Squat', reps: 8, weight: 185 },
+        ],
       };
 
       const response = await request(app)
@@ -231,7 +230,7 @@ describe('Workout API Routes', () => {
       expect(response.body.date).toBe('2024-01-15');
       expect(response.body.withInstructor).toBe(false);
       expect(response.body.exercises).toHaveLength(2);
-      
+
       expect(response.body.exercises[0].name).toBe('Bench Press');
       expect(response.body.exercises[0].reps).toBe(10);
       expect(response.body.exercises[0].weight).toBe(135);
@@ -245,8 +244,8 @@ describe('Workout API Routes', () => {
         withInstructor: false,
         exercises: [
           { name: 'Plank', reps: 1, time_seconds: 2 },
-          { name: 'Wall Sit', reps: 1, time_seconds: 1.5 }
-        ]
+          { name: 'Wall Sit', reps: 1, time_seconds: 1.5 },
+        ],
       };
 
       const response = await request(app)
@@ -268,8 +267,8 @@ describe('Workout API Routes', () => {
         withInstructor: false,
         exercises: [
           { name: 'Push-ups', reps: 20 },
-          { name: 'Pull-ups', reps: 12 }
-        ]
+          { name: 'Pull-ups', reps: 12 },
+        ],
       };
 
       const response = await request(app)
@@ -287,9 +286,7 @@ describe('Workout API Routes', () => {
       const workoutData = {
         date: '2024-01-15',
         withInstructor: true,
-        exercises: [
-          { name: 'Squats', reps: 10, weight: 100 }
-        ]
+        exercises: [{ name: 'Squats', reps: 10, weight: 100 }],
       };
 
       const response = await request(app)
@@ -306,9 +303,7 @@ describe('Workout API Routes', () => {
       const firstWorkout = {
         date: '2024-01-15',
         withInstructor: false,
-        exercises: [
-          { name: 'Bench Press', reps: 10, weight: 135 }
-        ]
+        exercises: [{ name: 'Bench Press', reps: 10, weight: 135 }],
       };
 
       await request(app)
@@ -321,9 +316,7 @@ describe('Workout API Routes', () => {
       const secondWorkout = {
         date: '2024-01-16',
         withInstructor: false,
-        exercises: [
-          { name: 'Bench Press', reps: 12, weight: 135 }
-        ]
+        exercises: [{ name: 'Bench Press', reps: 12, weight: 135 }],
       };
 
       const response = await request(app)
@@ -341,9 +334,7 @@ describe('Workout API Routes', () => {
       const firstWorkout = {
         date: '2024-01-15',
         withInstructor: false,
-        exercises: [
-          { name: 'Squat', reps: 8, weight: 185 }
-        ]
+        exercises: [{ name: 'Squat', reps: 8, weight: 185 }],
       };
 
       await request(app)
@@ -356,9 +347,7 @@ describe('Workout API Routes', () => {
       const secondWorkout = {
         date: '2024-01-16',
         withInstructor: false,
-        exercises: [
-          { name: 'Squat', reps: 8, weight: 200 }
-        ]
+        exercises: [{ name: 'Squat', reps: 8, weight: 200 }],
       };
 
       const response = await request(app)
@@ -376,9 +365,7 @@ describe('Workout API Routes', () => {
       const firstWorkout = {
         date: '2024-01-15',
         withInstructor: false,
-        exercises: [
-          { name: 'Plank', reps: 1, time_seconds: 2 }
-        ]
+        exercises: [{ name: 'Plank', reps: 1, time_seconds: 2 }],
       };
 
       await request(app)
@@ -391,9 +378,7 @@ describe('Workout API Routes', () => {
       const secondWorkout = {
         date: '2024-01-16',
         withInstructor: false,
-        exercises: [
-          { name: 'Plank', reps: 1, time_seconds: 2.5 }
-        ]
+        exercises: [{ name: 'Plank', reps: 1, time_seconds: 2.5 }],
       };
 
       const response = await request(app)
@@ -409,9 +394,7 @@ describe('Workout API Routes', () => {
       const workoutData = {
         date: '2024-01-15',
         withInstructor: false,
-        exercises: [
-          { name: 'Squats', reps: 10, weight: 100 }
-        ]
+        exercises: [{ name: 'Squats', reps: 10, weight: 100 }],
       };
 
       // Create first workout
@@ -445,9 +428,7 @@ describe('Workout API Routes', () => {
       const firstWorkout = {
         date: '2024-01-15',
         withInstructor: false,
-        exercises: [
-          { name: 'Deadlift', reps: 5, weight: 225 }
-        ]
+        exercises: [{ name: 'Deadlift', reps: 5, weight: 225 }],
       };
 
       await request(app)
@@ -457,7 +438,7 @@ describe('Workout API Routes', () => {
         .expect(200);
 
       const exercisesAfterFirst = await exerciseRepository.find({
-        where: { userId: testUser.id, name: 'Deadlift' }
+        where: { userId: testUser.id, name: 'Deadlift' },
       });
       expect(exercisesAfterFirst).toHaveLength(1);
 
@@ -465,9 +446,7 @@ describe('Workout API Routes', () => {
       const secondWorkout = {
         date: '2024-01-16',
         withInstructor: false,
-        exercises: [
-          { name: 'Deadlift', reps: 5, weight: 235 }
-        ]
+        exercises: [{ name: 'Deadlift', reps: 5, weight: 235 }],
       };
 
       await request(app)
@@ -478,7 +457,7 @@ describe('Workout API Routes', () => {
 
       // Should still only have one exercise record
       const exercisesAfterSecond = await exerciseRepository.find({
-        where: { userId: testUser.id, name: 'Deadlift' }
+        where: { userId: testUser.id, name: 'Deadlift' },
       });
       expect(exercisesAfterSecond).toHaveLength(1);
     });
@@ -490,8 +469,8 @@ describe('Workout API Routes', () => {
         exercises: [
           { name: 'Bench Press', reps: 10, weight: 135 },
           { name: 'Plank', reps: 1, time_seconds: 2 },
-          { name: 'Push-ups', reps: 20 }
-        ]
+          { name: 'Push-ups', reps: 20 },
+        ],
       };
 
       const response = await request(app)
@@ -511,9 +490,7 @@ describe('Workout API Routes', () => {
       const workoutData = {
         date: '2024-01-15',
         withInstructor: false,
-        exercises: [
-          { name: 'Squats', reps: 10, weight: 100 }
-        ]
+        exercises: [{ name: 'Squats', reps: 10, weight: 100 }],
       };
 
       const response = await request(app)
@@ -528,9 +505,9 @@ describe('Workout API Routes', () => {
         where: { id: response.body.id },
         relations: {
           workoutExercises: {
-            exercise: true
-          }
-        }
+            exercise: true,
+          },
+        },
       });
 
       expect(savedWorkout).toBeDefined();

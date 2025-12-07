@@ -1,8 +1,6 @@
-import { MigrationInterface, QueryRunner } from "typeorm";
+import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class BackPopulateNewRepsAndNewWeightFlags1746040208000
-  implements MigrationInterface
-{
+export class BackPopulateNewRepsAndNewWeightFlags1746040208000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     // This query uses window functions to compare each workout exercise with the previous one
     // for the same user and exercise, ordered by workout date

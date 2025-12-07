@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner } from "typeorm";
+import { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class CreateSleepScoresTable1714323600000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {

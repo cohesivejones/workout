@@ -15,6 +15,7 @@ Initialize a new workout coach session.
 **Request Body:** None
 
 **Response:** 200 OK
+
 ```json
 {
   "sessionId": "uuid-string",
@@ -23,6 +24,7 @@ Initialize a new workout coach session.
 ```
 
 **Errors:**
+
 - `401` - Unauthorized (no valid auth token)
 - `500` - Server error
 
@@ -35,6 +37,7 @@ Submit user response (yes/no) for the current workout plan.
 **Authentication:** Required
 
 **Request Body:**
+
 ```json
 {
   "sessionId": "uuid-string",
@@ -43,6 +46,7 @@ Submit user response (yes/no) for the current workout plan.
 ```
 
 **Response:** 200 OK
+
 ```json
 {
   "message": "Response recorded"
@@ -50,6 +54,7 @@ Submit user response (yes/no) for the current workout plan.
 ```
 
 **Errors:**
+
 - `400` - Bad Request
   - Session ID is required
   - Response is required
@@ -60,6 +65,7 @@ Submit user response (yes/no) for the current workout plan.
 - `500` - Server error
 
 **Behavior:**
+
 - `"yes"` - Records user acceptance of the current workout plan
 - `"no"` - Records user rejection and increments regeneration count
 
@@ -72,9 +78,11 @@ Server-Sent Events (SSE) stream for real-time workout generation updates.
 **Authentication:** Required
 
 **Parameters:**
+
 - `sessionId` (path) - The session ID to stream events for
 
 **Response Headers:**
+
 - `Content-Type: text/event-stream`
 - `Cache-Control: no-cache`
 - `Connection: keep-alive`
@@ -82,22 +90,26 @@ Server-Sent Events (SSE) stream for real-time workout generation updates.
 **Event Types:**
 
 **Connected Event:**
+
 ```
 data: {"type":"connected"}
 ```
 
 **Keep-Alive Ping** (every 30 seconds):
+
 ```
 data: {"type":"ping"}
 ```
 
 **Errors:**
+
 - `401` - Unauthorized (no valid auth token)
 - `403` - Unauthorized (session belongs to different user)
 - `404` - Session not found
 - `500` - Server error
 
 **Connection Management:**
+
 - The connection is kept alive with periodic ping events
 - Client should reconnect if connection is lost
 - Server cleans up connection when client disconnects
@@ -109,12 +121,14 @@ data: {"type":"ping"}
 ### Typical Usage Flow:
 
 1. **Start Session**
+
    ```
    POST /api/workout-coach/start
    → Returns sessionId
    ```
 
 2. **Connect to Stream**
+
    ```
    GET /api/workout-coach/stream/{sessionId}
    → Receive real-time updates
@@ -126,6 +140,7 @@ data: {"type":"ping"}
    - Workout sent via SSE stream
 
 4. **User Responds**
+
    ```
    POST /api/workout-coach/respond
    {
@@ -146,6 +161,7 @@ data: {"type":"ping"}
 ### Multiple Regenerations:
 
 Users can say "no" multiple times to regenerate workouts. Each "no" response:
+
 - Increments the `regenerationCount`
 - Triggers a new workout generation
 - Maintains session state
@@ -183,14 +199,13 @@ const { sessionId } = await response.json();
 ### Connecting to SSE Stream:
 
 ```typescript
-const eventSource = new EventSource(
-  `/api/workout-coach/stream/${sessionId}`,
-  { withCredentials: true }
-);
+const eventSource = new EventSource(`/api/workout-coach/stream/${sessionId}`, {
+  withCredentials: true,
+});
 
 eventSource.onmessage = (event) => {
   const data = JSON.parse(event.data);
-  
+
   if (data.type === 'connected') {
     console.log('Connected to stream');
   } else if (data.type === 'workout') {
@@ -231,12 +246,14 @@ await respondToWorkout(sessionId, 'no');
 ## Integration with LangGraph
 
 The routes integrate with:
+
 - **SessionStore** - In-memory session management
 - **WorkoutCoachGraph** - LangGraph workflow for workout generation
 - **OpenAI** - AI-powered workout generation
 - **Database** - Workout history fetching and creation
 
 The workflow uses a state machine pattern where:
+
 - State stored in SessionStore
 - User responses drive state transitions
 - OpenAI generates workouts based on history
