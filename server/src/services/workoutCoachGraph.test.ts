@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { WorkoutCoachGraph } from './workoutCoachGraph';
 import { SessionStore } from './sessionStore';
@@ -426,7 +427,7 @@ describe('WorkoutCoachGraph', () => {
       sessionStore.create(sessionId, userId);
       const mockWrite = vi.fn();
       sessionStore.update(sessionId, { 
-        sseResponse: { write: mockWrite } as unknown as Response 
+        sseResponse: { write: mockWrite } as any 
       });
 
       // Generate workout
@@ -459,7 +460,7 @@ describe('WorkoutCoachGraph', () => {
       sessionStore.create(sessionId, userId);
       const mockWrite = vi.fn();
       sessionStore.update(sessionId, { 
-        sseResponse: { write: mockWrite } as unknown as Response 
+        sseResponse: { write: mockWrite } as any 
       });
 
       // Generate workout should throw
@@ -506,7 +507,7 @@ describe('WorkoutCoachGraph', () => {
       sessionStore.create(sessionId, userId);
       const mockWrite = vi.fn();
       sessionStore.update(sessionId, { 
-        sseResponse: { write: mockWrite } as unknown as Response 
+        sseResponse: { write: mockWrite } as any 
       });
 
       // Handle "no" response
@@ -543,7 +544,7 @@ describe('WorkoutCoachGraph', () => {
       sessionStore.create(sessionId, userId);
       const mockWrite = vi.fn();
       sessionStore.update(sessionId, {
-        sseResponse: { write: mockWrite } as unknown as Response,
+        sseResponse: { write: mockWrite } as any,
         currentWorkoutPlan: mockWorkoutPlan,
       });
 
@@ -599,7 +600,7 @@ describe('WorkoutCoachGraph', () => {
       sessionStore.create(sessionId, userId);
       const mockWrite = vi.fn();
       sessionStore.update(sessionId, {
-        sseResponse: { write: mockWrite } as unknown as Response,
+        sseResponse: { write: mockWrite } as any,
         currentWorkoutPlan: mockWorkoutPlan,
       });
 
