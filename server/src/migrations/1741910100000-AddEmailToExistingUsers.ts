@@ -1,8 +1,6 @@
-import { MigrationInterface, QueryRunner } from "typeorm";
+import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddEmailToExistingUsers1741910100000
-  implements MigrationInterface
-{
+export class AddEmailToExistingUsers1741910100000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
           UPDATE users SET email = 'chloe.m.summers@gmail.com' WHERE id = 1;

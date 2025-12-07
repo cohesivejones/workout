@@ -3,7 +3,7 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
 export class RemoveUserChloe1746070000000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     // Delete all related data for user with email 'chloe.m.summers@gmail.com' first (foreign key constraints)
-    
+
     // Delete workout_exercises entries for Chloe's workouts
     await queryRunner.query(`
       DELETE FROM workout_exercises WHERE workout_id IN (
@@ -49,6 +49,8 @@ export class RemoveUserChloe1746070000000 implements MigrationInterface {
 
   public async down(_queryRunner: QueryRunner): Promise<void> {
     // Cannot reliably restore deleted user data, so down migration is a no-op
-    console.log('Cannot restore deleted user data for chloe.m.summers@gmail.com. This migration is irreversible.');
+    console.log(
+      'Cannot restore deleted user data for chloe.m.summers@gmail.com. This migration is irreversible.'
+    );
   }
 }

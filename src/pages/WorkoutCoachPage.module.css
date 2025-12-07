@@ -1,0 +1,301 @@
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.description {
+  margin-bottom: 24px;
+}
+
+.description p {
+  margin: 0;
+  color: #6c757d;
+  line-height: 1.6;
+  font-size: 14px;
+}
+
+.startSection {
+  display: flex;
+  justify-content: center;
+  padding: 32px 0;
+}
+
+.startButton {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 14px 32px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 200px;
+}
+
+.startButton:hover:not(:disabled) {
+  background-color: #0056b3;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.2);
+}
+
+.startButton:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.startButton.loading {
+  position: relative;
+}
+
+.startButton.loading::after {
+  content: '';
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  border: 2px solid transparent;
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: translateY(-50%) rotate(0deg);
+  }
+  100% {
+    transform: translateY(-50%) rotate(360deg);
+  }
+}
+
+.conversationContainer {
+  background-color: #f8f9fa;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  min-height: 200px;
+  max-height: 500px;
+  overflow-y: auto;
+  border: 1px solid #e9ecef;
+}
+
+.message {
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.coachMessage {
+  background-color: #e3f2fd;
+  border-left: 4px solid #2196f3;
+  margin-right: 40px;
+}
+
+.userMessage {
+  background-color: #f1f8e9;
+  border-left: 4px solid #8bc34a;
+  margin-left: 40px;
+}
+
+.messageSender {
+  font-weight: 600;
+  font-size: 13px;
+  margin-bottom: 6px;
+  color: #333;
+}
+
+.messageText {
+  color: #333;
+  line-height: 1.5;
+  font-size: 14px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.loadingDots {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.loadingDots span {
+  animation: blink 1.4s infinite both;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.loadingDots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.loadingDots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes blink {
+  0%,
+  80%,
+  100% {
+    opacity: 0;
+  }
+  40% {
+    opacity: 1;
+  }
+}
+
+.responseButtons {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  padding: 16px 0;
+}
+
+.responseButton {
+  padding: 12px 40px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 120px;
+}
+
+.responseButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.yesButton {
+  background-color: #28a745;
+  color: white;
+}
+
+.yesButton:hover:not(:disabled) {
+  background-color: #218838;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(40, 167, 69, 0.2);
+}
+
+.noButton {
+  background-color: #dc3545;
+  color: white;
+}
+
+.noButton:hover:not(:disabled) {
+  background-color: #c82333;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(220, 53, 69, 0.2);
+}
+
+.restartSection {
+  display: flex;
+  justify-content: center;
+  padding: 16px 0;
+}
+
+.restartButton {
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.restartButton:hover {
+  background-color: #545b62;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(108, 117, 125, 0.2);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .container {
+    padding: 16px;
+  }
+
+  .conversationContainer {
+    padding: 16px;
+    max-height: 400px;
+  }
+
+  .coachMessage {
+    margin-right: 20px;
+  }
+
+  .userMessage {
+    margin-left: 20px;
+  }
+
+  .responseButtons {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .responseButton {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 12px;
+  }
+
+  .conversationContainer {
+    padding: 12px;
+    max-height: 350px;
+  }
+
+  .message {
+    padding: 10px 12px;
+    margin-bottom: 12px;
+  }
+
+  .coachMessage {
+    margin-right: 10px;
+  }
+
+  .userMessage {
+    margin-left: 10px;
+  }
+
+  .messageSender {
+    font-size: 12px;
+  }
+
+  .messageText {
+    font-size: 13px;
+  }
+
+  .startButton {
+    width: 100%;
+    padding: 12px 24px;
+  }
+
+  .restartButton {
+    width: 100%;
+  }
+}

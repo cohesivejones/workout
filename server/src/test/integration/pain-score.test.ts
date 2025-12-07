@@ -111,9 +111,7 @@ describe('Pain Score API Routes', () => {
       const pain = repo.create({ userId: testUser.id, date: '2024-01-15', score: 5, notes: null });
       await repo.save(pain);
 
-      const response = await request(app)
-        .get(`/api/pain-scores/${pain.id}`)
-        .expect(401);
+      const response = await request(app).get(`/api/pain-scores/${pain.id}`).expect(401);
       expect(response.body.error).toBeDefined();
     });
 
@@ -206,9 +204,7 @@ describe('Pain Score API Routes', () => {
       const repo = dataSource.getRepository(PainScore);
       const pain = repo.create({ userId: testUser.id, date: '2024-01-15', score: 3, notes: null });
       await repo.save(pain);
-      const response = await request(app)
-        .delete(`/api/pain-scores/${pain.id}`)
-        .expect(401);
+      const response = await request(app).delete(`/api/pain-scores/${pain.id}`).expect(401);
       expect(response.body.error).toBeDefined();
     });
 

@@ -12,11 +12,11 @@ function createTestApp() {
   const app = express();
   app.use(express.json());
   app.use(cookieParser());
-  
+
   const apiRouter = express.Router();
-  
+
   // Timeline endpoint implementation
-  apiRouter.get("/timeline", authenticateToken, async (req, res) => {
+  apiRouter.get('/timeline', authenticateToken, async (req, res) => {
     try {
       const userId = req.user!.id;
       const { startDate, endDate } = req.query;
@@ -51,15 +51,15 @@ function createTestApp() {
               exercise: true,
             },
           },
-          order: { date: "DESC" },
+          order: { date: 'DESC' },
         }),
         painScoreRepository.find({
           where: painScoreWhere,
-          order: { date: "DESC" },
+          order: { date: 'DESC' },
         }),
         sleepScoreRepository.find({
           where: sleepScoreWhere,
-          order: { date: "DESC" },
+          order: { date: 'DESC' },
         }),
       ]);
 
@@ -116,12 +116,12 @@ function createTestApp() {
       });
     } catch (err) {
       console.error(err);
-      res.status(500).json({ error: "Server error" });
+      res.status(500).json({ error: 'Server error' });
     }
   });
-  
-  app.use("/api", apiRouter);
-  
+
+  app.use('/api', apiRouter);
+
   return app;
 }
 
@@ -133,17 +133,17 @@ describe('Timeline API Routes', () => {
   beforeAll(async () => {
     // Create test app
     app = createTestApp();
-    
+
     // Create test user
     const userRepository = dataSource.getRepository(User);
     const hashedPassword = await bcrypt.hash('testpass123', 10);
-    
+
     testUser = userRepository.create({
       email: 'timeline-test@example.com',
       name: 'Timeline Test User',
       password: hashedPassword,
     });
-    
+
     await userRepository.save(testUser);
     authToken = generateToken(testUser);
   });
@@ -159,7 +159,7 @@ describe('Timeline API Routes', () => {
       await dataSource.query('DELETE FROM pain_scores WHERE "userId" = $1', [testUser.id]);
       await dataSource.query('DELETE FROM sleep_scores WHERE "userId" = $1', [testUser.id]);
       await dataSource.query('DELETE FROM exercises WHERE "userId" = $1', [testUser.id]);
-      
+
       const userRepository = dataSource.getRepository(User);
       await userRepository.remove(testUser);
     }
@@ -179,10 +179,8 @@ describe('Timeline API Routes', () => {
 
   describe('GET /api/timeline', () => {
     it('should require authentication', async () => {
-      const response = await request(app)
-        .get('/api/timeline')
-        .expect(401);
-      
+      const response = await request(app).get('/api/timeline').expect(401);
+
       expect(response.body.error).toBeDefined();
     });
 
@@ -250,7 +248,7 @@ describe('Timeline API Routes', () => {
       expect(response.body).toHaveProperty('painScores');
       expect(response.body).toHaveProperty('sleepScores');
       expect(response.body).toHaveProperty('hasMore');
-      
+
       expect(response.body.workouts).toHaveLength(1);
       expect(response.body.painScores).toHaveLength(1);
       expect(response.body.sleepScores).toHaveLength(1);
@@ -268,7 +266,7 @@ describe('Timeline API Routes', () => {
           withInstructor: false,
         })
       );
-      
+
       await workoutRepository.save(
         workoutRepository.create({
           userId: testUser.id,
@@ -276,7 +274,7 @@ describe('Timeline API Routes', () => {
           withInstructor: false,
         })
       );
-      
+
       await workoutRepository.save(
         workoutRepository.create({
           userId: testUser.id,
@@ -307,7 +305,7 @@ describe('Timeline API Routes', () => {
           withInstructor: false,
         })
       );
-      
+
       await workoutRepository.save(
         workoutRepository.create({
           userId: testUser.id,
@@ -359,7 +357,7 @@ describe('Timeline API Routes', () => {
           withInstructor: false,
         })
       );
-      
+
       await workoutRepository.save(
         workoutRepository.create({
           userId: testUser.id,
@@ -391,7 +389,7 @@ describe('Timeline API Routes', () => {
           withInstructor: false,
         })
       );
-      
+
       await workoutRepository.save(
         workoutRepository.create({
           userId: testUser.id,
@@ -413,11 +411,11 @@ describe('Timeline API Routes', () => {
 
     it('should return all data when no dates provided', async () => {
       const workoutRepository = dataSource.getRepository(Workout);
-      
+
       const today = new Date();
       const fourMonthsAgo = new Date(today);
       fourMonthsAgo.setMonth(today.getMonth() - 4);
-      
+
       const twoMonthsAgo = new Date(today);
       twoMonthsAgo.setMonth(today.getMonth() - 2);
 
@@ -429,7 +427,7 @@ describe('Timeline API Routes', () => {
           withInstructor: false,
         })
       );
-      
+
       // Create workout 2 months ago (should be included)
       await workoutRepository.save(
         workoutRepository.create({

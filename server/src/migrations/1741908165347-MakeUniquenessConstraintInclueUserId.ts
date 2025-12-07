@@ -1,8 +1,6 @@
-import { MigrationInterface, QueryRunner } from "typeorm";
+import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class MakeUniquenessConstraintInclueUserId1741908165347
-  implements MigrationInterface
-{
+export class MakeUniquenessConstraintInclueUserId1741908165347 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     queryRunner.query(`
             ALTER TABLE workouts

@@ -7,9 +7,6 @@ dist-ssr
 build
 coverage
 
-# Server directory (has its own package.json)
-server
-
 # Test outputs
 test-results
 playwright-report

@@ -13,9 +13,9 @@ function createTestApp() {
   const app = express();
   app.use(express.json());
   app.use(cookieParser());
-  
-  app.use("/api/dashboard", dashboardRouter);
-  
+
+  app.use('/api/dashboard', dashboardRouter);
+
   return app;
 }
 
@@ -26,16 +26,16 @@ describe('Dashboard API Routes', () => {
 
   beforeAll(async () => {
     app = createTestApp();
-    
+
     const userRepository = dataSource.getRepository(User);
     const hashedPassword = await bcrypt.hash('testpass123', 10);
-    
+
     testUser = userRepository.create({
       email: 'dashboard-test@example.com',
       name: 'Dashboard Test User',
       password: hashedPassword,
     });
-    
+
     await userRepository.save(testUser);
     authToken = generateToken(testUser);
   });
@@ -50,7 +50,7 @@ describe('Dashboard API Routes', () => {
       await dataSource.query('DELETE FROM exercises WHERE "userId" = $1', [testUser.id]);
       await dataSource.query('DELETE FROM pain_scores WHERE "userId" = $1', [testUser.id]);
       await dataSource.query('DELETE FROM sleep_scores WHERE "userId" = $1', [testUser.id]);
-      
+
       const userRepository = dataSource.getRepository(User);
       await userRepository.remove(testUser);
     }
@@ -70,10 +70,8 @@ describe('Dashboard API Routes', () => {
 
   describe('GET /api/dashboard/weight-progression', () => {
     it('should require authentication', async () => {
-      const response = await request(app)
-        .get('/api/dashboard/weight-progression')
-        .expect(401);
-      
+      const response = await request(app).get('/api/dashboard/weight-progression').expect(401);
+
       expect(response.body.error).toBeDefined();
     });
 
@@ -92,9 +90,9 @@ describe('Dashboard API Routes', () => {
       const workoutExerciseRepository = dataSource.getRepository(WorkoutExercise);
 
       // Create exercise
-      const exercise = exerciseRepository.create({ 
-        name: 'Bench Press', 
-        userId: testUser.id 
+      const exercise = exerciseRepository.create({
+        name: 'Bench Press',
+        userId: testUser.id,
       });
       await exerciseRepository.save(exercise);
 
@@ -145,13 +143,13 @@ describe('Dashboard API Routes', () => {
       const workoutExerciseRepository = dataSource.getRepository(WorkoutExercise);
 
       // Create exercises
-      const weightedExercise = exerciseRepository.create({ 
-        name: 'Squats', 
-        userId: testUser.id 
+      const weightedExercise = exerciseRepository.create({
+        name: 'Squats',
+        userId: testUser.id,
       });
-      const bodyweightExercise = exerciseRepository.create({ 
-        name: 'Push-ups', 
-        userId: testUser.id 
+      const bodyweightExercise = exerciseRepository.create({
+        name: 'Push-ups',
+        userId: testUser.id,
       });
       await exerciseRepository.save([weightedExercise, bodyweightExercise]);
 
@@ -197,14 +195,14 @@ describe('Dashboard API Routes', () => {
       const exerciseRepository = dataSource.getRepository(Exercise);
       const workoutExerciseRepository = dataSource.getRepository(WorkoutExercise);
 
-      const exercise = exerciseRepository.create({ 
-        name: 'Deadlift', 
-        userId: testUser.id 
+      const exercise = exerciseRepository.create({
+        name: 'Deadlift',
+        userId: testUser.id,
       });
       await exerciseRepository.save(exercise);
 
       const today = new Date();
-      
+
       // Workout within 84 days
       const recentDate = new Date(today.getTime() - 50 * 24 * 60 * 60 * 1000);
       const recentWorkout = workoutRepository.create({
@@ -298,10 +296,8 @@ describe('Dashboard API Routes', () => {
 
   describe('GET /api/dashboard/pain-progression', () => {
     it('should require authentication', async () => {
-      const response = await request(app)
-        .get('/api/dashboard/pain-progression')
-        .expect(401);
-      
+      const response = await request(app).get('/api/dashboard/pain-progression').expect(401);
+
       expect(response.body.error).toBeDefined();
     });
 
@@ -351,7 +347,7 @@ describe('Dashboard API Routes', () => {
       const painScoreRepository = dataSource.getRepository(PainScore);
 
       const today = new Date();
-      
+
       // Pain score within 84 days
       const recentDate = new Date(today.getTime() - 50 * 24 * 60 * 60 * 1000);
       const recentPainScore = painScoreRepository.create({
@@ -409,7 +405,9 @@ describe('Dashboard API Routes', () => {
 
       expect(response.body.dataPoints).toHaveLength(3);
       // Verify dates are in ascending order
-      const responseDates = response.body.dataPoints.map((dp: { date: string }) => new Date(dp.date).getTime());
+      const responseDates = response.body.dataPoints.map((dp: { date: string }) =>
+        new Date(dp.date).getTime()
+      );
       for (let i = 1; i < responseDates.length; i++) {
         expect(responseDates[i]).toBeGreaterThan(responseDates[i - 1]);
       }
@@ -418,10 +416,8 @@ describe('Dashboard API Routes', () => {
 
   describe('GET /api/dashboard/sleep-progression', () => {
     it('should require authentication', async () => {
-      const response = await request(app)
-        .get('/api/dashboard/sleep-progression')
-        .expect(401);
-      
+      const response = await request(app).get('/api/dashboard/sleep-progression').expect(401);
+
       expect(response.body.error).toBeDefined();
     });
 
@@ -471,7 +467,7 @@ describe('Dashboard API Routes', () => {
       const sleepScoreRepository = dataSource.getRepository(SleepScore);
 
       const today = new Date();
-      
+
       // Sleep score within 84 days
       const recentDate = new Date(today.getTime() - 50 * 24 * 60 * 60 * 1000);
       const recentSleepScore = sleepScoreRepository.create({
@@ -529,7 +525,9 @@ describe('Dashboard API Routes', () => {
 
       expect(response.body.dataPoints).toHaveLength(3);
       // Verify dates are in ascending order
-      const responseDates = response.body.dataPoints.map((dp: { date: string }) => new Date(dp.date).getTime());
+      const responseDates = response.body.dataPoints.map((dp: { date: string }) =>
+        new Date(dp.date).getTime()
+      );
       for (let i = 1; i < responseDates.length; i++) {
         expect(responseDates[i]).toBeGreaterThan(responseDates[i - 1]);
       }

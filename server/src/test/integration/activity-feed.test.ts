@@ -25,7 +25,11 @@ describe('Activity Feed API', () => {
     app = createTestApp();
     const userRepository = dataSource.getRepository(User);
     const hashedPassword = await bcrypt.hash('testpass123', 10);
-    testUser = userRepository.create({ email: 'activity-test@example.com', name: 'Activity Test', password: hashedPassword });
+    testUser = userRepository.create({
+      email: 'activity-test@example.com',
+      name: 'Activity Test',
+      password: hashedPassword,
+    });
     await userRepository.save(testUser);
     authToken = generateToken(testUser);
   });
@@ -88,15 +92,30 @@ describe('Activity Feed API', () => {
 
     // Create 3 items in future month (offset=0 should return this)
     for (let i = 1; i <= 3; i++) {
-      const w = workoutRepo.create({ userId: testUser.id, date: `${futureMonthStr}-${String(i).padStart(2, '0')}`, withInstructor: false });
+      const w = workoutRepo.create({
+        userId: testUser.id,
+        date: `${futureMonthStr}-${String(i).padStart(2, '0')}`,
+        withInstructor: false,
+      });
       await workoutRepo.save(w);
-      const we = weRepo.create({ workout_id: w.id, exercise_id: ex.id, reps: 10, weight: 100 + i, time_seconds: null });
+      const we = weRepo.create({
+        workout_id: w.id,
+        exercise_id: ex.id,
+        reps: 10,
+        weight: 100 + i,
+        time_seconds: null,
+      });
       await weRepo.save(we);
     }
 
     // Create 2 items this month
     for (let i = 1; i <= 2; i++) {
-      const p = painRepo.create({ userId: testUser.id, date: `${thisMonthStr}-${String(i).padStart(2, '0')}`, score: 5, notes: null });
+      const p = painRepo.create({
+        userId: testUser.id,
+        date: `${thisMonthStr}-${String(i).padStart(2, '0')}`,
+        score: 5,
+        notes: null,
+      });
       await painRepo.save(p);
     }
 
@@ -145,15 +164,30 @@ describe('Activity Feed API', () => {
 
     // 3 workouts in future month (2 months ahead)
     for (let i = 1; i <= 3; i++) {
-      const w = workoutRepo.create({ userId: testUser.id, date: `${futureMonthStr}-${String(i).padStart(2, '0')}`, withInstructor: false });
+      const w = workoutRepo.create({
+        userId: testUser.id,
+        date: `${futureMonthStr}-${String(i).padStart(2, '0')}`,
+        withInstructor: false,
+      });
       await workoutRepo.save(w);
-      const we = weRepo.create({ workout_id: w.id, exercise_id: ex.id, reps: 10, weight: 100 + i, time_seconds: null });
+      const we = weRepo.create({
+        workout_id: w.id,
+        exercise_id: ex.id,
+        reps: 10,
+        weight: 100 + i,
+        time_seconds: null,
+      });
       await weRepo.save(we);
     }
 
     // 4 sleep scores in next month (1 month ahead)
     for (let i = 1; i <= 4; i++) {
-      const s = sleepRepo.create({ userId: testUser.id, date: `${nextMonthStr}-${String(i).padStart(2, '0')}`, score: 3, notes: null });
+      const s = sleepRepo.create({
+        userId: testUser.id,
+        date: `${nextMonthStr}-${String(i).padStart(2, '0')}`,
+        score: 3,
+        notes: null,
+      });
       await sleepRepo.save(s);
     }
 
@@ -178,8 +212,12 @@ describe('Activity Feed API', () => {
     expect(res2.body.items.length).toBe(4);
 
     // Ensure no overlap between months
-    const ids1 = new Set(res1.body.items.map((i: { type: string; id: number }) => `${i.type}-${i.id}`));
-    const ids2 = new Set(res2.body.items.map((i: { type: string; id: number }) => `${i.type}-${i.id}`));
+    const ids1 = new Set(
+      res1.body.items.map((i: { type: string; id: number }) => `${i.type}-${i.id}`)
+    );
+    const ids2 = new Set(
+      res2.body.items.map((i: { type: string; id: number }) => `${i.type}-${i.id}`)
+    );
     for (const id of ids1) {
       expect(ids2.has(id)).toBe(false);
     }

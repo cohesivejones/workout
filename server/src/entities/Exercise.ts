@@ -1,20 +1,17 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
-import { WorkoutExercise } from "./WorkoutExercise";
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { WorkoutExercise } from './WorkoutExercise';
 
-@Entity("exercises")
+@Entity('exercises')
 export class Exercise {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: "integer" })
+  @Column({ type: 'integer' })
   userId: number;
 
-  @Column({ type: "varchar", unique: true })
+  @Column({ type: 'varchar', unique: true })
   name: string;
 
-  @OneToMany(
-    () => WorkoutExercise,
-    (workoutExercise) => workoutExercise.exercise,
-  )
+  @OneToMany(() => WorkoutExercise, (workoutExercise) => workoutExercise.exercise)
   workoutExercises: WorkoutExercise[];
 }

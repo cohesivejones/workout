@@ -130,11 +130,11 @@ const Header = () => {
               </button>
               <div className={styles.dropdownMenu}>
                 <Link
-                  to="/workouts/generate"
+                  to="/workout-coach"
                   className={styles.dropdownMenuItem}
                   onClick={() => setAIDropdownOpen(false)}
                 >
-                  Generate Workout
+                  Workout Coach
                 </Link>
                 <Link
                   to="/diagnostician"
@@ -227,11 +227,11 @@ const Header = () => {
               <div className={styles.mobileMenuSection}>
                 <div className={styles.mobileMenuSectionTitle}>AI</div>
                 <Link
-                  to="/workouts/generate"
+                  to="/workout-coach"
                   className={styles.mobileMenuLink}
                   onClick={() => setMobileNavOpen(false)}
                 >
-                  Generate Workout
+                  Workout Coach
                 </Link>
                 <Link
                   to="/diagnostician"

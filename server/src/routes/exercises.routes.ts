@@ -1,28 +1,28 @@
-import { Router, Request, Response } from "express";
-import dataSource from "../data-source";
-import { Exercise, WorkoutExercise } from "../entities";
-import { authenticateToken } from "../middleware/auth";
-import { openai } from "../services/openai";
-import logger from "../logger";
+import { Router, Request, Response } from 'express';
+import dataSource from '../data-source';
+import { Exercise, WorkoutExercise } from '../entities';
+import { authenticateToken } from '../middleware/auth';
+import { openai } from '../services/openai';
+import logger from '../logger';
 
 const router = Router();
 
-router.get("/", authenticateToken, async (req: Request, res: Response) => {
+router.get('/', authenticateToken, async (req: Request, res: Response) => {
   try {
     const userId = req.user!.id;
     const exerciseRepository = dataSource.getRepository(Exercise);
-    const exercises = await exerciseRepository.find({ where: { userId }, order: { name: "ASC" } });
+    const exercises = await exerciseRepository.find({ where: { userId }, order: { name: 'ASC' } });
     res.json(exercises);
   } catch (err) {
-    logger.error("Get exercises error", { error: err, userId: req.user?.id });
-    res.status(500).json({ error: "Server error" });
+    logger.error('Get exercises error', { error: err, userId: req.user?.id });
+    res.status(500).json({ error: 'Server error' });
   }
 });
 
-router.get("/recent", authenticateToken, async (req: Request, res: Response) => {
+router.get('/recent', authenticateToken, async (req: Request, res: Response) => {
   const { exerciseId } = req.query;
   const userId = req.user!.id;
-  if (!exerciseId) return res.status(400).json({ error: "Exercise ID is required" });
+  if (!exerciseId) return res.status(400).json({ error: 'Exercise ID is required' });
 
   try {
     const workoutExerciseRepository = dataSource.getRepository(WorkoutExercise);
@@ -30,15 +30,24 @@ router.get("/recent", authenticateToken, async (req: Request, res: Response) => 
       `\n      WITH latest_workout AS (\n        SELECT w.id\n        FROM workouts w\n        JOIN workout_exercises we ON w.id = we.workout_id\n        WHERE we.exercise_id = $1\n        AND w."userId" = $2\n        ORDER BY w.date DESC\n        LIMIT 1\n      )\n      SELECT we.reps, we.weight, we.time_seconds\n      FROM workout_exercises we\n      WHERE we.workout_id = (SELECT id FROM latest_workout)\n      AND we.exercise_id = $1\n    `,
       [Number(exerciseId), Number(userId)]
     );
-    if (!result || result.length === 0) return res.status(404).json({ error: "No workout found with this exercise" });
-    res.json({ reps: result[0].reps, weight: result[0].weight, time_seconds: result[0].time_seconds });
+    if (!result || result.length === 0)
+      return res.status(404).json({ error: 'No workout found with this exercise' });
+    res.json({
+      reps: result[0].reps,
+      weight: result[0].weight,
+      time_seconds: result[0].time_seconds,
+    });
   } catch (err) {
-    logger.error("Get recent exercise error", { error: err, exerciseId: req.query.exerciseId, userId: req.user?.id });
-    res.status(500).json({ error: "Server error" });
+    logger.error('Get recent exercise error', {
+      error: err,
+      exerciseId: req.query.exerciseId,
+      userId: req.user?.id,
+    });
+    res.status(500).json({ error: 'Server error' });
   }
 });
 
-router.post("/", authenticateToken, async (req: Request, res: Response) => {
+router.post('/', authenticateToken, async (req: Request, res: Response) => {
   try {
     const { name } = req.body;
     const userId = req.user!.id;
@@ -46,41 +55,53 @@ router.post("/", authenticateToken, async (req: Request, res: Response) => {
     let exercise = await exerciseRepository.findOne({ where: { name, userId } });
     if (!exercise) exercise = exerciseRepository.create({ name, userId });
     await exerciseRepository.save(exercise);
-    logger.info("Exercise created/updated", { exerciseId: exercise.id, name: exercise.name, userId: req.user?.id });
+    logger.info('Exercise created/updated', {
+      exerciseId: exercise.id,
+      name: exercise.name,
+      userId: req.user?.id,
+    });
     res.json(exercise);
   } catch (err) {
-    logger.error("Create exercise error", { error: err, userId: req.user?.id });
-    res.status(500).json({ error: "Server error" });
+    logger.error('Create exercise error', { error: err, userId: req.user?.id });
+    res.status(500).json({ error: 'Server error' });
   }
 });
 
-router.put("/:id", authenticateToken, async (req: Request, res: Response) => {
+router.put('/:id', authenticateToken, async (req: Request, res: Response) => {
   try {
     const exerciseId = parseInt(req.params.id);
     const { name } = req.body;
-    if (!name) return res.status(400).json({ error: "Exercise name is required" });
+    if (!name) return res.status(400).json({ error: 'Exercise name is required' });
     const exerciseRepository = dataSource.getRepository(Exercise);
     const exercise = await exerciseRepository.findOne({ where: { id: exerciseId } });
-    if (!exercise) return res.status(404).json({ error: "Exercise not found" });
+    if (!exercise) return res.status(404).json({ error: 'Exercise not found' });
     exercise.name = name;
     await exerciseRepository.save(exercise);
-    logger.info("Exercise updated", { exerciseId: exercise.id, name: exercise.name, userId: req.user?.id });
+    logger.info('Exercise updated', {
+      exerciseId: exercise.id,
+      name: exercise.name,
+      userId: req.user?.id,
+    });
     res.json(exercise);
   } catch (err) {
-    logger.error("Update exercise error", { error: err, exerciseId: req.params.id, userId: req.user?.id });
-    res.status(500).json({ error: "Server error" });
+    logger.error('Update exercise error', {
+      error: err,
+      exerciseId: req.params.id,
+      userId: req.user?.id,
+    });
+    res.status(500).json({ error: 'Server error' });
   }
 });
 
-router.post("/:id/suggest", authenticateToken, async (req: Request, res: Response) => {
+router.post('/:id/suggest', authenticateToken, async (req: Request, res: Response) => {
   try {
     const exerciseId = parseInt(req.params.id);
     const userId = req.user!.id;
     const exerciseRepository = dataSource.getRepository(Exercise);
     const exercise = await exerciseRepository.findOne({ where: { id: exerciseId, userId } });
-    
+
     if (!exercise) {
-      return res.status(404).json({ error: "Exercise not found" });
+      return res.status(404).json({ error: 'Exercise not found' });
     }
 
     // Use OpenAI to suggest improved exercise names
@@ -95,10 +116,10 @@ router.post("/:id/suggest", authenticateToken, async (req: Request, res: Respons
 Respond with ONLY 3 suggested exercise names, one per line. No numbering, bullets, or extra text.`;
 
     const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: 'gpt-4o-mini',
       messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt },
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt },
       ],
       temperature: 0.8,
       max_tokens: 100,
@@ -107,8 +128,8 @@ Respond with ONLY 3 suggested exercise names, one per line. No numbering, bullet
     const suggestionsText = response.choices[0].message.content?.trim() || exercise.name;
     const suggestions = suggestionsText
       .split('\n')
-      .map(s => s.trim())
-      .filter(s => s.length > 0)
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0)
       .slice(0, 3); // Ensure max 3 suggestions
 
     // Fallback if OpenAI didn't return enough suggestions
@@ -116,17 +137,21 @@ Respond with ONLY 3 suggested exercise names, one per line. No numbering, bullet
       suggestions.push(exercise.name);
     }
 
-    logger.info("Exercise name suggestions generated via OpenAI", { 
-      exerciseId: exercise.id, 
-      originalName: exercise.name, 
+    logger.info('Exercise name suggestions generated via OpenAI', {
+      exerciseId: exercise.id,
+      originalName: exercise.name,
       suggestions,
-      userId 
+      userId,
     });
 
     res.json({ suggestions });
   } catch (err) {
-    logger.error("Suggest exercise name error", { error: err, exerciseId: req.params.id, userId: req.user?.id });
-    res.status(500).json({ error: "Server error" });
+    logger.error('Suggest exercise name error', {
+      error: err,
+      exerciseId: req.params.id,
+      userId: req.user?.id,
+    });
+    res.status(500).json({ error: 'Server error' });
   }
 });
 

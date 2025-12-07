@@ -1,14 +1,14 @@
-import { Router, Request, Response } from "express";
-import { Between, LessThan } from "typeorm";
-import dataSource from "../data-source";
-import { Workout, PainScore, SleepScore } from "../entities";
-import { authenticateToken } from "../middleware/auth";
-import { WorkoutResponse } from "../types";
-import logger from "../logger";
+import { Router, Request, Response } from 'express';
+import { Between, LessThan } from 'typeorm';
+import dataSource from '../data-source';
+import { Workout, PainScore, SleepScore } from '../entities';
+import { authenticateToken } from '../middleware/auth';
+import { WorkoutResponse } from '../types';
+import logger from '../logger';
 
 const router = Router();
 
-router.get("/", authenticateToken, async (req: Request, res: Response) => {
+router.get('/', authenticateToken, async (req: Request, res: Response) => {
   try {
     const userId = req.user!.id;
     const { startDate, endDate } = req.query;
@@ -36,10 +36,10 @@ router.get("/", authenticateToken, async (req: Request, res: Response) => {
       workoutRepository.find({
         where: workoutWhere,
         relations: { workoutExercises: { exercise: true } },
-        order: { date: "DESC" },
+        order: { date: 'DESC' },
       }),
-      painScoreRepository.find({ where: painScoreWhere, order: { date: "DESC" } }),
-      sleepScoreRepository.find({ where: sleepScoreWhere, order: { date: "DESC" } }),
+      painScoreRepository.find({ where: painScoreWhere, order: { date: 'DESC' } }),
+      sleepScoreRepository.find({ where: sleepScoreWhere, order: { date: 'DESC' } }),
     ]);
 
     let hasMore = false;
@@ -69,7 +69,7 @@ router.get("/", authenticateToken, async (req: Request, res: Response) => {
       })),
     }));
 
-    logger.debug("Timeline data fetched", {
+    logger.debug('Timeline data fetched', {
       workoutCount: workouts.length,
       painScoreCount: painScores.length,
       sleepScoreCount: sleepScores.length,
@@ -79,8 +79,8 @@ router.get("/", authenticateToken, async (req: Request, res: Response) => {
 
     res.json({ workouts: workoutResponses, painScores, sleepScores, hasMore });
   } catch (err) {
-    logger.error("Get timeline error", { error: err, userId: req.user?.id });
-    res.status(500).json({ error: "Server error" });
+    logger.error('Get timeline error', { error: err, userId: req.user?.id });
+    res.status(500).json({ error: 'Server error' });
   }
 });
 

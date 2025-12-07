@@ -9,7 +9,7 @@ import ExerciseListPage from './pages/ExerciseListPage';
 import ChangePasswordPage from './pages/ChangePasswordPage';
 import DiagnosticianPage from './pages/DiagnosticianPage';
 import DashboardPage from './pages/DashboardPage';
-import GenerateWorkoutPage from './pages/GenerateWorkoutPage';
+import WorkoutCoachPage from './pages/WorkoutCoachPage';
 import NotFoundPage from './pages/NotFoundPage';
 import { Layout } from './Layout';
 
@@ -77,9 +77,9 @@ function App() {
             <DashboardPage />
           </Layout>
         </Route>
-        <Route path="/workouts/generate">
+        <Route path="/workout-coach">
           <Layout>
-            <GenerateWorkoutPage />
+            <WorkoutCoachPage />
           </Layout>
         </Route>
         <Route>

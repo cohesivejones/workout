@@ -3,7 +3,7 @@ import logger from '../logger';
 
 export const requestLogger = (req: Request, res: Response, next: NextFunction) => {
   const startTime = Date.now();
-  
+
   // Log incoming request
   logger.info('Incoming request', {
     method: req.method,
@@ -17,9 +17,9 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction) =
 
   // Override res.end to log response
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  res.end = function(chunk?: any, encoding?: any, callback?: any): Response {
+  res.end = function (chunk?: any, encoding?: any, callback?: any): Response {
     const duration = Date.now() - startTime;
-    
+
     logger.info('Request completed', {
       method: req.method,
       path: req.path,

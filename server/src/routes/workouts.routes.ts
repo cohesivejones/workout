@@ -1,22 +1,20 @@
-import { Router, Request, Response } from "express";
-import dataSource from "../data-source";
-import { Exercise, Workout, WorkoutExercise } from "../entities";
-import { authenticateToken } from "../middleware/auth";
-import { DatabaseError, WorkoutResponse, CreateWorkoutRequest } from "../types";
-import logger from "../logger";
-import { Between } from "typeorm";
-import { openai } from "../services/openai";
+import { Router, Request, Response } from 'express';
+import dataSource from '../data-source';
+import { Exercise, Workout, WorkoutExercise } from '../entities';
+import { authenticateToken } from '../middleware/auth';
+import { DatabaseError, WorkoutResponse, CreateWorkoutRequest } from '../types';
+import logger from '../logger';
 
 const router = Router();
 
-router.get("/:id", authenticateToken, async (req: Request, res: Response) => {
+router.get('/:id', authenticateToken, async (req: Request, res: Response) => {
   try {
     const workoutId = parseInt(req.params.id);
     const workout = await dataSource.getRepository(Workout).findOne({
       where: { id: workoutId },
       relations: { workoutExercises: { exercise: true } },
     });
-    if (!workout) return res.status(404).json({ error: "Workout not found" });
+    if (!workout) return res.status(404).json({ error: 'Workout not found' });
     const workoutResponse: WorkoutResponse = {
       id: workout.id,
       date: workout.date,
@@ -34,12 +32,16 @@ router.get("/:id", authenticateToken, async (req: Request, res: Response) => {
     };
     res.json(workoutResponse);
   } catch (err) {
-    logger.error("Get workout error", { error: err, workoutId: req.params.id, userId: req.user?.id });
-    res.status(500).json({ error: "Server error" });
+    logger.error('Get workout error', {
+      error: err,
+      workoutId: req.params.id,
+      userId: req.user?.id,
+    });
+    res.status(500).json({ error: 'Server error' });
   }
 });
 
-router.post("/", authenticateToken, async (req: Request, res: Response) => {
+router.post('/', authenticateToken, async (req: Request, res: Response) => {
   const queryRunner = dataSource.createQueryRunner();
   try {
     await queryRunner.connect();
@@ -47,13 +49,20 @@ router.post("/", authenticateToken, async (req: Request, res: Response) => {
     const { date, withInstructor, exercises } = req.body as CreateWorkoutRequest;
     const userId = req.user!.id;
     const workoutRepository = queryRunner.manager.getRepository(Workout);
-    const workout = workoutRepository.create({ userId, date, withInstructor: withInstructor || false, workoutExercises: [] });
+    const workout = workoutRepository.create({
+      userId,
+      date,
+      withInstructor: withInstructor || false,
+      workoutExercises: [],
+    });
     await workoutRepository.save(workout);
     const exerciseRepository = queryRunner.manager.getRepository(Exercise);
     const workoutExerciseRepository = queryRunner.manager.getRepository(WorkoutExercise);
     const createdWorkoutExercises: WorkoutExercise[] = [];
     for (const exerciseData of exercises) {
-      let exercise = await exerciseRepository.findOne({ where: { name: exerciseData.name, userId } });
+      let exercise = await exerciseRepository.findOne({
+        where: { name: exerciseData.name, userId },
+      });
       if (!exercise) {
         exercise = exerciseRepository.create({ name: exerciseData.name, userId });
         await exerciseRepository.save(exercise);
@@ -75,7 +84,8 @@ router.post("/", authenticateToken, async (req: Request, res: Response) => {
       if (previousWorkoutExercise.length > 0) {
         workoutExercise.new_reps = workoutExercise.reps !== previousWorkoutExercise[0].reps;
         workoutExercise.new_weight = workoutExercise.weight !== previousWorkoutExercise[0].weight;
-        workoutExercise.new_time = workoutExercise.time_seconds !== previousWorkoutExercise[0].time_seconds;
+        workoutExercise.new_time =
+          workoutExercise.time_seconds !== previousWorkoutExercise[0].time_seconds;
       } else {
         workoutExercise.new_reps = false;
         workoutExercise.new_weight = false;
@@ -84,7 +94,7 @@ router.post("/", authenticateToken, async (req: Request, res: Response) => {
       await workoutExerciseRepository.save(workoutExercise);
       const reloadedWorkoutExercise = await workoutExerciseRepository.findOne({
         where: { workout_id: workout.id, exercise_id: exercise.id },
-        relations: ["exercise"],
+        relations: ['exercise'],
       });
       if (reloadedWorkoutExercise) {
         workout.workoutExercises.push(reloadedWorkoutExercise);
@@ -107,23 +117,28 @@ router.post("/", authenticateToken, async (req: Request, res: Response) => {
         new_time: we.new_time,
       })),
     };
-    logger.info("Workout created", { workoutId: workout.id, date: workout.date, exerciseCount: exercises.length, userId: req.user?.id });
+    logger.info('Workout created', {
+      workoutId: workout.id,
+      date: workout.date,
+      exerciseCount: exercises.length,
+      userId: req.user?.id,
+    });
     res.json(response);
   } catch (err) {
     await queryRunner.rollbackTransaction();
     const error = err as DatabaseError;
-    logger.error("Create workout error", { error: err, userId: req.user?.id });
-    if (error.code === "23505" && error.constraint === "workouts_date_user_id_key") {
-      res.status(400).json({ error: "A workout already exists for this date" });
+    logger.error('Create workout error', { error: err, userId: req.user?.id });
+    if (error.code === '23505' && error.constraint === 'workouts_date_user_id_key') {
+      res.status(400).json({ error: 'A workout already exists for this date' });
     } else {
-      res.status(500).json({ error: error.message || "Server error" });
+      res.status(500).json({ error: error.message || 'Server error' });
     }
   } finally {
     await queryRunner.release();
   }
 });
 
-router.put("/:id", authenticateToken, async (req: Request, res: Response) => {
+router.put('/:id', authenticateToken, async (req: Request, res: Response) => {
   const queryRunner = dataSource.createQueryRunner();
   try {
     await queryRunner.connect();
@@ -136,7 +151,7 @@ router.put("/:id", authenticateToken, async (req: Request, res: Response) => {
       loadRelationIds: true,
       relations: { workoutExercises: { exercise: true } },
     });
-    if (!workout) return res.status(404).json({ error: "Workout not found" });
+    if (!workout) return res.status(404).json({ error: 'Workout not found' });
     workout.date = date;
     workout.withInstructor = withInstructor || false;
     await workoutRepository.save(workout);
@@ -145,7 +160,9 @@ router.put("/:id", authenticateToken, async (req: Request, res: Response) => {
     const exerciseRepository = queryRunner.manager.getRepository(Exercise);
     const newWorkoutExercises: WorkoutExercise[] = [];
     for (const exerciseData of exercises) {
-      let exercise = await exerciseRepository.findOne({ where: { name: exerciseData.name, userId: workout.userId } });
+      let exercise = await exerciseRepository.findOne({
+        where: { name: exerciseData.name, userId: workout.userId },
+      });
       if (!exercise) {
         exercise = exerciseRepository.create({ name: exerciseData.name, userId: workout.userId });
         await exerciseRepository.save(exercise);
@@ -167,7 +184,8 @@ router.put("/:id", authenticateToken, async (req: Request, res: Response) => {
       if (previousWorkoutExercise.length > 0) {
         workoutExercise.new_reps = workoutExercise.reps !== previousWorkoutExercise[0].reps;
         workoutExercise.new_weight = workoutExercise.weight !== previousWorkoutExercise[0].weight;
-        workoutExercise.new_time = workoutExercise.time_seconds !== previousWorkoutExercise[0].time_seconds;
+        workoutExercise.new_time =
+          workoutExercise.time_seconds !== previousWorkoutExercise[0].time_seconds;
       } else {
         workoutExercise.new_reps = false;
         workoutExercise.new_weight = false;
@@ -192,23 +210,32 @@ router.put("/:id", authenticateToken, async (req: Request, res: Response) => {
         new_time: we.new_time,
       })),
     };
-    logger.info("Workout updated", { workoutId: workout.id, date: workout.date, exerciseCount: exercises.length, userId: req.user?.id });
+    logger.info('Workout updated', {
+      workoutId: workout.id,
+      date: workout.date,
+      exerciseCount: exercises.length,
+      userId: req.user?.id,
+    });
     res.json(response);
   } catch (err) {
     await queryRunner.rollbackTransaction();
     const error = err as DatabaseError;
-    logger.error("Update workout error", { error: err, workoutId: req.params.id, userId: req.user?.id });
-    if (error.code === "23505" && error.constraint === "workouts_date_key") {
-      res.status(400).json({ error: "A workout already exists for this date" });
+    logger.error('Update workout error', {
+      error: err,
+      workoutId: req.params.id,
+      userId: req.user?.id,
+    });
+    if (error.code === '23505' && error.constraint === 'workouts_date_key') {
+      res.status(400).json({ error: 'A workout already exists for this date' });
     } else {
-      res.status(500).json({ error: error.message || "Server error" });
+      res.status(500).json({ error: error.message || 'Server error' });
     }
   } finally {
     await queryRunner.release();
   }
 });
 
-router.delete("/:id", authenticateToken, async (req: Request, res: Response) => {
+router.delete('/:id', authenticateToken, async (req: Request, res: Response) => {
   const queryRunner = dataSource.createQueryRunner();
   try {
     await queryRunner.connect();
@@ -216,62 +243,22 @@ router.delete("/:id", authenticateToken, async (req: Request, res: Response) => 
     const workoutId = parseInt(req.params.id);
     const workoutRepository = queryRunner.manager.getRepository(Workout);
     const workout = await workoutRepository.findOne({ where: { id: workoutId } });
-    if (!workout) return res.status(404).json({ error: "Workout not found" });
+    if (!workout) return res.status(404).json({ error: 'Workout not found' });
     await workoutRepository.remove(workout);
     await queryRunner.commitTransaction();
-    logger.info("Workout deleted", { workoutId, userId: req.user?.id });
+    logger.info('Workout deleted', { workoutId, userId: req.user?.id });
     res.json({ id: workoutId });
   } catch (err) {
     await queryRunner.rollbackTransaction();
     const error = err as DatabaseError;
-    logger.error("Delete workout error", { error: err, workoutId: req.params.id, userId: req.user?.id });
-    res.status(500).json({ error: error.message || "Server error" });
+    logger.error('Delete workout error', {
+      error: err,
+      workoutId: req.params.id,
+      userId: req.user?.id,
+    });
+    res.status(500).json({ error: error.message || 'Server error' });
   } finally {
     await queryRunner.release();
-  }
-});
-
-router.post("/generate", authenticateToken, async (req: Request, res: Response) => {
-  try {
-    const { additionalNotes } = req.body;
-    const userId = req.user!.id;
-    const endDate = new Date();
-    const startDate = new Date();
-    startDate.setDate(endDate.getDate() - 30);
-    const startDateStr = startDate.toISOString().split("T")[0];
-    const endDateStr = endDate.toISOString().split("T")[0];
-    const workoutRepository = dataSource.getRepository(Workout);
-    const workouts = await workoutRepository.find({
-      where: { userId: Number(userId), date: Between(startDateStr, endDateStr) },
-      relations: { workoutExercises: { exercise: true } },
-      order: { date: "DESC" },
-    });
-    const workoutData = workouts.map((workout) => ({
-      date_of_workout: workout.date,
-      exercises: workout.workoutExercises.map((we) => ({
-        name: we.exercise.name,
-        reps: we.reps,
-        sets: 3,
-        ...(we.weight && { weight: we.weight }),
-      })),
-    }));
-    const basePrompt = "Generally I do 6 full body exercises every workout covering legs core and upper body, generate a workout for me based on the following exercises over the last month";
-    let fullPrompt = `${basePrompt}:\n\n${JSON.stringify(workoutData, null, 2)}`;
-    if (additionalNotes && additionalNotes.trim()) fullPrompt += `\n\nAdditional notes: ${additionalNotes.trim()}`;
-    fullPrompt += "\n\nPlease generate a balanced full-body workout with 6 exercises, including suggested reps and weights based on my recent performance. Focus on covering legs, core, and upper body as requested.";
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
-        { role: "system", content: "You are a fitness trainer assistant. Generate practical workout routines based on the user's exercise history. Provide specific rep ranges and weight suggestions when possible. Format your response clearly with exercise names, reps, and weights." },
-        { role: "user", content: fullPrompt },
-      ],
-      temperature: 0.7,
-    });
-    logger.info("Workout generated", { userId: req.user?.id });
-    res.json({ generatedWorkout: response.choices[0].message.content });
-  } catch (err) {
-    logger.error("Generate workout error", { error: err, userId: req.user?.id });
-    res.status(500).json({ error: "Failed to generate workout" });
   }
 });
 

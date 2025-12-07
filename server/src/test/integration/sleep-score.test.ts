@@ -107,9 +107,7 @@ describe('Sleep Score API Routes', () => {
       const repo = dataSource.getRepository(SleepScore);
       const sleep = repo.create({ userId: testUser.id, date: '2024-01-15', score: 3, notes: null });
       await repo.save(sleep);
-      const response = await request(app)
-        .get(`/api/sleep-scores/${sleep.id}`)
-        .expect(401);
+      const response = await request(app).get(`/api/sleep-scores/${sleep.id}`).expect(401);
       expect(response.body.error).toBeDefined();
     });
 
@@ -123,7 +121,12 @@ describe('Sleep Score API Routes', () => {
 
     it('should fetch existing sleep score', async () => {
       const repo = dataSource.getRepository(SleepScore);
-      const sleep = repo.create({ userId: testUser.id, date: '2024-01-15', score: 5, notes: 'Great' });
+      const sleep = repo.create({
+        userId: testUser.id,
+        date: '2024-01-15',
+        score: 5,
+        notes: 'Great',
+      });
       await repo.save(sleep);
       const response = await request(app)
         .get(`/api/sleep-scores/${sleep.id}`)
@@ -170,7 +173,12 @@ describe('Sleep Score API Routes', () => {
 
     it('should update existing sleep score', async () => {
       const repo = dataSource.getRepository(SleepScore);
-      const sleep = repo.create({ userId: testUser.id, date: '2024-01-15', score: 1, notes: 'Bad' });
+      const sleep = repo.create({
+        userId: testUser.id,
+        date: '2024-01-15',
+        score: 1,
+        notes: 'Bad',
+      });
       await repo.save(sleep);
       const response = await request(app)
         .put(`/api/sleep-scores/${sleep.id}`)
@@ -184,8 +192,18 @@ describe('Sleep Score API Routes', () => {
 
     it('should prevent duplicate date on update', async () => {
       const repo = dataSource.getRepository(SleepScore);
-      const sleep1 = repo.create({ userId: testUser.id, date: '2024-01-15', score: 2, notes: null });
-      const sleep2 = repo.create({ userId: testUser.id, date: '2024-01-16', score: 3, notes: null });
+      const sleep1 = repo.create({
+        userId: testUser.id,
+        date: '2024-01-15',
+        score: 2,
+        notes: null,
+      });
+      const sleep2 = repo.create({
+        userId: testUser.id,
+        date: '2024-01-16',
+        score: 3,
+        notes: null,
+      });
       await repo.save([sleep1, sleep2]);
       const response = await request(app)
         .put(`/api/sleep-scores/${sleep2.id}`)
@@ -201,9 +219,7 @@ describe('Sleep Score API Routes', () => {
       const repo = dataSource.getRepository(SleepScore);
       const sleep = repo.create({ userId: testUser.id, date: '2024-01-15', score: 2, notes: null });
       await repo.save(sleep);
-      const response = await request(app)
-        .delete(`/api/sleep-scores/${sleep.id}`)
-        .expect(401);
+      const response = await request(app).delete(`/api/sleep-scores/${sleep.id}`).expect(401);
       expect(response.body.error).toBeDefined();
     });
 
