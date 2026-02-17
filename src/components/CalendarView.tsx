@@ -8,6 +8,7 @@ import { toWorkoutPath, toPainScoreEditPath, toSleepScoreEditPath } from '../uti
 import { GenericCalendarView, CalendarItem } from './GenericCalendarView';
 import { fetchTimeline } from '../api';
 import { useUserContext } from '../contexts/useUserContext';
+import { format } from 'date-fns';
 
 // Type for workout calendar items
 export type WorkoutCalendarItem = Workout & {
@@ -84,8 +85,8 @@ const CalendarView = () => {
     const startDate = new Date(year, month, 1);
     const endDate = new Date(year, month + 1, 0); // Last day of month
 
-    const startDateStr = startDate.toISOString().split('T')[0];
-    const endDateStr = endDate.toISOString().split('T')[0];
+    const startDateStr = format(startDate, 'yyyy-MM-dd');
+    const endDateStr = format(endDate, 'yyyy-MM-dd');
 
     try {
       const timelineData = await fetchTimeline(startDateStr, endDateStr);
@@ -114,8 +115,8 @@ const CalendarView = () => {
   const startDate = new Date(year, month, 1);
   const endDate = new Date(year, month + 1, 0); // Last day of month
 
-  const startDateStr = startDate.toISOString().split('T')[0];
-  const endDateStr = endDate.toISOString().split('T')[0];
+  const startDateStr = format(startDate, 'yyyy-MM-dd');
+  const endDateStr = format(endDate, 'yyyy-MM-dd');
 
   // Fetch data when user or current month changes
   useEffect(() => {
