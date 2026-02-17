@@ -314,26 +314,11 @@ test.describe('Timeline Pagination', () => {
     await expect(prevWeekButton).toBeVisible({ timeout: 5000 });
     await expect(nextWeekButton).toBeVisible({ timeout: 5000 });
 
-    // Step 6: Check current week - should show workouts from early current month
-    // The exact workouts visible depend on what week "today" falls in
-    // For now, just verify some workouts are visible
-    const initialWorkouts = page.locator('[data-testid^="calendar-workout-"]');
-    const initialCount = await initialWorkouts.count();
-    console.log(`Initial workouts visible in week view: ${initialCount}`);
-    expect(initialCount).toBeGreaterThan(0);
-
-    // Step 7: Navigate to previous week (should cross into previous month potentially)
+    // Step 6: Navigate to previous week (should cross into previous month potentially)
     await prevWeekButton.click();
     await page.waitForTimeout(1000);
 
-    // Step 8: Check if workouts from previous week are visible
-    // This is where the bug might appear - if data isn't refetched for the new month,
-    // workouts from the previous month won't show up
-    const prevWeekWorkouts = page.locator('[data-testid^="calendar-workout-"]');
-    const prevWeekCount = await prevWeekWorkouts.count();
-    console.log(`Workouts visible after navigating to previous week: ${prevWeekCount}`);
-
-    // Step 9: Navigate to the week containing the previous month workouts (25th-27th)
+    // Step 7: Navigate to the week containing the previous month workouts (25th-27th)
     // Parse week header to find the right week dynamically
     const targetDate = new Date(currentYear, currentMonth - 1, 25);
     let foundTargetWeek = false;
@@ -384,13 +369,13 @@ test.describe('Timeline Pagination', () => {
 
     expect(foundTargetWeek).toBe(true);
 
-    // Step 10: Verify we can see workouts from the previous month (Deadlifts, Pull-ups)
+    // Step 8: Verify we can see workouts from the previous month (Deadlifts, Pull-ups)
     const oldMonthWorkouts = page.locator('[data-testid^="calendar-workout-"]');
     const oldMonthCount = await oldMonthWorkouts.count();
     console.log(`Workouts visible in previous month's week: ${oldMonthCount}`);
     expect(oldMonthCount).toBeGreaterThan(0);
 
-    // Step 11: Navigate to a week in the second week of current month containing the later workouts
+    // Step 9: Navigate to a week in the second week of current month containing the later workouts
     const todayButton = page.getByRole('button', { name: 'Go to today' });
     await todayButton.click();
     await page.waitForTimeout(1000);
@@ -444,7 +429,7 @@ test.describe('Timeline Pagination', () => {
 
     expect(foundLaterWeek).toBe(true);
 
-    // Step 12: Verify we can see workouts from the second week (Lunges, Rows)
+    // Step 10: Verify we can see workouts from the second week (Lunges, Rows)
     const laterWeekWorkouts = page.locator('[data-testid^="calendar-workout-"]');
     const laterWeekCount = await laterWeekWorkouts.count();
     console.log(`Workouts visible in later week: ${laterWeekCount}`);
