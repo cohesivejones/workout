@@ -1,14 +1,11 @@
 import winston from 'winston';
 
-// Determine log level based on environment
+// Determine log level from environment variable or defaults
 const getLogLevel = (): string => {
-  if (process.env.NODE_ENV === 'test') {
-    return 'debug'; // Show info logs in tests to verify logging works
+  if (process.env.LOG_LEVEL) {
+    return process.env.LOG_LEVEL;
   }
-  if (process.env.NODE_ENV === 'production') {
-    return 'info';
-  }
-  return 'debug'; // Verbose in development
+  return 'info'; // Default to 'info' if not specified
 };
 
 // Create logger instance

@@ -49,8 +49,8 @@ app.use(
 app.use(express.json());
 app.use(cookieParser());
 
-// Force HTTPS in production
-if (process.env.NODE_ENV === 'production') {
+// Force HTTPS redirect when enabled (typically for environments with SSL termination like Heroku)
+if (process.env.FORCE_HTTPS === 'true') {
   app.use((req, res, next) => {
     if (req.header('x-forwarded-proto') !== 'https') {
       res.redirect(`https://${req.header('host')}${req.url}`);
