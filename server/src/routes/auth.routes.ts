@@ -25,7 +25,7 @@ router.post('/login', async (req: Request, res: Response) => {
     const token = generateToken(user);
     res.cookie('token', token, {
       httpOnly: true,
-      secure: true,
+      secure: process.env.FORCE_HTTPS === 'true',
       sameSite: 'lax',
       maxAge: 2 * 60 * 60 * 1000,
     });
