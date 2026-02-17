@@ -21,6 +21,7 @@ jobs:
       PORT: 5001
       CORS_ORIGIN: https://localhost
       OPENAI_API_KEY: test_key_for_ci
+      FORCE_HTTPS: true
     
     services:
       postgres:

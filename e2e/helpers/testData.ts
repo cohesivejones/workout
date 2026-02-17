@@ -9,7 +9,8 @@ import { APIRequestContext } from '@playwright/test';
  */
 export async function clearTestData(request: APIRequestContext): Promise<void> {
   try {
-    const response = await request.delete('http://localhost:5001/api/test/clear-test-data');
+    // Use https://localhost to go through nginx (same as browser requests)
+    const response = await request.delete('https://localhost/api/test/clear-test-data');
     if (!response.ok()) {
       console.warn('Failed to clear test data:', response.status(), await response.text());
     }
