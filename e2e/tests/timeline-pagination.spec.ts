@@ -260,23 +260,18 @@ test.describe('Timeline Pagination', () => {
     await clearTestData(request);
 
     // Step 2: Create workouts across multiple weeks spanning different months
+    // Use fixed dates from previous year (2025) to make test deterministic
     // This will test if data fetching works correctly when navigating week-by-week
-    const today = new Date();
-    const currentYear = today.getFullYear();
-    const currentMonth = today.getMonth();
-
-    // Create workouts at the end of the previous month and beginning of current month
-    // to test cross-month week navigation
     const workoutDates = [
-      // Last week of previous month
-      { date: new Date(currentYear, currentMonth - 1, 25), exerciseName: 'Deadlifts' },
-      { date: new Date(currentYear, currentMonth - 1, 27), exerciseName: 'Pull-ups' },
-      // First week of current month
-      { date: new Date(currentYear, currentMonth, 2), exerciseName: 'Squats' },
-      { date: new Date(currentYear, currentMonth, 4), exerciseName: 'Bench Press' },
-      // Second week of current month
-      { date: new Date(currentYear, currentMonth, 10), exerciseName: 'Lunges' },
-      { date: new Date(currentYear, currentMonth, 12), exerciseName: 'Rows' },
+      // Last week of January 2025
+      { date: new Date(2025, 0, 25), exerciseName: 'Deadlifts' }, // Jan 25, 2025
+      { date: new Date(2025, 0, 27), exerciseName: 'Pull-ups' }, // Jan 27, 2025
+      // First week of February 2025
+      { date: new Date(2025, 1, 2), exerciseName: 'Squats' }, // Feb 2, 2025
+      { date: new Date(2025, 1, 4), exerciseName: 'Bench Press' }, // Feb 4, 2025
+      // Second week of February 2025
+      { date: new Date(2025, 1, 10), exerciseName: 'Lunges' }, // Feb 10, 2025
+      { date: new Date(2025, 1, 12), exerciseName: 'Rows' }, // Feb 12, 2025
     ];
 
     for (const workout of workoutDates) {
@@ -318,15 +313,15 @@ test.describe('Timeline Pagination', () => {
     await prevWeekButton.click();
     await page.waitForTimeout(1000);
 
-    // Step 7: Navigate to the week containing the previous month workouts (25th-27th)
+    // Step 7: Navigate to the week containing the January 2025 workouts (25th-27th)
     // Parse week header to find the right week dynamically
-    const targetDate = new Date(currentYear, currentMonth - 1, 25);
+    const targetDate = new Date(2025, 0, 25); // Jan 25, 2025
     let foundTargetWeek = false;
     let attempts = 0;
-    const maxAttempts = 10;
+    const maxWeeksToNavigate = 60; // Need to navigate back ~52 weeks from 2026 to reach Jan 2025
 
-    while (!foundTargetWeek && attempts < maxAttempts) {
-      await page.waitForTimeout(500);
+    while (!foundTargetWeek && attempts < maxWeeksToNavigate) {
+      await page.waitForTimeout(100); // Reduced from 500ms to speed up navigation
       const weekHeader = await page.getByTestId('calendar-week-title').textContent();
       console.log(`Current week header: ${weekHeader}`);
 
@@ -369,26 +364,21 @@ test.describe('Timeline Pagination', () => {
 
     expect(foundTargetWeek).toBe(true);
 
-    // Step 8: Verify we can see workouts from the previous month (Deadlifts, Pull-ups)
-    const oldMonthWorkouts = page.locator('[data-testid^="calendar-workout-"]');
-    const oldMonthCount = await oldMonthWorkouts.count();
-    console.log(`Workouts visible in previous month's week: ${oldMonthCount}`);
-    expect(oldMonthCount).toBeGreaterThan(0);
+    // Step 8: Verify we can see workouts from January 2025 (Deadlifts, Pull-ups)
+    const janWorkouts = page.locator('[data-testid^="calendar-workout-"]');
+    const janCount = await janWorkouts.count();
+    console.log(`Workouts visible in January week: ${janCount}`);
+    expect(janCount).toBeGreaterThan(0);
 
-    // Step 9: Navigate to a week in the second week of current month containing the later workouts
-    const todayButton = page.getByRole('button', { name: 'Go to today' });
-    await todayButton.click();
-    await page.waitForTimeout(1000);
-
-    // Navigate to week containing the 10th-12th of current month
-    const laterTargetDate = new Date(currentYear, currentMonth, 10);
-    let foundLaterWeek = false;
+    // Step 9: Navigate forward to week containing February 10-12, 2025
+    const febTargetDate = new Date(2025, 1, 10); // Feb 10, 2025
+    let foundFebWeek = false;
     attempts = 0;
 
-    while (!foundLaterWeek && attempts < maxAttempts) {
-      await page.waitForTimeout(500);
+    while (!foundFebWeek && attempts < maxWeeksToNavigate) {
+      await page.waitForTimeout(100); // Reduced from 500ms to speed up navigation
       const weekHeader = await page.getByTestId('calendar-week-title').textContent();
-      console.log(`Current week header (looking for later week): ${weekHeader}`);
+      console.log(`Current week header (looking for Feb 10-12 week): ${weekHeader}`);
 
       if (weekHeader) {
         const match = weekHeader.match(/(\w+)\s+(\d+)\s+-\s+(\w+)\s+(\d+),\s+(\d+)/);
@@ -412,28 +402,28 @@ test.describe('Timeline Pagination', () => {
           const weekStart = new Date(parseInt(year), months[startMonth], parseInt(startDay));
           const weekEnd = new Date(parseInt(year), months[endMonth], parseInt(endDay));
 
-          if (laterTargetDate >= weekStart && laterTargetDate <= weekEnd) {
-            foundLaterWeek = true;
+          if (febTargetDate >= weekStart && febTargetDate <= weekEnd) {
+            foundFebWeek = true;
             console.log(
-              `Found later week containing ${laterTargetDate.toISOString().split('T')[0]}`
+              `Found February week containing ${febTargetDate.toISOString().split('T')[0]}`
             );
           }
         }
       }
 
-      if (!foundLaterWeek) {
+      if (!foundFebWeek) {
         await nextWeekButton.click();
         attempts++;
       }
     }
 
-    expect(foundLaterWeek).toBe(true);
+    expect(foundFebWeek).toBe(true);
 
-    // Step 10: Verify we can see workouts from the second week (Lunges, Rows)
-    const laterWeekWorkouts = page.locator('[data-testid^="calendar-workout-"]');
-    const laterWeekCount = await laterWeekWorkouts.count();
-    console.log(`Workouts visible in later week: ${laterWeekCount}`);
-    expect(laterWeekCount).toBeGreaterThan(0);
+    // Step 10: Verify we can see workouts from February 10-12, 2025 (Lunges, Rows)
+    const febWorkouts = page.locator('[data-testid^="calendar-workout-"]');
+    const febCount = await febWorkouts.count();
+    console.log(`Workouts visible in February week: ${febCount}`);
+    expect(febCount).toBeGreaterThan(0);
   });
 
   test('calendar week view fetches data when navigating to a different month', async ({
@@ -526,10 +516,10 @@ test.describe('Timeline Pagination', () => {
     const weekHeaderHistory: string[] = [];
     let foundInRange = false;
     let attempts = 0;
-    const maxAttempts = 12; // generous (covers > 2 months span)
+    const maxWeeksToNavigate = 12; // Covers navigating back a few months
     let currentVisibleWorkoutCount = baselineWorkouts;
 
-    while (!foundInRange && attempts < maxAttempts) {
+    while (!foundInRange && attempts < maxWeeksToNavigate) {
       // Inspect current header
       const headerText = await page.getByTestId('calendar-week-title').textContent();
       if (headerText) weekHeaderHistory.push(headerText);
