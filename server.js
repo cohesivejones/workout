@@ -70,7 +70,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 // Force HTTPS in production
-if (process.env.NODE_ENV === 'production') {
+if (process.env.FORCE_HTTPS === 'true') {
   app.use((req, res, next) => {
     if (req.header('x-forwarded-proto') !== 'https') {
       res.redirect(`https://${req.header('host')}${req.url}`);
@@ -117,7 +117,7 @@ app.post('/api/auth/login', async (req, res) => {
     // Set cookie
     res.cookie('token', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: process.env.FORCE_HTTPS === 'true',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
