@@ -12,7 +12,10 @@ dotenv.config({ path: envPath });
 // Parse DATABASE_URL if provided (Heroku), otherwise use individual config vars
 // Only skip migrations during vitest integration tests (not E2E tests)
 // Vitest sets VITEST=true, so we can use that to distinguish
-const migrations = process.env.VITEST === 'true' ? [] : [__dirname + '/migrations/*.ts'];
+// Use .js for compiled code, .ts for ts-node
+const migrationExtension = __filename.endsWith('.js') ? 'js' : 'ts';
+const migrations =
+  process.env.VITEST === 'true' ? [] : [__dirname + `/migrations/*.${migrationExtension}`];
 
 const dataSource = process.env.DATABASE_URL
   ? new DataSource({
