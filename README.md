@@ -114,16 +114,14 @@ After trusting the certificate, restart your browser.
 
 ## Production Build
 
+For local testing of the production build:
+
 ```bash
 npm run build
 npm start
 ```
 
-This will:
-
-- Build the React frontend to `/dist`
-- Compile the TypeScript backend to `/server/dist`
-- Start the single consolidated server on the configured PORT
+For actual deployment, use the Docker image (see Deployment section below).
 
 ## Environment Variables
 
@@ -204,52 +202,94 @@ E2E tests run against `https://localhost` using the same HTTPS setup as developm
 
 ## Deployment
 
-The application is deployed to Heroku and automatically deploys when changes are pushed to the main branch on GitHub.
+The application is deployed as an all-in-one Docker image that includes the frontend, backend, and PostgreSQL database.
 
-### Deployment Process
+### Prerequisites
 
-1. **Push to GitHub:**
+- Docker installed on your server
+- A secure JWT_SECRET (generate with `openssl rand -base64 32`)
+- OpenAI API key (optional, for AI features)
 
-```bash
-git push origin main
-```
-
-2. **Heroku automatically deploys** from the connected GitHub repository
-
-### Manual Deployment (if needed)
-
-If you need to manually trigger a deployment or run migrations:
+### Quick Start
 
 ```bash
-# Trigger manual deployment
-git push heroku main
-
-# Run migrations on Heroku
-heroku run npm run db:migrate
+docker run -d \
+  --name workout-app \
+  --restart unless-stopped \
+  -p 3000:5001 \
+  -v workout-db:/var/lib/postgresql/data \
+  -e PORT=5001 \
+  -e PGUSER=postgres \
+  -e PGPASSWORD=postgres \
+  -e PGDATABASE=workout_production \
+  -e CORS_ORIGIN="http://your-server-ip:3000" \
+  -e JWT_SECRET="$(openssl rand -base64 32)" \
+  -e OPENAI_API_KEY="your-openai-api-key-or-leave-blank" \
+  drnatejones/natetastic-adventures:workout-latest
 ```
 
-### Deployment Scripts
+Access your app at: `http://your-server-ip:3000`
 
-The application includes deployment scripts for server management:
+### Environment Variables
+
+**Required:**
+- `PORT` - Server port (5001)
+- `PGUSER`, `PGPASSWORD`, `PGDATABASE` - PostgreSQL credentials
+- `CORS_ORIGIN` - Your server URL (e.g., "http://192.168.1.100:3000")
+- `JWT_SECRET` - Random secure string for JWT tokens
+
+**Optional:**
+- `OPENAI_API_KEY` - For AI workout generation features
+- `FORCE_HTTPS` - Set to "true" if behind SSL proxy/reverse proxy
+- `LOG_LEVEL` - Logging verbosity (default: info)
+
+### Docker Management
 
 ```bash
-./scripts/deploy.sh
+# View logs
+docker logs -f workout-app
+
+# Restart container
+docker restart workout-app
+
+# Stop container
+docker stop workout-app
+
+# Update to latest version
+docker pull drnatejones/natetastic-adventures:workout-latest
+docker stop workout-app
+docker rm workout-app
+# Then re-run the docker run command above
 ```
 
-This script:
+### Data Persistence
 
-1. Kills existing Node.js processes
-2. Pulls latest code from git
-3. Installs dependencies
-4. Runs database migrations
-5. Builds the application
-6. Starts the production server
+The database is stored in a Docker volume (`workout-db`). This persists across container restarts and updates.
 
-Make the script executable:
+### Backup & Restore
 
 ```bash
-chmod +x scripts/deploy.sh
+# Backup database
+docker run --rm -v workout-db:/data -v $(pwd):/backup alpine \
+  tar czf /backup/workout-db-backup-$(date +%Y%m%d).tar.gz /data
+
+# Restore database
+docker run --rm -v workout-db:/data -v $(pwd):/backup alpine \
+  tar xzf /backup/workout-db-backup-YYYYMMDD.tar.gz -C /
 ```
+
+### Using Specific Versions
+
+```bash
+# Use a specific version tag
+docker pull drnatejones/natetastic-adventures:workout-v1.0.2
+docker run -d --name workout-app ... drnatejones/natetastic-adventures:workout-v1.0.2
+```
+
+Available tags:
+- `workout-latest` - Latest stable version
+- `workout-v1.0.2` - Specific version (recommended for production)
+- `workout` - Alias for latest
 
 ## Tech Stack
 
