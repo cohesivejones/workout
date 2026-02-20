@@ -4,6 +4,7 @@ import WorkoutForm from '../components/WorkoutForm';
 import { createWorkout, createExercise, fetchExercises } from '../api';
 import { Exercise, Workout } from '../types';
 import { useUserContext } from '../contexts/useUserContext';
+import { toWorkoutPath } from '../utils/paths';
 import styles from '../components/WorkoutForm.module.css';
 
 export default function AddWorkoutPage() {
@@ -29,8 +30,8 @@ export default function AddWorkoutPage() {
   const addWorkout = async (workout: Omit<Workout, 'id'>): Promise<boolean> => {
     try {
       setError(null);
-      await createWorkout(workout as Workout);
-      setLocation('/');
+      const createdWorkout = await createWorkout(workout as Workout);
+      setLocation(toWorkoutPath(createdWorkout));
       return true;
     } catch (err) {
       console.error('Failed to add workout:', err);

@@ -52,10 +52,11 @@ test.describe('Create and Edit Workout', () => {
 
     // Step 4: Save the workout
     await page.getByRole('button', { name: 'Save Workout' }).click();
-    await page.waitForURL('/', { timeout: 5000 });
-    await expect(page.locator('h2:has-text("Activity Timeline")')).toBeVisible({ timeout: 5000 });
+    await page.waitForURL(/\/workouts\/\d+/, { timeout: 10000 });
+    await expect(page.locator('h2:has-text("Workout Details")')).toBeVisible({ timeout: 5000 });
 
-    // Step 5: Navigate to edit page directly from List view
+    // Step 5: Navigate to Timeline and then to edit page from List view
+    await page.goto('/');
     await page.getByRole('button', { name: 'List' }).click();
     await page.waitForURL('/?view=list', { timeout: 5000 });
 

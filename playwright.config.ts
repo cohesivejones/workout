@@ -53,9 +53,10 @@ export default defineConfig({
     ? undefined
     : {
         command: 'NODE_ENV=test npm run build && cd server && npm run dev:test',
-        url: 'http://localhost:5001',
+        url: 'https://localhost',
         timeout: 120000,
         reuseExistingServer: true,
+        ignoreHTTPSErrors: true,
         stdout: 'pipe',
         stderr: 'pipe',
       },

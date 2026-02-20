@@ -72,8 +72,8 @@ test.describe('Timeline Pagination', () => {
       // Save workout
       await page.getByRole('button', { name: 'Save Workout' }).click();
 
-      // Wait for redirect
-      await page.waitForURL('/', { timeout: 10000 });
+      // Wait for redirect to Workout Show page
+      await page.waitForURL(/\/workouts\/\d+/, { timeout: 10000 });
     }
 
     // Step 3: Navigate to timeline list view
@@ -181,8 +181,8 @@ test.describe('Timeline Pagination', () => {
       // Save workout
       await page.getByRole('button', { name: 'Save Workout' }).click();
 
-      // Wait for redirect
-      await page.waitForURL('/', { timeout: 10000 });
+      // Wait for redirect to Workout Show page
+      await page.waitForURL(/\/workouts\/\d+/, { timeout: 10000 });
     }
 
     // Step 3: Navigate to calendar view
@@ -291,7 +291,7 @@ test.describe('Timeline Pagination', () => {
       await addExercise(page, { name: workout.exerciseName, reps: '10' });
 
       await page.getByRole('button', { name: 'Save Workout' }).click();
-      await page.waitForURL('/', { timeout: 10000 });
+      await page.waitForURL(/\/workouts\/\d+/, { timeout: 10000 });
     }
 
     // Step 3: Set viewport to mobile size to trigger week view
@@ -463,7 +463,7 @@ test.describe('Timeline Pagination', () => {
       await expect(page.getByRole('heading', { name: 'New Workout' })).toBeVisible({
         timeout: 5000,
       });
-      await page.waitForLoadState('networkidle');
+      await expect(page.getByPlaceholder('Reps')).toBeVisible({ timeout: 5000 });
 
       console.log(
         `Creating workout: ${workout.exerciseName} on ${workout.date.toISOString().split('T')[0]}`
@@ -472,7 +472,7 @@ test.describe('Timeline Pagination', () => {
       await setWorkoutDate(page, workout.date);
       await addExercise(page, { name: workout.exerciseName, reps: '10' });
       await page.getByRole('button', { name: 'Save Workout' }).click();
-      await page.waitForURL('/', { timeout: 10000 });
+      await page.waitForURL(/\/workouts\/\d+/, { timeout: 10000 });
     }
 
     // Set viewport to mobile size for week view

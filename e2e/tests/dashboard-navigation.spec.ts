@@ -46,13 +46,21 @@ test.describe('Dashboard Alphabetical Navigation', () => {
     ];
 
     for (let i = 0; i < 6; i++) {
+      // Navigate to Timeline first (in case we're on workout show page from previous iteration)
+      await page.goto('/');
+
       // Navigate to List view
       await page.getByRole('button', { name: 'List' }).click();
       await page.waitForURL('/?view=list', { timeout: 5000 });
 
       // Click FAB to create new workout
       await clickFabMenuItem(page, 'New Workout');
-      await page.waitForLoadState('networkidle');
+
+      // Wait for the form to be ready instead of networkidle
+      await expect(page.getByRole('heading', { name: 'New Workout' })).toBeVisible({
+        timeout: 5000,
+      });
+      await expect(page.getByPlaceholder('Reps')).toBeVisible({ timeout: 5000 });
 
       // Set the workout date
       await setWorkoutDate(page, workoutDates[i]);
@@ -80,7 +88,7 @@ test.describe('Dashboard Alphabetical Navigation', () => {
 
       // Save the workout
       await page.getByRole('button', { name: 'Save Workout' }).click();
-      await page.waitForURL('/', { timeout: 5000 });
+      await page.waitForURL(/\/workouts\/\d+/, { timeout: 10000 });
     }
 
     // ===== PHASE 3: NAVIGATE TO DASHBOARD =====
