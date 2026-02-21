@@ -16,6 +16,7 @@ import styles from './ListView.module.css';
 import buttonStyles from '../styles/common/buttons.module.css';
 import { useUserContext } from '../contexts/useUserContext';
 import { listViewReducer, createInitialListViewState } from './listView.reducer';
+import { formatWeightWithKg } from '../utils/weight';
 
 export const ListView = () => {
   const { user } = useUserContext();
@@ -320,7 +321,7 @@ export const ListView = () => {
                             <span className={styles.exerciseName}>{exercise.name}</span>
                             <span className={styles.exerciseDetails}>
                               {exercise.reps} reps
-                              {exercise.weight ? ` - ${exercise.weight} lbs` : ''}
+                              {exercise.weight ? ` - ${formatWeightWithKg(exercise.weight)}` : ''}
                               {exercise.time_seconds ? ` - ${exercise.time_seconds} sec` : ''}
                             </span>
                             <div className={styles.badgeContainer}>

@@ -8,6 +8,7 @@ import { useUserContext } from '../contexts/useUserContext';
 import { fetchRecentExerciseData } from '../api';
 import { useForm, useFieldArray, Controller, SubmitHandler } from 'react-hook-form';
 import { SingleValue } from 'react-select';
+import { lbsToKg } from '../utils/weight';
 
 interface FormValues {
   date: string;
@@ -238,9 +239,7 @@ function WorkoutForm({
                 {...register('currentExercise.weight')}
               />
               <span className={styles.weightSuffix}>
-                {currentExercise.weight
-                  ? `${(Number(currentExercise.weight) * 0.453592).toFixed(1)} kg`
-                  : '0 kg'}
+                {currentExercise.weight ? `${lbsToKg(Number(currentExercise.weight))} kg` : '0 kg'}
               </span>
             </div>
           </div>
