@@ -19,6 +19,7 @@ This directory contains scripts for Docker-based deployment of the Workout App.
 Pulls the latest Docker image and starts the container with proper configuration.
 
 **Features:**
+
 - Pulls latest Docker image
 - Stops and removes old container
 - Starts new container with persistent database
@@ -48,11 +49,13 @@ LOG_LEVEL=info
 **Note:** The script will automatically detect your server's network IP address for `CORS_ORIGIN` if not explicitly set. This allows the app to be accessed from other devices on your network.
 
 **Usage:**
+
 ```bash
 ./scripts/deploy.sh
 ```
 
 The script will:
+
 1. Load environment variables from `.env` (if exists)
 2. Generate JWT_SECRET if not provided
 3. Pull latest Docker image
@@ -65,6 +68,7 @@ The script will:
 Restarts the existing Docker container without pulling a new image.
 
 **Usage:**
+
 ```bash
 ./scripts/restart.sh
 ```
@@ -74,6 +78,7 @@ Restarts the existing Docker container without pulling a new image.
 Docker's built-in restart policy (`--restart unless-stopped`) is automatically configured in `deploy.sh`, so the container will restart when Docker starts.
 
 To ensure Docker itself starts on boot:
+
 ```bash
 sudo systemctl enable docker
 sudo systemctl start docker
@@ -116,16 +121,19 @@ sudo docker run --rm -v workout-db:/data -v $(pwd):/backup alpine \
 ## Troubleshooting
 
 **Container won't start:**
+
 ```bash
 sudo docker logs workout-app
 ```
 
 **Check environment variables:**
+
 ```bash
 sudo docker inspect workout-app | grep -A 20 Env
 ```
 
 **Force clean start:**
+
 ```bash
 sudo docker stop workout-app
 sudo docker rm workout-app

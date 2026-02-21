@@ -7,6 +7,7 @@ import buttonStyles from '../styles/common/buttons.module.css';
 import { format } from 'date-fns';
 import classNames from 'classnames';
 import { toHomePath, toWorkoutEditPath } from '../utils/paths';
+import { formatWeightWithKg } from '../utils/weight';
 
 const WorkoutShowPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -99,7 +100,9 @@ const WorkoutShowPage: React.FC = () => {
                   <div className={styles.exerciseDetailStats}>
                     <span className={styles.exerciseDetailReps}>{exercise.reps} reps</span>
                     {exercise.weight && (
-                      <span className={styles.exerciseDetailWeight}>{exercise.weight} lbs</span>
+                      <span className={styles.exerciseDetailWeight}>
+                        {formatWeightWithKg(exercise.weight)}
+                      </span>
                     )}
                     {exercise.time_seconds && (
                       <span className={styles.exerciseDetailTime}>{exercise.time_seconds} sec</span>

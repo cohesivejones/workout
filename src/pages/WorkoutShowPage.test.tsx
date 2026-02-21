@@ -85,7 +85,7 @@ describe('WorkoutShowPage', () => {
     expect(screen.getByText('10 reps')).toBeInTheDocument();
     expect(screen.getByText('Squats')).toBeInTheDocument();
     expect(screen.getByText('15 reps')).toBeInTheDocument();
-    expect(screen.getByText('20 lbs')).toBeInTheDocument();
+    expect(screen.getByText('20 lbs (9.1 kg)')).toBeInTheDocument();
 
     // Check that edit button is displayed
     expect(screen.getByText('Edit Workout')).toBeInTheDocument();

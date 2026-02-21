@@ -233,12 +233,14 @@ Access your app at: `http://your-server-ip:3000`
 ### Environment Variables
 
 **Required:**
+
 - `PORT` - Server port (5001)
 - `PGUSER`, `PGPASSWORD`, `PGDATABASE` - PostgreSQL credentials
 - `CORS_ORIGIN` - Your server URL (e.g., "http://192.168.1.100:3000")
 - `JWT_SECRET` - Random secure string for JWT tokens
 
 **Optional:**
+
 - `OPENAI_API_KEY` - For AI workout generation features
 - `FORCE_HTTPS` - Set to "true" if behind SSL proxy/reverse proxy
 - `LOG_LEVEL` - Logging verbosity (default: info)
@@ -287,6 +289,7 @@ docker run -d --name workout-app ... drnatejones/natetastic-adventures:workout-v
 ```
 
 Available tags:
+
 - `workout-latest` - Latest stable version
 - `workout-v1.0.2` - Specific version (recommended for production)
 - `workout` - Alias for latest

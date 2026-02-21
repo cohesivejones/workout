@@ -383,7 +383,7 @@ describe('ListView', () => {
     expect(screen.getByText('Push-ups')).toBeInTheDocument();
     expect(screen.getByText('10 reps')).toBeInTheDocument();
     expect(screen.getByText('Squats')).toBeInTheDocument();
-    expect(screen.getByText(/15 reps - 20 lbs/)).toBeInTheDocument();
+    expect(screen.getByText(/15 reps - 20 lbs \(9\.1 kg\)/)).toBeInTheDocument();
     expect(screen.getByText('Lunges')).toBeInTheDocument();
     expect(screen.getByText('12 reps')).toBeInTheDocument();
 

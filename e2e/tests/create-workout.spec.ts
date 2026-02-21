@@ -61,12 +61,12 @@ test.describe('Create Workout with Multiple Exercises', () => {
     // Step 5: Submit the workout
     await page.getByRole('button', { name: 'Save Workout' }).click();
 
-    // Wait for redirect to Timeline page
-    await page.waitForURL('/', { timeout: 10000 });
-    await expect(page.locator('h2:has-text("Activity Timeline")')).toBeVisible({ timeout: 5000 });
+    // Wait for redirect to Workout Show page
+    await page.waitForURL(/\/workouts\/\d+/, { timeout: 10000 });
+    await expect(page.locator('h2:has-text("Workout Details")')).toBeVisible({ timeout: 5000 });
 
-    // Step 6: Verify in List View (should already be in list view after redirect)
-    // The app redirects to Timeline root which defaults to calendar, so switch to list
+    // Step 6: Navigate to Timeline and verify in List View
+    await page.goto('/');
     await page.getByRole('button', { name: 'List' }).click();
     await page.waitForURL('/?view=list', { timeout: 5000 });
 
@@ -185,11 +185,12 @@ test.describe('Create Workout with Multiple Exercises', () => {
     // Submit the second workout
     await page.getByRole('button', { name: 'Save Workout' }).click();
 
-    // Wait for redirect to Timeline page
-    await page.waitForURL('/', { timeout: 10000 });
-    await expect(page.locator('h2:has-text("Activity Timeline")')).toBeVisible({ timeout: 5000 });
+    // Wait for redirect to Workout Show page
+    await page.waitForURL(/\/workouts\/\d+/, { timeout: 10000 });
+    await expect(page.locator('h2:has-text("Workout Details")')).toBeVisible({ timeout: 5000 });
 
-    // Step 9: Verify NEW badges in List View
+    // Step 9: Navigate to Timeline and verify NEW badges in List View
+    await page.goto('/');
     await page.getByRole('button', { name: 'List' }).click();
     await page.waitForURL('/?view=list', { timeout: 5000 });
 
