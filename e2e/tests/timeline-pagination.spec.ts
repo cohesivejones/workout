@@ -276,11 +276,10 @@ test.describe('Timeline Pagination', () => {
 
     for (const workout of workoutDates) {
       await page.goto('/workouts/new');
+      await page.waitForURL('/workouts/new', { timeout: 5000 });
       await expect(page.getByRole('heading', { name: 'New Workout' })).toBeVisible({
         timeout: 5000,
       });
-
-      await page.waitForLoadState('networkidle');
       await expect(page.getByPlaceholder('Reps')).toBeVisible({ timeout: 5000 });
 
       console.log(
