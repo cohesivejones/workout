@@ -210,4 +210,43 @@ describe('EditWorkoutPage', () => {
     expect(screen.getByRole('heading', { name: /Edit Workout/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Update Workout/i })).toBeInTheDocument();
   });
+
+  it('navigates to workout show page after successful update', async () => {
+    server.use(
+      http.get('/api/workouts/:id', () => {
+        return HttpResponse.json(mockWorkout);
+      }),
+      http.get('/api/exercises', () => {
+        return HttpResponse.json(mockExercises);
+      }),
+      http.put('/api/workouts/:id', () => {
+        return HttpResponse.json(mockWorkout);
+      })
+    );
+
+    render(
+      <MemoryRouter initialPath="/workouts/1/edit">
+        <Route path="/workouts/:id/edit">
+          <EditWorkoutPage />
+        </Route>
+        <Route path="/workouts/:id">
+          <div data-testid="workout-show-page">Workout Show Page</div>
+        </Route>
+      </MemoryRouter>
+    );
+
+    // Wait for the form to load
+    await waitFor(() => {
+      expect(screen.queryByText(/Loading.../i)).not.toBeInTheDocument();
+    });
+
+    // Submit the form
+    const updateButton = screen.getByRole('button', { name: /Update Workout/i });
+    updateButton.click();
+
+    // Verify navigation to workout show page
+    await waitFor(() => {
+      expect(screen.getByTestId('workout-show-page')).toBeInTheDocument();
+    });
+  });
 });
