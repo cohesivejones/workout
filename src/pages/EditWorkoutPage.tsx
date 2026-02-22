@@ -4,6 +4,7 @@ import WorkoutForm from '../components/WorkoutForm';
 import { fetchWorkout, updateWorkout, createExercise, fetchExercises } from '../api';
 import { Exercise, Workout } from '../types';
 import { useUserContext } from '../contexts/useUserContext';
+import { toWorkoutPath } from '../utils/paths';
 import styles from '../components/WorkoutForm.module.css';
 import loadingStyles from '../App.module.css';
 
@@ -55,7 +56,7 @@ export default function EditWorkoutPage() {
     try {
       setError(null);
       await updateWorkout(workoutId, updatedWorkout);
-      setLocation('/');
+      setLocation(toWorkoutPath({ id: workoutId } as Workout));
       return true;
     } catch (err) {
       console.error('Failed to update workout:', err);
