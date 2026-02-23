@@ -568,4 +568,263 @@ describe('Exercise API Routes', () => {
       expect(response.body.suggestions[0]).toBe('Romanian Deadlift');
     });
   });
+
+  describe('GET /api/exercises/:id/progression', () => {
+    it('should require authentication', async () => {
+      const response = await request(app).get('/api/exercises/1/progression').expect(401);
+
+      expect(response.body.error).toBeDefined();
+    });
+
+    it('should return 404 for non-existent exercise', async () => {
+      const response = await request(app)
+        .get('/api/exercises/99999/progression')
+        .set('Cookie', [`token=${authToken}`])
+        .expect(404);
+
+      expect(response.body.error).toBe('Exercise not found');
+    });
+
+    it('should return 404 when exercise belongs to different user', async () => {
+      const exerciseRepository = dataSource.getRepository(Exercise);
+      const userRepository = dataSource.getRepository(User);
+
+      // Create another user
+      const hashedPassword = await bcrypt.hash('otherpass123', 10);
+      const otherUser = userRepository.create({
+        email: 'progression-other-user@example.com',
+        name: 'Other Progression User',
+        password: hashedPassword,
+      });
+      await userRepository.save(otherUser);
+
+      // Create exercise for other user
+      const otherExercise = exerciseRepository.create({
+        name: 'Other User Exercise',
+        userId: otherUser.id,
+      });
+      await exerciseRepository.save(otherExercise);
+
+      const response = await request(app)
+        .get(`/api/exercises/${otherExercise.id}/progression`)
+        .set('Cookie', [`token=${authToken}`])
+        .expect(404);
+
+      expect(response.body.error).toBe('Exercise not found');
+
+      // Cleanup
+      await dataSource.query('DELETE FROM exercises WHERE "userId" = $1', [otherUser.id]);
+      await userRepository.remove(otherUser);
+    });
+
+    it('should return empty progression data for exercise with no history', async () => {
+      const exerciseRepository = dataSource.getRepository(Exercise);
+      const exercise = exerciseRepository.create({
+        name: 'New Exercise',
+        userId: testUser.id,
+      });
+      await exerciseRepository.save(exercise);
+
+      const response = await request(app)
+        .get(`/api/exercises/${exercise.id}/progression`)
+        .set('Cookie', [`token=${authToken}`])
+        .expect(200);
+
+      expect(response.body.exerciseName).toBe('New Exercise');
+      expect(response.body.weightData).toEqual([]);
+      expect(response.body.repsData).toEqual([]);
+    });
+
+    it('should return progression data for exercise within 12 weeks', async () => {
+      const exerciseRepository = dataSource.getRepository(Exercise);
+      const workoutRepository = dataSource.getRepository(Workout);
+      const workoutExerciseRepository = dataSource.getRepository(WorkoutExercise);
+
+      // Create exercise
+      const exercise = exerciseRepository.create({
+        name: 'Bench Press',
+        userId: testUser.id,
+      });
+      await exerciseRepository.save(exercise);
+
+      // Create workout from 7 days ago
+      const workout1Date = new Date();
+      workout1Date.setDate(workout1Date.getDate() - 7);
+      const workout1 = workoutRepository.create({
+        userId: testUser.id,
+        date: workout1Date.toISOString().split('T')[0],
+        withInstructor: false,
+      });
+      await workoutRepository.save(workout1);
+
+      const workoutExercise1 = workoutExerciseRepository.create({
+        workout_id: workout1.id,
+        exercise_id: exercise.id,
+        reps: 8,
+        weight: 135,
+        time_seconds: null,
+        new_reps: false,
+        new_weight: false,
+      });
+      await workoutExerciseRepository.save(workoutExercise1);
+
+      // Create workout from today with improvements
+      const workout2Date = new Date();
+      const workout2 = workoutRepository.create({
+        userId: testUser.id,
+        date: workout2Date.toISOString().split('T')[0],
+        withInstructor: false,
+      });
+      await workoutRepository.save(workout2);
+
+      const workoutExercise2 = workoutExerciseRepository.create({
+        workout_id: workout2.id,
+        exercise_id: exercise.id,
+        reps: 10,
+        weight: 145,
+        time_seconds: null,
+        new_reps: true,
+        new_weight: true,
+      });
+      await workoutExerciseRepository.save(workoutExercise2);
+
+      const response = await request(app)
+        .get(`/api/exercises/${exercise.id}/progression`)
+        .set('Cookie', [`token=${authToken}`])
+        .expect(200);
+
+      expect(response.body.exerciseName).toBe('Bench Press');
+      expect(response.body.weightData).toHaveLength(2);
+      expect(response.body.repsData).toHaveLength(2);
+
+      // Check first data point (older workout)
+      expect(response.body.weightData[0].weight).toBe(135);
+      expect(response.body.weightData[0].reps).toBe(8);
+      expect(response.body.weightData[0].new_weight).toBe(false);
+      expect(response.body.weightData[0].new_reps).toBe(false);
+
+      // Check second data point (newer workout with PRs)
+      expect(response.body.weightData[1].weight).toBe(145);
+      expect(response.body.weightData[1].reps).toBe(10);
+      expect(response.body.weightData[1].new_weight).toBe(true);
+      expect(response.body.weightData[1].new_reps).toBe(true);
+
+      // Check reps data
+      expect(response.body.repsData[0].reps).toBe(8);
+      expect(response.body.repsData[1].reps).toBe(10);
+    });
+
+    it('should only return data from the last 12 weeks', async () => {
+      const exerciseRepository = dataSource.getRepository(Exercise);
+      const workoutRepository = dataSource.getRepository(Workout);
+      const workoutExerciseRepository = dataSource.getRepository(WorkoutExercise);
+
+      // Create exercise
+      const exercise = exerciseRepository.create({
+        name: 'Squats',
+        userId: testUser.id,
+      });
+      await exerciseRepository.save(exercise);
+
+      // Create workout from 100 days ago (outside 12-week window)
+      const oldWorkoutDate = new Date();
+      oldWorkoutDate.setDate(oldWorkoutDate.getDate() - 100);
+      const oldWorkout = workoutRepository.create({
+        userId: testUser.id,
+        date: oldWorkoutDate.toISOString().split('T')[0],
+        withInstructor: false,
+      });
+      await workoutRepository.save(oldWorkout);
+
+      const oldWorkoutExercise = workoutExerciseRepository.create({
+        workout_id: oldWorkout.id,
+        exercise_id: exercise.id,
+        reps: 5,
+        weight: 100,
+        time_seconds: null,
+      });
+      await workoutExerciseRepository.save(oldWorkoutExercise);
+
+      // Create workout from 7 days ago (within 12-week window)
+      const recentWorkoutDate = new Date();
+      recentWorkoutDate.setDate(recentWorkoutDate.getDate() - 7);
+      const recentWorkout = workoutRepository.create({
+        userId: testUser.id,
+        date: recentWorkoutDate.toISOString().split('T')[0],
+        withInstructor: false,
+      });
+      await workoutRepository.save(recentWorkout);
+
+      const recentWorkoutExercise = workoutExerciseRepository.create({
+        workout_id: recentWorkout.id,
+        exercise_id: exercise.id,
+        reps: 8,
+        weight: 135,
+        time_seconds: null,
+      });
+      await workoutExerciseRepository.save(recentWorkoutExercise);
+
+      const response = await request(app)
+        .get(`/api/exercises/${exercise.id}/progression`)
+        .set('Cookie', [`token=${authToken}`])
+        .expect(200);
+
+      expect(response.body.exerciseName).toBe('Squats');
+      expect(response.body.weightData).toHaveLength(1);
+      expect(response.body.repsData).toHaveLength(1);
+      expect(response.body.weightData[0].weight).toBe(135);
+      expect(response.body.weightData[0].reps).toBe(8);
+    });
+
+    it('should return data sorted by date in ascending order', async () => {
+      const exerciseRepository = dataSource.getRepository(Exercise);
+      const workoutRepository = dataSource.getRepository(Workout);
+      const workoutExerciseRepository = dataSource.getRepository(WorkoutExercise);
+
+      // Create exercise
+      const exercise = exerciseRepository.create({
+        name: 'Deadlift',
+        userId: testUser.id,
+      });
+      await exerciseRepository.save(exercise);
+
+      // Create workouts in non-chronological order
+      const dates = [
+        { daysAgo: 21, weight: 200 },
+        { daysAgo: 7, weight: 220 },
+        { daysAgo: 14, weight: 210 },
+      ];
+
+      for (const { daysAgo, weight } of dates) {
+        const workoutDate = new Date();
+        workoutDate.setDate(workoutDate.getDate() - daysAgo);
+        const workout = workoutRepository.create({
+          userId: testUser.id,
+          date: workoutDate.toISOString().split('T')[0],
+          withInstructor: false,
+        });
+        await workoutRepository.save(workout);
+
+        const workoutExercise = workoutExerciseRepository.create({
+          workout_id: workout.id,
+          exercise_id: exercise.id,
+          reps: 5,
+          weight: weight,
+          time_seconds: null,
+        });
+        await workoutExerciseRepository.save(workoutExercise);
+      }
+
+      const response = await request(app)
+        .get(`/api/exercises/${exercise.id}/progression`)
+        .set('Cookie', [`token=${authToken}`])
+        .expect(200);
+
+      expect(response.body.weightData).toHaveLength(3);
+      // Should be sorted oldest to newest
+      expect(response.body.weightData[0].weight).toBe(200); // 21 days ago
+      expect(response.body.weightData[1].weight).toBe(210); // 14 days ago
+      expect(response.body.weightData[2].weight).toBe(220); // 7 days ago
+    });
+  });
 });

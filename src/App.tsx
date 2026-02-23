@@ -6,6 +6,7 @@ import WorkoutShowPage from './pages/WorkoutShowPage';
 import PainScorePage from './pages/PainScorePage';
 import SleepScorePage from './pages/SleepScorePage';
 import ExerciseListPage from './pages/ExerciseListPage';
+import ExerciseProgressionPage from './pages/ExerciseProgressionPage';
 import ChangePasswordPage from './pages/ChangePasswordPage';
 import DiagnosticianPage from './pages/DiagnosticianPage';
 import DashboardPage from './pages/DashboardPage';
@@ -55,6 +56,11 @@ function App() {
         <Route path="/sleep-scores/:id/edit">
           <Layout>
             <SleepScorePage />
+          </Layout>
+        </Route>
+        <Route path="/exercises/:id/progression">
+          <Layout>
+            <ExerciseProgressionPage />
           </Layout>
         </Route>
         <Route path="/exercises">

@@ -6,7 +6,7 @@ import styles from './WorkoutShowPage.module.css';
 import buttonStyles from '../styles/common/buttons.module.css';
 import { format } from 'date-fns';
 import classNames from 'classnames';
-import { toHomePath, toWorkoutEditPath } from '../utils/paths';
+import { toHomePath, toWorkoutEditPath, toExerciseProgressionPath } from '../utils/paths';
 import { formatWeightWithKg } from '../utils/weight';
 
 const WorkoutShowPage: React.FC = () => {
@@ -96,7 +96,13 @@ const WorkoutShowPage: React.FC = () => {
             <ul className={styles.exerciseDetailList}>
               {workout.exercises.map((exercise, index) => (
                 <li key={index} className={styles.exerciseDetailItem}>
-                  <div className={styles.exerciseDetailName}>{exercise.name}</div>
+                  <div className={styles.exerciseDetailName}>
+                    {exercise.id ? (
+                      <Link to={toExerciseProgressionPath(exercise.id)}>{exercise.name}</Link>
+                    ) : (
+                      exercise.name
+                    )}
+                  </div>
                   <div className={styles.exerciseDetailStats}>
                     <span className={styles.exerciseDetailReps}>{exercise.reps} reps</span>
                     {exercise.weight && (

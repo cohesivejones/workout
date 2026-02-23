@@ -31,3 +31,7 @@ export function toSleepScoreNewPath(date?: string) {
 export function toSleepScoreEditPath(sleepScore: SleepScore) {
   return `/sleep-scores/${sleepScore.id}/edit`;
 }
+
+export function toExerciseProgressionPath(exerciseId: number) {
+  return `/exercises/${exerciseId}/progression`;
+}

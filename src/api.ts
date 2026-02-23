@@ -206,3 +206,25 @@ export const respondToCoachWorkout = (
 ): Promise<{ message: string }> => {
   return api.post('/workout-coach/respond', { sessionId, response });
 };
+
+// Exercise progression types
+export interface ExerciseProgressionDataPoint {
+  date: string;
+  weight: number | null;
+  reps: number;
+  new_weight?: boolean;
+  new_reps?: boolean;
+}
+
+export interface ExerciseProgressionResponse {
+  exerciseName: string;
+  weightData: ExerciseProgressionDataPoint[];
+  repsData: ExerciseProgressionDataPoint[];
+}
+
+// Fetch exercise progression data for a specific exercise
+export const fetchExerciseProgression = (
+  exerciseId: number
+): Promise<ExerciseProgressionResponse> => {
+  return api.get(`/exercises/${exerciseId}/progression`);
+};
