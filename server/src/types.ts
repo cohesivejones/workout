@@ -24,9 +24,9 @@ export interface WorkoutResponse {
     reps: number;
     weight?: number | null;
     time_seconds?: number | null;
-    new_reps?: boolean;
-    new_weight?: boolean;
-    new_time?: boolean;
+    newReps?: boolean;
+    newWeight?: boolean;
+    newTime?: boolean;
   }>;
 }
 

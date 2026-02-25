@@ -6,7 +6,7 @@ import styles from './WorkoutShowPage.module.css';
 import buttonStyles from '../styles/common/buttons.module.css';
 import { format } from 'date-fns';
 import classNames from 'classnames';
-import { toHomePath, toWorkoutEditPath } from '../utils/paths';
+import { toHomePath, toWorkoutEditPath, toExerciseProgressionPath } from '../utils/paths';
 import { formatWeightWithKg } from '../utils/weight';
 
 const WorkoutShowPage: React.FC = () => {
@@ -96,7 +96,13 @@ const WorkoutShowPage: React.FC = () => {
             <ul className={styles.exerciseDetailList}>
               {workout.exercises.map((exercise, index) => (
                 <li key={index} className={styles.exerciseDetailItem}>
-                  <div className={styles.exerciseDetailName}>{exercise.name}</div>
+                  <div className={styles.exerciseDetailName}>
+                    {exercise.id ? (
+                      <Link to={toExerciseProgressionPath(exercise.id)}>{exercise.name}</Link>
+                    ) : (
+                      exercise.name
+                    )}
+                  </div>
                   <div className={styles.exerciseDetailStats}>
                     <span className={styles.exerciseDetailReps}>{exercise.reps} reps</span>
                     {exercise.weight && (
@@ -107,11 +113,11 @@ const WorkoutShowPage: React.FC = () => {
                     {exercise.time_seconds && (
                       <span className={styles.exerciseDetailTime}>{exercise.time_seconds} sec</span>
                     )}
-                    {(exercise.new_reps || exercise.new_weight || exercise.new_time) && (
+                    {(exercise.newReps || exercise.newWeight || exercise.newTime) && (
                       <div className={styles.badgeContainer}>
-                        {exercise.new_reps && <span className={styles.newBadge}>NEW REPS</span>}
-                        {exercise.new_weight && <span className={styles.newBadge}>NEW WEIGHT</span>}
-                        {exercise.new_time && <span className={styles.newBadge}>NEW TIME</span>}
+                        {exercise.newReps && <span className={styles.newBadge}>NEW REPS</span>}
+                        {exercise.newWeight && <span className={styles.newBadge}>NEW WEIGHT</span>}
+                        {exercise.newTime && <span className={styles.newBadge}>NEW TIME</span>}
                       </div>
                     )}
                   </div>

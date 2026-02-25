@@ -102,9 +102,9 @@ function createTestApp() {
           reps: we.reps,
           weight: we.weight,
           time_seconds: we.time_seconds,
-          new_reps: we.new_reps,
-          new_weight: we.new_weight,
-          new_time: we.new_time,
+          newReps: we.newReps,
+          newWeight: we.newWeight,
+          newTime: we.newTime,
         })),
       }));
 
@@ -213,9 +213,9 @@ describe('Timeline API Routes', () => {
         reps: 10,
         weight: 100,
         time_seconds: null,
-        new_reps: false,
-        new_weight: false,
-        new_time: false,
+        newReps: false,
+        newWeight: false,
+        newTime: false,
       });
       await workoutExerciseRepository.save(workoutExercise);
 

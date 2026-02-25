@@ -155,4 +155,95 @@ Respond with ONLY 3 suggested exercise names, one per line. No numbering, bullet
   }
 });
 
+router.get('/:id/progression', authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const exerciseId = parseInt(req.params.id);
+    const userId = req.user!.id;
+
+    // Verify the exercise exists and belongs to the user
+    const exerciseRepository = dataSource.getRepository(Exercise);
+    const exercise = await exerciseRepository.findOne({ where: { id: exerciseId, userId } });
+
+    if (!exercise) {
+      return res.status(404).json({ error: 'Exercise not found' });
+    }
+
+    // Get date range (last year = 365 days)
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(endDate.getDate() - 365);
+    const startDateStr = startDate.toISOString().split('T')[0];
+    const endDateStr = endDate.toISOString().split('T')[0];
+
+    // Fetch all workout exercises for this exercise within the date range
+    const workoutExercises = await dataSource.manager.query(
+      `
+      SELECT 
+        w.date::text as date,
+        we.weight,
+        we.reps,
+        we.time_seconds,
+        we.new_weight,
+        we.new_reps,
+        we.new_time
+      FROM workout_exercises we
+      JOIN workouts w ON we.workout_id = w.id
+      WHERE we.exercise_id = $1
+        AND w."userId" = $2
+        AND w.date BETWEEN $3 AND $4
+      ORDER BY w.date ASC
+      `,
+      [exerciseId, userId, startDateStr, endDateStr]
+    );
+
+    // Define the type for workout exercise query results
+    interface WorkoutExerciseResult {
+      date: string;
+      weight: number;
+      reps: number;
+      time_seconds: number;
+      new_weight: boolean;
+      new_reps: boolean;
+      new_time: boolean;
+    }
+
+    // Separate weight and reps data
+    const weightData = workoutExercises.map((we: WorkoutExerciseResult) => ({
+      date: we.date,
+      weight: we.weight,
+      reps: we.reps,
+      newWeight: we.new_weight,
+      newReps: we.new_reps,
+    }));
+
+    const repsData = workoutExercises.map((we: WorkoutExerciseResult) => ({
+      date: we.date,
+      reps: we.reps,
+      weight: we.weight,
+      newReps: we.new_reps,
+      newWeight: we.new_weight,
+    }));
+
+    logger.info('Exercise progression data fetched', {
+      exerciseId,
+      exerciseName: exercise.name,
+      dataPoints: workoutExercises.length,
+      userId,
+    });
+
+    res.json({
+      exerciseName: exercise.name,
+      weightData,
+      repsData,
+    });
+  } catch (err) {
+    logger.error('Get exercise progression error', {
+      error: err,
+      exerciseId: req.params.id,
+      userId: req.user?.id,
+    });
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 export default router;

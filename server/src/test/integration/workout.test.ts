@@ -3,153 +3,17 @@ import request from 'supertest';
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import dataSource from '../../data-source';
-import { User, Workout, Exercise, WorkoutExercise } from '../../entities';
-import { generateToken, authenticateToken } from '../../middleware/auth';
+import { User, Workout, Exercise } from '../../entities';
+import { generateToken } from '../../middleware/auth';
 import * as bcrypt from 'bcrypt';
-import { CreateWorkoutRequest, WorkoutResponse, DatabaseError } from '../../types';
+import workoutRoutes from '../../routes/workouts.routes';
 
-// Create a minimal test app with just the workout endpoints
+// Create a minimal test app using the actual workout routes
 function createTestApp() {
   const app = express();
   app.use(express.json());
   app.use(cookieParser());
-
-  const apiRouter = express.Router();
-
-  // POST /workouts endpoint implementation
-  apiRouter.post('/workouts', authenticateToken, async (req, res) => {
-    const queryRunner = dataSource.createQueryRunner();
-
-    try {
-      await queryRunner.connect();
-      await queryRunner.startTransaction();
-
-      const { date, withInstructor, exercises } = req.body as CreateWorkoutRequest;
-      const userId = req.user!.id;
-
-      // Create new workout
-      const workoutRepository = queryRunner.manager.getRepository(Workout);
-      const workout = workoutRepository.create({
-        userId,
-        date,
-        withInstructor: withInstructor || false,
-        workoutExercises: [],
-      });
-
-      await workoutRepository.save(workout);
-
-      // Process exercises
-      const exerciseRepository = queryRunner.manager.getRepository(Exercise);
-      const workoutExerciseRepository = queryRunner.manager.getRepository(WorkoutExercise);
-      const createdWorkoutExercises: WorkoutExercise[] = [];
-
-      for (const exerciseData of exercises) {
-        // Get or create exercise
-        let exercise = await exerciseRepository.findOne({
-          where: { name: exerciseData.name, userId },
-        });
-
-        if (!exercise) {
-          exercise = exerciseRepository.create({
-            name: exerciseData.name,
-            userId,
-          });
-          await exerciseRepository.save(exercise);
-        }
-
-        // Create workout-exercise relationship
-        const workoutExercise = workoutExerciseRepository.create({
-          workout_id: workout.id,
-          exercise_id: exercise.id,
-          reps: exerciseData.reps,
-          weight: exerciseData.weight || null,
-          time_seconds: exerciseData.time_seconds || null,
-          workout,
-          exercise,
-        });
-
-        await workoutExerciseRepository.save(workoutExercise);
-
-        // Find the most recent previous workout exercise for this exercise
-        const previousWorkoutExercise = await workoutExerciseRepository.query(
-          `
-          SELECT we.reps, we.weight, we.time_seconds
-          FROM workout_exercises we
-          JOIN workouts w ON we.workout_id = w.id
-          WHERE we.exercise_id = $1
-          AND w."userId" = $2
-          AND w.date < $3
-          ORDER BY w.date DESC
-          LIMIT 1
-        `,
-          [exercise.id, userId, date]
-        );
-
-        // Set flags based on comparison
-        if (previousWorkoutExercise.length > 0) {
-          workoutExercise.new_reps = workoutExercise.reps !== previousWorkoutExercise[0].reps;
-          workoutExercise.new_weight = workoutExercise.weight !== previousWorkoutExercise[0].weight;
-          workoutExercise.new_time =
-            workoutExercise.time_seconds !== previousWorkoutExercise[0].time_seconds;
-        } else {
-          workoutExercise.new_reps = false;
-          workoutExercise.new_weight = false;
-          workoutExercise.new_time = false;
-        }
-
-        await workoutExerciseRepository.save(workoutExercise);
-
-        const reloadedWorkoutExercise = await workoutExerciseRepository.findOne({
-          where: {
-            workout_id: workout.id,
-            exercise_id: exercise.id,
-          },
-          relations: ['exercise'],
-        });
-
-        if (reloadedWorkoutExercise) {
-          workout.workoutExercises.push(reloadedWorkoutExercise);
-          createdWorkoutExercises.push(reloadedWorkoutExercise);
-        }
-      }
-
-      await queryRunner.commitTransaction();
-
-      // Format response
-      const response: WorkoutResponse = {
-        id: workout.id,
-        date: workout.date,
-        withInstructor: workout.withInstructor,
-        exercises: createdWorkoutExercises.map((we) => ({
-          id: we.exercise.id,
-          name: we.exercise.name,
-          reps: we.reps,
-          weight: we.weight,
-          time_seconds: we.time_seconds,
-          new_reps: we.new_reps,
-          new_weight: we.new_weight,
-          new_time: we.new_time,
-        })),
-      };
-
-      res.json(response);
-    } catch (err) {
-      await queryRunner.rollbackTransaction();
-      console.error(err);
-      const error = err as DatabaseError;
-
-      if (error.code === '23505' && error.constraint === 'workouts_date_user_id_key') {
-        res.status(400).json({ error: 'A workout already exists for this date' });
-      } else {
-        res.status(500).json({ error: error.message || 'Server error' });
-      }
-    } finally {
-      await queryRunner.release();
-    }
-  });
-
-  app.use('/api', apiRouter);
-
+  app.use('/api/workouts', workoutRoutes);
   return app;
 }
 
@@ -234,8 +98,8 @@ describe('Workout API Routes', () => {
       expect(response.body.exercises[0].name).toBe('Bench Press');
       expect(response.body.exercises[0].reps).toBe(10);
       expect(response.body.exercises[0].weight).toBe(135);
-      expect(response.body.exercises[0].new_reps).toBe(false);
-      expect(response.body.exercises[0].new_weight).toBe(false);
+      expect(response.body.exercises[0].newReps).toBe(false);
+      expect(response.body.exercises[0].newWeight).toBe(false);
     });
 
     it('should create a workout with time-based exercises', async () => {
@@ -325,11 +189,11 @@ describe('Workout API Routes', () => {
         .set('Cookie', [`token=${authToken}`])
         .expect(200);
 
-      expect(response.body.exercises[0].new_reps).toBe(true);
-      expect(response.body.exercises[0].new_weight).toBe(false);
+      expect(response.body.exercises[0].newReps).toBe(true);
+      expect(response.body.exercises[0].newWeight).toBe(false);
     });
 
-    it('should set new_weight flag when weight increases', async () => {
+    it('should set newWeight flag when weight increases', async () => {
       // Create first workout
       const firstWorkout = {
         date: '2024-01-15',
@@ -356,11 +220,11 @@ describe('Workout API Routes', () => {
         .set('Cookie', [`token=${authToken}`])
         .expect(200);
 
-      expect(response.body.exercises[0].new_reps).toBe(false);
-      expect(response.body.exercises[0].new_weight).toBe(true);
+      expect(response.body.exercises[0].newReps).toBe(false);
+      expect(response.body.exercises[0].newWeight).toBe(true);
     });
 
-    it('should set new_time flag when time increases', async () => {
+    it('should set newTime flag when time increases', async () => {
       // Create first workout
       const firstWorkout = {
         date: '2024-01-15',
@@ -387,7 +251,7 @@ describe('Workout API Routes', () => {
         .set('Cookie', [`token=${authToken}`])
         .expect(200);
 
-      expect(response.body.exercises[0].new_time).toBe(true);
+      expect(response.body.exercises[0].newTime).toBe(true);
     });
 
     it('should prevent duplicate workouts for same date with user-friendly error', async () => {

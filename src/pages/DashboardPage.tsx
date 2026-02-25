@@ -87,7 +87,7 @@ const normalizeDataToStandardRange = <T extends { date: string }>(
 const CustomDot = (props: {
   cx?: number;
   cy?: number;
-  payload?: { weight: number | null; new_reps?: boolean; new_weight?: boolean };
+  payload?: { weight: number | null; newReps?: boolean; newWeight?: boolean };
 }) => {
   const { cx, cy, payload } = props;
 
@@ -99,13 +99,13 @@ const CustomDot = (props: {
   let fill = '#8884d8'; // Default blue
   let r = 4; // Default radius
 
-  if (payload.new_reps && payload.new_weight) {
+  if (payload.newReps && payload.newWeight) {
     fill = '#ff6b35'; // Orange for both PRs
     r = 6;
-  } else if (payload.new_reps) {
+  } else if (payload.newReps) {
     fill = '#ffd700'; // Gold for new reps
     r = 6;
-  } else if (payload.new_weight) {
+  } else if (payload.newWeight) {
     fill = '#4caf50'; // Green for new weight
     r = 6;
   }
@@ -117,17 +117,17 @@ const CustomDot = (props: {
 const formatTooltip = (
   value: number | string,
   name: string,
-  props: { payload?: { weight: number; reps: number; new_reps?: boolean; new_weight?: boolean } }
+  props: { payload?: { weight: number; reps: number; newReps?: boolean; newWeight?: boolean } }
 ) => {
   if (name === 'Weight' && props.payload) {
-    const { weight, reps, new_reps, new_weight } = props.payload;
+    const { weight, reps, newReps, newWeight } = props.payload;
 
     const tooltipContent = [`${weight} lbs • ${reps} reps`, 'Weight & Reps'];
 
     // Add PR indicators
     const prIndicators = [];
-    if (new_reps) prIndicators.push('🎉 New Rep PR!');
-    if (new_weight) prIndicators.push('⭐ New Weight PR!');
+    if (newReps) prIndicators.push('🎉 New Rep PR!');
+    if (newWeight) prIndicators.push('⭐ New Weight PR!');
 
     if (prIndicators.length > 0) {
       tooltipContent[0] += ` • ${prIndicators.join(' • ')}`;

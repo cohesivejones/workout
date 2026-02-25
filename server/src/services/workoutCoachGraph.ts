@@ -165,11 +165,12 @@ export class WorkoutCoachGraph {
           reps: exerciseData.reps,
           weight: exerciseData.weight || null,
           time_seconds: null,
+          new_reps: false,
+          new_weight: false,
+          new_time: false,
           workout,
           exercise,
         });
-
-        await workoutExerciseRepository.save(workoutExercise);
 
         // Check for new PR flags
         const previousWorkoutExercise = await workoutExerciseRepository.query(

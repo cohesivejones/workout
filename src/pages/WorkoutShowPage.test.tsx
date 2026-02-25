@@ -232,4 +232,103 @@ describe('WorkoutShowPage', () => {
     expect(screen.getByText('2 reps')).toBeInTheDocument();
     expect(screen.getByText('1.5 sec')).toBeInTheDocument();
   });
+
+  it('renders exercise WITH id as clickable link to progression page', async () => {
+    const workoutWithExerciseIds = {
+      ...mockWorkout,
+      exercises: [{ id: 1, name: 'Bench Press', reps: 10, weight: 135 }],
+    };
+
+    server.use(
+      http.get('/api/workouts/:id', () => {
+        return HttpResponse.json(workoutWithExerciseIds);
+      })
+    );
+
+    render(
+      <MemoryRouter initialPath="/workouts/1">
+        <Route path="/workouts/:id">
+          <WorkoutShowPage />
+        </Route>
+      </MemoryRouter>
+    );
+
+    // Wait for the workout to load
+    await waitFor(() => {
+      expect(screen.queryByText(/Loading workout.../i)).not.toBeInTheDocument();
+    });
+
+    // Check that exercise name is a link
+    const exerciseLink = screen.getByRole('link', { name: /Bench Press/i });
+    expect(exerciseLink).toBeInTheDocument();
+    expect(exerciseLink).toHaveAttribute('href', '/exercises/1/progression');
+  });
+
+  it('renders exercise WITHOUT id as plain text (not a link)', async () => {
+    const workoutWithoutExerciseId = {
+      ...mockWorkout,
+      exercises: [{ name: 'Push-ups', reps: 10 }], // No id property
+    };
+
+    server.use(
+      http.get('/api/workouts/:id', () => {
+        return HttpResponse.json(workoutWithoutExerciseId);
+      })
+    );
+
+    render(
+      <MemoryRouter initialPath="/workouts/1">
+        <Route path="/workouts/:id">
+          <WorkoutShowPage />
+        </Route>
+      </MemoryRouter>
+    );
+
+    // Wait for the workout to load
+    await waitFor(() => {
+      expect(screen.queryByText(/Loading workout.../i)).not.toBeInTheDocument();
+    });
+
+    // Check that exercise name is NOT a link
+    expect(screen.getByText('Push-ups')).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /Push-ups/i })).not.toBeInTheDocument();
+  });
+
+  it('renders multiple exercises with mixed id presence correctly', async () => {
+    const workoutMixedExercises = {
+      ...mockWorkout,
+      exercises: [
+        { id: 1, name: 'Bench Press', reps: 10, weight: 135 }, // Has id - should be link
+        { name: 'Push-ups', reps: 20 }, // No id - should be plain text
+        { id: 3, name: 'Squats', reps: 8, weight: 185 }, // Has id - should be link
+      ],
+    };
+
+    server.use(
+      http.get('/api/workouts/:id', () => {
+        return HttpResponse.json(workoutMixedExercises);
+      })
+    );
+
+    render(
+      <MemoryRouter initialPath="/workouts/1">
+        <Route path="/workouts/:id">
+          <WorkoutShowPage />
+        </Route>
+      </MemoryRouter>
+    );
+
+    // Wait for the workout to load
+    await waitFor(() => {
+      expect(screen.queryByText(/Loading workout.../i)).not.toBeInTheDocument();
+    });
+
+    // Check exercises with IDs are links
+    expect(screen.getByRole('link', { name: /Bench Press/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Squats/i })).toBeInTheDocument();
+
+    // Check exercise without ID is NOT a link
+    expect(screen.getByText('Push-ups')).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /Push-ups/i })).not.toBeInTheDocument();
+  });
 });

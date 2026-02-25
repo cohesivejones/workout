@@ -325,13 +325,13 @@ export const ListView = () => {
                               {exercise.time_seconds ? ` - ${exercise.time_seconds} sec` : ''}
                             </span>
                             <div className={styles.badgeContainer}>
-                              {exercise.new_reps && (
+                              {exercise.newReps && (
                                 <span className={styles.newBadge}>NEW REPS</span>
                               )}
-                              {exercise.new_weight && (
+                              {exercise.newWeight && (
                                 <span className={styles.newBadge}>NEW WEIGHT</span>
                               )}
-                              {exercise.new_time && (
+                              {exercise.newTime && (
                                 <span className={styles.newBadge}>NEW TIME</span>
                               )}
                             </div>

@@ -136,8 +136,8 @@ export interface ExerciseWeightDataPoint {
   date: string;
   weight: number | null;
   reps: number;
-  new_reps?: boolean;
-  new_weight?: boolean;
+  newReps?: boolean;
+  newWeight?: boolean;
 }
 
 export interface ExerciseWeightProgression {
@@ -205,4 +205,26 @@ export const respondToCoachWorkout = (
   response: 'yes' | 'no'
 ): Promise<{ message: string }> => {
   return api.post('/workout-coach/respond', { sessionId, response });
+};
+
+// Exercise progression types
+export interface ExerciseProgressionDataPoint {
+  date: string;
+  weight: number | null;
+  reps: number;
+  newWeight?: boolean;
+  newReps?: boolean;
+}
+
+export interface ExerciseProgressionResponse {
+  exerciseName: string;
+  weightData: ExerciseProgressionDataPoint[];
+  repsData: ExerciseProgressionDataPoint[];
+}
+
+// Fetch exercise progression data for a specific exercise
+export const fetchExerciseProgression = (
+  exerciseId: number
+): Promise<ExerciseProgressionResponse> => {
+  return api.get(`/exercises/${exerciseId}/progression`);
 };

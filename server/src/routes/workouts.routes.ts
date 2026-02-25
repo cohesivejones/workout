@@ -25,9 +25,9 @@ router.get('/:id', authenticateToken, async (req: Request, res: Response) => {
         reps: we.reps,
         weight: we.weight,
         time_seconds: we.time_seconds,
-        new_reps: we.new_reps,
-        new_weight: we.new_weight,
-        new_time: we.new_time,
+        newReps: we.new_reps,
+        newWeight: we.new_weight,
+        newTime: we.new_time,
       })),
     };
     res.json(workoutResponse);
@@ -59,6 +59,8 @@ router.post('/', authenticateToken, async (req: Request, res: Response) => {
     const exerciseRepository = queryRunner.manager.getRepository(Exercise);
     const workoutExerciseRepository = queryRunner.manager.getRepository(WorkoutExercise);
     const createdWorkoutExercises: WorkoutExercise[] = [];
+    const prFlags: Array<{ newReps: boolean; newWeight: boolean; newTime: boolean }> = [];
+
     for (const exerciseData of exercises) {
       let exercise = await exerciseRepository.findOne({
         where: { name: exerciseData.name, userId },
@@ -73,10 +75,13 @@ router.post('/', authenticateToken, async (req: Request, res: Response) => {
         reps: exerciseData.reps,
         weight: exerciseData.weight || null,
         time_seconds: exerciseData.time_seconds || null,
+        new_reps: false,
+        new_weight: false,
+        new_time: false,
         workout,
         exercise,
       });
-      await workoutExerciseRepository.save(workoutExercise);
+
       const previousWorkoutExercise = await workoutExerciseRepository.query(
         `\n        SELECT we.reps, we.weight, we.time_seconds\n        FROM workout_exercises we\n        JOIN workouts w ON we.workout_id = w.id\n        WHERE we.exercise_id = $1\n        AND w."userId" = $2\n        AND w.date < $3\n        ORDER BY w.date DESC\n        LIMIT 1\n      `,
         [exercise.id, userId, date]
@@ -92,31 +97,36 @@ router.post('/', authenticateToken, async (req: Request, res: Response) => {
         workoutExercise.new_time = false;
       }
       await workoutExerciseRepository.save(workoutExercise);
-      const reloadedWorkoutExercise = await workoutExerciseRepository.findOne({
-        where: { workout_id: workout.id, exercise_id: exercise.id },
-        relations: ['exercise'],
+
+      // Store PR flags separately since TypeORM might not preserve them on the entity
+      prFlags.push({
+        newReps: workoutExercise.new_reps,
+        newWeight: workoutExercise.new_weight,
+        newTime: workoutExercise.new_time,
       });
-      if (reloadedWorkoutExercise) {
-        workout.workoutExercises.push(reloadedWorkoutExercise);
-        createdWorkoutExercises.push(reloadedWorkoutExercise);
-      }
+
+      workout.workoutExercises.push(workoutExercise);
+      createdWorkoutExercises.push(workoutExercise);
     }
-    await queryRunner.commitTransaction();
+
+    // Build response using stored PR flags
     const response: WorkoutResponse = {
       id: workout.id,
       date: workout.date,
       withInstructor: workout.withInstructor,
-      exercises: createdWorkoutExercises.map((we) => ({
+      exercises: createdWorkoutExercises.map((we, index) => ({
         id: we.exercise.id,
         name: we.exercise.name,
         reps: we.reps,
         weight: we.weight,
         time_seconds: we.time_seconds,
-        new_reps: we.new_reps,
-        new_weight: we.new_weight,
-        new_time: we.new_time,
+        newReps: prFlags[index].newReps,
+        newWeight: prFlags[index].newWeight,
+        newTime: prFlags[index].newTime,
       })),
     };
+
+    await queryRunner.commitTransaction();
     logger.info('Workout created', {
       workoutId: workout.id,
       date: workout.date,
@@ -159,6 +169,8 @@ router.put('/:id', authenticateToken, async (req: Request, res: Response) => {
     await workoutExerciseRepository.delete({ workout_id: workout.id });
     const exerciseRepository = queryRunner.manager.getRepository(Exercise);
     const newWorkoutExercises: WorkoutExercise[] = [];
+    const prFlags: Array<{ newReps: boolean; newWeight: boolean; newTime: boolean }> = [];
+
     for (const exerciseData of exercises) {
       let exercise = await exerciseRepository.findOne({
         where: { name: exerciseData.name, userId: workout.userId },
@@ -173,10 +185,13 @@ router.put('/:id', authenticateToken, async (req: Request, res: Response) => {
         reps: exerciseData.reps,
         weight: exerciseData.weight || null,
         time_seconds: exerciseData.time_seconds || null,
+        new_reps: false,
+        new_weight: false,
+        new_time: false,
         workout,
         exercise,
       });
-      await workoutExerciseRepository.save(workoutExercise);
+
       const previousWorkoutExercise = await workoutExerciseRepository.query(
         `\n        SELECT we.reps, we.weight, we.time_seconds\n        FROM workout_exercises we\n        JOIN workouts w ON we.workout_id = w.id\n        WHERE we.exercise_id = $1\n        AND w."userId" = $2\n        AND w.date < $3\n        ORDER BY w.date DESC\n        LIMIT 1\n      `,
         [exercise.id, workout.userId, date]
@@ -192,24 +207,35 @@ router.put('/:id', authenticateToken, async (req: Request, res: Response) => {
         workoutExercise.new_time = false;
       }
       await workoutExerciseRepository.save(workoutExercise);
+
+      // Store PR flags separately
+      prFlags.push({
+        newReps: workoutExercise.new_reps,
+        newWeight: workoutExercise.new_weight,
+        newTime: workoutExercise.new_time,
+      });
+
       newWorkoutExercises.push(workoutExercise);
     }
-    await queryRunner.commitTransaction();
+
+    // Build response using stored PR flags
     const response: WorkoutResponse = {
       id: workout.id,
       date: workout.date,
       withInstructor: workout.withInstructor,
-      exercises: newWorkoutExercises.map((we) => ({
+      exercises: newWorkoutExercises.map((we, index) => ({
         id: we.exercise.id,
         name: we.exercise.name,
         reps: we.reps,
         weight: we.weight,
         time_seconds: we.time_seconds,
-        new_reps: we.new_reps,
-        new_weight: we.new_weight,
-        new_time: we.new_time,
+        newReps: prFlags[index].newReps,
+        newWeight: prFlags[index].newWeight,
+        newTime: prFlags[index].newTime,
       })),
     };
+
+    await queryRunner.commitTransaction();
     logger.info('Workout updated', {
       workoutId: workout.id,
       date: workout.date,

@@ -276,17 +276,17 @@ function WorkoutForm({
                     {exercises[index].name} - {exercises[index].reps} reps
                     {exercises[index].weight ? ` - ${exercises[index].weight} lbs` : ''}
                     {exercises[index].time_seconds ? ` - ${exercises[index].time_seconds} sec` : ''}
-                    {(exercises[index].new_reps ||
-                      exercises[index].new_weight ||
-                      exercises[index].new_time) && (
+                    {(exercises[index].newReps ||
+                      exercises[index].newWeight ||
+                      exercises[index].newTime) && (
                       <div className={styles.badgeContainer}>
-                        {exercises[index].new_reps && (
+                        {exercises[index].newReps && (
                           <span className={styles.newBadge}>NEW REPS</span>
                         )}
-                        {exercises[index].new_weight && (
+                        {exercises[index].newWeight && (
                           <span className={styles.newBadge}>NEW WEIGHT</span>
                         )}
-                        {exercises[index].new_time && (
+                        {exercises[index].newTime && (
                           <span className={styles.newBadge}>NEW TIME</span>
                         )}
                       </div>
