@@ -27,8 +27,8 @@ describe('ListView', () => {
       date: '2025-04-10',
       withInstructor: true,
       exercises: [
-        { id: 1, name: 'Push-ups', reps: 10, new_reps: true },
-        { id: 2, name: 'Squats', reps: 15, weight: 20, new_weight: true },
+        { id: 1, name: 'Push-ups', reps: 10, newReps: true },
+        { id: 2, name: 'Squats', reps: 15, weight: 20, newWeight: true },
       ],
     },
     {

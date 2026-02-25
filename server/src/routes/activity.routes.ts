@@ -18,7 +18,7 @@ router.get('/', authenticateToken, async (req: Request, res: Response) => {
 
     // Get both max date and total count in a single query
     const metadataSql = `
-      SELECT MAX(date) AS max_date, COUNT(*) AS total FROM (
+      SELECT MAX(date)::text AS max_date, COUNT(*) AS total FROM (
         SELECT id, date FROM workouts WHERE "userId" = $1
         UNION ALL
         SELECT id, date FROM pain_scores WHERE "userId" = $1
@@ -50,11 +50,11 @@ router.get('/', authenticateToken, async (req: Request, res: Response) => {
     // Use raw SQL to fetch all items for this month, ordered by date DESC
     const sql = `
       SELECT type, id, date FROM (
-        SELECT 'workout' AS type, id, date FROM workouts WHERE "userId" = $1 AND date >= $2 AND date < $3
+        SELECT 'workout' AS type, id, date::text as date FROM workouts WHERE "userId" = $1 AND date >= $2 AND date < $3
         UNION ALL
-        SELECT 'painScore' AS type, id, date FROM pain_scores WHERE "userId" = $1 AND date >= $2 AND date < $3
+        SELECT 'painScore' AS type, id, date::text as date FROM pain_scores WHERE "userId" = $1 AND date >= $2 AND date < $3
         UNION ALL
-        SELECT 'sleepScore' AS type, id, date FROM sleep_scores WHERE "userId" = $1 AND date >= $2 AND date < $3
+        SELECT 'sleepScore' AS type, id, date::text as date FROM sleep_scores WHERE "userId" = $1 AND date >= $2 AND date < $3
       ) AS combined
       ORDER BY date DESC, id DESC
     `;
@@ -99,9 +99,9 @@ router.get('/', authenticateToken, async (req: Request, res: Response) => {
           reps: we.reps,
           weight: we.weight,
           time_seconds: we.time_seconds,
-          new_reps: we.new_reps,
-          new_weight: we.new_weight,
-          new_time: we.new_time,
+          newReps: we.new_reps,
+          newWeight: we.new_weight,
+          newTime: we.new_time,
         })),
       };
       workoutMap.set(w.id, wr);

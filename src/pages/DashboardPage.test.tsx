@@ -39,17 +39,17 @@ describe('DashboardPage', () => {
     {
       exerciseName: 'Bench Press',
       dataPoints: [
-        { date: '2025-02-15', weight: 135, reps: 8, new_reps: false, new_weight: false },
-        { date: '2025-02-22', weight: 145, reps: 10, new_reps: true, new_weight: true },
-        { date: '2025-03-01', weight: 155, reps: 8, new_reps: false, new_weight: true },
+        { date: '2025-02-15', weight: 135, reps: 8, newReps: false, newWeight: false },
+        { date: '2025-02-22', weight: 145, reps: 10, newReps: true, newWeight: true },
+        { date: '2025-03-01', weight: 155, reps: 8, newReps: false, newWeight: true },
       ],
     },
     {
       exerciseName: 'Squat',
       dataPoints: [
-        { date: '2025-02-15', weight: 185, reps: 5, new_reps: false, new_weight: false },
-        { date: '2025-02-22', weight: 195, reps: 6, new_reps: true, new_weight: false },
-        { date: '2025-03-08', weight: 205, reps: 5, new_reps: false, new_weight: true },
+        { date: '2025-02-15', weight: 185, reps: 5, newReps: false, newWeight: false },
+        { date: '2025-02-22', weight: 195, reps: 6, newReps: true, newWeight: false },
+        { date: '2025-03-08', weight: 205, reps: 5, newReps: false, newWeight: true },
       ],
     },
   ];
@@ -364,10 +364,10 @@ describe('DashboardPage', () => {
         {
           exerciseName: 'Test Exercise',
           dataPoints: [
-            { date: '2025-02-15', weight: 135, reps: 8, new_reps: false, new_weight: false },
-            { date: '2025-02-22', weight: 145, reps: 10, new_reps: true, new_weight: false },
-            { date: '2025-03-01', weight: 155, reps: 8, new_reps: false, new_weight: true },
-            { date: '2025-03-08', weight: 165, reps: 10, new_reps: true, new_weight: true },
+            { date: '2025-02-15', weight: 135, reps: 8, newReps: false, newWeight: false },
+            { date: '2025-02-22', weight: 145, reps: 10, newReps: true, newWeight: false },
+            { date: '2025-03-01', weight: 155, reps: 8, newReps: false, newWeight: true },
+            { date: '2025-03-08', weight: 165, reps: 10, newReps: true, newWeight: true },
           ],
         },
       ];
@@ -423,8 +423,8 @@ describe('DashboardPage', () => {
       // Since we're mocking Recharts, we can't test the actual tooltip rendering
       // but we can verify the data contains the necessary fields
       expect(mockProgressionData[0].dataPoints[0]).toHaveProperty('reps');
-      expect(mockProgressionData[0].dataPoints[0]).toHaveProperty('new_reps');
-      expect(mockProgressionData[0].dataPoints[0]).toHaveProperty('new_weight');
+      expect(mockProgressionData[0].dataPoints[0]).toHaveProperty('newReps');
+      expect(mockProgressionData[0].dataPoints[0]).toHaveProperty('newWeight');
     });
   });
 
@@ -434,10 +434,10 @@ describe('DashboardPage', () => {
         {
           exerciseName: 'Mixed PRs Exercise',
           dataPoints: [
-            { date: '2025-02-15', weight: 100, reps: 5, new_reps: false, new_weight: false },
-            { date: '2025-02-22', weight: 100, reps: 8, new_reps: true, new_weight: false },
-            { date: '2025-03-01', weight: 110, reps: 5, new_reps: false, new_weight: true },
-            { date: '2025-03-08', weight: 120, reps: 10, new_reps: true, new_weight: true },
+            { date: '2025-02-15', weight: 100, reps: 5, newReps: false, newWeight: false },
+            { date: '2025-02-22', weight: 100, reps: 8, newReps: true, newWeight: false },
+            { date: '2025-03-01', weight: 110, reps: 5, newReps: false, newWeight: true },
+            { date: '2025-03-08', weight: 120, reps: 10, newReps: true, newWeight: true },
           ],
         },
       ];
@@ -508,26 +508,24 @@ describe('DashboardPage', () => {
       {
         exerciseName: 'Bench Press',
         dataPoints: [
-          { date: '2025-02-15', weight: 135, reps: 8, new_reps: false, new_weight: false },
+          { date: '2025-02-15', weight: 135, reps: 8, newReps: false, newWeight: false },
         ],
       },
       {
         exerciseName: 'Deadlift',
         dataPoints: [
-          { date: '2025-02-15', weight: 225, reps: 5, new_reps: false, new_weight: false },
+          { date: '2025-02-15', weight: 225, reps: 5, newReps: false, newWeight: false },
         ],
       },
       {
         exerciseName: 'Squat',
         dataPoints: [
-          { date: '2025-02-15', weight: 185, reps: 8, new_reps: false, new_weight: false },
+          { date: '2025-02-15', weight: 185, reps: 8, newReps: false, newWeight: false },
         ],
       },
       {
         exerciseName: 'Pull-ups',
-        dataPoints: [
-          { date: '2025-02-15', weight: 0, reps: 12, new_reps: false, new_weight: false },
-        ],
+        dataPoints: [{ date: '2025-02-15', weight: 0, reps: 12, newReps: false, newWeight: false }],
       },
     ];
 
@@ -637,19 +635,19 @@ describe('DashboardPage', () => {
         {
           exerciseName: 'Bench Press',
           dataPoints: [
-            { date: '2025-02-15', weight: 135, reps: 8, new_reps: false, new_weight: false },
+            { date: '2025-02-15', weight: 135, reps: 8, newReps: false, newWeight: false },
           ],
         },
         {
           exerciseName: 'Bicep Curls',
           dataPoints: [
-            { date: '2025-02-15', weight: 30, reps: 12, new_reps: false, new_weight: false },
+            { date: '2025-02-15', weight: 30, reps: 12, newReps: false, newWeight: false },
           ],
         },
         {
           exerciseName: 'Bulgarian Split Squat',
           dataPoints: [
-            { date: '2025-02-15', weight: 60, reps: 10, new_reps: false, new_weight: false },
+            { date: '2025-02-15', weight: 60, reps: 10, newReps: false, newWeight: false },
           ],
         },
       ];

@@ -28,8 +28,8 @@ router.get('/weight-progression', authenticateToken, async (req: Request, res: R
         date: string;
         weight: number | null;
         reps: number;
-        new_reps?: boolean;
-        new_weight?: boolean;
+        newReps?: boolean;
+        newWeight?: boolean;
       }>
     > = {};
 
@@ -42,8 +42,8 @@ router.get('/weight-progression', authenticateToken, async (req: Request, res: R
           date: workout.date,
           weight: we.weight,
           reps: we.reps,
-          new_reps: we.new_reps,
-          new_weight: we.new_weight,
+          newReps: we.new_reps,
+          newWeight: we.new_weight,
         });
       });
     });

@@ -23,12 +23,13 @@ test.describe('Exercise Progression Feature', () => {
     // ============================================
     // STEP 1: Create historical workout data to build progression
     // Create 4 workouts over 3 weeks showing progressive overload
+    // All workouts are created 3 months in the past to avoid date conflicts
     // ============================================
     const workouts = [
-      { daysAgo: 21, name: 'Bench Press', reps: '8', weight: '135' },
-      { daysAgo: 14, name: 'Bench Press', reps: '10', weight: '135' }, // Rep PR
-      { daysAgo: 7, name: 'Bench Press', reps: '10', weight: '145' }, // Weight PR
-      { daysAgo: 0, name: 'Bench Press', reps: '12', weight: '145' }, // Rep PR
+      { daysAgo: 111, name: 'Bench Press', reps: '8', weight: '135' }, // ~3 months + 21 days ago
+      { daysAgo: 104, name: 'Bench Press', reps: '10', weight: '135' }, // ~3 months + 14 days ago - Rep PR
+      { daysAgo: 97, name: 'Bench Press', reps: '10', weight: '145' }, // ~3 months + 7 days ago - Weight PR
+      { daysAgo: 90, name: 'Bench Press', reps: '12', weight: '145' }, // ~3 months ago - Rep PR
     ];
 
     for (const workout of workouts) {

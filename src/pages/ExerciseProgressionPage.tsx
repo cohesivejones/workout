@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link } from 'wouter';
 import { fetchExerciseProgression, ExerciseProgressionResponse } from '../api';
 import {
@@ -11,72 +11,16 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
-import { format, eachDayOfInterval } from 'date-fns';
+import { format } from 'date-fns';
 import styles from './ExerciseProgressionPage.module.css';
 import buttonStyles from '../styles/common/buttons.module.css';
 import classNames from 'classnames';
-
-// Utility function to get standard 12-week date range
-const getStandardDateRange = () => {
-  const endDate = new Date();
-  const startDate = new Date();
-  startDate.setDate(endDate.getDate() - 84); // 12 weeks = 84 days
-
-  return {
-    startDate,
-    endDate,
-    startDateStr: startDate.toISOString().split('T')[0],
-    endDateStr: endDate.toISOString().split('T')[0],
-  };
-};
-
-// Utility function to convert a date to a week number (1-12)
-const getWeekNumber = (dateStr: string, startDate: Date): number => {
-  const date = new Date(dateStr);
-  const diffTime = Math.abs(date.getTime() - startDate.getTime());
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  const weekNumber = Math.floor(diffDays / 7) + 1;
-  return Math.min(Math.max(weekNumber, 1), 12);
-};
-
-// Utility function to normalize data to the standard date range
-const normalizeDataToStandardRange = <T extends { date: string }>(
-  dataPoints: T[],
-  valueKey: keyof T
-): T[] => {
-  const { startDate, endDate } = getStandardDateRange();
-
-  // Create a map of existing data points by date
-  const dataMap = new Map<string, T>();
-  dataPoints.forEach((point) => {
-    dataMap.set(point.date, point);
-  });
-
-  // Generate a complete series with all dates in the range
-  const allDatesInRange = eachDayOfInterval({ start: startDate, end: endDate }).map(
-    (date) => date.toISOString().split('T')[0]
-  );
-
-  // Create normalized data with all dates in range
-  const normalizedData = allDatesInRange.map((dateStr) => {
-    if (dataMap.has(dateStr)) {
-      return dataMap.get(dateStr) as T;
-    } else {
-      return {
-        date: dateStr,
-        [valueKey]: null,
-      } as unknown as T;
-    }
-  });
-
-  return normalizedData;
-};
 
 // Custom dot component for weight chart
 const WeightDot = (props: {
   cx?: number;
   cy?: number;
-  payload?: { weight: number | null; new_weight?: boolean };
+  payload?: { weight: number | null; newWeight?: boolean };
 }) => {
   const { cx, cy, payload } = props;
 
@@ -84,8 +28,8 @@ const WeightDot = (props: {
     return null;
   }
 
-  const fill = payload.new_weight ? '#4caf50' : '#8884d8';
-  const r = payload.new_weight ? 6 : 4;
+  const fill = payload.newWeight ? '#4caf50' : '#8884d8';
+  const r = payload.newWeight ? 6 : 4;
 
   return <circle cx={cx} cy={cy} r={r} fill={fill} stroke={fill} strokeWidth={2} />;
 };
@@ -94,7 +38,7 @@ const WeightDot = (props: {
 const RepsDot = (props: {
   cx?: number;
   cy?: number;
-  payload?: { reps: number | null; new_reps?: boolean };
+  payload?: { reps: number | null; newReps?: boolean };
 }) => {
   const { cx, cy, payload } = props;
 
@@ -102,8 +46,8 @@ const RepsDot = (props: {
     return null;
   }
 
-  const fill = payload.new_reps ? '#ffd700' : '#ff6b35';
-  const r = payload.new_reps ? 6 : 4;
+  const fill = payload.newReps ? '#ffd700' : '#ff6b35';
+  const r = payload.newReps ? 6 : 4;
 
   return <circle cx={cx} cy={cy} r={r} fill={fill} stroke={fill} strokeWidth={2} />;
 };
@@ -116,24 +60,13 @@ function ExerciseProgressionPage() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const dateRange = useMemo(() => getStandardDateRange(), []);
-
   useEffect(() => {
     const loadData = async () => {
       try {
         setLoading(true);
         setError(null);
         const data = await fetchExerciseProgression(exerciseId);
-
-        // Normalize the data
-        const normalizedWeightData = normalizeDataToStandardRange(data.weightData, 'weight');
-        const normalizedRepsData = normalizeDataToStandardRange(data.repsData, 'reps');
-
-        setProgressionData({
-          exerciseName: data.exerciseName,
-          weightData: normalizedWeightData,
-          repsData: normalizedRepsData,
-        });
+        setProgressionData(data);
       } catch (err) {
         console.error('Failed to load progression data:', err);
         setError(err instanceof Error ? err.message : 'Failed to load progression data');
@@ -158,8 +91,8 @@ function ExerciseProgressionPage() {
   }
 
   // Check if there's any actual data
-  const hasWeightData = progressionData.weightData.some((d) => d.weight !== null);
-  const hasRepsData = progressionData.repsData.some((d) => d.reps !== null);
+  const hasWeightData = progressionData.weightData.length > 0;
+  const hasRepsData = progressionData.repsData.length > 0;
 
   if (!hasWeightData && !hasRepsData) {
     return (
@@ -187,7 +120,7 @@ function ExerciseProgressionPage() {
         </Link>
       </div>
 
-      <p className={styles.subtitle}>Track your progressive overload over the past 12 weeks</p>
+      <p className={styles.subtitle}>Track your progressive overload over time</p>
 
       <div className={styles.chartsContainer}>
         {/* Weight Progression Chart */}
@@ -199,16 +132,8 @@ function ExerciseProgressionPage() {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis
                   dataKey="date"
-                  tickFormatter={(date) => `Week ${getWeekNumber(date, dateRange.startDate)}`}
+                  tickFormatter={(date) => format(new Date(date), 'MMM d')}
                   tick={{ fontSize: 12 }}
-                  domain={[dateRange.startDateStr, dateRange.endDateStr]}
-                  type="category"
-                  allowDataOverflow={true}
-                  ticks={Array.from({ length: 12 }, (_, i) => {
-                    const weekDate = new Date(dateRange.startDate);
-                    weekDate.setDate(weekDate.getDate() + i * 7);
-                    return weekDate.toISOString().split('T')[0];
-                  })}
                 />
                 <YAxis
                   label={{
@@ -222,7 +147,7 @@ function ExerciseProgressionPage() {
                   width={50}
                 />
                 <Tooltip
-                  formatter={(value: number, name: string) => [`${value} lbs`, 'Weight']}
+                  formatter={(value: number, _name: string) => [`${value} lbs`, 'Weight']}
                   labelFormatter={(date) => format(new Date(date), 'MMM d, yyyy')}
                   contentStyle={{ fontSize: '12px', padding: '8px' }}
                   wrapperStyle={{ zIndex: 1000 }}
@@ -262,16 +187,8 @@ function ExerciseProgressionPage() {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis
                   dataKey="date"
-                  tickFormatter={(date) => `Week ${getWeekNumber(date, dateRange.startDate)}`}
+                  tickFormatter={(date) => format(new Date(date), 'MMM d')}
                   tick={{ fontSize: 12 }}
-                  domain={[dateRange.startDateStr, dateRange.endDateStr]}
-                  type="category"
-                  allowDataOverflow={true}
-                  ticks={Array.from({ length: 12 }, (_, i) => {
-                    const weekDate = new Date(dateRange.startDate);
-                    weekDate.setDate(weekDate.getDate() + i * 7);
-                    return weekDate.toISOString().split('T')[0];
-                  })}
                 />
                 <YAxis
                   label={{
@@ -285,7 +202,7 @@ function ExerciseProgressionPage() {
                   width={50}
                 />
                 <Tooltip
-                  formatter={(value: number, name: string) => [`${value} reps`, 'Reps']}
+                  formatter={(value: number, _name: string) => [`${value} reps`, 'Reps']}
                   labelFormatter={(date) => format(new Date(date), 'MMM d, yyyy')}
                   contentStyle={{ fontSize: '12px', padding: '8px' }}
                   wrapperStyle={{ zIndex: 1000 }}

@@ -665,6 +665,7 @@ describe('Exercise API Routes', () => {
         time_seconds: null,
         new_reps: false,
         new_weight: false,
+        new_time: false,
       });
       await workoutExerciseRepository.save(workoutExercise1);
 
@@ -685,6 +686,7 @@ describe('Exercise API Routes', () => {
         time_seconds: null,
         new_reps: true,
         new_weight: true,
+        new_time: false,
       });
       await workoutExerciseRepository.save(workoutExercise2);
 
@@ -700,21 +702,21 @@ describe('Exercise API Routes', () => {
       // Check first data point (older workout)
       expect(response.body.weightData[0].weight).toBe(135);
       expect(response.body.weightData[0].reps).toBe(8);
-      expect(response.body.weightData[0].new_weight).toBe(false);
-      expect(response.body.weightData[0].new_reps).toBe(false);
+      expect(response.body.weightData[0].newWeight).toBe(false);
+      expect(response.body.weightData[0].newReps).toBe(false);
 
       // Check second data point (newer workout with PRs)
       expect(response.body.weightData[1].weight).toBe(145);
       expect(response.body.weightData[1].reps).toBe(10);
-      expect(response.body.weightData[1].new_weight).toBe(true);
-      expect(response.body.weightData[1].new_reps).toBe(true);
+      expect(response.body.weightData[1].newWeight).toBe(true);
+      expect(response.body.weightData[1].newReps).toBe(true);
 
       // Check reps data
       expect(response.body.repsData[0].reps).toBe(8);
       expect(response.body.repsData[1].reps).toBe(10);
     });
 
-    it('should only return data from the last 12 weeks', async () => {
+    it('should only return data from the last year (365 days)', async () => {
       const exerciseRepository = dataSource.getRepository(Exercise);
       const workoutRepository = dataSource.getRepository(Workout);
       const workoutExerciseRepository = dataSource.getRepository(WorkoutExercise);
@@ -726,9 +728,9 @@ describe('Exercise API Routes', () => {
       });
       await exerciseRepository.save(exercise);
 
-      // Create workout from 100 days ago (outside 12-week window)
+      // Create workout from 400 days ago (outside 365-day window)
       const oldWorkoutDate = new Date();
-      oldWorkoutDate.setDate(oldWorkoutDate.getDate() - 100);
+      oldWorkoutDate.setDate(oldWorkoutDate.getDate() - 400);
       const oldWorkout = workoutRepository.create({
         userId: testUser.id,
         date: oldWorkoutDate.toISOString().split('T')[0],
@@ -745,7 +747,7 @@ describe('Exercise API Routes', () => {
       });
       await workoutExerciseRepository.save(oldWorkoutExercise);
 
-      // Create workout from 7 days ago (within 12-week window)
+      // Create workout from 7 days ago (within 365-day window)
       const recentWorkoutDate = new Date();
       recentWorkoutDate.setDate(recentWorkoutDate.getDate() - 7);
       const recentWorkout = workoutRepository.create({

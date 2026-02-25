@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { Route } from 'wouter';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { http, HttpResponse } from 'msw';
 import { server } from '../mocks/server';
 import ExerciseProgressionPage from './ExerciseProgressionPage';
@@ -9,14 +9,16 @@ import { MemoryRouter } from '../test-utils/MemoryRouter';
 
 // Mock recharts to avoid rendering complexity in tests
 vi.mock('recharts', () => ({
-  LineChart: ({ children }: any) => <div data-testid="line-chart">{children}</div>,
+  LineChart: ({ children }: { children?: React.ReactNode }) => (
+    <div data-testid="line-chart">{children}</div>
+  ),
   Line: () => <div data-testid="line" />,
   XAxis: () => <div data-testid="x-axis" />,
   YAxis: () => <div data-testid="y-axis" />,
   CartesianGrid: () => <div data-testid="cartesian-grid" />,
   Tooltip: () => <div data-testid="tooltip" />,
   Legend: () => <div data-testid="legend" />,
-  ResponsiveContainer: ({ children }: any) => (
+  ResponsiveContainer: ({ children }: { children?: React.ReactNode }) => (
     <div data-testid="responsive-container">{children}</div>
   ),
 }));
@@ -27,22 +29,29 @@ vi.mock('../contexts/useUserContext', () => ({
 }));
 
 describe('ExerciseProgressionPage', () => {
+  // Mock a fixed date so tests are deterministic
+  const MOCK_CURRENT_DATE = new Date('2025-02-01T12:00:00.000Z');
+
   const mockProgressionData = {
     exerciseName: 'Bench Press',
     weightData: [
-      { date: '2025-01-01', weight: 135, reps: 10, new_weight: false, new_reps: false },
-      { date: '2025-01-08', weight: 135, reps: 12, new_weight: false, new_reps: true },
-      { date: '2025-01-15', weight: 145, reps: 10, new_weight: true, new_reps: false },
+      // Sample workout data
+      { date: '2025-01-01', weight: 135, reps: 10, newWeight: false, newReps: false },
+      { date: '2025-01-08', weight: 135, reps: 12, newWeight: false, newReps: true },
+      { date: '2025-01-15', weight: 145, reps: 10, newWeight: true, newReps: false },
     ],
     repsData: [
-      { date: '2025-01-01', reps: 10, weight: 135, new_weight: false, new_reps: false },
-      { date: '2025-01-08', reps: 12, weight: 135, new_weight: false, new_reps: true },
-      { date: '2025-01-15', reps: 10, weight: 145, new_weight: true, new_reps: false },
+      { date: '2025-01-01', reps: 10, weight: 135, newWeight: false, newReps: false },
+      { date: '2025-01-08', reps: 12, weight: 135, newWeight: false, newReps: true },
+      { date: '2025-01-15', reps: 10, weight: 145, newWeight: true, newReps: false },
     ],
   };
 
   beforeEach(() => {
     vi.clearAllMocks();
+
+    // Mock system time to ensure consistent date calculations
+    vi.setSystemTime(MOCK_CURRENT_DATE);
 
     // Mock the user context to simulate a logged-in user
     vi.spyOn(UserContext, 'useUserContext').mockReturnValue({
@@ -51,6 +60,11 @@ describe('ExerciseProgressionPage', () => {
       logout: vi.fn(),
       loading: false,
     });
+  });
+
+  afterEach(() => {
+    // Restore real timers after each test
+    vi.useRealTimers();
   });
 
   it('renders loading state initially', () => {

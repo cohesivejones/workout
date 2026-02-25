@@ -136,8 +136,8 @@ export interface ExerciseWeightDataPoint {
   date: string;
   weight: number | null;
   reps: number;
-  new_reps?: boolean;
-  new_weight?: boolean;
+  newReps?: boolean;
+  newWeight?: boolean;
 }
 
 export interface ExerciseWeightProgression {
@@ -212,8 +212,8 @@ export interface ExerciseProgressionDataPoint {
   date: string;
   weight: number | null;
   reps: number;
-  new_weight?: boolean;
-  new_reps?: boolean;
+  newWeight?: boolean;
+  newReps?: boolean;
 }
 
 export interface ExerciseProgressionResponse {

@@ -113,11 +113,11 @@ const WorkoutShowPage: React.FC = () => {
                     {exercise.time_seconds && (
                       <span className={styles.exerciseDetailTime}>{exercise.time_seconds} sec</span>
                     )}
-                    {(exercise.new_reps || exercise.new_weight || exercise.new_time) && (
+                    {(exercise.newReps || exercise.newWeight || exercise.newTime) && (
                       <div className={styles.badgeContainer}>
-                        {exercise.new_reps && <span className={styles.newBadge}>NEW REPS</span>}
-                        {exercise.new_weight && <span className={styles.newBadge}>NEW WEIGHT</span>}
-                        {exercise.new_time && <span className={styles.newBadge}>NEW TIME</span>}
+                        {exercise.newReps && <span className={styles.newBadge}>NEW REPS</span>}
+                        {exercise.newWeight && <span className={styles.newBadge}>NEW WEIGHT</span>}
+                        {exercise.newTime && <span className={styles.newBadge}>NEW TIME</span>}
                       </div>
                     )}
                   </div>

@@ -63,9 +63,9 @@ router.get('/', authenticateToken, async (req: Request, res: Response) => {
         reps: we.reps,
         weight: we.weight,
         time_seconds: we.time_seconds,
-        new_reps: we.new_reps,
-        new_weight: we.new_weight,
-        new_time: we.new_time,
+        newReps: we.new_reps,
+        newWeight: we.new_weight,
+        newTime: we.new_time,
       })),
     }));
 
