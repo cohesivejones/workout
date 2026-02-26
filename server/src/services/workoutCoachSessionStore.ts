@@ -112,5 +112,5 @@ export class SessionStore {
 }
 
 // Export singleton instance
-export const sessionStore = new SessionStore();
-sessionStore.startPeriodicCleanup();
+export const workoutCoachSessionStore = new SessionStore();
+workoutCoachSessionStore.startPeriodicCleanup();

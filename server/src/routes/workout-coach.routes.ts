@@ -1,13 +1,13 @@
 import { Router, Request, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { authenticateToken } from '../middleware/auth';
-import { sessionStore } from '../services/sessionStore';
+import { workoutCoachSessionStore } from '../services/workoutCoachSessionStore';
 import { WorkoutCoachGraph } from '../services/workoutCoachGraph';
 import logger from '../logger';
 
 const router = Router();
 
-const workoutCoach = new WorkoutCoachGraph(sessionStore);
+const workoutCoach = new WorkoutCoachGraph(workoutCoachSessionStore);
 
 /**
  * POST /api/workout-coach/start
@@ -19,7 +19,7 @@ router.post('/start', authenticateToken, async (req: Request, res: Response) => 
     const sessionId = uuidv4();
 
     // Create session in store
-    sessionStore.create(sessionId, userId);
+    workoutCoachSessionStore.create(sessionId, userId);
 
     logger.info('Workout coach session started', { sessionId, userId });
 
@@ -58,7 +58,7 @@ router.post('/respond', authenticateToken, async (req: Request, res: Response) =
     }
 
     // Get session
-    const session = sessionStore.get(sessionId);
+    const session = workoutCoachSessionStore.get(sessionId);
     if (!session) {
       return res.status(404).json({ error: 'Session not found' });
     }
@@ -70,12 +70,12 @@ router.post('/respond', authenticateToken, async (req: Request, res: Response) =
 
     // Update session with response and handle via workoutCoach
     if (response === 'no') {
-      sessionStore.update(sessionId, {
+      workoutCoachSessionStore.update(sessionId, {
         userResponse: 'no',
         regenerationCount: session.regenerationCount + 1,
       });
     } else {
-      sessionStore.update(sessionId, {
+      workoutCoachSessionStore.update(sessionId, {
         userResponse: 'yes',
       });
     }
@@ -108,7 +108,7 @@ router.get('/stream/:sessionId', authenticateToken, async (req: Request, res: Re
     const { sessionId } = req.params;
 
     // Get session
-    const session = sessionStore.get(sessionId);
+    const session = workoutCoachSessionStore.get(sessionId);
     if (!session) {
       return res.status(404).json({ error: 'Session not found' });
     }
@@ -124,7 +124,7 @@ router.get('/stream/:sessionId', authenticateToken, async (req: Request, res: Re
     res.setHeader('Connection', 'keep-alive');
 
     // Store response in session for cleanup
-    sessionStore.update(sessionId, { sseResponse: res });
+    workoutCoachSessionStore.update(sessionId, { sseResponse: res });
 
     // Send initial connection message
     res.write(`data: ${JSON.stringify({ type: 'connected' })}\n\n`);
@@ -146,7 +146,7 @@ router.get('/stream/:sessionId', authenticateToken, async (req: Request, res: Re
     // Clean up on close
     req.on('close', () => {
       clearInterval(keepAlive);
-      sessionStore.update(sessionId, { sseResponse: undefined });
+      workoutCoachSessionStore.update(sessionId, { sseResponse: undefined });
       logger.info('SSE connection closed', { sessionId, userId: req.user!.id });
     });
 

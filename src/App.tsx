@@ -11,6 +11,7 @@ import ChangePasswordPage from './pages/ChangePasswordPage';
 import DiagnosticianPage from './pages/DiagnosticianPage';
 import DashboardPage from './pages/DashboardPage';
 import WorkoutCoachPage from './pages/WorkoutCoachPage';
+import WorkoutInsightsPage from './pages/WorkoutInsightsPage';
 import NotFoundPage from './pages/NotFoundPage';
 import { Layout } from './Layout';
 
@@ -86,6 +87,11 @@ function App() {
         <Route path="/workout-coach">
           <Layout>
             <WorkoutCoachPage />
+          </Layout>
+        </Route>
+        <Route path="/workout-insights">
+          <Layout>
+            <WorkoutInsightsPage />
           </Layout>
         </Route>
         <Route>

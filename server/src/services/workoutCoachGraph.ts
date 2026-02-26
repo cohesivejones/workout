@@ -1,5 +1,5 @@
 import { ChatOpenAI } from '@langchain/openai';
-import { SessionStore, WorkoutHistoryItem, WorkoutPlan } from './sessionStore';
+import { SessionStore, WorkoutHistoryItem, WorkoutPlan } from './workoutCoachSessionStore';
 import dataSource from '../data-source';
 import { Workout, Exercise, WorkoutExercise } from '../entities';
 import { Between } from 'typeorm';

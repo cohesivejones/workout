@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useCallback } from 'react';
 import { startCoachSession, respondToCoachWorkout } from '../api';
 import FormContainer from '../components/common/FormContainer';
+import { useSSE, SSEMessage } from '../hooks/useSSE';
 import styles from './WorkoutCoachPage.module.css';
 
 interface WorkoutPlan {
@@ -17,6 +18,13 @@ interface Message {
   text: string;
 }
 
+// SSE message types for this page
+interface CoachSSEMessage extends SSEMessage {
+  type: 'connected' | 'generating' | 'workout' | 'saved' | 'error' | 'ping';
+  plan?: WorkoutPlan;
+  message?: string;
+}
+
 function WorkoutCoachPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -24,16 +32,97 @@ function WorkoutCoachPage() {
   const [error, setError] = useState<string | null>(null);
   const [conversationEnded, setConversationEnded] = useState<boolean>(false);
   const [currentWorkout, setCurrentWorkout] = useState<WorkoutPlan | null>(null);
-  const eventSourceRef = useRef<EventSource | null>(null);
 
-  // Clean up EventSource on unmount
-  useEffect(() => {
-    return () => {
-      if (eventSourceRef.current) {
-        eventSourceRef.current.close();
+  // Handle SSE messages
+  const handleSSEMessage = useCallback((data: CoachSSEMessage) => {
+    switch (data.type) {
+      case 'connected':
+        console.log('SSE connected');
+        break;
+
+      case 'generating':
+        setMessages((prev) => [
+          ...prev.slice(0, -1),
+          { sender: 'coach', text: 'Generating your workout...' },
+        ]);
+        break;
+
+      case 'workout': {
+        // Format workout for display
+        if (!data.plan) return;
+        const plan = data.plan;
+        const workoutText = formatWorkoutForDisplay(plan);
+        setMessages((prev) => {
+          // Remove "Generating..." and previous "Ready to do this workout?" messages
+          const filteredMessages = prev.filter(
+            (msg) =>
+              !msg.text.includes('Generating your workout') &&
+              msg.text !== 'Ready to do this workout?'
+          );
+          return [
+            ...filteredMessages,
+            { sender: 'coach', text: workoutText },
+            { sender: 'coach', text: 'Ready to do this workout?' },
+          ];
+        });
+        setCurrentWorkout(plan);
+        setLoading(false);
+        break;
       }
-    };
+
+      case 'saved':
+        setMessages((prev) => [
+          ...prev,
+          {
+            sender: 'coach',
+            text: "Great! Your workout has been saved. Let's crush it! 💪",
+          },
+        ]);
+        setConversationEnded(true);
+        setLoading(false);
+        break;
+
+      case 'error':
+        setError(data.message || 'An error occurred');
+        setLoading(false);
+        break;
+
+      case 'ping':
+        // Keep-alive ping, ignore
+        break;
+
+      default:
+        console.log('Unknown SSE event type:', data.type);
+    }
   }, []);
+
+  // Handle SSE errors
+  const handleSSEError = useCallback((err: Error) => {
+    console.error('SSE error:', err);
+    setError('Connection error. Please try again.');
+    setLoading(false);
+  }, []);
+
+  // Use SSE hook
+  const { close: closeSSE } = useSSE<CoachSSEMessage>({
+    url: sessionId ? `/api/workout-coach/stream/${sessionId}` : null,
+    onMessage: handleSSEMessage,
+    onError: handleSSEError,
+  });
+
+  const formatWorkoutForDisplay = (plan: WorkoutPlan): string => {
+    const lines = ["Here's your workout for today:", ''];
+
+    plan.exercises.forEach((exercise, index) => {
+      let line = `${index + 1}. ${exercise.name} - ${exercise.reps} reps`;
+      if (exercise.weight) {
+        line += ` @ ${exercise.weight} lbs`;
+      }
+      lines.push(line);
+    });
+
+    return lines.join('\n');
+  };
 
   const handleStartSession = async () => {
     setLoading(true);
@@ -48,107 +137,11 @@ function WorkoutCoachPage() {
 
       // Add initial message
       setMessages([{ sender: 'coach', text: 'Generating your workout...' }]);
-
-      // Connect to SSE stream
-      const eventSource = new EventSource(`/api/workout-coach/stream/${response.sessionId}`, {
-        withCredentials: true,
-      });
-      eventSourceRef.current = eventSource;
-
-      eventSource.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
-
-          switch (data.type) {
-            case 'connected':
-              console.log('SSE connected');
-              break;
-
-            case 'generating':
-              setMessages((prev) => [
-                ...prev.slice(0, -1),
-                { sender: 'coach', text: 'Generating your workout...' },
-              ]);
-              break;
-
-            case 'workout': {
-              // Format workout for display
-              const workoutText = formatWorkoutForDisplay(data.plan);
-              setMessages((prev) => {
-                // Remove "Generating..." and previous "Ready to do this workout?" messages
-                const filteredMessages = prev.filter(
-                  (msg) =>
-                    !msg.text.includes('Generating your workout') &&
-                    msg.text !== 'Ready to do this workout?'
-                );
-                return [
-                  ...filteredMessages,
-                  { sender: 'coach', text: workoutText },
-                  { sender: 'coach', text: 'Ready to do this workout?' },
-                ];
-              });
-              setCurrentWorkout(data.plan);
-              setLoading(false);
-              break;
-            }
-
-            case 'saved':
-              setMessages((prev) => [
-                ...prev,
-                {
-                  sender: 'coach',
-                  text: "Great! Your workout has been saved. Let's crush it! 💪",
-                },
-              ]);
-              setConversationEnded(true);
-              setLoading(false);
-              if (eventSource) {
-                eventSource.close();
-              }
-              break;
-
-            case 'error':
-              setError(data.message || 'An error occurred');
-              setLoading(false);
-              break;
-
-            case 'ping':
-              // Keep-alive ping, ignore
-              break;
-
-            default:
-              console.log('Unknown SSE event type:', data.type);
-          }
-        } catch (err) {
-          console.error('Failed to parse SSE event:', err);
-        }
-      };
-
-      eventSource.onerror = (err) => {
-        console.error('SSE error:', err);
-        setError('Connection error. Please try again.');
-        setLoading(false);
-        eventSource.close();
-      };
     } catch (err) {
       console.error('Failed to start coach session:', err);
       setError(err instanceof Error ? err.message : 'Failed to start session. Please try again.');
       setLoading(false);
     }
-  };
-
-  const formatWorkoutForDisplay = (plan: WorkoutPlan): string => {
-    const lines = ["Here's your workout for today:", ''];
-
-    plan.exercises.forEach((exercise, index) => {
-      let line = `${index + 1}. ${exercise.name} - ${exercise.reps} reps`;
-      if (exercise.weight) {
-        line += ` @ ${exercise.weight} lbs`;
-      }
-      lines.push(line);
-    });
-
-    return lines.join('\n');
   };
 
   const handleRespond = async (response: 'yes' | 'no') => {
@@ -176,9 +169,7 @@ function WorkoutCoachPage() {
   };
 
   const handleReset = () => {
-    if (eventSourceRef.current) {
-      eventSourceRef.current.close();
-    }
+    closeSSE();
     setMessages([]);
     setSessionId(null);
     setError(null);

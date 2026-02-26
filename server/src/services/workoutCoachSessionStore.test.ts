@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
-import { SessionStore } from './sessionStore';
+import { SessionStore } from './workoutCoachSessionStore';
 import { Response } from 'express';
 
 describe('SessionStore', () => {

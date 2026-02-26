@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { WorkoutCoachGraph } from './workoutCoachGraph';
-import { SessionStore } from './sessionStore';
+import { SessionStore } from './workoutCoachSessionStore';
 
 // Mock OpenAI
 vi.mock('@langchain/openai', () => ({
