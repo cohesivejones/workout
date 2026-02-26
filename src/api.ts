@@ -228,3 +228,25 @@ export const fetchExerciseProgression = (
 ): Promise<ExerciseProgressionResponse> => {
   return api.get(`/exercises/${exerciseId}/progression`);
 };
+
+// Workout Insights API functions
+export type TimeframeOption = '7d' | '30d' | '3m' | '6m';
+
+export interface InsightsSessionResponse {
+  sessionId: string;
+  dataCount: {
+    workouts: number;
+    exercises: number;
+    dateRange: {
+      start: string;
+      end: string;
+    };
+  };
+}
+
+export const startInsightsSession = (
+  question: string,
+  timeframe: TimeframeOption
+): Promise<InsightsSessionResponse> => {
+  return api.post('/workout-insights/ask', { question, timeframe });
+};

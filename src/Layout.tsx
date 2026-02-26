@@ -137,6 +137,13 @@ const Header = () => {
                   Workout Coach
                 </Link>
                 <Link
+                  to="/workout-insights"
+                  className={styles.dropdownMenuItem}
+                  onClick={() => setAIDropdownOpen(false)}
+                >
+                  Workout Insights
+                </Link>
+                <Link
                   to="/diagnostician"
                   className={styles.dropdownMenuItem}
                   onClick={() => setAIDropdownOpen(false)}
@@ -232,6 +239,13 @@ const Header = () => {
                   onClick={() => setMobileNavOpen(false)}
                 >
                   Workout Coach
+                </Link>
+                <Link
+                  to="/workout-insights"
+                  className={styles.mobileMenuLink}
+                  onClick={() => setMobileNavOpen(false)}
+                >
+                  Workout Insights
                 </Link>
                 <Link
                   to="/diagnostician"
