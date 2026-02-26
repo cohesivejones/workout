@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useCallback } from 'react';
 import { startInsightsSession, TimeframeOption } from '../api';
 import FormContainer from '../components/common/FormContainer';
+import { useSSE, SSEMessage } from '../hooks/useSSE';
 import styles from './WorkoutInsightsPage.module.css';
 
 interface Message {
@@ -8,25 +9,75 @@ interface Message {
   text: string;
 }
 
+// SSE message types for this page
+interface InsightsSSEMessage extends SSEMessage {
+  type: 'connected' | 'thinking' | 'content' | 'complete' | 'error' | 'ping';
+  chunk?: string;
+  message?: string;
+}
+
 function WorkoutInsightsPage() {
   const [question, setQuestion] = useState<string>('');
   const [timeframe, setTimeframe] = useState<TimeframeOption>('30d');
   const [messages, setMessages] = useState<Message[]>([]);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [dataSummary, setDataSummary] = useState<string>('');
-  const eventSourceRef = useRef<EventSource | null>(null);
 
-  // Clean up EventSource on unmount
-  useEffect(() => {
-    return () => {
-      if (eventSourceRef.current) {
-        eventSourceRef.current.close();
-      }
-    };
+  // Handle SSE messages
+  const handleSSEMessage = useCallback((data: InsightsSSEMessage) => {
+    switch (data.type) {
+      case 'connected':
+        console.log('SSE connected');
+        break;
+
+      case 'thinking':
+        // Thinking indicator already shown
+        break;
+
+      case 'content':
+        // Append chunk to current response
+        if (data.chunk) {
+          setMessages((msgs) => {
+            const lastMessage = msgs[msgs.length - 1];
+            const updatedText = (lastMessage?.text || '') + data.chunk;
+            return [...msgs.slice(0, -1), { sender: 'ai', text: updatedText }];
+          });
+        }
+        break;
+
+      case 'complete':
+        setLoading(false);
+        break;
+
+      case 'error':
+        setError(data.message || 'An error occurred');
+        setLoading(false);
+        break;
+
+      case 'ping':
+        // Keep-alive ping, ignore
+        break;
+
+      default:
+        console.log('Unknown SSE event type:', data.type);
+    }
   }, []);
+
+  // Handle SSE errors
+  const handleSSEError = useCallback((err: Error) => {
+    console.error('SSE error:', err);
+    setError('Connection error. Please try again.');
+    setLoading(false);
+  }, []);
+
+  // Use SSE hook
+  const { close: closeSSE } = useSSE<InsightsSSEMessage>({
+    url: sessionId ? `/api/workout-insights/stream/${sessionId}` : null,
+    onMessage: handleSSEMessage,
+    onError: handleSSEError,
+  });
 
   const handleAsk = async () => {
     if (!question.trim()) return;
@@ -55,70 +106,6 @@ function WorkoutInsightsPage() {
 
       // Add thinking message
       setMessages((prev) => [...prev, { sender: 'ai', text: '' }]);
-
-      // Connect to SSE stream
-      const eventSource = new EventSource(`/api/workout-insights/stream/${response.sessionId}`, {
-        withCredentials: true,
-      });
-      eventSourceRef.current = eventSource;
-
-      let currentResponse = '';
-
-      eventSource.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
-
-          switch (data.type) {
-            case 'connected':
-              console.log('SSE connected');
-              break;
-
-            case 'thinking':
-              // Show thinking indicator
-              break;
-
-            case 'content':
-              // Append chunk to current response
-              currentResponse += data.chunk;
-              setMessages((prev) => [
-                ...prev.slice(0, -1),
-                { sender: 'ai', text: currentResponse },
-              ]);
-              break;
-
-            case 'complete':
-              setLoading(false);
-              if (eventSource) {
-                eventSource.close();
-              }
-              break;
-
-            case 'error':
-              setError(data.message || 'An error occurred');
-              setLoading(false);
-              if (eventSource) {
-                eventSource.close();
-              }
-              break;
-
-            case 'ping':
-              // Keep-alive ping, ignore
-              break;
-
-            default:
-              console.log('Unknown SSE event type:', data.type);
-          }
-        } catch (err) {
-          console.error('Failed to parse SSE event:', err);
-        }
-      };
-
-      eventSource.onerror = (err) => {
-        console.error('SSE error:', err);
-        setError('Connection error. Please try again.');
-        setLoading(false);
-        eventSource.close();
-      };
     } catch (err) {
       console.error('Failed to start insights session:', err);
       setError(err instanceof Error ? err.message : 'Failed to start session. Please try again.');
@@ -127,9 +114,7 @@ function WorkoutInsightsPage() {
   };
 
   const handleReset = () => {
-    if (eventSourceRef.current) {
-      eventSourceRef.current.close();
-    }
+    closeSSE();
     setQuestion('');
     setMessages([]);
     setSessionId(null);
