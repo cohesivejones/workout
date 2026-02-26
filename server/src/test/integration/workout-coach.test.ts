@@ -7,7 +7,7 @@ import { User } from '../../entities';
 import { generateToken } from '../../middleware/auth';
 import * as bcrypt from 'bcrypt';
 import workoutCoachRouter from '../../routes/workout-coach.routes';
-import { sessionStore } from '../../services/sessionStore';
+import { workoutCoachSessionStore } from '../../services/workoutCoachSessionStore';
 
 // Mock OpenAI to avoid hitting external API
 vi.mock('@langchain/openai', () => ({
@@ -108,7 +108,7 @@ describe('Workout Coach API Routes', () => {
         .expect(200);
 
       const sessionId = response.body.sessionId;
-      const session = sessionStore.get(sessionId);
+      const session = workoutCoachSessionStore.get(sessionId);
 
       expect(session).toBeDefined();
       expect(session!.userId).toBe(testUser.id);
@@ -132,8 +132,8 @@ describe('Workout Coach API Routes', () => {
       expect(response1.body.sessionId).not.toBe(response2.body.sessionId);
 
       // Both sessions should exist
-      expect(sessionStore.get(response1.body.sessionId)).toBeDefined();
-      expect(sessionStore.get(response2.body.sessionId)).toBeDefined();
+      expect(workoutCoachSessionStore.get(response1.body.sessionId)).toBeDefined();
+      expect(workoutCoachSessionStore.get(response2.body.sessionId)).toBeDefined();
     });
   });
 
@@ -208,7 +208,7 @@ describe('Workout Coach API Routes', () => {
           { name: 'Bench Press', reps: 10, weight: 155 },
         ],
       };
-      sessionStore.update(sessionId, { currentWorkoutPlan: mockWorkoutPlan });
+      workoutCoachSessionStore.update(sessionId, { currentWorkoutPlan: mockWorkoutPlan });
 
       const response = await request(app)
         .post('/api/workout-coach/respond')
@@ -218,7 +218,7 @@ describe('Workout Coach API Routes', () => {
 
       expect(response.body.message).toBe('Response recorded');
 
-      const session = sessionStore.get(sessionId);
+      const session = workoutCoachSessionStore.get(sessionId);
       expect(session!.userResponse).toBe('yes');
       expect(session!.regenerationCount).toBe(0); // Should not increment for yes
     });
@@ -232,7 +232,7 @@ describe('Workout Coach API Routes', () => {
 
       expect(response.body.message).toBe('Response recorded');
 
-      const session = sessionStore.get(sessionId);
+      const session = workoutCoachSessionStore.get(sessionId);
       expect(session!.userResponse).toBe('no');
       expect(session!.regenerationCount).toBe(1);
     });
@@ -245,7 +245,7 @@ describe('Workout Coach API Routes', () => {
         .send({ sessionId, response: 'no' })
         .expect(200);
 
-      let session = sessionStore.get(sessionId);
+      let session = workoutCoachSessionStore.get(sessionId);
       expect(session!.regenerationCount).toBe(1);
 
       // Second no
@@ -255,7 +255,7 @@ describe('Workout Coach API Routes', () => {
         .send({ sessionId, response: 'no' })
         .expect(200);
 
-      session = sessionStore.get(sessionId);
+      session = workoutCoachSessionStore.get(sessionId);
       expect(session!.regenerationCount).toBe(2);
 
       // Third no
@@ -265,7 +265,7 @@ describe('Workout Coach API Routes', () => {
         .send({ sessionId, response: 'no' })
         .expect(200);
 
-      session = sessionStore.get(sessionId);
+      session = workoutCoachSessionStore.get(sessionId);
       expect(session!.regenerationCount).toBe(3);
     });
 
@@ -439,7 +439,7 @@ describe('Workout Coach API Routes', () => {
       expect(sessionId).toBeDefined();
 
       // 2. Verify session was created
-      let session = sessionStore.get(sessionId);
+      let session = workoutCoachSessionStore.get(sessionId);
       expect(session).toBeDefined();
       expect(session!.userId).toBe(testUser.id);
 
@@ -451,7 +451,7 @@ describe('Workout Coach API Routes', () => {
           { name: 'Bench Press', reps: 10, weight: 155 },
         ],
       };
-      sessionStore.update(sessionId, { currentWorkoutPlan: mockWorkoutPlan });
+      workoutCoachSessionStore.update(sessionId, { currentWorkoutPlan: mockWorkoutPlan });
 
       // 4. User responds yes
       const respondResponse = await request(app)
@@ -463,7 +463,7 @@ describe('Workout Coach API Routes', () => {
       expect(respondResponse.body.message).toBe('Response recorded');
 
       // 5. Verify session state
-      session = sessionStore.get(sessionId);
+      session = workoutCoachSessionStore.get(sessionId);
       expect(session!.userResponse).toBe('yes');
       expect(session!.currentWorkoutPlan).toEqual(mockWorkoutPlan);
       expect(session!.regenerationCount).toBe(0);
@@ -483,7 +483,7 @@ describe('Workout Coach API Routes', () => {
         date: new Date().toISOString().split('T')[0],
         exercises: [{ name: 'Squats', reps: 12, weight: 140 }],
       };
-      sessionStore.update(sessionId, { currentWorkoutPlan: workout1 });
+      workoutCoachSessionStore.update(sessionId, { currentWorkoutPlan: workout1 });
 
       // 3. User says no
       await request(app)
@@ -492,7 +492,7 @@ describe('Workout Coach API Routes', () => {
         .send({ sessionId, response: 'no' })
         .expect(200);
 
-      let session = sessionStore.get(sessionId);
+      let session = workoutCoachSessionStore.get(sessionId);
       expect(session!.regenerationCount).toBe(1);
 
       // 4. Second workout plan
@@ -500,7 +500,7 @@ describe('Workout Coach API Routes', () => {
         date: new Date().toISOString().split('T')[0],
         exercises: [{ name: 'Deadlifts', reps: 5, weight: 225 }],
       };
-      sessionStore.update(sessionId, {
+      workoutCoachSessionStore.update(sessionId, {
         currentWorkoutPlan: workout2,
         userResponse: null,
       });
@@ -512,7 +512,7 @@ describe('Workout Coach API Routes', () => {
         .send({ sessionId, response: 'no' })
         .expect(200);
 
-      session = sessionStore.get(sessionId);
+      session = workoutCoachSessionStore.get(sessionId);
       expect(session!.regenerationCount).toBe(2);
 
       // 6. Third workout plan
@@ -520,7 +520,7 @@ describe('Workout Coach API Routes', () => {
         date: new Date().toISOString().split('T')[0],
         exercises: [{ name: 'Bench Press', reps: 10, weight: 155 }],
       };
-      sessionStore.update(sessionId, {
+      workoutCoachSessionStore.update(sessionId, {
         currentWorkoutPlan: workout3,
         userResponse: null,
       });
@@ -532,7 +532,7 @@ describe('Workout Coach API Routes', () => {
         .send({ sessionId, response: 'yes' })
         .expect(200);
 
-      session = sessionStore.get(sessionId);
+      session = workoutCoachSessionStore.get(sessionId);
       expect(session!.userResponse).toBe('yes');
       expect(session!.regenerationCount).toBe(2);
       expect(session!.currentWorkoutPlan).toEqual(workout3);
@@ -571,8 +571,8 @@ describe('Workout Coach API Routes', () => {
           { name: 'Pull-ups', reps: 10 },
         ],
       };
-      sessionStore.update(sessionId1, { currentWorkoutPlan: mockWorkoutPlan1 });
-      sessionStore.update(sessionId2, { currentWorkoutPlan: mockWorkoutPlan2 });
+      workoutCoachSessionStore.update(sessionId1, { currentWorkoutPlan: mockWorkoutPlan1 });
+      workoutCoachSessionStore.update(sessionId2, { currentWorkoutPlan: mockWorkoutPlan2 });
 
       // Respond to session 1
       await request(app)
@@ -589,8 +589,8 @@ describe('Workout Coach API Routes', () => {
         .expect(200);
 
       // Verify independent states
-      const session1 = sessionStore.get(sessionId1);
-      const session2 = sessionStore.get(sessionId2);
+      const session1 = workoutCoachSessionStore.get(sessionId1);
+      const session2 = workoutCoachSessionStore.get(sessionId2);
 
       expect(session1!.userResponse).toBe('yes');
       expect(session1!.regenerationCount).toBe(0);
