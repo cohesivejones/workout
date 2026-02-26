@@ -135,9 +135,11 @@ describe('WorkoutForm', () => {
     // Check instructor checkbox
     expect(screen.getByLabelText(/with instructor/i)).toBeChecked();
 
-    // Check exercises are displayed
-    expect(screen.getByText('Push-ups - 10 reps')).toBeInTheDocument();
-    expect(screen.getByText('Squats - 15 reps - 20 lbs')).toBeInTheDocument();
+    // Check exercises are displayed (now as links since they have IDs)
+    expect(screen.getByRole('link', { name: 'Push-ups' })).toBeInTheDocument();
+    expect(screen.getByText('- 10 reps')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Squats' })).toBeInTheDocument();
+    expect(screen.getByText('- 15 reps - 20 lbs')).toBeInTheDocument();
 
     // Check save workout button
     expect(screen.getByText('Update Workout')).toBeInTheDocument();
@@ -192,9 +194,9 @@ describe('WorkoutForm', () => {
 
     render(<WorkoutForm {...defaultProps} existingWorkout={existingWorkout} />);
 
-    // Check that both exercises are displayed
-    expect(screen.getByText('Push-ups - 10 reps')).toBeInTheDocument();
-    expect(screen.getByText('Squats - 15 reps')).toBeInTheDocument();
+    // Check that both exercises are displayed (now as links since they have IDs)
+    expect(screen.getByRole('link', { name: 'Push-ups' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Squats' })).toBeInTheDocument();
 
     // Get the remove buttons
     const removeButtons = screen.getAllByTitle('Remove exercise');
@@ -204,8 +206,8 @@ describe('WorkoutForm', () => {
     fireEvent.click(removeButtons[0]);
 
     // Check that the first exercise is removed
-    expect(screen.queryByText('Push-ups - 10 reps')).not.toBeInTheDocument();
-    expect(screen.getByText('Squats - 15 reps')).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Push-ups' })).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Squats' })).toBeInTheDocument();
   });
 
   it('submits the form with correct data', async () => {
@@ -320,5 +322,58 @@ describe('WorkoutForm', () => {
     fireEvent.click(addButton);
 
     expect(await screen.findByText('Failed to save exercise')).toBeInTheDocument();
+  });
+
+  it('renders exercise progression links for persisted exercises', () => {
+    const existingWorkout: Workout = {
+      id: 1,
+      userId: 1,
+      date: '2025-03-01',
+      withInstructor: false,
+      exercises: [
+        { id: 1, name: 'Push-ups', reps: 10 },
+        { id: 2, name: 'Squats', reps: 15, weight: 20 },
+      ],
+    };
+
+    render(<WorkoutForm {...defaultProps} existingWorkout={existingWorkout} />);
+
+    // Check that exercises with IDs are rendered as links
+    const pushUpsLink = screen.getByRole('link', { name: 'Push-ups' });
+    expect(pushUpsLink).toBeInTheDocument();
+    expect(pushUpsLink).toHaveAttribute('href', '/exercises/1/progression');
+
+    const squatsLink = screen.getByRole('link', { name: 'Squats' });
+    expect(squatsLink).toBeInTheDocument();
+    expect(squatsLink).toHaveAttribute('href', '/exercises/2/progression');
+  });
+
+  it('does not render exercise progression links for new exercises without IDs', async () => {
+    render(<WorkoutForm {...defaultProps} />);
+
+    // Add a new exercise (which won't have an ID)
+    const exerciseSelect = screen.getByTestId('exercise-select');
+    fireEvent.change(exerciseSelect, { target: { value: 'Push-ups' } });
+
+    const repsInput = screen.getByPlaceholderText('Reps');
+    fireEvent.change(repsInput, { target: { value: '12' } });
+
+    const addButton = screen.getByText('Add Exercise');
+    fireEvent.click(addButton);
+
+    // Wait for the exercise to be added
+    await waitFor(() => {
+      const exerciseList = screen.getByTestId('exercise-list');
+      expect(exerciseList).toHaveTextContent('Push-ups');
+      expect(exerciseList).toHaveTextContent('- 12 reps');
+    });
+
+    // Check that the exercise name is not a link
+    const pushUpsLink = screen.queryByRole('link', { name: 'Push-ups' });
+    expect(pushUpsLink).not.toBeInTheDocument();
+
+    // Verify the text is present in the exercise list (not in the dropdown)
+    const exerciseList = screen.getByTestId('exercise-list');
+    expect(exerciseList).toHaveTextContent('Push-ups');
   });
 });

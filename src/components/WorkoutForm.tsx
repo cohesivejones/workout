@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { Link } from 'wouter';
 import { WorkoutFormProps, WorkoutExercise } from '../types';
 import CreatableSelect from 'react-select/creatable';
 import classNames from 'classnames';
@@ -9,6 +10,7 @@ import { fetchRecentExerciseData } from '../api';
 import { useForm, useFieldArray, Controller, SubmitHandler } from 'react-hook-form';
 import { SingleValue } from 'react-select';
 import { lbsToKg } from '../utils/weight';
+import { toExerciseProgressionPath } from '../utils/paths';
 
 interface FormValues {
   date: string;
@@ -273,7 +275,14 @@ function WorkoutForm({
               {fields.map((field, index) => (
                 <li key={field.id} className={styles.exerciseItem}>
                   <div className={styles.exerciseInfo}>
-                    {exercises[index].name} - {exercises[index].reps} reps
+                    {exercises[index].id ? (
+                      <Link to={toExerciseProgressionPath(exercises[index].id!)}>
+                        {exercises[index].name}
+                      </Link>
+                    ) : (
+                      exercises[index].name
+                    )}{' '}
+                    - {exercises[index].reps} reps
                     {exercises[index].weight ? ` - ${exercises[index].weight} lbs` : ''}
                     {exercises[index].time_seconds ? ` - ${exercises[index].time_seconds} sec` : ''}
                     {(exercises[index].newReps ||
