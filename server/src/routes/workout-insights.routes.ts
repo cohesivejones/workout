@@ -106,7 +106,13 @@ router.post('/ask', authenticateToken, async (req: Request, res: Response) => {
       workoutData: workouts,
     });
 
-    logger.info('Workout insights session started', { sessionId, userId, timeframe });
+    logger.info('Workout insights session started', {
+      sessionId,
+      userId,
+      timeframe,
+      workoutCount: workouts.length,
+      exerciseCount: exerciseSet.size,
+    });
 
     res.json({
       sessionId,
@@ -167,14 +173,27 @@ router.get('/stream/:sessionId', authenticateToken, async (req: Request, res: Re
 
     // Send initial connection message
     res.write(`data: ${JSON.stringify({ type: 'connected' })}\n\n`);
+    logger.info('SSE: Sent connected message', { sessionId });
 
     // Format workout data as context
     const workoutContext = formatWorkoutDataForAI(session.workoutData);
+    logger.info('Formatted workout context', {
+      sessionId,
+      contextLength: workoutContext.length,
+      workoutCount: session.workoutData.length,
+    });
 
     // Send thinking message
     res.write(`data: ${JSON.stringify({ type: 'thinking' })}\n\n`);
+    logger.info('SSE: Sent thinking message', { sessionId });
 
     // Stream AI response
+    logger.info('Initiating OpenAI stream', {
+      sessionId,
+      question: session.question,
+      apiKeyConfigured: !!process.env.OPENAI_API_KEY,
+    });
+
     try {
       const stream = await openai.chat.completions.create({
         model: 'gpt-4',
@@ -193,17 +212,33 @@ router.get('/stream/:sessionId', authenticateToken, async (req: Request, res: Re
         temperature: 0.7,
       });
 
+      logger.info('OpenAI stream created successfully', { sessionId });
+      let chunkCount = 0;
+
       for await (const chunk of stream) {
         const content = chunk.choices[0]?.delta?.content;
         if (content) {
+          chunkCount++;
           res.write(`data: ${JSON.stringify({ type: 'content', chunk: content })}\n\n`);
+          if (chunkCount === 1) {
+            logger.info('SSE: First content chunk received', { sessionId });
+          }
         }
       }
 
+      logger.info('OpenAI stream completed', { sessionId, totalChunks: chunkCount });
+
       // Send completion message
       res.write(`data: ${JSON.stringify({ type: 'complete' })}\n\n`);
+      logger.info('SSE: Sent complete message', { sessionId });
     } catch (aiError) {
-      logger.error('AI streaming error', { error: aiError, sessionId });
+      logger.error('AI streaming error', {
+        error: aiError,
+        message: aiError instanceof Error ? aiError.message : String(aiError),
+        stack: aiError instanceof Error ? aiError.stack : undefined,
+        sessionId,
+        userId: req.user!.id,
+      });
       res.write(`data: ${JSON.stringify({ type: 'error', message: 'AI processing failed' })}\n\n`);
     }
 
