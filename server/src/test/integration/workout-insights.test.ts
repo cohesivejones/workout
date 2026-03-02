@@ -1,11 +1,8 @@
 import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import request from 'supertest';
 import express from 'express';
-import cookieParser from 'cookie-parser';
-import dataSource from '../../data-source';
-import { User } from '../../entities/User';
-import { generateToken } from '../../middleware/auth';
 import workoutInsightsRoutes from '../../routes/workout-insights.routes';
+import { createTestApp, createTestUser, cleanupTestUser, TestUserData } from '../helpers';
 
 // Mock OpenAI to avoid external API calls
 vi.mock('../../services/openai', () => ({
@@ -35,46 +32,17 @@ vi.mock('../../services/openai', () => ({
   },
 }));
 
-function createTestApp() {
-  const app = express();
-  app.use(express.json());
-  app.use(cookieParser());
-  app.use('/api/workout-insights', workoutInsightsRoutes);
-  return app;
-}
-
 describe('Workout Insights API', () => {
   let app: express.Application;
-  let authToken: string;
+  let testUserData: TestUserData;
 
   beforeAll(async () => {
-    app = createTestApp();
-
-    if (!dataSource.isInitialized) {
-      await dataSource.initialize();
-    }
-
-    // Create test user
-    const userRepository = dataSource.getRepository(User);
-    const testUser = userRepository.create({
-      email: 'insights-test@example.com',
-      name: 'Insights Test User',
-      password: 'hashedpassword',
-    });
-    const savedUser = await userRepository.save(testUser);
-
-    // Generate proper JWT token
-    authToken = generateToken(savedUser);
+    app = createTestApp([{ path: '/api/workout-insights', router: workoutInsightsRoutes }]);
+    testUserData = await createTestUser();
   });
 
   afterAll(async () => {
-    // Cleanup
-    const userRepository = dataSource.getRepository(User);
-    await userRepository.delete({ email: 'insights-test@example.com' });
-
-    if (dataSource.isInitialized) {
-      await dataSource.destroy();
-    }
+    await cleanupTestUser(testUserData.user);
   });
 
   describe('POST /api/workout-insights/ask', () => {
@@ -89,7 +57,7 @@ describe('Workout Insights API', () => {
     it('should validate required fields', async () => {
       const response = await request(app)
         .post('/api/workout-insights/ask')
-        .set('Cookie', [`token=${authToken}`])
+        .set('Cookie', [`token=${testUserData.authToken}`])
         .send({});
 
       expect(response.status).toBe(400);
@@ -99,7 +67,7 @@ describe('Workout Insights API', () => {
     it('should validate timeframe format', async () => {
       const response = await request(app)
         .post('/api/workout-insights/ask')
-        .set('Cookie', [`token=${authToken}`])
+        .set('Cookie', [`token=${testUserData.authToken}`])
         .send({ question: 'Test', timeframe: 'invalid' });
 
       expect(response.status).toBe(400);
@@ -109,7 +77,7 @@ describe('Workout Insights API', () => {
     it('should create session and return data count', async () => {
       const response = await request(app)
         .post('/api/workout-insights/ask')
-        .set('Cookie', [`token=${authToken}`])
+        .set('Cookie', [`token=${testUserData.authToken}`])
         .send({ question: 'What is my progress?', timeframe: '30d' });
 
       if (response.status !== 200) {
@@ -135,7 +103,7 @@ describe('Workout Insights API', () => {
     it('should return 404 for invalid session', async () => {
       const response = await request(app)
         .get('/api/workout-insights/stream/invalid-session')
-        .set('Cookie', [`token=${authToken}`]);
+        .set('Cookie', [`token=${testUserData.authToken}`]);
 
       expect(response.status).toBe(404);
     });
@@ -144,7 +112,7 @@ describe('Workout Insights API', () => {
       // First create a session
       const createResponse = await request(app)
         .post('/api/workout-insights/ask')
-        .set('Cookie', [`token=${authToken}`])
+        .set('Cookie', [`token=${testUserData.authToken}`])
         .send({ question: 'Test', timeframe: '30d' });
 
       const { sessionId } = createResponse.body;
@@ -153,7 +121,7 @@ describe('Workout Insights API', () => {
       return new Promise<void>((resolve, reject) => {
         request(app)
           .get(`/api/workout-insights/stream/${sessionId}`)
-          .set('Cookie', [`token=${authToken}`])
+          .set('Cookie', [`token=${testUserData.authToken}`])
           .buffer(false) // Don't buffer the response
           .ok(() => true) // Accept any status code so we can check headers
           .on('response', (res) => {

@@ -1,86 +1,45 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import request from 'supertest';
 import express from 'express';
-import cookieParser from 'cookie-parser';
 import dataSource from '../../data-source';
-import { User, Workout, Exercise, WorkoutExercise, PainScore, SleepScore } from '../../entities';
-import { generateToken } from '../../middleware/auth';
-import * as bcrypt from 'bcrypt';
+import { Workout, Exercise, WorkoutExercise, PainScore, SleepScore } from '../../entities';
 import dashboardRouter from '../../routes/dashboard.routes';
-
-// Create a minimal test app with dashboard routes
-function createTestApp() {
-  const app = express();
-  app.use(express.json());
-  app.use(cookieParser());
-
-  app.use('/api/dashboard', dashboardRouter);
-
-  return app;
-}
+import {
+  createTestApp,
+  createTestUser,
+  cleanupTestUser,
+  cleanupUserData,
+  authenticatedRequest,
+  TestUserData,
+} from '../helpers';
 
 describe('Dashboard API Routes', () => {
   let app: express.Application;
-  let testUser: User;
-  let authToken: string;
+  let testUserData: TestUserData;
 
   beforeAll(async () => {
-    app = createTestApp();
-
-    const userRepository = dataSource.getRepository(User);
-    const hashedPassword = await bcrypt.hash('testpass123', 10);
-
-    testUser = userRepository.create({
-      email: 'dashboard-test@example.com',
-      name: 'Dashboard Test User',
-      password: hashedPassword,
-    });
-
-    await userRepository.save(testUser);
-    authToken = generateToken(testUser);
+    app = createTestApp([{ path: '/api/dashboard', router: dashboardRouter }]);
+    testUserData = await createTestUser();
   });
 
   afterAll(async () => {
-    if (testUser) {
-      await dataSource.query(
-        'DELETE FROM workout_exercises WHERE workout_id IN (SELECT id FROM workouts WHERE "userId" = $1)',
-        [testUser.id]
-      );
-      await dataSource.query('DELETE FROM workouts WHERE "userId" = $1', [testUser.id]);
-      await dataSource.query('DELETE FROM exercises WHERE "userId" = $1', [testUser.id]);
-      await dataSource.query('DELETE FROM pain_scores WHERE "userId" = $1', [testUser.id]);
-      await dataSource.query('DELETE FROM sleep_scores WHERE "userId" = $1', [testUser.id]);
-
-      const userRepository = dataSource.getRepository(User);
-      await userRepository.remove(testUser);
-    }
+    await cleanupUserData(testUserData.user.id);
+    await cleanupTestUser(testUserData.user);
   });
 
   beforeEach(async () => {
-    // Clean up all data except the test user
-    await dataSource.query(
-      'DELETE FROM workout_exercises WHERE workout_id IN (SELECT id FROM workouts WHERE "userId" = $1)',
-      [testUser.id]
-    );
-    await dataSource.query('DELETE FROM workouts WHERE "userId" = $1', [testUser.id]);
-    await dataSource.query('DELETE FROM exercises WHERE "userId" = $1', [testUser.id]);
-    await dataSource.query('DELETE FROM pain_scores WHERE "userId" = $1', [testUser.id]);
-    await dataSource.query('DELETE FROM sleep_scores WHERE "userId" = $1', [testUser.id]);
+    await cleanupUserData(testUserData.user.id);
   });
 
   describe('GET /api/dashboard/weight-progression', () => {
     it('should require authentication', async () => {
       const response = await request(app).get('/api/dashboard/weight-progression').expect(401);
-
       expect(response.body.error).toBeDefined();
     });
 
     it('should return empty array when no workouts exist', async () => {
-      const response = await request(app)
-        .get('/api/dashboard/weight-progression')
-        .set('Cookie', [`token=${authToken}`])
-        .expect(200);
-
+      const authReq = authenticatedRequest(app, testUserData.authToken);
+      const response = await authReq.get('/api/dashboard/weight-progression').expect(200);
       expect(response.body).toEqual([]);
     });
 
@@ -92,7 +51,7 @@ describe('Dashboard API Routes', () => {
       // Create exercise
       const exercise = exerciseRepository.create({
         name: 'Bench Press',
-        userId: testUser.id,
+        userId: testUserData.user.id,
       });
       await exerciseRepository.save(exercise);
 
@@ -108,7 +67,7 @@ describe('Dashboard API Routes', () => {
 
       for (let i = 0; i < dates.length; i++) {
         const workout = workoutRepository.create({
-          userId: testUser.id,
+          userId: testUserData.user.id,
           date: dates[i].toISOString().split('T')[0],
           withInstructor: false,
         });
@@ -124,10 +83,8 @@ describe('Dashboard API Routes', () => {
         await workoutExerciseRepository.save(workoutExercise);
       }
 
-      const response = await request(app)
-        .get('/api/dashboard/weight-progression')
-        .set('Cookie', [`token=${authToken}`])
-        .expect(200);
+      const authReq = authenticatedRequest(app, testUserData.authToken);
+      const response = await authReq.get('/api/dashboard/weight-progression').expect(200);
 
       expect(response.body).toHaveLength(1);
       expect(response.body[0].exerciseName).toBe('Bench Press');
@@ -145,17 +102,17 @@ describe('Dashboard API Routes', () => {
       // Create exercises
       const weightedExercise = exerciseRepository.create({
         name: 'Squats',
-        userId: testUser.id,
+        userId: testUserData.user.id,
       });
       const bodyweightExercise = exerciseRepository.create({
         name: 'Push-ups',
-        userId: testUser.id,
+        userId: testUserData.user.id,
       });
       await exerciseRepository.save([weightedExercise, bodyweightExercise]);
 
       const today = new Date();
       const workout = workoutRepository.create({
-        userId: testUser.id,
+        userId: testUserData.user.id,
         date: today.toISOString().split('T')[0],
         withInstructor: false,
       });
@@ -181,10 +138,8 @@ describe('Dashboard API Routes', () => {
       });
       await workoutExerciseRepository.save(we2);
 
-      const response = await request(app)
-        .get('/api/dashboard/weight-progression')
-        .set('Cookie', [`token=${authToken}`])
-        .expect(200);
+      const authReq = authenticatedRequest(app, testUserData.authToken);
+      const response = await authReq.get('/api/dashboard/weight-progression').expect(200);
 
       expect(response.body).toHaveLength(1);
       expect(response.body[0].exerciseName).toBe('Squats');
@@ -197,7 +152,7 @@ describe('Dashboard API Routes', () => {
 
       const exercise = exerciseRepository.create({
         name: 'Deadlift',
-        userId: testUser.id,
+        userId: testUserData.user.id,
       });
       await exerciseRepository.save(exercise);
 
@@ -206,7 +161,7 @@ describe('Dashboard API Routes', () => {
       // Workout within 84 days
       const recentDate = new Date(today.getTime() - 50 * 24 * 60 * 60 * 1000);
       const recentWorkout = workoutRepository.create({
-        userId: testUser.id,
+        userId: testUserData.user.id,
         date: recentDate.toISOString().split('T')[0],
         withInstructor: false,
       });
@@ -224,7 +179,7 @@ describe('Dashboard API Routes', () => {
       // Workout older than 84 days
       const oldDate = new Date(today.getTime() - 100 * 24 * 60 * 60 * 1000);
       const oldWorkout = workoutRepository.create({
-        userId: testUser.id,
+        userId: testUserData.user.id,
         date: oldDate.toISOString().split('T')[0],
         withInstructor: false,
       });
@@ -239,10 +194,8 @@ describe('Dashboard API Routes', () => {
       });
       await workoutExerciseRepository.save(oldWE);
 
-      const response = await request(app)
-        .get('/api/dashboard/weight-progression')
-        .set('Cookie', [`token=${authToken}`])
-        .expect(200);
+      const authReq = authenticatedRequest(app, testUserData.authToken);
+      const response = await authReq.get('/api/dashboard/weight-progression').expect(200);
 
       expect(response.body).toHaveLength(1);
       expect(response.body[0].dataPoints).toHaveLength(1);
@@ -254,13 +207,16 @@ describe('Dashboard API Routes', () => {
       const exerciseRepository = dataSource.getRepository(Exercise);
       const workoutExerciseRepository = dataSource.getRepository(WorkoutExercise);
 
-      const bench = exerciseRepository.create({ name: 'Bench Press', userId: testUser.id });
-      const squat = exerciseRepository.create({ name: 'Squat', userId: testUser.id });
+      const bench = exerciseRepository.create({
+        name: 'Bench Press',
+        userId: testUserData.user.id,
+      });
+      const squat = exerciseRepository.create({ name: 'Squat', userId: testUserData.user.id });
       await exerciseRepository.save([bench, squat]);
 
       const today = new Date();
       const workout = workoutRepository.create({
-        userId: testUser.id,
+        userId: testUserData.user.id,
         date: today.toISOString().split('T')[0],
         withInstructor: false,
       });
@@ -282,10 +238,8 @@ describe('Dashboard API Routes', () => {
       });
       await workoutExerciseRepository.save([we1, we2]);
 
-      const response = await request(app)
-        .get('/api/dashboard/weight-progression')
-        .set('Cookie', [`token=${authToken}`])
-        .expect(200);
+      const authReq = authenticatedRequest(app, testUserData.authToken);
+      const response = await authReq.get('/api/dashboard/weight-progression').expect(200);
 
       expect(response.body).toHaveLength(2);
       const exerciseNames = response.body.map((e: { exerciseName: string }) => e.exerciseName);
@@ -297,16 +251,12 @@ describe('Dashboard API Routes', () => {
   describe('GET /api/dashboard/pain-progression', () => {
     it('should require authentication', async () => {
       const response = await request(app).get('/api/dashboard/pain-progression').expect(401);
-
       expect(response.body.error).toBeDefined();
     });
 
     it('should return empty array when no pain scores exist', async () => {
-      const response = await request(app)
-        .get('/api/dashboard/pain-progression')
-        .set('Cookie', [`token=${authToken}`])
-        .expect(200);
-
+      const authReq = authenticatedRequest(app, testUserData.authToken);
+      const response = await authReq.get('/api/dashboard/pain-progression').expect(200);
       expect(response.body.dataPoints).toEqual([]);
     });
 
@@ -324,7 +274,7 @@ describe('Dashboard API Routes', () => {
 
       for (let i = 0; i < dates.length; i++) {
         const painScore = painScoreRepository.create({
-          userId: testUser.id,
+          userId: testUserData.user.id,
           date: dates[i].toISOString().split('T')[0],
           score: scores[i],
           notes: null,
@@ -332,10 +282,8 @@ describe('Dashboard API Routes', () => {
         await painScoreRepository.save(painScore);
       }
 
-      const response = await request(app)
-        .get('/api/dashboard/pain-progression')
-        .set('Cookie', [`token=${authToken}`])
-        .expect(200);
+      const authReq = authenticatedRequest(app, testUserData.authToken);
+      const response = await authReq.get('/api/dashboard/pain-progression').expect(200);
 
       expect(response.body.dataPoints).toHaveLength(3);
       expect(response.body.dataPoints[0].score).toBe(7);
@@ -351,7 +299,7 @@ describe('Dashboard API Routes', () => {
       // Pain score within 84 days
       const recentDate = new Date(today.getTime() - 50 * 24 * 60 * 60 * 1000);
       const recentPainScore = painScoreRepository.create({
-        userId: testUser.id,
+        userId: testUserData.user.id,
         date: recentDate.toISOString().split('T')[0],
         score: 5,
         notes: null,
@@ -361,17 +309,15 @@ describe('Dashboard API Routes', () => {
       // Pain score older than 84 days
       const oldDate = new Date(today.getTime() - 100 * 24 * 60 * 60 * 1000);
       const oldPainScore = painScoreRepository.create({
-        userId: testUser.id,
+        userId: testUserData.user.id,
         date: oldDate.toISOString().split('T')[0],
         score: 8,
         notes: null,
       });
       await painScoreRepository.save(oldPainScore);
 
-      const response = await request(app)
-        .get('/api/dashboard/pain-progression')
-        .set('Cookie', [`token=${authToken}`])
-        .expect(200);
+      const authReq = authenticatedRequest(app, testUserData.authToken);
+      const response = await authReq.get('/api/dashboard/pain-progression').expect(200);
 
       expect(response.body.dataPoints).toHaveLength(1);
       expect(response.body.dataPoints[0].score).toBe(5);
@@ -390,7 +336,7 @@ describe('Dashboard API Routes', () => {
       // Create in non-sorted order
       for (const date of dates) {
         const painScore = painScoreRepository.create({
-          userId: testUser.id,
+          userId: testUserData.user.id,
           date: date.toISOString().split('T')[0],
           score: 5,
           notes: null,
@@ -398,10 +344,8 @@ describe('Dashboard API Routes', () => {
         await painScoreRepository.save(painScore);
       }
 
-      const response = await request(app)
-        .get('/api/dashboard/pain-progression')
-        .set('Cookie', [`token=${authToken}`])
-        .expect(200);
+      const authReq = authenticatedRequest(app, testUserData.authToken);
+      const response = await authReq.get('/api/dashboard/pain-progression').expect(200);
 
       expect(response.body.dataPoints).toHaveLength(3);
       // Verify dates are in ascending order
@@ -417,16 +361,12 @@ describe('Dashboard API Routes', () => {
   describe('GET /api/dashboard/sleep-progression', () => {
     it('should require authentication', async () => {
       const response = await request(app).get('/api/dashboard/sleep-progression').expect(401);
-
       expect(response.body.error).toBeDefined();
     });
 
     it('should return empty array when no sleep scores exist', async () => {
-      const response = await request(app)
-        .get('/api/dashboard/sleep-progression')
-        .set('Cookie', [`token=${authToken}`])
-        .expect(200);
-
+      const authReq = authenticatedRequest(app, testUserData.authToken);
+      const response = await authReq.get('/api/dashboard/sleep-progression').expect(200);
       expect(response.body.dataPoints).toEqual([]);
     });
 
@@ -444,7 +384,7 @@ describe('Dashboard API Routes', () => {
 
       for (let i = 0; i < dates.length; i++) {
         const sleepScore = sleepScoreRepository.create({
-          userId: testUser.id,
+          userId: testUserData.user.id,
           date: dates[i].toISOString().split('T')[0],
           score: scores[i],
           notes: null,
@@ -452,10 +392,8 @@ describe('Dashboard API Routes', () => {
         await sleepScoreRepository.save(sleepScore);
       }
 
-      const response = await request(app)
-        .get('/api/dashboard/sleep-progression')
-        .set('Cookie', [`token=${authToken}`])
-        .expect(200);
+      const authReq = authenticatedRequest(app, testUserData.authToken);
+      const response = await authReq.get('/api/dashboard/sleep-progression').expect(200);
 
       expect(response.body.dataPoints).toHaveLength(3);
       expect(response.body.dataPoints[0].score).toBe(2);
@@ -471,7 +409,7 @@ describe('Dashboard API Routes', () => {
       // Sleep score within 84 days
       const recentDate = new Date(today.getTime() - 50 * 24 * 60 * 60 * 1000);
       const recentSleepScore = sleepScoreRepository.create({
-        userId: testUser.id,
+        userId: testUserData.user.id,
         date: recentDate.toISOString().split('T')[0],
         score: 4,
         notes: null,
@@ -481,17 +419,15 @@ describe('Dashboard API Routes', () => {
       // Sleep score older than 84 days
       const oldDate = new Date(today.getTime() - 100 * 24 * 60 * 60 * 1000);
       const oldSleepScore = sleepScoreRepository.create({
-        userId: testUser.id,
+        userId: testUserData.user.id,
         date: oldDate.toISOString().split('T')[0],
         score: 2,
         notes: null,
       });
       await sleepScoreRepository.save(oldSleepScore);
 
-      const response = await request(app)
-        .get('/api/dashboard/sleep-progression')
-        .set('Cookie', [`token=${authToken}`])
-        .expect(200);
+      const authReq = authenticatedRequest(app, testUserData.authToken);
+      const response = await authReq.get('/api/dashboard/sleep-progression').expect(200);
 
       expect(response.body.dataPoints).toHaveLength(1);
       expect(response.body.dataPoints[0].score).toBe(4);
@@ -510,7 +446,7 @@ describe('Dashboard API Routes', () => {
       // Create in non-sorted order
       for (const date of dates) {
         const sleepScore = sleepScoreRepository.create({
-          userId: testUser.id,
+          userId: testUserData.user.id,
           date: date.toISOString().split('T')[0],
           score: 3,
           notes: null,
@@ -518,10 +454,8 @@ describe('Dashboard API Routes', () => {
         await sleepScoreRepository.save(sleepScore);
       }
 
-      const response = await request(app)
-        .get('/api/dashboard/sleep-progression')
-        .set('Cookie', [`token=${authToken}`])
-        .expect(200);
+      const authReq = authenticatedRequest(app, testUserData.authToken);
+      const response = await authReq.get('/api/dashboard/sleep-progression').expect(200);
 
       expect(response.body.dataPoints).toHaveLength(3);
       // Verify dates are in ascending order

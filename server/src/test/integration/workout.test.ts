@@ -1,64 +1,34 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
 import request from 'supertest';
 import express from 'express';
-import cookieParser from 'cookie-parser';
 import dataSource from '../../data-source';
-import { User, Workout, Exercise } from '../../entities';
-import { generateToken } from '../../middleware/auth';
-import * as bcrypt from 'bcrypt';
+import { Workout, Exercise } from '../../entities';
 import workoutRoutes from '../../routes/workouts.routes';
-
-// Create a minimal test app using the actual workout routes
-function createTestApp() {
-  const app = express();
-  app.use(express.json());
-  app.use(cookieParser());
-  app.use('/api/workouts', workoutRoutes);
-  return app;
-}
+import {
+  createTestApp,
+  createTestUser,
+  cleanupTestUser,
+  cleanupUserData,
+  authenticatedRequest,
+  TestUserData,
+} from '../helpers';
 
 describe('Workout API Routes', () => {
   let app: express.Application;
-  let testUser: User;
-  let authToken: string;
+  let testUserData: TestUserData;
 
   beforeAll(async () => {
-    app = createTestApp();
-
-    const userRepository = dataSource.getRepository(User);
-    const hashedPassword = await bcrypt.hash('testpass123', 10);
-
-    testUser = userRepository.create({
-      email: 'workout-test@example.com',
-      name: 'Workout Test User',
-      password: hashedPassword,
-    });
-
-    await userRepository.save(testUser);
-    authToken = generateToken(testUser);
+    app = createTestApp([{ path: '/api/workouts', router: workoutRoutes }]);
+    testUserData = await createTestUser();
   });
 
   afterAll(async () => {
-    if (testUser) {
-      await dataSource.query(
-        'DELETE FROM workout_exercises WHERE workout_id IN (SELECT id FROM workouts WHERE "userId" = $1)',
-        [testUser.id]
-      );
-      await dataSource.query('DELETE FROM workouts WHERE "userId" = $1', [testUser.id]);
-      await dataSource.query('DELETE FROM exercises WHERE "userId" = $1', [testUser.id]);
-
-      const userRepository = dataSource.getRepository(User);
-      await userRepository.remove(testUser);
-    }
+    await cleanupUserData(testUserData.user.id);
+    await cleanupTestUser(testUserData.user);
   });
 
   beforeEach(async () => {
-    await dataSource.query(
-      'DELETE FROM workout_exercises WHERE workout_id IN (SELECT id FROM workouts WHERE "userId" = $1)',
-      [testUser.id]
-    );
-    await dataSource.query('DELETE FROM workouts WHERE "userId" = $1', [testUser.id]);
-    await dataSource.query('DELETE FROM exercises WHERE "userId" = $1', [testUser.id]);
+    await cleanupUserData(testUserData.user.id);
   });
 
   describe('POST /api/workouts', () => {
@@ -70,7 +40,6 @@ describe('Workout API Routes', () => {
       };
 
       const response = await request(app).post('/api/workouts').send(workoutData).expect(401);
-
       expect(response.body.error).toBeDefined();
     });
 
@@ -84,11 +53,8 @@ describe('Workout API Routes', () => {
         ],
       };
 
-      const response = await request(app)
-        .post('/api/workouts')
-        .send(workoutData)
-        .set('Cookie', [`token=${authToken}`])
-        .expect(200);
+      const authReq = authenticatedRequest(app, testUserData.authToken);
+      const response = await authReq.post('/api/workouts').send(workoutData).expect(200);
 
       expect(response.body).toHaveProperty('id');
       expect(response.body.date).toBe('2024-01-15');
@@ -112,11 +78,8 @@ describe('Workout API Routes', () => {
         ],
       };
 
-      const response = await request(app)
-        .post('/api/workouts')
-        .send(workoutData)
-        .set('Cookie', [`token=${authToken}`])
-        .expect(200);
+      const authReq = authenticatedRequest(app, testUserData.authToken);
+      const response = await authReq.post('/api/workouts').send(workoutData).expect(200);
 
       expect(response.body.exercises).toHaveLength(2);
       expect(response.body.exercises[0].name).toBe('Plank');
@@ -135,11 +98,8 @@ describe('Workout API Routes', () => {
         ],
       };
 
-      const response = await request(app)
-        .post('/api/workouts')
-        .send(workoutData)
-        .set('Cookie', [`token=${authToken}`])
-        .expect(200);
+      const authReq = authenticatedRequest(app, testUserData.authToken);
+      const response = await authReq.post('/api/workouts').send(workoutData).expect(200);
 
       expect(response.body.exercises).toHaveLength(2);
       expect(response.body.exercises[0].weight).toBeNull();
@@ -153,16 +113,15 @@ describe('Workout API Routes', () => {
         exercises: [{ name: 'Squats', reps: 10, weight: 100 }],
       };
 
-      const response = await request(app)
-        .post('/api/workouts')
-        .send(workoutData)
-        .set('Cookie', [`token=${authToken}`])
-        .expect(200);
+      const authReq = authenticatedRequest(app, testUserData.authToken);
+      const response = await authReq.post('/api/workouts').send(workoutData).expect(200);
 
       expect(response.body.withInstructor).toBe(true);
     });
 
     it('should set new_reps flag when reps increase', async () => {
+      const authReq = authenticatedRequest(app, testUserData.authToken);
+
       // Create first workout
       const firstWorkout = {
         date: '2024-01-15',
@@ -170,11 +129,7 @@ describe('Workout API Routes', () => {
         exercises: [{ name: 'Bench Press', reps: 10, weight: 135 }],
       };
 
-      await request(app)
-        .post('/api/workouts')
-        .send(firstWorkout)
-        .set('Cookie', [`token=${authToken}`])
-        .expect(200);
+      await authReq.post('/api/workouts').send(firstWorkout).expect(200);
 
       // Create second workout with increased reps
       const secondWorkout = {
@@ -183,17 +138,15 @@ describe('Workout API Routes', () => {
         exercises: [{ name: 'Bench Press', reps: 12, weight: 135 }],
       };
 
-      const response = await request(app)
-        .post('/api/workouts')
-        .send(secondWorkout)
-        .set('Cookie', [`token=${authToken}`])
-        .expect(200);
+      const response = await authReq.post('/api/workouts').send(secondWorkout).expect(200);
 
       expect(response.body.exercises[0].newReps).toBe(true);
       expect(response.body.exercises[0].newWeight).toBe(false);
     });
 
     it('should set newWeight flag when weight increases', async () => {
+      const authReq = authenticatedRequest(app, testUserData.authToken);
+
       // Create first workout
       const firstWorkout = {
         date: '2024-01-15',
@@ -201,11 +154,7 @@ describe('Workout API Routes', () => {
         exercises: [{ name: 'Squat', reps: 8, weight: 185 }],
       };
 
-      await request(app)
-        .post('/api/workouts')
-        .send(firstWorkout)
-        .set('Cookie', [`token=${authToken}`])
-        .expect(200);
+      await authReq.post('/api/workouts').send(firstWorkout).expect(200);
 
       // Create second workout with increased weight
       const secondWorkout = {
@@ -214,17 +163,15 @@ describe('Workout API Routes', () => {
         exercises: [{ name: 'Squat', reps: 8, weight: 200 }],
       };
 
-      const response = await request(app)
-        .post('/api/workouts')
-        .send(secondWorkout)
-        .set('Cookie', [`token=${authToken}`])
-        .expect(200);
+      const response = await authReq.post('/api/workouts').send(secondWorkout).expect(200);
 
       expect(response.body.exercises[0].newReps).toBe(false);
       expect(response.body.exercises[0].newWeight).toBe(true);
     });
 
     it('should set newTime flag when time increases', async () => {
+      const authReq = authenticatedRequest(app, testUserData.authToken);
+
       // Create first workout
       const firstWorkout = {
         date: '2024-01-15',
@@ -232,11 +179,7 @@ describe('Workout API Routes', () => {
         exercises: [{ name: 'Plank', reps: 1, time_seconds: 2 }],
       };
 
-      await request(app)
-        .post('/api/workouts')
-        .send(firstWorkout)
-        .set('Cookie', [`token=${authToken}`])
-        .expect(200);
+      await authReq.post('/api/workouts').send(firstWorkout).expect(200);
 
       // Create second workout with increased time
       const secondWorkout = {
@@ -245,11 +188,7 @@ describe('Workout API Routes', () => {
         exercises: [{ name: 'Plank', reps: 1, time_seconds: 2.5 }],
       };
 
-      const response = await request(app)
-        .post('/api/workouts')
-        .send(secondWorkout)
-        .set('Cookie', [`token=${authToken}`])
-        .expect(200);
+      const response = await authReq.post('/api/workouts').send(secondWorkout).expect(200);
 
       expect(response.body.exercises[0].newTime).toBe(true);
     });
@@ -261,22 +200,16 @@ describe('Workout API Routes', () => {
         exercises: [{ name: 'Squats', reps: 10, weight: 100 }],
       };
 
+      const authReq = authenticatedRequest(app, testUserData.authToken);
+
       // Create first workout
-      await request(app)
-        .post('/api/workouts')
-        .send(workoutData)
-        .set('Cookie', [`token=${authToken}`])
-        .expect(200);
+      await authReq.post('/api/workouts').send(workoutData).expect(200);
 
       // Mock console.error to suppress expected error output
       const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       // Try to create duplicate - should return 400 with user-friendly message
-      const response = await request(app)
-        .post('/api/workouts')
-        .send(workoutData)
-        .set('Cookie', [`token=${authToken}`])
-        .expect(400);
+      const response = await authReq.post('/api/workouts').send(workoutData).expect(400);
 
       expect(response.body.error).toBe('A workout already exists for this date');
       expect(response.status).toBe(400); // Not 500
@@ -287,6 +220,7 @@ describe('Workout API Routes', () => {
 
     it('should create or reuse exercises', async () => {
       const exerciseRepository = dataSource.getRepository(Exercise);
+      const authReq = authenticatedRequest(app, testUserData.authToken);
 
       // Create first workout with new exercise
       const firstWorkout = {
@@ -295,14 +229,10 @@ describe('Workout API Routes', () => {
         exercises: [{ name: 'Deadlift', reps: 5, weight: 225 }],
       };
 
-      await request(app)
-        .post('/api/workouts')
-        .send(firstWorkout)
-        .set('Cookie', [`token=${authToken}`])
-        .expect(200);
+      await authReq.post('/api/workouts').send(firstWorkout).expect(200);
 
       const exercisesAfterFirst = await exerciseRepository.find({
-        where: { userId: testUser.id, name: 'Deadlift' },
+        where: { userId: testUserData.user.id, name: 'Deadlift' },
       });
       expect(exercisesAfterFirst).toHaveLength(1);
 
@@ -313,15 +243,11 @@ describe('Workout API Routes', () => {
         exercises: [{ name: 'Deadlift', reps: 5, weight: 235 }],
       };
 
-      await request(app)
-        .post('/api/workouts')
-        .send(secondWorkout)
-        .set('Cookie', [`token=${authToken}`])
-        .expect(200);
+      await authReq.post('/api/workouts').send(secondWorkout).expect(200);
 
       // Should still only have one exercise record
       const exercisesAfterSecond = await exerciseRepository.find({
-        where: { userId: testUser.id, name: 'Deadlift' },
+        where: { userId: testUserData.user.id, name: 'Deadlift' },
       });
       expect(exercisesAfterSecond).toHaveLength(1);
     });
@@ -337,11 +263,8 @@ describe('Workout API Routes', () => {
         ],
       };
 
-      const response = await request(app)
-        .post('/api/workouts')
-        .send(workoutData)
-        .set('Cookie', [`token=${authToken}`])
-        .expect(200);
+      const authReq = authenticatedRequest(app, testUserData.authToken);
+      const response = await authReq.post('/api/workouts').send(workoutData).expect(200);
 
       expect(response.body.exercises).toHaveLength(3);
       expect(response.body.exercises[0].weight).toBe(135);
@@ -357,11 +280,8 @@ describe('Workout API Routes', () => {
         exercises: [{ name: 'Squats', reps: 10, weight: 100 }],
       };
 
-      const response = await request(app)
-        .post('/api/workouts')
-        .send(workoutData)
-        .set('Cookie', [`token=${authToken}`])
-        .expect(200);
+      const authReq = authenticatedRequest(app, testUserData.authToken);
+      const response = await authReq.post('/api/workouts').send(workoutData).expect(200);
 
       // Verify in database
       const workoutRepository = dataSource.getRepository(Workout);

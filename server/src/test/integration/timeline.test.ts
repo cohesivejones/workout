@@ -3,9 +3,9 @@ import request from 'supertest';
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import dataSource from '../../data-source';
-import { User, Workout, PainScore, SleepScore, Exercise, WorkoutExercise } from '../../entities';
-import { generateToken, authenticateToken } from '../../middleware/auth';
-import * as bcrypt from 'bcrypt';
+import { Workout, PainScore, SleepScore, Exercise, WorkoutExercise } from '../../entities';
+import { authenticateToken } from '../../middleware/auth';
+import { createTestUser, cleanupTestUser, cleanupUserData, TestUserData } from '../helpers';
 
 // Create a minimal test app with just the timeline endpoint
 function createTestApp() {
@@ -102,9 +102,9 @@ function createTestApp() {
           reps: we.reps,
           weight: we.weight,
           time_seconds: we.time_seconds,
-          newReps: we.newReps,
-          newWeight: we.newWeight,
-          newTime: we.newTime,
+          newReps: we.new_reps,
+          newWeight: we.new_weight,
+          newTime: we.new_time,
         })),
       }));
 
@@ -127,60 +127,25 @@ function createTestApp() {
 
 describe('Timeline API Routes', () => {
   let app: express.Application;
-  let testUser: User;
-  let authToken: string;
+  let testUserData: TestUserData;
 
   beforeAll(async () => {
-    // Create test app
     app = createTestApp();
-
-    // Create test user
-    const userRepository = dataSource.getRepository(User);
-    const hashedPassword = await bcrypt.hash('testpass123', 10);
-
-    testUser = userRepository.create({
-      email: 'timeline-test@example.com',
-      name: 'Timeline Test User',
-      password: hashedPassword,
-    });
-
-    await userRepository.save(testUser);
-    authToken = generateToken(testUser);
+    testUserData = await createTestUser();
   });
 
   afterAll(async () => {
-    // Clean up test user and all related data
-    if (testUser) {
-      await dataSource.query(
-        'DELETE FROM workout_exercises WHERE workout_id IN (SELECT id FROM workouts WHERE "userId" = $1)',
-        [testUser.id]
-      );
-      await dataSource.query('DELETE FROM workouts WHERE "userId" = $1', [testUser.id]);
-      await dataSource.query('DELETE FROM pain_scores WHERE "userId" = $1', [testUser.id]);
-      await dataSource.query('DELETE FROM sleep_scores WHERE "userId" = $1', [testUser.id]);
-      await dataSource.query('DELETE FROM exercises WHERE "userId" = $1', [testUser.id]);
-
-      const userRepository = dataSource.getRepository(User);
-      await userRepository.remove(testUser);
-    }
+    await cleanupUserData(testUserData.user.id);
+    await cleanupTestUser(testUserData.user);
   });
 
   beforeEach(async () => {
-    // Clear test data before each test
-    await dataSource.query(
-      'DELETE FROM workout_exercises WHERE workout_id IN (SELECT id FROM workouts WHERE "userId" = $1)',
-      [testUser.id]
-    );
-    await dataSource.query('DELETE FROM workouts WHERE "userId" = $1', [testUser.id]);
-    await dataSource.query('DELETE FROM pain_scores WHERE "userId" = $1', [testUser.id]);
-    await dataSource.query('DELETE FROM sleep_scores WHERE "userId" = $1', [testUser.id]);
-    await dataSource.query('DELETE FROM exercises WHERE "userId" = $1', [testUser.id]);
+    await cleanupUserData(testUserData.user.id);
   });
 
   describe('GET /api/timeline', () => {
     it('should require authentication', async () => {
       const response = await request(app).get('/api/timeline').expect(401);
-
       expect(response.body.error).toBeDefined();
     });
 
@@ -194,7 +159,7 @@ describe('Timeline API Routes', () => {
 
       // Create a workout
       const workout = workoutRepository.create({
-        userId: testUser.id,
+        userId: testUserData.user.id,
         date: '2024-01-15',
         withInstructor: false,
       });
@@ -203,25 +168,25 @@ describe('Timeline API Routes', () => {
       // Add exercise to workout
       const exercise = exerciseRepository.create({
         name: 'Squats',
-        userId: testUser.id,
+        userId: testUserData.user.id,
       });
       await exerciseRepository.save(exercise);
 
       const workoutExercise = workoutExerciseRepository.create({
-        workout_id: workout.id,
-        exercise_id: exercise.id,
+        workout: workout,
+        exercise: exercise,
         reps: 10,
         weight: 100,
         time_seconds: null,
-        newReps: false,
-        newWeight: false,
-        newTime: false,
+        new_reps: false,
+        new_weight: false,
+        new_time: false,
       });
       await workoutExerciseRepository.save(workoutExercise);
 
       // Create a pain score
       const painScore = painScoreRepository.create({
-        userId: testUser.id,
+        userId: testUserData.user.id,
         date: '2024-01-16',
         score: 3,
         notes: 'Mild discomfort',
@@ -230,7 +195,7 @@ describe('Timeline API Routes', () => {
 
       // Create a sleep score
       const sleepScore = sleepScoreRepository.create({
-        userId: testUser.id,
+        userId: testUserData.user.id,
         date: '2024-01-17',
         score: 4,
         notes: 'Good sleep',
@@ -241,7 +206,7 @@ describe('Timeline API Routes', () => {
       const response = await request(app)
         .get('/api/timeline')
         .query({ startDate: '2024-01-01', endDate: '2024-01-31' })
-        .set('Cookie', [`token=${authToken}`])
+        .set('Cookie', [`token=${testUserData.authToken}`])
         .expect(200);
 
       expect(response.body).toHaveProperty('workouts');
@@ -261,7 +226,7 @@ describe('Timeline API Routes', () => {
       // Create workouts in different months
       await workoutRepository.save(
         workoutRepository.create({
-          userId: testUser.id,
+          userId: testUserData.user.id,
           date: '2024-01-15',
           withInstructor: false,
         })
@@ -269,7 +234,7 @@ describe('Timeline API Routes', () => {
 
       await workoutRepository.save(
         workoutRepository.create({
-          userId: testUser.id,
+          userId: testUserData.user.id,
           date: '2024-02-15',
           withInstructor: false,
         })
@@ -277,7 +242,7 @@ describe('Timeline API Routes', () => {
 
       await workoutRepository.save(
         workoutRepository.create({
-          userId: testUser.id,
+          userId: testUserData.user.id,
           date: '2024-03-15',
           withInstructor: false,
         })
@@ -287,7 +252,7 @@ describe('Timeline API Routes', () => {
       const response = await request(app)
         .get('/api/timeline')
         .query({ startDate: '2024-02-01', endDate: '2024-02-29' })
-        .set('Cookie', [`token=${authToken}`])
+        .set('Cookie', [`token=${testUserData.authToken}`])
         .expect(200);
 
       expect(response.body.workouts).toHaveLength(1);
@@ -300,7 +265,7 @@ describe('Timeline API Routes', () => {
       // Create workouts in January and February
       await workoutRepository.save(
         workoutRepository.create({
-          userId: testUser.id,
+          userId: testUserData.user.id,
           date: '2024-01-15',
           withInstructor: false,
         })
@@ -308,7 +273,7 @@ describe('Timeline API Routes', () => {
 
       await workoutRepository.save(
         workoutRepository.create({
-          userId: testUser.id,
+          userId: testUserData.user.id,
           date: '2024-02-15',
           withInstructor: false,
         })
@@ -318,7 +283,7 @@ describe('Timeline API Routes', () => {
       const response = await request(app)
         .get('/api/timeline')
         .query({ startDate: '2024-02-01', endDate: '2024-02-29' })
-        .set('Cookie', [`token=${authToken}`])
+        .set('Cookie', [`token=${testUserData.authToken}`])
         .expect(200);
 
       expect(response.body.hasMore).toBe(true);
@@ -330,7 +295,7 @@ describe('Timeline API Routes', () => {
       // Create workout only in February
       await workoutRepository.save(
         workoutRepository.create({
-          userId: testUser.id,
+          userId: testUserData.user.id,
           date: '2024-02-15',
           withInstructor: false,
         })
@@ -340,7 +305,7 @@ describe('Timeline API Routes', () => {
       const response = await request(app)
         .get('/api/timeline')
         .query({ startDate: '2024-02-01', endDate: '2024-02-29' })
-        .set('Cookie', [`token=${authToken}`])
+        .set('Cookie', [`token=${testUserData.authToken}`])
         .expect(200);
 
       expect(response.body.hasMore).toBe(false);
@@ -352,7 +317,7 @@ describe('Timeline API Routes', () => {
       // Create workouts at specific dates
       await workoutRepository.save(
         workoutRepository.create({
-          userId: testUser.id,
+          userId: testUserData.user.id,
           date: '2024-02-01', // Exactly at start date
           withInstructor: false,
         })
@@ -360,7 +325,7 @@ describe('Timeline API Routes', () => {
 
       await workoutRepository.save(
         workoutRepository.create({
-          userId: testUser.id,
+          userId: testUserData.user.id,
           date: '2024-02-15', // Within range
           withInstructor: false,
         })
@@ -371,7 +336,7 @@ describe('Timeline API Routes', () => {
       const response = await request(app)
         .get('/api/timeline')
         .query({ startDate: '2024-02-01', endDate: '2024-02-29' })
-        .set('Cookie', [`token=${authToken}`])
+        .set('Cookie', [`token=${testUserData.authToken}`])
         .expect(200);
 
       expect(response.body.workouts).toHaveLength(2);
@@ -384,7 +349,7 @@ describe('Timeline API Routes', () => {
       // Create workouts at specific dates
       await workoutRepository.save(
         workoutRepository.create({
-          userId: testUser.id,
+          userId: testUserData.user.id,
           date: '2024-01-31', // One day before start date
           withInstructor: false,
         })
@@ -392,7 +357,7 @@ describe('Timeline API Routes', () => {
 
       await workoutRepository.save(
         workoutRepository.create({
-          userId: testUser.id,
+          userId: testUserData.user.id,
           date: '2024-02-15', // Within range
           withInstructor: false,
         })
@@ -402,7 +367,7 @@ describe('Timeline API Routes', () => {
       const response = await request(app)
         .get('/api/timeline')
         .query({ startDate: '2024-02-01', endDate: '2024-02-29' })
-        .set('Cookie', [`token=${authToken}`])
+        .set('Cookie', [`token=${testUserData.authToken}`])
         .expect(200);
 
       expect(response.body.workouts).toHaveLength(1); // Only Feb 15
@@ -422,7 +387,7 @@ describe('Timeline API Routes', () => {
       // Create workout 4 months ago (should be included)
       await workoutRepository.save(
         workoutRepository.create({
-          userId: testUser.id,
+          userId: testUserData.user.id,
           date: fourMonthsAgo.toISOString().split('T')[0],
           withInstructor: false,
         })
@@ -431,7 +396,7 @@ describe('Timeline API Routes', () => {
       // Create workout 2 months ago (should be included)
       await workoutRepository.save(
         workoutRepository.create({
-          userId: testUser.id,
+          userId: testUserData.user.id,
           date: twoMonthsAgo.toISOString().split('T')[0],
           withInstructor: false,
         })
@@ -439,7 +404,7 @@ describe('Timeline API Routes', () => {
 
       const response = await request(app)
         .get('/api/timeline')
-        .set('Cookie', [`token=${authToken}`])
+        .set('Cookie', [`token=${testUserData.authToken}`])
         .expect(200);
 
       // Should return all workouts when no date range is specified
@@ -451,7 +416,7 @@ describe('Timeline API Routes', () => {
       const response = await request(app)
         .get('/api/timeline')
         .query({ startDate: '2024-01-01', endDate: '2024-01-31' })
-        .set('Cookie', [`token=${authToken}`])
+        .set('Cookie', [`token=${testUserData.authToken}`])
         .expect(200);
 
       expect(response.body.workouts).toEqual([]);
@@ -462,22 +427,14 @@ describe('Timeline API Routes', () => {
 
     it('should only return data for authenticated user', async () => {
       const workoutRepository = dataSource.getRepository(Workout);
-      const userRepository = dataSource.getRepository(User);
 
-      // Create another user with unique email
-      const hashedPassword = await bcrypt.hash('testpass123', 10);
-      const uniqueEmail = `other-user-${Date.now()}@example.com`;
-      const otherUser = userRepository.create({
-        email: uniqueEmail,
-        name: 'Other User',
-        password: hashedPassword,
-      });
-      await userRepository.save(otherUser);
+      // Create another user
+      const otherUserData = await createTestUser();
 
       // Create workout for other user
       await workoutRepository.save(
         workoutRepository.create({
-          userId: otherUser.id,
+          userId: otherUserData.user.id,
           date: '2024-01-15',
           withInstructor: false,
         })
@@ -486,7 +443,7 @@ describe('Timeline API Routes', () => {
       // Create workout for test user
       await workoutRepository.save(
         workoutRepository.create({
-          userId: testUser.id,
+          userId: testUserData.user.id,
           date: '2024-01-16',
           withInstructor: false,
         })
@@ -496,7 +453,7 @@ describe('Timeline API Routes', () => {
       const response = await request(app)
         .get('/api/timeline')
         .query({ startDate: '2024-01-01', endDate: '2024-01-31' })
-        .set('Cookie', [`token=${authToken}`])
+        .set('Cookie', [`token=${testUserData.authToken}`])
         .expect(200);
 
       // Should only see test user's workout
@@ -504,8 +461,8 @@ describe('Timeline API Routes', () => {
       expect(response.body.workouts[0].date).toBe('2024-01-16');
 
       // Clean up other user
-      await dataSource.query('DELETE FROM workouts WHERE "userId" = $1', [otherUser.id]);
-      await userRepository.remove(otherUser);
+      await cleanupUserData(otherUserData.user.id);
+      await cleanupTestUser(otherUserData.user);
     });
 
     it('should return hasMore: false when oldest workout is at startDate boundary (real scenario)', async () => {
@@ -524,7 +481,7 @@ describe('Timeline API Routes', () => {
       for (const date of workoutDates) {
         await workoutRepository.save(
           workoutRepository.create({
-            userId: testUser.id,
+            userId: testUserData.user.id,
             date,
             withInstructor: false,
           })
@@ -535,7 +492,7 @@ describe('Timeline API Routes', () => {
       const response1 = await request(app)
         .get('/api/timeline')
         .query({ startDate: '2025-05-06', endDate: '2025-11-01' })
-        .set('Cookie', [`token=${authToken}`])
+        .set('Cookie', [`token=${testUserData.authToken}`])
         .expect(200);
 
       // Should return all 5 workouts
@@ -547,7 +504,7 @@ describe('Timeline API Routes', () => {
       const response2 = await request(app)
         .get('/api/timeline')
         .query({ startDate: '2025-05-05', endDate: '2025-11-01' })
-        .set('Cookie', [`token=${authToken}`])
+        .set('Cookie', [`token=${testUserData.authToken}`])
         .expect(200);
 
       // Should return all 6 workouts
@@ -559,7 +516,7 @@ describe('Timeline API Routes', () => {
       const response3 = await request(app)
         .get('/api/timeline')
         .query({ startDate: '2025-02-04', endDate: '2025-11-01' })
-        .set('Cookie', [`token=${authToken}`])
+        .set('Cookie', [`token=${testUserData.authToken}`])
         .expect(200);
 
       // Should still return all 6 workouts

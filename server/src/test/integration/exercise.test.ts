@@ -1,13 +1,19 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach, vi, type Mock } from 'vitest';
 import request from 'supertest';
 import express from 'express';
-import cookieParser from 'cookie-parser';
 import dataSource from '../../data-source';
-import { User, Exercise, Workout, WorkoutExercise } from '../../entities';
-import { generateToken } from '../../middleware/auth';
-import * as bcrypt from 'bcrypt';
+import { Exercise, Workout, WorkoutExercise } from '../../entities';
 import exercisesRouter from '../../routes/exercises.routes';
 import { openai } from '../../services/openai';
+import {
+  createTestApp,
+  createTestUser,
+  cleanupTestUser,
+  cleanupUserData,
+  cleanupAllTables,
+  authenticatedRequest,
+  TestUserData,
+} from '../helpers';
 
 // Mock the OpenAI client
 vi.mock('../../services/openai', () => ({
@@ -23,73 +29,39 @@ vi.mock('../../services/openai', () => ({
 // Type the mocked function
 const mockOpenAICreate = openai.chat.completions.create as Mock;
 
-// Create a minimal test app with exercise routes
-function createTestApp() {
-  const app = express();
-  app.use(express.json());
-  app.use(cookieParser());
-
-  app.use('/api/exercises', exercisesRouter);
-
-  return app;
-}
-
 describe('Exercise API Routes', () => {
   let app: express.Application;
-  let testUser: User;
-  let authToken: string;
+  let testUserData: TestUserData;
 
   beforeAll(async () => {
-    app = createTestApp();
-
-    const userRepository = dataSource.getRepository(User);
-    const hashedPassword = await bcrypt.hash('testpass123', 10);
-
-    testUser = userRepository.create({
-      email: 'exercise-test@example.com',
-      name: 'Exercise Test User',
-      password: hashedPassword,
-    });
-
-    await userRepository.save(testUser);
-    authToken = generateToken(testUser);
+    app = createTestApp([{ path: '/api/exercises', router: exercisesRouter }]);
+    testUserData = await createTestUser(); // Auto-generated unique email
   });
 
   afterAll(async () => {
-    if (testUser) {
-      await dataSource.query(
-        'DELETE FROM workout_exercises WHERE workout_id IN (SELECT id FROM workouts WHERE "userId" = $1)',
-        [testUser.id]
-      );
-      await dataSource.query('DELETE FROM workouts WHERE "userId" = $1', [testUser.id]);
-      await dataSource.query('DELETE FROM exercises WHERE "userId" = $1', [testUser.id]);
-
-      const userRepository = dataSource.getRepository(User);
-      await userRepository.remove(testUser);
-    }
+    await cleanupUserData(testUserData.user.id);
+    await cleanupTestUser(testUserData.user);
   });
 
   beforeEach(async () => {
-    await dataSource.query('DELETE FROM workout_exercises');
-    await dataSource.query('DELETE FROM workouts');
-    await dataSource.query('DELETE FROM exercises');
-    await dataSource.query('DELETE FROM pain_scores');
-    await dataSource.query('DELETE FROM sleep_scores');
+    await cleanupAllTables([
+      'workout_exercises',
+      'workouts',
+      'exercises',
+      'pain_scores',
+      'sleep_scores',
+    ]);
   });
 
   describe('GET /api/exercises', () => {
     it('should require authentication', async () => {
       const response = await request(app).get('/api/exercises').expect(401);
-
       expect(response.body.error).toBeDefined();
     });
 
     it('should return empty array when no exercises exist', async () => {
-      const response = await request(app)
-        .get('/api/exercises')
-        .set('Cookie', [`token=${authToken}`])
-        .expect(200);
-
+      const authReq = authenticatedRequest(app, testUserData.authToken);
+      const response = await authReq.get('/api/exercises').expect(200);
       expect(response.body).toEqual([]);
     });
 
@@ -97,14 +69,15 @@ describe('Exercise API Routes', () => {
       const exerciseRepository = dataSource.getRepository(Exercise);
 
       // Create test exercises
-      const exercise1 = exerciseRepository.create({ name: 'Bench Press', userId: testUser.id });
-      const exercise2 = exerciseRepository.create({ name: 'Squats', userId: testUser.id });
+      const exercise1 = exerciseRepository.create({
+        name: 'Bench Press',
+        userId: testUserData.user.id,
+      });
+      const exercise2 = exerciseRepository.create({ name: 'Squats', userId: testUserData.user.id });
       await exerciseRepository.save([exercise1, exercise2]);
 
-      const response = await request(app)
-        .get('/api/exercises')
-        .set('Cookie', [`token=${authToken}`])
-        .expect(200);
+      const authReq = authenticatedRequest(app, testUserData.authToken);
+      const response = await authReq.get('/api/exercises').expect(200);
 
       expect(response.body).toHaveLength(2);
       expect(response.body[0].name).toBe('Bench Press');
@@ -116,16 +89,14 @@ describe('Exercise API Routes', () => {
 
       // Create exercises in non-alphabetical order
       const exercises = [
-        exerciseRepository.create({ name: 'Squats', userId: testUser.id }),
-        exerciseRepository.create({ name: 'Bench Press', userId: testUser.id }),
-        exerciseRepository.create({ name: 'Deadlift', userId: testUser.id }),
+        exerciseRepository.create({ name: 'Squats', userId: testUserData.user.id }),
+        exerciseRepository.create({ name: 'Bench Press', userId: testUserData.user.id }),
+        exerciseRepository.create({ name: 'Deadlift', userId: testUserData.user.id }),
       ];
       await exerciseRepository.save(exercises);
 
-      const response = await request(app)
-        .get('/api/exercises')
-        .set('Cookie', [`token=${authToken}`])
-        .expect(200);
+      const authReq = authenticatedRequest(app, testUserData.authToken);
+      const response = await authReq.get('/api/exercises').expect(200);
 
       expect(response.body).toHaveLength(3);
       expect(response.body[0].name).toBe('Bench Press');
@@ -135,39 +106,30 @@ describe('Exercise API Routes', () => {
 
     it('should only return exercises for authenticated user', async () => {
       const exerciseRepository = dataSource.getRepository(Exercise);
-      const userRepository = dataSource.getRepository(User);
 
       // Create another user
-      const hashedPassword = await bcrypt.hash('otherpass123', 10);
-      const otherUser = userRepository.create({
-        email: 'my-other-exercise-test@example.com',
-        name: 'Other Exercise Test User',
-        password: hashedPassword,
-      });
-      await userRepository.save(otherUser);
+      const otherUserData = await createTestUser();
 
       // Create exercises for both users
       const testUserExercise = exerciseRepository.create({
         name: 'My Exercise',
-        userId: testUser.id,
+        userId: testUserData.user.id,
       });
       const otherUserExercise = exerciseRepository.create({
         name: 'Other Exercise',
-        userId: otherUser.id,
+        userId: otherUserData.user.id,
       });
       await exerciseRepository.save([testUserExercise, otherUserExercise]);
 
-      const response = await request(app)
-        .get('/api/exercises')
-        .set('Cookie', [`token=${authToken}`])
-        .expect(200);
+      const authReq = authenticatedRequest(app, testUserData.authToken);
+      const response = await authReq.get('/api/exercises').expect(200);
 
       expect(response.body).toHaveLength(1);
       expect(response.body[0].name).toBe('My Exercise');
 
       // Cleanup
-      await dataSource.query('DELETE FROM exercises WHERE "userId" = $1', [otherUser.id]);
-      await userRepository.remove(otherUser);
+      await cleanupUserData(otherUserData.user.id);
+      await cleanupTestUser(otherUserData.user);
     });
   });
 
@@ -177,52 +139,45 @@ describe('Exercise API Routes', () => {
         .post('/api/exercises')
         .send({ name: 'New Exercise' })
         .expect(401);
-
       expect(response.body.error).toBeDefined();
     });
 
     it('should create a new exercise', async () => {
-      const response = await request(app)
+      const authReq = authenticatedRequest(app, testUserData.authToken);
+      const response = await authReq
         .post('/api/exercises')
         .send({ name: 'Bench Press' })
-        .set('Cookie', [`token=${authToken}`])
         .expect(200);
 
       expect(response.body).toHaveProperty('id');
       expect(response.body.name).toBe('Bench Press');
-      expect(response.body.userId).toBe(testUser.id);
+      expect(response.body.userId).toBe(testUserData.user.id);
     });
 
     it('should return existing exercise if already exists', async () => {
       const exerciseRepository = dataSource.getRepository(Exercise);
       const existingExercise = exerciseRepository.create({
         name: 'Squats',
-        userId: testUser.id,
+        userId: testUserData.user.id,
       });
       await exerciseRepository.save(existingExercise);
 
-      const response = await request(app)
-        .post('/api/exercises')
-        .send({ name: 'Squats' })
-        .set('Cookie', [`token=${authToken}`])
-        .expect(200);
+      const authReq = authenticatedRequest(app, testUserData.authToken);
+      const response = await authReq.post('/api/exercises').send({ name: 'Squats' }).expect(200);
 
       expect(response.body.id).toBe(existingExercise.id);
       expect(response.body.name).toBe('Squats');
 
       // Verify only one exercise exists
       const allExercises = await exerciseRepository.find({
-        where: { name: 'Squats', userId: testUser.id },
+        where: { name: 'Squats', userId: testUserData.user.id },
       });
       expect(allExercises).toHaveLength(1);
     });
 
     it('should persist exercise to database', async () => {
-      const response = await request(app)
-        .post('/api/exercises')
-        .send({ name: 'Deadlift' })
-        .set('Cookie', [`token=${authToken}`])
-        .expect(200);
+      const authReq = authenticatedRequest(app, testUserData.authToken);
+      const response = await authReq.post('/api/exercises').send({ name: 'Deadlift' }).expect(200);
 
       const exerciseRepository = dataSource.getRepository(Exercise);
       const savedExercise = await exerciseRepository.findOne({
@@ -231,7 +186,7 @@ describe('Exercise API Routes', () => {
 
       expect(savedExercise).toBeDefined();
       expect(savedExercise!.name).toBe('Deadlift');
-      expect(savedExercise!.userId).toBe(testUser.id);
+      expect(savedExercise!.userId).toBe(testUserData.user.id);
     });
   });
 
@@ -241,7 +196,6 @@ describe('Exercise API Routes', () => {
         .put('/api/exercises/1')
         .send({ name: 'Updated Exercise' })
         .expect(401);
-
       expect(response.body.error).toBeDefined();
     });
 
@@ -249,14 +203,14 @@ describe('Exercise API Routes', () => {
       const exerciseRepository = dataSource.getRepository(Exercise);
       const exercise = exerciseRepository.create({
         name: 'Old Name',
-        userId: testUser.id,
+        userId: testUserData.user.id,
       });
       await exerciseRepository.save(exercise);
 
-      const response = await request(app)
+      const authReq = authenticatedRequest(app, testUserData.authToken);
+      const response = await authReq
         .put(`/api/exercises/${exercise.id}`)
         .send({ name: 'New Name' })
-        .set('Cookie', [`token=${authToken}`])
         .expect(200);
 
       expect(response.body.id).toBe(exercise.id);
@@ -264,12 +218,11 @@ describe('Exercise API Routes', () => {
     });
 
     it('should return 404 for non-existent exercise', async () => {
-      const response = await request(app)
+      const authReq = authenticatedRequest(app, testUserData.authToken);
+      const response = await authReq
         .put('/api/exercises/99999')
         .send({ name: 'New Name' })
-        .set('Cookie', [`token=${authToken}`])
         .expect(404);
-
       expect(response.body.error).toBe('Exercise not found');
     });
 
@@ -277,16 +230,12 @@ describe('Exercise API Routes', () => {
       const exerciseRepository = dataSource.getRepository(Exercise);
       const exercise = exerciseRepository.create({
         name: 'Test Exercise',
-        userId: testUser.id,
+        userId: testUserData.user.id,
       });
       await exerciseRepository.save(exercise);
 
-      const response = await request(app)
-        .put(`/api/exercises/${exercise.id}`)
-        .send({})
-        .set('Cookie', [`token=${authToken}`])
-        .expect(400);
-
+      const authReq = authenticatedRequest(app, testUserData.authToken);
+      const response = await authReq.put(`/api/exercises/${exercise.id}`).send({}).expect(400);
       expect(response.body.error).toBe('Exercise name is required');
     });
 
@@ -294,15 +243,12 @@ describe('Exercise API Routes', () => {
       const exerciseRepository = dataSource.getRepository(Exercise);
       const exercise = exerciseRepository.create({
         name: 'Old Name',
-        userId: testUser.id,
+        userId: testUserData.user.id,
       });
       await exerciseRepository.save(exercise);
 
-      await request(app)
-        .put(`/api/exercises/${exercise.id}`)
-        .send({ name: 'Updated Name' })
-        .set('Cookie', [`token=${authToken}`])
-        .expect(200);
+      const authReq = authenticatedRequest(app, testUserData.authToken);
+      await authReq.put(`/api/exercises/${exercise.id}`).send({ name: 'Updated Name' }).expect(200);
 
       const updatedExercise = await exerciseRepository.findOne({
         where: { id: exercise.id },
@@ -315,16 +261,12 @@ describe('Exercise API Routes', () => {
   describe('GET /api/exercises/recent', () => {
     it('should require authentication', async () => {
       const response = await request(app).get('/api/exercises/recent?exerciseId=1').expect(401);
-
       expect(response.body.error).toBeDefined();
     });
 
     it('should return 400 when exerciseId is missing', async () => {
-      const response = await request(app)
-        .get('/api/exercises/recent')
-        .set('Cookie', [`token=${authToken}`])
-        .expect(400);
-
+      const authReq = authenticatedRequest(app, testUserData.authToken);
+      const response = await authReq.get('/api/exercises/recent').expect(400);
       expect(response.body.error).toBe('Exercise ID is required');
     });
 
@@ -332,15 +274,14 @@ describe('Exercise API Routes', () => {
       const exerciseRepository = dataSource.getRepository(Exercise);
       const exercise = exerciseRepository.create({
         name: 'Bench Press',
-        userId: testUser.id,
+        userId: testUserData.user.id,
       });
       await exerciseRepository.save(exercise);
 
-      const response = await request(app)
+      const authReq = authenticatedRequest(app, testUserData.authToken);
+      const response = await authReq
         .get(`/api/exercises/recent?exerciseId=${exercise.id}`)
-        .set('Cookie', [`token=${authToken}`])
         .expect(404);
-
       expect(response.body.error).toBe('No workout found with this exercise');
     });
 
@@ -352,13 +293,13 @@ describe('Exercise API Routes', () => {
       // Create exercise
       const exercise = exerciseRepository.create({
         name: 'Bench Press',
-        userId: testUser.id,
+        userId: testUserData.user.id,
       });
       await exerciseRepository.save(exercise);
 
       // Create older workout
       const oldWorkout = workoutRepository.create({
-        userId: testUser.id,
+        userId: testUserData.user.id,
         date: '2024-01-10',
         withInstructor: false,
       });
@@ -375,7 +316,7 @@ describe('Exercise API Routes', () => {
 
       // Create newer workout
       const newWorkout = workoutRepository.create({
-        userId: testUser.id,
+        userId: testUserData.user.id,
         date: '2024-01-15',
         withInstructor: false,
       });
@@ -390,9 +331,9 @@ describe('Exercise API Routes', () => {
       });
       await workoutExerciseRepository.save(newWorkoutExercise);
 
-      const response = await request(app)
+      const authReq = authenticatedRequest(app, testUserData.authToken);
+      const response = await authReq
         .get(`/api/exercises/recent?exerciseId=${exercise.id}`)
-        .set('Cookie', [`token=${authToken}`])
         .expect(200);
 
       expect(response.body.reps).toBe(10);
@@ -408,13 +349,13 @@ describe('Exercise API Routes', () => {
       // Create exercise
       const exercise = exerciseRepository.create({
         name: 'Plank',
-        userId: testUser.id,
+        userId: testUserData.user.id,
       });
       await exerciseRepository.save(exercise);
 
       // Create workout
       const workout = workoutRepository.create({
-        userId: testUser.id,
+        userId: testUserData.user.id,
         date: '2024-01-15',
         withInstructor: false,
       });
@@ -429,9 +370,9 @@ describe('Exercise API Routes', () => {
       });
       await workoutExerciseRepository.save(workoutExercise);
 
-      const response = await request(app)
+      const authReq = authenticatedRequest(app, testUserData.authToken);
+      const response = await authReq
         .get(`/api/exercises/recent?exerciseId=${exercise.id}`)
-        .set('Cookie', [`token=${authToken}`])
         .expect(200);
 
       expect(response.body.reps).toBe(1);
@@ -443,56 +384,42 @@ describe('Exercise API Routes', () => {
   describe('POST /api/exercises/:id/suggest', () => {
     it('should require authentication', async () => {
       const response = await request(app).post('/api/exercises/1/suggest').expect(401);
-
       expect(response.body.error).toBeDefined();
     });
 
     it('should return 404 for non-existent exercise', async () => {
-      const response = await request(app)
-        .post('/api/exercises/99999/suggest')
-        .set('Cookie', [`token=${authToken}`])
-        .expect(404);
-
+      const authReq = authenticatedRequest(app, testUserData.authToken);
+      const response = await authReq.post('/api/exercises/99999/suggest').expect(404);
       expect(response.body.error).toBe('Exercise not found');
     });
 
     it('should return 404 when exercise belongs to different user', async () => {
       const exerciseRepository = dataSource.getRepository(Exercise);
-      const userRepository = dataSource.getRepository(User);
 
       // Create another user
-      const hashedPassword = await bcrypt.hash('otherpass123', 10);
-      const otherUser = userRepository.create({
-        email: 'suggest-other-user@example.com',
-        name: 'Other Suggest User',
-        password: hashedPassword,
-      });
-      await userRepository.save(otherUser);
+      const otherUserData = await createTestUser();
 
       // Create exercise for other user
       const otherExercise = exerciseRepository.create({
         name: 'Other User Exercise',
-        userId: otherUser.id,
+        userId: otherUserData.user.id,
       });
       await exerciseRepository.save(otherExercise);
 
-      const response = await request(app)
-        .post(`/api/exercises/${otherExercise.id}/suggest`)
-        .set('Cookie', [`token=${authToken}`])
-        .expect(404);
-
+      const authReq = authenticatedRequest(app, testUserData.authToken);
+      const response = await authReq.post(`/api/exercises/${otherExercise.id}/suggest`).expect(404);
       expect(response.body.error).toBe('Exercise not found');
 
       // Cleanup
-      await dataSource.query('DELETE FROM exercises WHERE "userId" = $1', [otherUser.id]);
-      await userRepository.remove(otherUser);
+      await cleanupUserData(otherUserData.user.id);
+      await cleanupTestUser(otherUserData.user);
     });
 
     it('should return 3 AI-generated suggestions', async () => {
       const exerciseRepository = dataSource.getRepository(Exercise);
       const exercise = exerciseRepository.create({
         name: 'bench press',
-        userId: testUser.id,
+        userId: testUserData.user.id,
       });
       await exerciseRepository.save(exercise);
 
@@ -507,10 +434,8 @@ describe('Exercise API Routes', () => {
         ],
       });
 
-      const response = await request(app)
-        .post(`/api/exercises/${exercise.id}/suggest`)
-        .set('Cookie', [`token=${authToken}`])
-        .expect(200);
+      const authReq = authenticatedRequest(app, testUserData.authToken);
+      const response = await authReq.post(`/api/exercises/${exercise.id}/suggest`).expect(200);
 
       expect(response.body.suggestions).toHaveLength(3);
       expect(response.body.suggestions).toEqual([
@@ -524,18 +449,15 @@ describe('Exercise API Routes', () => {
       const exerciseRepository = dataSource.getRepository(Exercise);
       const exercise = exerciseRepository.create({
         name: 'squats',
-        userId: testUser.id,
+        userId: testUserData.user.id,
       });
       await exerciseRepository.save(exercise);
 
       // Mock OpenAI error
       mockOpenAICreate.mockRejectedValueOnce(new Error('OpenAI API error'));
 
-      const response = await request(app)
-        .post(`/api/exercises/${exercise.id}/suggest`)
-        .set('Cookie', [`token=${authToken}`])
-        .expect(500);
-
+      const authReq = authenticatedRequest(app, testUserData.authToken);
+      const response = await authReq.post(`/api/exercises/${exercise.id}/suggest`).expect(500);
       expect(response.body.error).toBe('Server error');
     });
 
@@ -543,7 +465,7 @@ describe('Exercise API Routes', () => {
       const exerciseRepository = dataSource.getRepository(Exercise);
       const exercise = exerciseRepository.create({
         name: 'deadlift',
-        userId: testUser.id,
+        userId: testUserData.user.id,
       });
       await exerciseRepository.save(exercise);
 
@@ -558,10 +480,8 @@ describe('Exercise API Routes', () => {
         ],
       });
 
-      const response = await request(app)
-        .post(`/api/exercises/${exercise.id}/suggest`)
-        .set('Cookie', [`token=${authToken}`])
-        .expect(200);
+      const authReq = authenticatedRequest(app, testUserData.authToken);
+      const response = await authReq.post(`/api/exercises/${exercise.id}/suggest`).expect(200);
 
       // Should return the single suggestion (implementation doesn't pad to 3)
       expect(response.body.suggestions).toHaveLength(1);
@@ -572,63 +492,49 @@ describe('Exercise API Routes', () => {
   describe('GET /api/exercises/:id/progression', () => {
     it('should require authentication', async () => {
       const response = await request(app).get('/api/exercises/1/progression').expect(401);
-
       expect(response.body.error).toBeDefined();
     });
 
     it('should return 404 for non-existent exercise', async () => {
-      const response = await request(app)
-        .get('/api/exercises/99999/progression')
-        .set('Cookie', [`token=${authToken}`])
-        .expect(404);
-
+      const authReq = authenticatedRequest(app, testUserData.authToken);
+      const response = await authReq.get('/api/exercises/99999/progression').expect(404);
       expect(response.body.error).toBe('Exercise not found');
     });
 
     it('should return 404 when exercise belongs to different user', async () => {
       const exerciseRepository = dataSource.getRepository(Exercise);
-      const userRepository = dataSource.getRepository(User);
 
       // Create another user
-      const hashedPassword = await bcrypt.hash('otherpass123', 10);
-      const otherUser = userRepository.create({
-        email: 'progression-other-user@example.com',
-        name: 'Other Progression User',
-        password: hashedPassword,
-      });
-      await userRepository.save(otherUser);
+      const otherUserData = await createTestUser();
 
       // Create exercise for other user
       const otherExercise = exerciseRepository.create({
         name: 'Other User Exercise',
-        userId: otherUser.id,
+        userId: otherUserData.user.id,
       });
       await exerciseRepository.save(otherExercise);
 
-      const response = await request(app)
+      const authReq = authenticatedRequest(app, testUserData.authToken);
+      const response = await authReq
         .get(`/api/exercises/${otherExercise.id}/progression`)
-        .set('Cookie', [`token=${authToken}`])
         .expect(404);
-
       expect(response.body.error).toBe('Exercise not found');
 
       // Cleanup
-      await dataSource.query('DELETE FROM exercises WHERE "userId" = $1', [otherUser.id]);
-      await userRepository.remove(otherUser);
+      await cleanupUserData(otherUserData.user.id);
+      await cleanupTestUser(otherUserData.user);
     });
 
     it('should return empty progression data for exercise with no history', async () => {
       const exerciseRepository = dataSource.getRepository(Exercise);
       const exercise = exerciseRepository.create({
         name: 'New Exercise',
-        userId: testUser.id,
+        userId: testUserData.user.id,
       });
       await exerciseRepository.save(exercise);
 
-      const response = await request(app)
-        .get(`/api/exercises/${exercise.id}/progression`)
-        .set('Cookie', [`token=${authToken}`])
-        .expect(200);
+      const authReq = authenticatedRequest(app, testUserData.authToken);
+      const response = await authReq.get(`/api/exercises/${exercise.id}/progression`).expect(200);
 
       expect(response.body.exerciseName).toBe('New Exercise');
       expect(response.body.weightData).toEqual([]);
@@ -643,7 +549,7 @@ describe('Exercise API Routes', () => {
       // Create exercise
       const exercise = exerciseRepository.create({
         name: 'Bench Press',
-        userId: testUser.id,
+        userId: testUserData.user.id,
       });
       await exerciseRepository.save(exercise);
 
@@ -651,7 +557,7 @@ describe('Exercise API Routes', () => {
       const workout1Date = new Date();
       workout1Date.setDate(workout1Date.getDate() - 7);
       const workout1 = workoutRepository.create({
-        userId: testUser.id,
+        userId: testUserData.user.id,
         date: workout1Date.toISOString().split('T')[0],
         withInstructor: false,
       });
@@ -672,7 +578,7 @@ describe('Exercise API Routes', () => {
       // Create workout from today with improvements
       const workout2Date = new Date();
       const workout2 = workoutRepository.create({
-        userId: testUser.id,
+        userId: testUserData.user.id,
         date: workout2Date.toISOString().split('T')[0],
         withInstructor: false,
       });
@@ -690,10 +596,8 @@ describe('Exercise API Routes', () => {
       });
       await workoutExerciseRepository.save(workoutExercise2);
 
-      const response = await request(app)
-        .get(`/api/exercises/${exercise.id}/progression`)
-        .set('Cookie', [`token=${authToken}`])
-        .expect(200);
+      const authReq = authenticatedRequest(app, testUserData.authToken);
+      const response = await authReq.get(`/api/exercises/${exercise.id}/progression`).expect(200);
 
       expect(response.body.exerciseName).toBe('Bench Press');
       expect(response.body.weightData).toHaveLength(2);
@@ -724,7 +628,7 @@ describe('Exercise API Routes', () => {
       // Create exercise
       const exercise = exerciseRepository.create({
         name: 'Squats',
-        userId: testUser.id,
+        userId: testUserData.user.id,
       });
       await exerciseRepository.save(exercise);
 
@@ -732,7 +636,7 @@ describe('Exercise API Routes', () => {
       const oldWorkoutDate = new Date();
       oldWorkoutDate.setDate(oldWorkoutDate.getDate() - 400);
       const oldWorkout = workoutRepository.create({
-        userId: testUser.id,
+        userId: testUserData.user.id,
         date: oldWorkoutDate.toISOString().split('T')[0],
         withInstructor: false,
       });
@@ -751,7 +655,7 @@ describe('Exercise API Routes', () => {
       const recentWorkoutDate = new Date();
       recentWorkoutDate.setDate(recentWorkoutDate.getDate() - 7);
       const recentWorkout = workoutRepository.create({
-        userId: testUser.id,
+        userId: testUserData.user.id,
         date: recentWorkoutDate.toISOString().split('T')[0],
         withInstructor: false,
       });
@@ -766,10 +670,8 @@ describe('Exercise API Routes', () => {
       });
       await workoutExerciseRepository.save(recentWorkoutExercise);
 
-      const response = await request(app)
-        .get(`/api/exercises/${exercise.id}/progression`)
-        .set('Cookie', [`token=${authToken}`])
-        .expect(200);
+      const authReq = authenticatedRequest(app, testUserData.authToken);
+      const response = await authReq.get(`/api/exercises/${exercise.id}/progression`).expect(200);
 
       expect(response.body.exerciseName).toBe('Squats');
       expect(response.body.weightData).toHaveLength(1);
@@ -786,7 +688,7 @@ describe('Exercise API Routes', () => {
       // Create exercise
       const exercise = exerciseRepository.create({
         name: 'Deadlift',
-        userId: testUser.id,
+        userId: testUserData.user.id,
       });
       await exerciseRepository.save(exercise);
 
@@ -801,7 +703,7 @@ describe('Exercise API Routes', () => {
         const workoutDate = new Date();
         workoutDate.setDate(workoutDate.getDate() - daysAgo);
         const workout = workoutRepository.create({
-          userId: testUser.id,
+          userId: testUserData.user.id,
           date: workoutDate.toISOString().split('T')[0],
           withInstructor: false,
         });
@@ -817,10 +719,8 @@ describe('Exercise API Routes', () => {
         await workoutExerciseRepository.save(workoutExercise);
       }
 
-      const response = await request(app)
-        .get(`/api/exercises/${exercise.id}/progression`)
-        .set('Cookie', [`token=${authToken}`])
-        .expect(200);
+      const authReq = authenticatedRequest(app, testUserData.authToken);
+      const response = await authReq.get(`/api/exercises/${exercise.id}/progression`).expect(200);
 
       expect(response.body.weightData).toHaveLength(3);
       // Should be sorted oldest to newest

@@ -1,63 +1,34 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import request from 'supertest';
 import express from 'express';
-import cookieParser from 'cookie-parser';
-import dataSource from '../../data-source';
-import { User, Workout, PainScore, SleepScore, WorkoutExercise, Exercise } from '../../entities';
-import { generateToken } from '../../middleware/auth';
-import * as bcrypt from 'bcrypt';
 import activityRouter from '../../routes/activity.routes';
-
-function createTestApp() {
-  const app = express();
-  app.use(express.json());
-  app.use(cookieParser());
-  app.use('/api/activity', activityRouter);
-  return app;
-}
+import {
+  createTestApp,
+  createTestUser,
+  cleanupTestUser,
+  cleanupUserData,
+  authenticatedRequest,
+  createTestWorkoutWithExercises,
+  createTestSleepScore,
+  TestUserData,
+} from '../helpers';
 
 describe('Activity Feed API', () => {
   let app: express.Application;
-  let testUser: User;
-  let authToken: string;
+  let testUserData: TestUserData;
 
   beforeAll(async () => {
-    app = createTestApp();
-    const userRepository = dataSource.getRepository(User);
-    const hashedPassword = await bcrypt.hash('testpass123', 10);
-    testUser = userRepository.create({
-      email: 'activity-test@example.com',
-      name: 'Activity Test',
-      password: hashedPassword,
-    });
-    await userRepository.save(testUser);
-    authToken = generateToken(testUser);
+    app = createTestApp([{ path: '/api/activity', router: activityRouter }]);
+    testUserData = await createTestUser('activity-test@example.com', 'Activity Test');
   });
 
   afterAll(async () => {
-    if (testUser) {
-      await dataSource.query(
-        'DELETE FROM workout_exercises WHERE workout_id IN (SELECT id FROM workouts WHERE "userId" = $1)',
-        [testUser.id]
-      );
-      await dataSource.query('DELETE FROM workouts WHERE "userId" = $1', [testUser.id]);
-      await dataSource.query('DELETE FROM exercises WHERE "userId" = $1', [testUser.id]);
-      await dataSource.query('DELETE FROM pain_scores WHERE "userId" = $1', [testUser.id]);
-      await dataSource.query('DELETE FROM sleep_scores WHERE "userId" = $1', [testUser.id]);
-      const userRepository = dataSource.getRepository(User);
-      await userRepository.remove(testUser);
-    }
+    await cleanupUserData(testUserData.user.id);
+    await cleanupTestUser(testUserData.user);
   });
 
   beforeEach(async () => {
-    await dataSource.query(
-      'DELETE FROM workout_exercises WHERE workout_id IN (SELECT id FROM workouts WHERE "userId" = $1)',
-      [testUser.id]
-    );
-    await dataSource.query('DELETE FROM workouts WHERE "userId" = $1', [testUser.id]);
-    await dataSource.query('DELETE FROM exercises WHERE "userId" = $1', [testUser.id]);
-    await dataSource.query('DELETE FROM pain_scores WHERE "userId" = $1', [testUser.id]);
-    await dataSource.query('DELETE FROM sleep_scores WHERE "userId" = $1', [testUser.id]);
+    await cleanupUserData(testUserData.user.id);
   });
 
   it('requires authentication', async () => {
@@ -65,10 +36,8 @@ describe('Activity Feed API', () => {
   });
 
   it('returns empty feed when no data', async () => {
-    const res = await request(app)
-      .get('/api/activity')
-      .set('Cookie', [`token=${authToken}`])
-      .expect(200);
+    const authReq = authenticatedRequest(app, testUserData.authToken);
+    const res = await authReq.get('/api/activity').expect(200);
 
     expect(res.body.items).toEqual([]);
     expect(res.body.total).toBe(0);
@@ -77,14 +46,6 @@ describe('Activity Feed API', () => {
   });
 
   it('returns most recent activity month by default (offset=0), ordered desc', async () => {
-    const workoutRepo = dataSource.getRepository(Workout);
-    const exerciseRepo = dataSource.getRepository(Exercise);
-    const weRepo = dataSource.getRepository(WorkoutExercise);
-    const painRepo = dataSource.getRepository(PainScore);
-
-    const ex = exerciseRepo.create({ name: 'Bench Press', userId: testUser.id });
-    await exerciseRepo.save(ex);
-
     const now = new Date();
     const futureMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
     const futureMonthStr = `${futureMonth.getFullYear()}-${String(futureMonth.getMonth() + 1).padStart(2, '0')}`;
@@ -92,37 +53,23 @@ describe('Activity Feed API', () => {
 
     // Create 3 items in future month (offset=0 should return this)
     for (let i = 1; i <= 3; i++) {
-      const w = workoutRepo.create({
-        userId: testUser.id,
-        date: `${futureMonthStr}-${String(i).padStart(2, '0')}`,
-        withInstructor: false,
-      });
-      await workoutRepo.save(w);
-      const we = weRepo.create({
-        workout_id: w.id,
-        exercise_id: ex.id,
-        reps: 10,
-        weight: 100 + i,
-        time_seconds: null,
-      });
-      await weRepo.save(we);
+      await createTestWorkoutWithExercises(
+        testUserData.user.id,
+        { date: `${futureMonthStr}-${String(i).padStart(2, '0')}` },
+        [{ name: 'Bench Press', reps: 10, weight: 100 + i }]
+      );
     }
 
     // Create 2 items this month
     for (let i = 1; i <= 2; i++) {
-      const p = painRepo.create({
-        userId: testUser.id,
+      await createTestSleepScore(testUserData.user.id, {
         date: `${thisMonthStr}-${String(i).padStart(2, '0')}`,
-        score: 5,
-        notes: null,
+        score: 3,
       });
-      await painRepo.save(p);
     }
 
-    const res = await request(app)
-      .get('/api/activity')
-      .set('Cookie', [`token=${authToken}`])
-      .expect(200);
+    const authReq = authenticatedRequest(app, testUserData.authToken);
+    const res = await authReq.get('/api/activity').expect(200);
 
     expect(res.body.offset).toBe(0);
     expect(res.body.month).toBe(futureMonthStr);
@@ -148,14 +95,6 @@ describe('Activity Feed API', () => {
   });
 
   it('supports month-based pagination via offset (offset=1 => one month earlier)', async () => {
-    const workoutRepo = dataSource.getRepository(Workout);
-    const exerciseRepo = dataSource.getRepository(Exercise);
-    const weRepo = dataSource.getRepository(WorkoutExercise);
-    const sleepRepo = dataSource.getRepository(SleepScore);
-
-    const ex = exerciseRepo.create({ name: 'Squat', userId: testUser.id });
-    await exerciseRepo.save(ex);
-
     const now = new Date();
     const futureMonth = new Date(now.getFullYear(), now.getMonth() + 2, 1);
     const futureMonthStr = `${futureMonth.getFullYear()}-${String(futureMonth.getMonth() + 1).padStart(2, '0')}`;
@@ -164,48 +103,32 @@ describe('Activity Feed API', () => {
 
     // 3 workouts in future month (2 months ahead)
     for (let i = 1; i <= 3; i++) {
-      const w = workoutRepo.create({
-        userId: testUser.id,
-        date: `${futureMonthStr}-${String(i).padStart(2, '0')}`,
-        withInstructor: false,
-      });
-      await workoutRepo.save(w);
-      const we = weRepo.create({
-        workout_id: w.id,
-        exercise_id: ex.id,
-        reps: 10,
-        weight: 100 + i,
-        time_seconds: null,
-      });
-      await weRepo.save(we);
+      await createTestWorkoutWithExercises(
+        testUserData.user.id,
+        { date: `${futureMonthStr}-${String(i).padStart(2, '0')}` },
+        [{ name: 'Squat', reps: 10, weight: 100 + i }]
+      );
     }
 
     // 4 sleep scores in next month (1 month ahead)
     for (let i = 1; i <= 4; i++) {
-      const s = sleepRepo.create({
-        userId: testUser.id,
+      await createTestSleepScore(testUserData.user.id, {
         date: `${nextMonthStr}-${String(i).padStart(2, '0')}`,
         score: 3,
-        notes: null,
       });
-      await sleepRepo.save(s);
     }
 
+    const authReq = authenticatedRequest(app, testUserData.authToken);
+
     // offset=0 => most recent activity month (2 months ahead)
-    const res1 = await request(app)
-      .get('/api/activity?offset=0')
-      .set('Cookie', [`token=${authToken}`])
-      .expect(200);
+    const res1 = await authReq.get('/api/activity?offset=0').expect(200);
 
     expect(res1.body.offset).toBe(0);
     expect(res1.body.month).toBe(futureMonthStr);
     expect(res1.body.items.length).toBe(3);
 
     // offset=1 => one month earlier (1 month ahead)
-    const res2 = await request(app)
-      .get('/api/activity?offset=1')
-      .set('Cookie', [`token=${authToken}`])
-      .expect(200);
+    const res2 = await authReq.get('/api/activity?offset=1').expect(200);
 
     expect(res2.body.offset).toBe(1);
     expect(res2.body.month).toBe(nextMonthStr);

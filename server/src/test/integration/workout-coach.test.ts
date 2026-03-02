@@ -1,13 +1,15 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
 import request from 'supertest';
 import express from 'express';
-import cookieParser from 'cookie-parser';
-import dataSource from '../../data-source';
-import { User } from '../../entities';
-import { generateToken } from '../../middleware/auth';
-import * as bcrypt from 'bcrypt';
 import workoutCoachRouter from '../../routes/workout-coach.routes';
 import { workoutCoachSessionStore } from '../../services/workoutCoachSessionStore';
+import {
+  createTestApp,
+  createTestUser,
+  cleanupTestUser,
+  cleanupUserData,
+  TestUserData,
+} from '../helpers';
 
 // Mock OpenAI to avoid hitting external API
 vi.mock('@langchain/openai', () => ({
@@ -27,72 +29,34 @@ vi.mock('@langchain/openai', () => ({
   })),
 }));
 
-// Create test app
-function createTestApp() {
-  const app = express();
-  app.use(express.json());
-  app.use(cookieParser());
-  app.use('/api/workout-coach', workoutCoachRouter);
-  return app;
-}
-
 describe('Workout Coach API Routes', () => {
   let app: express.Application;
-  let testUser: User;
-  let authToken: string;
+  let testUserData: TestUserData;
 
   beforeAll(async () => {
-    app = createTestApp();
-
-    const userRepository = dataSource.getRepository(User);
-    const hashedPassword = await bcrypt.hash('testpass123', 10);
-
-    testUser = userRepository.create({
-      email: 'workout-coach-test@example.com',
-      name: 'Workout Coach Test User',
-      password: hashedPassword,
-    });
-
-    await userRepository.save(testUser);
-    authToken = generateToken(testUser);
+    app = createTestApp([{ path: '/api/workout-coach', router: workoutCoachRouter }]);
+    testUserData = await createTestUser();
   });
 
   afterAll(async () => {
-    if (testUser) {
-      // Clean up all test data
-      await dataSource.query(
-        'DELETE FROM workout_exercises WHERE workout_id IN (SELECT id FROM workouts WHERE "userId" = $1)',
-        [testUser.id]
-      );
-      await dataSource.query('DELETE FROM workouts WHERE "userId" = $1', [testUser.id]);
-      await dataSource.query('DELETE FROM exercises WHERE "userId" = $1', [testUser.id]);
-
-      const userRepository = dataSource.getRepository(User);
-      await userRepository.remove(testUser);
-    }
+    await cleanupUserData(testUserData.user.id);
+    await cleanupTestUser(testUserData.user);
   });
 
   beforeEach(async () => {
-    // Clean up workouts before each test
-    await dataSource.query(
-      'DELETE FROM workout_exercises WHERE workout_id IN (SELECT id FROM workouts WHERE "userId" = $1)',
-      [testUser.id]
-    );
-    await dataSource.query('DELETE FROM workouts WHERE "userId" = $1', [testUser.id]);
-    await dataSource.query('DELETE FROM exercises WHERE "userId" = $1', [testUser.id]);
+    await cleanupUserData(testUserData.user.id);
   });
 
   describe('POST /api/workout-coach/start', () => {
     it('should require authentication', async () => {
       const response = await request(app).post('/api/workout-coach/start').expect(401);
-
       expect(response.body.error).toBeDefined();
     });
 
     it('should create a new session and return session ID', async () => {
       const response = await request(app)
         .post('/api/workout-coach/start')
-        .set('Cookie', [`token=${authToken}`])
+        .set('Cookie', [`token=${testUserData.authToken}`])
         .expect(200);
 
       expect(response.body).toHaveProperty('sessionId');
@@ -104,14 +68,14 @@ describe('Workout Coach API Routes', () => {
     it('should initialize session in session store', async () => {
       const response = await request(app)
         .post('/api/workout-coach/start')
-        .set('Cookie', [`token=${authToken}`])
+        .set('Cookie', [`token=${testUserData.authToken}`])
         .expect(200);
 
       const sessionId = response.body.sessionId;
       const session = workoutCoachSessionStore.get(sessionId);
 
       expect(session).toBeDefined();
-      expect(session!.userId).toBe(testUser.id);
+      expect(session!.userId).toBe(testUserData.user.id);
       expect(session!.messages).toEqual([]);
       expect(session!.regenerationCount).toBe(0);
       expect(session!.currentWorkoutPlan).toBeNull();
@@ -121,12 +85,12 @@ describe('Workout Coach API Routes', () => {
     it('should create unique session IDs for multiple requests', async () => {
       const response1 = await request(app)
         .post('/api/workout-coach/start')
-        .set('Cookie', [`token=${authToken}`])
+        .set('Cookie', [`token=${testUserData.authToken}`])
         .expect(200);
 
       const response2 = await request(app)
         .post('/api/workout-coach/start')
-        .set('Cookie', [`token=${authToken}`])
+        .set('Cookie', [`token=${testUserData.authToken}`])
         .expect(200);
 
       expect(response1.body.sessionId).not.toBe(response2.body.sessionId);
@@ -144,7 +108,7 @@ describe('Workout Coach API Routes', () => {
       // Create a session for each test
       const response = await request(app)
         .post('/api/workout-coach/start')
-        .set('Cookie', [`token=${authToken}`])
+        .set('Cookie', [`token=${testUserData.authToken}`])
         .expect(200);
 
       sessionId = response.body.sessionId;
@@ -162,7 +126,7 @@ describe('Workout Coach API Routes', () => {
     it('should require sessionId', async () => {
       const response = await request(app)
         .post('/api/workout-coach/respond')
-        .set('Cookie', [`token=${authToken}`])
+        .set('Cookie', [`token=${testUserData.authToken}`])
         .send({ response: 'yes' })
         .expect(400);
 
@@ -172,7 +136,7 @@ describe('Workout Coach API Routes', () => {
     it('should require response', async () => {
       const response = await request(app)
         .post('/api/workout-coach/respond')
-        .set('Cookie', [`token=${authToken}`])
+        .set('Cookie', [`token=${testUserData.authToken}`])
         .send({ sessionId })
         .expect(400);
 
@@ -182,7 +146,7 @@ describe('Workout Coach API Routes', () => {
     it('should validate response is yes or no', async () => {
       const response = await request(app)
         .post('/api/workout-coach/respond')
-        .set('Cookie', [`token=${authToken}`])
+        .set('Cookie', [`token=${testUserData.authToken}`])
         .send({ sessionId, response: 'maybe' })
         .expect(400);
 
@@ -192,7 +156,7 @@ describe('Workout Coach API Routes', () => {
     it('should return error if session not found', async () => {
       const response = await request(app)
         .post('/api/workout-coach/respond')
-        .set('Cookie', [`token=${authToken}`])
+        .set('Cookie', [`token=${testUserData.authToken}`])
         .send({ sessionId: 'non-existent-session', response: 'yes' })
         .expect(404);
 
@@ -212,7 +176,7 @@ describe('Workout Coach API Routes', () => {
 
       const response = await request(app)
         .post('/api/workout-coach/respond')
-        .set('Cookie', [`token=${authToken}`])
+        .set('Cookie', [`token=${testUserData.authToken}`])
         .send({ sessionId, response: 'yes' })
         .expect(200);
 
@@ -226,7 +190,7 @@ describe('Workout Coach API Routes', () => {
     it('should update session with "no" response and increment regeneration count', async () => {
       const response = await request(app)
         .post('/api/workout-coach/respond')
-        .set('Cookie', [`token=${authToken}`])
+        .set('Cookie', [`token=${testUserData.authToken}`])
         .send({ sessionId, response: 'no' })
         .expect(200);
 
@@ -241,7 +205,7 @@ describe('Workout Coach API Routes', () => {
       // First no
       await request(app)
         .post('/api/workout-coach/respond')
-        .set('Cookie', [`token=${authToken}`])
+        .set('Cookie', [`token=${testUserData.authToken}`])
         .send({ sessionId, response: 'no' })
         .expect(200);
 
@@ -251,7 +215,7 @@ describe('Workout Coach API Routes', () => {
       // Second no
       await request(app)
         .post('/api/workout-coach/respond')
-        .set('Cookie', [`token=${authToken}`])
+        .set('Cookie', [`token=${testUserData.authToken}`])
         .send({ sessionId, response: 'no' })
         .expect(200);
 
@@ -261,7 +225,7 @@ describe('Workout Coach API Routes', () => {
       // Third no
       await request(app)
         .post('/api/workout-coach/respond')
-        .set('Cookie', [`token=${authToken}`])
+        .set('Cookie', [`token=${testUserData.authToken}`])
         .send({ sessionId, response: 'no' })
         .expect(200);
 
@@ -271,29 +235,19 @@ describe('Workout Coach API Routes', () => {
 
     it('should verify user owns the session', async () => {
       // Create another user
-      const userRepository = dataSource.getRepository(User);
-      const hashedPassword = await bcrypt.hash('testpass123', 10);
-
-      const otherUser = userRepository.create({
-        email: 'other-user@example.com',
-        name: 'Other User',
-        password: hashedPassword,
-      });
-
-      await userRepository.save(otherUser);
-      const otherAuthToken = generateToken(otherUser);
+      const otherUserData = await createTestUser();
 
       // Try to respond to session owned by testUser using otherUser's token
       const response = await request(app)
         .post('/api/workout-coach/respond')
-        .set('Cookie', [`token=${otherAuthToken}`])
+        .set('Cookie', [`token=${otherUserData.authToken}`])
         .send({ sessionId, response: 'yes' })
         .expect(403);
 
       expect(response.body.error).toBe('Unauthorized');
 
       // Clean up other user
-      await userRepository.remove(otherUser);
+      await cleanupTestUser(otherUserData.user);
     });
   });
 
@@ -304,7 +258,7 @@ describe('Workout Coach API Routes', () => {
       // Create a session for each test
       const response = await request(app)
         .post('/api/workout-coach/start')
-        .set('Cookie', [`token=${authToken}`])
+        .set('Cookie', [`token=${testUserData.authToken}`])
         .expect(200);
 
       sessionId = response.body.sessionId;
@@ -312,14 +266,13 @@ describe('Workout Coach API Routes', () => {
 
     it('should require authentication', async () => {
       const response = await request(app).get(`/api/workout-coach/stream/${sessionId}`).expect(401);
-
       expect(response.body.error).toBeDefined();
     });
 
     it('should return error if session not found', async () => {
       const response = await request(app)
         .get('/api/workout-coach/stream/non-existent-session')
-        .set('Cookie', [`token=${authToken}`])
+        .set('Cookie', [`token=${testUserData.authToken}`])
         .expect(404);
 
       expect(response.body.error).toBe('Session not found');
@@ -330,7 +283,7 @@ describe('Workout Coach API Routes', () => {
       return new Promise<void>((resolve, reject) => {
         request(app)
           .get(`/api/workout-coach/stream/${sessionId}`)
-          .set('Cookie', [`token=${authToken}`])
+          .set('Cookie', [`token=${testUserData.authToken}`])
           .buffer(false) // Don't buffer the response
           .ok(() => true) // Accept any status code so we can check headers
           .on('response', (res) => {
@@ -367,7 +320,7 @@ describe('Workout Coach API Routes', () => {
 
         request(app)
           .get(`/api/workout-coach/stream/${sessionId}`)
-          .set('Cookie', [`token=${authToken}`])
+          .set('Cookie', [`token=${testUserData.authToken}`])
           .buffer(false) // Don't buffer the response
           .ok(() => true) // Accept any status code
           .on('response', (res) => {
@@ -402,28 +355,18 @@ describe('Workout Coach API Routes', () => {
 
     it('should verify user owns the session', async () => {
       // Create another user
-      const userRepository = dataSource.getRepository(User);
-      const hashedPassword = await bcrypt.hash('testpass123', 10);
-
-      const otherUser = userRepository.create({
-        email: 'other-user-stream@example.com',
-        name: 'Other User',
-        password: hashedPassword,
-      });
-
-      await userRepository.save(otherUser);
-      const otherAuthToken = generateToken(otherUser);
+      const otherUserData = await createTestUser();
 
       // Try to stream session owned by testUser using otherUser's token
       const response = await request(app)
         .get(`/api/workout-coach/stream/${sessionId}`)
-        .set('Cookie', [`token=${otherAuthToken}`])
+        .set('Cookie', [`token=${otherUserData.authToken}`])
         .expect(403);
 
       expect(response.body.error).toBe('Unauthorized');
 
       // Clean up other user
-      await userRepository.remove(otherUser);
+      await cleanupTestUser(otherUserData.user);
     });
   });
 
@@ -432,7 +375,7 @@ describe('Workout Coach API Routes', () => {
       // 1. Start session
       const startResponse = await request(app)
         .post('/api/workout-coach/start')
-        .set('Cookie', [`token=${authToken}`])
+        .set('Cookie', [`token=${testUserData.authToken}`])
         .expect(200);
 
       const sessionId = startResponse.body.sessionId;
@@ -441,7 +384,7 @@ describe('Workout Coach API Routes', () => {
       // 2. Verify session was created
       let session = workoutCoachSessionStore.get(sessionId);
       expect(session).toBeDefined();
-      expect(session!.userId).toBe(testUser.id);
+      expect(session!.userId).toBe(testUserData.user.id);
 
       // 3. Simulate workout generation (would happen via stream in real workflow)
       const mockWorkoutPlan = {
@@ -456,7 +399,7 @@ describe('Workout Coach API Routes', () => {
       // 4. User responds yes
       const respondResponse = await request(app)
         .post('/api/workout-coach/respond')
-        .set('Cookie', [`token=${authToken}`])
+        .set('Cookie', [`token=${testUserData.authToken}`])
         .send({ sessionId, response: 'yes' })
         .expect(200);
 
@@ -473,7 +416,7 @@ describe('Workout Coach API Routes', () => {
       // 1. Start session
       const startResponse = await request(app)
         .post('/api/workout-coach/start')
-        .set('Cookie', [`token=${authToken}`])
+        .set('Cookie', [`token=${testUserData.authToken}`])
         .expect(200);
 
       const sessionId = startResponse.body.sessionId;
@@ -488,7 +431,7 @@ describe('Workout Coach API Routes', () => {
       // 3. User says no
       await request(app)
         .post('/api/workout-coach/respond')
-        .set('Cookie', [`token=${authToken}`])
+        .set('Cookie', [`token=${testUserData.authToken}`])
         .send({ sessionId, response: 'no' })
         .expect(200);
 
@@ -508,7 +451,7 @@ describe('Workout Coach API Routes', () => {
       // 5. User says no again
       await request(app)
         .post('/api/workout-coach/respond')
-        .set('Cookie', [`token=${authToken}`])
+        .set('Cookie', [`token=${testUserData.authToken}`])
         .send({ sessionId, response: 'no' })
         .expect(200);
 
@@ -528,7 +471,7 @@ describe('Workout Coach API Routes', () => {
       // 7. User says yes
       await request(app)
         .post('/api/workout-coach/respond')
-        .set('Cookie', [`token=${authToken}`])
+        .set('Cookie', [`token=${testUserData.authToken}`])
         .send({ sessionId, response: 'yes' })
         .expect(200);
 
@@ -542,12 +485,12 @@ describe('Workout Coach API Routes', () => {
       // Create multiple sessions
       const session1Response = await request(app)
         .post('/api/workout-coach/start')
-        .set('Cookie', [`token=${authToken}`])
+        .set('Cookie', [`token=${testUserData.authToken}`])
         .expect(200);
 
       const session2Response = await request(app)
         .post('/api/workout-coach/start')
-        .set('Cookie', [`token=${authToken}`])
+        .set('Cookie', [`token=${testUserData.authToken}`])
         .expect(200);
 
       const sessionId1 = session1Response.body.sessionId;
@@ -577,14 +520,14 @@ describe('Workout Coach API Routes', () => {
       // Respond to session 1
       await request(app)
         .post('/api/workout-coach/respond')
-        .set('Cookie', [`token=${authToken}`])
+        .set('Cookie', [`token=${testUserData.authToken}`])
         .send({ sessionId: sessionId1, response: 'yes' })
         .expect(200);
 
       // Respond to session 2
       await request(app)
         .post('/api/workout-coach/respond')
-        .set('Cookie', [`token=${authToken}`])
+        .set('Cookie', [`token=${testUserData.authToken}`])
         .send({ sessionId: sessionId2, response: 'no' })
         .expect(200);
 
