@@ -1,24 +1,76 @@
-import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { http, HttpResponse } from 'msw';
+import { server } from '../mocks/server';
 import WorkoutInsightsPage from './WorkoutInsightsPage';
-import * as api from '../api';
 
-// Mock the API
-vi.mock('../api', () => ({
-  startInsightsSession: vi.fn(),
-}));
+// Mock EventSource
+class MockEventSource {
+  onmessage: ((event: MessageEvent) => void) | null = null;
+  onerror: ((event: Event) => void) | null = null;
+  readyState: number = 0;
+  url: string;
+
+  constructor(url: string) {
+    this.url = url;
+    this.readyState = 1; // OPEN
+
+    // Simulate connected event
+    setTimeout(() => {
+      if (this.onmessage) {
+        this.onmessage(
+          new MessageEvent('message', {
+            data: JSON.stringify({ type: 'connected' }),
+          })
+        );
+      }
+    }, 10);
+  }
+
+  close() {
+    this.readyState = 2; // CLOSED
+  }
+
+  // Helper to simulate receiving a message
+  simulateMessage(data: unknown) {
+    if (this.onmessage) {
+      this.onmessage(
+        new MessageEvent('message', {
+          data: JSON.stringify(data),
+        })
+      );
+    }
+  }
+
+  // Helper to simulate an error
+  simulateError() {
+    if (this.onerror) {
+      this.onerror(new Event('error'));
+    }
+  }
+}
+
+let mockEventSource: MockEventSource | null = null;
 
 describe('WorkoutInsightsPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockEventSource = null;
 
-    // Mock EventSource
-    global.EventSource = vi.fn().mockImplementation(() => ({
-      onmessage: vi.fn(),
-      onerror: vi.fn(),
-      close: vi.fn(),
-    })) as unknown as typeof EventSource;
+    // Mock scrollIntoView (not available in jsdom)
+    Element.prototype.scrollIntoView = vi.fn();
+
+    // Mock EventSource globally
+    global.EventSource = vi.fn((url: string) => {
+      mockEventSource = new MockEventSource(url);
+      return mockEventSource as unknown as EventSource;
+    }) as unknown as typeof EventSource;
+  });
+
+  afterEach(() => {
+    if (mockEventSource) {
+      mockEventSource.close();
+    }
   });
 
   it('renders the page title and description', () => {
@@ -89,7 +141,14 @@ describe('WorkoutInsightsPage', () => {
       },
     };
 
-    vi.mocked(api.startInsightsSession).mockResolvedValue(mockResponse);
+    server.use(
+      http.post('/api/workout-insights/ask', async ({ request }) => {
+        const body = (await request.json()) as { question: string; timeframe: string };
+        expect(body.question).toBe('What is my progress?');
+        expect(body.timeframe).toBe('7d');
+        return HttpResponse.json(mockResponse);
+      })
+    );
 
     render(<WorkoutInsightsPage />);
 
@@ -107,7 +166,7 @@ describe('WorkoutInsightsPage', () => {
     fireEvent.click(askButton);
 
     await waitFor(() => {
-      expect(api.startInsightsSession).toHaveBeenCalledWith('What is my progress?', '7d');
+      expect(mockEventSource).not.toBeNull();
     });
   });
 
@@ -124,7 +183,11 @@ describe('WorkoutInsightsPage', () => {
       },
     };
 
-    vi.mocked(api.startInsightsSession).mockResolvedValue(mockResponse);
+    server.use(
+      http.post('/api/workout-insights/ask', () => {
+        return HttpResponse.json(mockResponse);
+      })
+    );
 
     render(<WorkoutInsightsPage />);
 
@@ -153,7 +216,11 @@ describe('WorkoutInsightsPage', () => {
       },
     };
 
-    vi.mocked(api.startInsightsSession).mockResolvedValue(mockResponse);
+    server.use(
+      http.post('/api/workout-insights/ask', () => {
+        return HttpResponse.json(mockResponse);
+      })
+    );
 
     render(<WorkoutInsightsPage />);
 
@@ -168,7 +235,7 @@ describe('WorkoutInsightsPage', () => {
     });
   });
 
-  it('shows Ask Another Question button after response is displayed', async () => {
+  it('shows follow-up input after response is displayed', async () => {
     const mockResponse = {
       sessionId: 'test-session-123',
       dataCount: {
@@ -181,7 +248,11 @@ describe('WorkoutInsightsPage', () => {
       },
     };
 
-    vi.mocked(api.startInsightsSession).mockResolvedValue(mockResponse);
+    server.use(
+      http.post('/api/workout-insights/ask', () => {
+        return HttpResponse.json(mockResponse);
+      })
+    );
 
     render(<WorkoutInsightsPage />);
 
@@ -192,11 +263,64 @@ describe('WorkoutInsightsPage', () => {
     fireEvent.click(askButton);
 
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: /ask another question/i })).toBeInTheDocument();
+      expect(screen.getByPlaceholderText(/ask a follow-up question/i)).toBeInTheDocument();
     });
   });
 
-  it('shows reset button in conversation view', async () => {
+  it('can send follow-up questions', async () => {
+    const mockInitialResponse = {
+      sessionId: 'test-session-123',
+      dataCount: {
+        workouts: 10,
+        exercises: 25,
+        dateRange: {
+          start: '2026-01-27',
+          end: '2026-02-26',
+        },
+      },
+    };
+
+    server.use(
+      http.post('/api/workout-insights/ask', async ({ request }) => {
+        const body = (await request.json()) as {
+          question: string;
+          sessionId?: string;
+          timeframe?: string;
+        };
+        if (body.sessionId) {
+          // Follow-up question
+          expect(body.question).toBe('Tell me more');
+          expect(body.sessionId).toBe('test-session-123');
+          return HttpResponse.json({ sessionId: 'test-session-123' });
+        }
+        // Initial question
+        return HttpResponse.json(mockInitialResponse);
+      })
+    );
+
+    render(<WorkoutInsightsPage />);
+
+    // Ask initial question
+    const initialInput = screen.getByLabelText(/your question/i);
+    fireEvent.change(initialInput, { target: { value: 'Initial question' } });
+    fireEvent.click(screen.getByRole('button', { name: /ask ai/i }));
+
+    // Wait for conversation view
+    await waitFor(() => {
+      expect(screen.getByPlaceholderText(/ask a follow-up question/i)).toBeInTheDocument();
+    });
+
+    // Ask follow-up
+    const followUpInput = screen.getByPlaceholderText(/ask a follow-up question/i);
+    fireEvent.change(followUpInput, { target: { value: 'Tell me more' } });
+    fireEvent.click(screen.getByRole('button', { name: /send/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText('Tell me more')).toBeInTheDocument();
+    });
+  });
+
+  it('clears conversation when Clear button is clicked', async () => {
     const mockResponse = {
       sessionId: 'test-session-123',
       dataCount: {
@@ -209,7 +333,61 @@ describe('WorkoutInsightsPage', () => {
       },
     };
 
-    vi.mocked(api.startInsightsSession).mockResolvedValue(mockResponse);
+    server.use(
+      http.post('/api/workout-insights/ask', () => {
+        return HttpResponse.json(mockResponse);
+      })
+    );
+
+    render(<WorkoutInsightsPage />);
+
+    // Start a conversation
+    const questionInput = screen.getByLabelText(/your question/i);
+    fireEvent.change(questionInput, { target: { value: 'Test question' } });
+    fireEvent.click(screen.getByRole('button', { name: /ask ai/i }));
+
+    // Wait for conversation view and ensure loading is complete
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /clear/i })).toBeInTheDocument();
+    });
+
+    // Simulate SSE completion to exit loading state
+    mockEventSource!.simulateMessage({ type: 'complete' });
+
+    // Wait for loading to finish (Clear button enabled when loading is false)
+    await waitFor(() => {
+      const clearButton = screen.getByRole('button', { name: /clear/i });
+      expect(clearButton).toBeEnabled();
+    });
+
+    // Click Clear
+    fireEvent.click(screen.getByRole('button', { name: /clear/i }));
+
+    // Should return to initial form
+    await waitFor(() => {
+      expect(screen.getByLabelText(/data timeframe/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/your question/i)).toBeInTheDocument();
+    });
+  });
+
+  it('shows chat interface with Send and Clear buttons in conversation view', async () => {
+    const mockResponse = {
+      sessionId: 'test-session-123',
+      dataCount: {
+        workouts: 10,
+        exercises: 25,
+        dateRange: {
+          start: '2026-01-27',
+          end: '2026-02-26',
+        },
+      },
+    };
+
+    server.use(
+      http.post('/api/workout-insights/ask', () => {
+        return HttpResponse.json(mockResponse);
+      })
+    );
 
     render(<WorkoutInsightsPage />);
 
@@ -219,17 +397,24 @@ describe('WorkoutInsightsPage', () => {
     fireEvent.change(questionInput, { target: { value: 'Test question' } });
     fireEvent.click(askButton);
 
-    // Reset button should appear in conversation view
+    // Send and Clear buttons should appear in conversation view
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: /ask another question/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /send/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /clear/i })).toBeInTheDocument();
     });
 
-    // Verify we're in conversation view (input form hidden)
-    expect(screen.queryByLabelText(/your question/i)).not.toBeInTheDocument();
+    // Verify we're in conversation view (timeframe selector hidden)
+    expect(screen.queryByLabelText(/data timeframe/i)).not.toBeInTheDocument();
   });
 
   it('displays error message when API call fails', async () => {
-    vi.mocked(api.startInsightsSession).mockRejectedValue(new Error('API Error'));
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    server.use(
+      http.post('/api/workout-insights/ask', () => {
+        return HttpResponse.json({ error: 'API Error' }, { status: 500 });
+      })
+    );
 
     render(<WorkoutInsightsPage />);
 
@@ -242,6 +427,8 @@ describe('WorkoutInsightsPage', () => {
     await waitFor(() => {
       expect(screen.getByText(/API Error/i)).toBeInTheDocument();
     });
+
+    consoleErrorSpy.mockRestore();
   });
 
   it('shows conversation view after submitting question', async () => {
@@ -257,7 +444,11 @@ describe('WorkoutInsightsPage', () => {
       },
     };
 
-    vi.mocked(api.startInsightsSession).mockResolvedValue(mockResponse);
+    server.use(
+      http.post('/api/workout-insights/ask', () => {
+        return HttpResponse.json(mockResponse);
+      })
+    );
 
     render(<WorkoutInsightsPage />);
 
@@ -267,9 +458,9 @@ describe('WorkoutInsightsPage', () => {
     fireEvent.change(questionInput, { target: { value: 'Test question' } });
     fireEvent.click(askButton);
 
-    // The input form should no longer be visible
+    // The initial form timeframe selector should no longer be visible
     await waitFor(() => {
-      expect(screen.queryByLabelText(/your question/i)).not.toBeInTheDocument();
+      expect(screen.queryByLabelText(/data timeframe/i)).not.toBeInTheDocument();
     });
 
     // Conversation should be showing

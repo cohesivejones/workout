@@ -12,12 +12,17 @@ export interface WorkoutData {
   }>;
 }
 
+export interface ConversationMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
 export interface InsightsSessionData {
   userId: number;
   sessionId: string;
-  question: string;
   timeframe: string;
   workoutData: WorkoutData[];
+  messages: ConversationMessage[];
   timestamp: number;
   sseResponse?: Response;
 }
@@ -29,19 +34,27 @@ export class InsightsSessionStore {
   create(
     sessionId: string,
     userId: number,
-    data: { question: string; timeframe: string; workoutData: WorkoutData[] }
+    data: { timeframe: string; workoutData: WorkoutData[]; initialQuestion: string }
   ): InsightsSessionData {
     const session: InsightsSessionData = {
       userId,
       sessionId,
-      question: data.question,
       timeframe: data.timeframe,
       workoutData: data.workoutData,
+      messages: [{ role: 'user', content: data.initialQuestion }],
       timestamp: Date.now(),
     };
     this.sessions.set(sessionId, session);
     this.scheduleCleanup(sessionId);
     return session;
+  }
+
+  addMessage(sessionId: string, message: ConversationMessage): void {
+    const session = this.sessions.get(sessionId);
+    if (session) {
+      session.messages.push(message);
+      session.timestamp = Date.now();
+    }
   }
 
   get(sessionId: string): InsightsSessionData | undefined {
