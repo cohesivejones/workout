@@ -74,7 +74,7 @@ describe('Workout Insights API', () => {
       expect(response.body.error).toContain('timeframe');
     });
 
-    it('should create session and return data count', async () => {
+    it('should create session and return data count for initial question', async () => {
       const response = await request(app)
         .post('/api/workout-insights/ask')
         .set('Cookie', [`token=${testUserData.authToken}`])
@@ -90,6 +90,72 @@ describe('Workout Insights API', () => {
       expect(response.body.dataCount).toHaveProperty('workouts');
       expect(response.body.dataCount).toHaveProperty('exercises');
       expect(response.body.dataCount).toHaveProperty('dateRange');
+    });
+
+    it('should require timeframe for initial question (no sessionId)', async () => {
+      const response = await request(app)
+        .post('/api/workout-insights/ask')
+        .set('Cookie', [`token=${testUserData.authToken}`])
+        .send({ question: 'Test question' }); // No timeframe or sessionId
+
+      expect(response.status).toBe(400);
+      expect(response.body.error).toContain('Timeframe is required');
+    });
+
+    it('should handle follow-up question with existing sessionId', async () => {
+      // First create a session
+      const initialResponse = await request(app)
+        .post('/api/workout-insights/ask')
+        .set('Cookie', [`token=${testUserData.authToken}`])
+        .send({ question: 'What exercises am I improving at?', timeframe: '30d' });
+
+      expect(initialResponse.status).toBe(200);
+      const { sessionId } = initialResponse.body;
+
+      // Now send a follow-up question
+      const followUpResponse = await request(app)
+        .post('/api/workout-insights/ask')
+        .set('Cookie', [`token=${testUserData.authToken}`])
+        .send({ question: 'Tell me more about my bench press', sessionId });
+
+      expect(followUpResponse.status).toBe(200);
+      expect(followUpResponse.body.sessionId).toBe(sessionId); // Same session
+      expect(followUpResponse.body).not.toHaveProperty('dataCount'); // No data count for follow-ups
+    });
+
+    it('should reject follow-up with invalid sessionId', async () => {
+      const response = await request(app)
+        .post('/api/workout-insights/ask')
+        .set('Cookie', [`token=${testUserData.authToken}`])
+        .send({ question: 'Follow-up question', sessionId: 'invalid-session-id' });
+
+      expect(response.status).toBe(404);
+      expect(response.body.error).toContain('Session not found');
+    });
+
+    it("should reject follow-up to another user's session", async () => {
+      // Create a session with the test user
+      const initialResponse = await request(app)
+        .post('/api/workout-insights/ask')
+        .set('Cookie', [`token=${testUserData.authToken}`])
+        .send({ question: 'Initial question', timeframe: '30d' });
+
+      const { sessionId } = initialResponse.body;
+
+      // Create another user
+      const otherUser = await createTestUser();
+
+      // Try to use the session with a different user
+      const followUpResponse = await request(app)
+        .post('/api/workout-insights/ask')
+        .set('Cookie', [`token=${otherUser.authToken}`])
+        .send({ question: 'Follow-up', sessionId });
+
+      expect(followUpResponse.status).toBe(403);
+      expect(followUpResponse.body.error).toContain('Unauthorized');
+
+      // Cleanup
+      await cleanupTestUser(otherUser.user);
     });
   });
 
@@ -147,6 +213,96 @@ describe('Workout Insights API', () => {
             }
           })
           .end();
+      });
+    });
+
+    it('should stream AI response for follow-up questions through existing SSE connection', async () => {
+      // First create a session
+      const createResponse = await request(app)
+        .post('/api/workout-insights/ask')
+        .set('Cookie', [`token=${testUserData.authToken}`])
+        .send({ question: 'What is my progress?', timeframe: '30d' });
+
+      const { sessionId } = createResponse.body;
+
+      return new Promise<void>((resolve, reject) => {
+        const receivedEvents: string[] = [];
+        let initialResponseComplete = false;
+
+        // Open SSE connection
+        const sseRequest = request(app)
+          .get(`/api/workout-insights/stream/${sessionId}`)
+          .set('Cookie', [`token=${testUserData.authToken}`])
+          .buffer(false)
+          .ok(() => true);
+
+        sseRequest.on('response', (res) => {
+          res.on('data', (chunk: Buffer) => {
+            const data = chunk.toString();
+            const lines = data.split('\n\n');
+
+            lines.forEach((line: string) => {
+              if (line.startsWith('data: ')) {
+                try {
+                  const eventData = JSON.parse(line.slice(6));
+                  receivedEvents.push(eventData.type);
+
+                  // After initial response completes, send a follow-up
+                  if (eventData.type === 'complete' && !initialResponseComplete) {
+                    initialResponseComplete = true;
+
+                    // Send follow-up question
+                    request(app)
+                      .post('/api/workout-insights/ask')
+                      .set('Cookie', [`token=${testUserData.authToken}`])
+                      .send({ question: 'Tell me more', sessionId })
+                      .then((followUpRes) => {
+                        expect(followUpRes.status).toBe(200);
+                      })
+                      .catch(reject);
+                  }
+
+                  // Verify we get a second response after follow-up
+                  if (
+                    eventData.type === 'complete' &&
+                    initialResponseComplete &&
+                    receivedEvents.filter((e) => e === 'complete').length === 2
+                  ) {
+                    // We received two complete responses on the same connection
+                    expect(receivedEvents).toContain('connected');
+                    expect(receivedEvents).toContain('thinking');
+                    expect(receivedEvents).toContain('content');
+                    expect(receivedEvents.filter((e) => e === 'complete').length).toBe(2);
+
+                    res.destroy();
+                    resolve();
+                  }
+                } catch {
+                  // Ignore parse errors for non-JSON lines
+                }
+              }
+            });
+          });
+
+          res.on('error', (err) => {
+            if (err.code !== 'ECONNRESET') {
+              reject(err);
+            }
+          });
+        });
+
+        sseRequest.on('error', (err) => {
+          if (err.code !== 'ECONNRESET') {
+            reject(err);
+          }
+        });
+
+        // Set timeout to fail the test if it takes too long
+        setTimeout(() => {
+          reject(new Error('Test timeout: SSE follow-up response not received'));
+        }, 10000);
+
+        sseRequest.end();
       });
     });
   });

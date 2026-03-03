@@ -38,11 +38,11 @@ function getDateRangeFromTimeframe(timeframe: string): { start: Date; end: Date 
 
 /**
  * POST /api/workout-insights/ask
- * Initialize a new workout insights session
+ * Ask a question (initial or follow-up)
  */
 router.post('/ask', authenticateToken, async (req: Request, res: Response) => {
   try {
-    const { question, timeframe } = req.body;
+    const { question, timeframe, sessionId } = req.body;
     const userId = req.user!.id;
 
     // Validation
@@ -50,8 +50,47 @@ router.post('/ask', authenticateToken, async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Question is required' });
     }
 
+    // Handle follow-up question (sessionId provided)
+    if (sessionId) {
+      const session = insightsSessionStore.get(sessionId);
+
+      if (!session) {
+        return res.status(404).json({ error: 'Session not found' });
+      }
+
+      if (session.userId !== userId) {
+        return res.status(403).json({ error: 'Unauthorized' });
+      }
+
+      // Add user's follow-up question to conversation
+      insightsSessionStore.addMessage(sessionId, { role: 'user', content: question });
+
+      logger.info('Follow-up question added to session', {
+        sessionId,
+        userId,
+        messageCount: session.messages.length,
+      });
+
+      // If there's an active SSE connection, trigger streaming
+      if (session.sseResponse) {
+        logger.info('Triggering AI streaming for follow-up question', { sessionId });
+
+        // Stream the AI response through the existing SSE connection
+        streamAIResponse(sessionId, session.sseResponse).catch((err) => {
+          logger.error('Failed to stream follow-up response', {
+            error: err,
+            sessionId,
+            userId,
+          });
+        });
+      }
+
+      return res.json({ sessionId });
+    }
+
+    // Handle initial question (no sessionId)
     if (!timeframe || typeof timeframe !== 'string') {
-      return res.status(400).json({ error: 'Timeframe is required' });
+      return res.status(400).json({ error: 'Timeframe is required for initial question' });
     }
 
     if (!VALID_TIMEFRAMES.includes(timeframe)) {
@@ -98,16 +137,16 @@ router.post('/ask', authenticateToken, async (req: Request, res: Response) => {
       }
     });
 
-    // Create session
-    const sessionId = uuidv4();
-    insightsSessionStore.create(sessionId, userId, {
-      question,
+    // Create new session
+    const newSessionId = uuidv4();
+    insightsSessionStore.create(newSessionId, userId, {
+      initialQuestion: question,
       timeframe,
       workoutData: workouts,
     });
 
     logger.info('Workout insights session started', {
-      sessionId,
+      sessionId: newSessionId,
       userId,
       timeframe,
       workoutCount: workouts.length,
@@ -115,7 +154,7 @@ router.post('/ask', authenticateToken, async (req: Request, res: Response) => {
     });
 
     res.json({
-      sessionId,
+      sessionId: newSessionId,
       dataCount: {
         workouts: workouts.length,
         exercises: exerciseSet.size,
@@ -126,14 +165,14 @@ router.post('/ask', authenticateToken, async (req: Request, res: Response) => {
       },
     });
   } catch (err) {
-    logger.error('Failed to start workout insights session', {
+    logger.error('Failed to process workout insights question', {
       error: err,
       message: err instanceof Error ? err.message : String(err),
       stack: err instanceof Error ? err.stack : undefined,
       userId: req.user?.id,
     });
     res.status(500).json({
-      error: 'Failed to start session',
+      error: 'Failed to process question',
       details:
         process.env.NODE_ENV === 'test'
           ? err instanceof Error
@@ -143,6 +182,99 @@ router.post('/ask', authenticateToken, async (req: Request, res: Response) => {
     });
   }
 });
+
+/**
+ * Helper function to stream AI response for a session
+ * Called both on initial connection and for follow-up questions
+ */
+async function streamAIResponse(sessionId: string, res: Response): Promise<void> {
+  const session = insightsSessionStore.get(sessionId);
+  if (!session) {
+    throw new Error('Session not found');
+  }
+
+  // Format workout data as context
+  const workoutContext = formatWorkoutDataForAI(session.workoutData);
+  logger.info('Formatted workout context', {
+    sessionId,
+    contextLength: workoutContext.length,
+    workoutCount: session.workoutData.length,
+  });
+
+  // Send thinking message
+  res.write(`data: ${JSON.stringify({ type: 'thinking' })}\n\n`);
+  logger.info('SSE: Sent thinking message', { sessionId });
+
+  // Stream AI response
+  logger.info('Initiating OpenAI stream', {
+    sessionId,
+    messageCount: session.messages.length,
+    apiKeyConfigured: !!process.env.OPENAI_API_KEY,
+  });
+
+  try {
+    // Build messages for OpenAI with workout context and conversation history
+    const stream = await openai.chat.completions.create({
+      model: 'gpt-4',
+      messages: [
+        {
+          role: 'system',
+          content:
+            "You are a knowledgeable workout analysis assistant. Analyze the workout data provided and answer the user's question with helpful insights. Be specific, use data from their workouts, and provide actionable advice.",
+        },
+        {
+          role: 'system',
+          content: `Workout History:\n${workoutContext}`,
+        },
+        ...session.messages, // Include full conversation history
+      ],
+      stream: true,
+      temperature: 0.7,
+    });
+
+    logger.info('OpenAI stream created successfully', { sessionId });
+    let chunkCount = 0;
+    let fullResponse = '';
+
+    for await (const chunk of stream) {
+      const content = chunk.choices[0]?.delta?.content;
+      if (content) {
+        chunkCount++;
+        fullResponse += content;
+        res.write(`data: ${JSON.stringify({ type: 'content', chunk: content })}\n\n`);
+        if (chunkCount === 1) {
+          logger.info('SSE: First content chunk received', { sessionId });
+        }
+      }
+    }
+
+    logger.info('OpenAI stream completed', { sessionId, totalChunks: chunkCount });
+
+    // Store the AI's response in the conversation history
+    if (fullResponse) {
+      insightsSessionStore.addMessage(sessionId, {
+        role: 'assistant',
+        content: fullResponse,
+      });
+      logger.info('AI response added to conversation', {
+        sessionId,
+        responseLength: fullResponse.length,
+      });
+    }
+
+    // Send completion message
+    res.write(`data: ${JSON.stringify({ type: 'complete' })}\n\n`);
+    logger.info('SSE: Sent complete message', { sessionId });
+  } catch (aiError) {
+    logger.error('AI streaming error', {
+      error: aiError,
+      message: aiError instanceof Error ? aiError.message : String(aiError),
+      stack: aiError instanceof Error ? aiError.stack : undefined,
+      sessionId,
+    });
+    res.write(`data: ${JSON.stringify({ type: 'error', message: 'AI processing failed' })}\n\n`);
+  }
+}
 
 /**
  * GET /api/workout-insights/stream/:sessionId
@@ -175,72 +307,8 @@ router.get('/stream/:sessionId', authenticateToken, async (req: Request, res: Re
     res.write(`data: ${JSON.stringify({ type: 'connected' })}\n\n`);
     logger.info('SSE: Sent connected message', { sessionId });
 
-    // Format workout data as context
-    const workoutContext = formatWorkoutDataForAI(session.workoutData);
-    logger.info('Formatted workout context', {
-      sessionId,
-      contextLength: workoutContext.length,
-      workoutCount: session.workoutData.length,
-    });
-
-    // Send thinking message
-    res.write(`data: ${JSON.stringify({ type: 'thinking' })}\n\n`);
-    logger.info('SSE: Sent thinking message', { sessionId });
-
-    // Stream AI response
-    logger.info('Initiating OpenAI stream', {
-      sessionId,
-      question: session.question,
-      apiKeyConfigured: !!process.env.OPENAI_API_KEY,
-    });
-
-    try {
-      const stream = await openai.chat.completions.create({
-        model: 'gpt-4',
-        messages: [
-          {
-            role: 'system',
-            content:
-              "You are a knowledgeable workout analysis assistant. Analyze the workout data provided and answer the user's question with helpful insights. Be specific, use data from their workouts, and provide actionable advice.",
-          },
-          {
-            role: 'user',
-            content: `Workout History:\n${workoutContext}\n\nQuestion: ${session.question}`,
-          },
-        ],
-        stream: true,
-        temperature: 0.7,
-      });
-
-      logger.info('OpenAI stream created successfully', { sessionId });
-      let chunkCount = 0;
-
-      for await (const chunk of stream) {
-        const content = chunk.choices[0]?.delta?.content;
-        if (content) {
-          chunkCount++;
-          res.write(`data: ${JSON.stringify({ type: 'content', chunk: content })}\n\n`);
-          if (chunkCount === 1) {
-            logger.info('SSE: First content chunk received', { sessionId });
-          }
-        }
-      }
-
-      logger.info('OpenAI stream completed', { sessionId, totalChunks: chunkCount });
-
-      // Send completion message
-      res.write(`data: ${JSON.stringify({ type: 'complete' })}\n\n`);
-      logger.info('SSE: Sent complete message', { sessionId });
-    } catch (aiError) {
-      logger.error('AI streaming error', {
-        error: aiError,
-        message: aiError instanceof Error ? aiError.message : String(aiError),
-        stack: aiError instanceof Error ? aiError.stack : undefined,
-        sessionId,
-        userId: req.user!.id,
-      });
-      res.write(`data: ${JSON.stringify({ type: 'error', message: 'AI processing failed' })}\n\n`);
-    }
+    // Stream initial AI response
+    await streamAIResponse(sessionId, res);
 
     // Keep connection alive
     const keepAlive = setInterval(() => {

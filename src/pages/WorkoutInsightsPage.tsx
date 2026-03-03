@@ -1,5 +1,5 @@
-import { useState, useCallback } from 'react';
-import { startInsightsSession, TimeframeOption } from '../api';
+import { useState, useCallback, useRef, useEffect } from 'react';
+import { startInsightsSession, askFollowUpQuestion, TimeframeOption } from '../api';
 import FormContainer from '../components/common/FormContainer';
 import { useSSE, SSEMessage } from '../hooks/useSSE';
 import styles from './WorkoutInsightsPage.module.css';
@@ -24,6 +24,7 @@ function WorkoutInsightsPage() {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [dataSummary, setDataSummary] = useState<string>('');
+  const conversationEndRef = useRef<HTMLDivElement>(null);
 
   // Handle SSE messages
   const handleSSEMessage = useCallback((data: InsightsSSEMessage) => {
@@ -84,36 +85,48 @@ function WorkoutInsightsPage() {
 
     setLoading(true);
     setError(null);
-    setMessages([]);
-    setDataSummary('');
 
     try {
-      // Add user question to messages
-      setMessages([{ sender: 'user', text: question }]);
+      // Initial question (no sessionId yet)
+      if (!sessionId) {
+        // Add user question to messages
+        setMessages([{ sender: 'user', text: question }]);
 
-      const response = await startInsightsSession(question, timeframe);
-      setSessionId(response.sessionId);
+        const response = await startInsightsSession(question, timeframe);
+        setSessionId(response.sessionId);
 
-      // Set data summary
-      const { workouts, exercises, dateRange } = response.dataCount;
-      setDataSummary(
-        `Using ${workouts} workout${workouts !== 1 ? 's' : ''} with ${exercises} exercise${
-          exercises !== 1 ? 's' : ''
-        } from ${new Date(dateRange.start).toLocaleDateString()} - ${new Date(
-          dateRange.end
-        ).toLocaleDateString()}`
-      );
+        // Set data summary
+        const { workouts, exercises, dateRange } = response.dataCount;
+        setDataSummary(
+          `Using ${workouts} workout${workouts !== 1 ? 's' : ''} with ${exercises} exercise${
+            exercises !== 1 ? 's' : ''
+          } from ${new Date(dateRange.start).toLocaleDateString()} - ${new Date(
+            dateRange.end
+          ).toLocaleDateString()}`
+        );
 
-      // Add thinking message
-      setMessages((prev) => [...prev, { sender: 'ai', text: '' }]);
+        // Add thinking message
+        setMessages((prev) => [...prev, { sender: 'ai', text: '' }]);
+      } else {
+        // Follow-up question (sessionId exists)
+        setMessages((prev) => [...prev, { sender: 'user', text: question }]);
+
+        await askFollowUpQuestion(sessionId, question);
+
+        // Add thinking message for AI response
+        setMessages((prev) => [...prev, { sender: 'ai', text: '' }]);
+      }
+
+      // Clear input after sending
+      setQuestion('');
     } catch (err) {
-      console.error('Failed to start insights session:', err);
-      setError(err instanceof Error ? err.message : 'Failed to start session. Please try again.');
+      console.error('Failed to ask question:', err);
+      setError(err instanceof Error ? err.message : 'Failed to ask question. Please try again.');
       setLoading(false);
     }
   };
 
-  const handleReset = () => {
+  const handleClear = () => {
     closeSSE();
     setQuestion('');
     setMessages([]);
@@ -122,6 +135,13 @@ function WorkoutInsightsPage() {
     setDataSummary('');
     setLoading(false);
   };
+
+  // Auto-scroll to bottom when new messages arrive
+  useEffect(() => {
+    if (conversationEndRef.current) {
+      conversationEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages]);
 
   return (
     <div className={styles.container}>
@@ -133,7 +153,7 @@ function WorkoutInsightsPage() {
           </p>
         </div>
 
-        {messages.length === 0 ? (
+        {sessionId === null ? (
           <div className={styles.inputSection}>
             <label htmlFor="timeframe" className={styles.label}>
               Data timeframe:
@@ -162,6 +182,11 @@ function WorkoutInsightsPage() {
               className={styles.questionInput}
               rows={4}
               disabled={loading}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && e.ctrlKey) {
+                  handleAsk();
+                }
+              }}
             />
 
             <button
@@ -198,12 +223,35 @@ function WorkoutInsightsPage() {
                   </div>
                 </div>
               ))}
+              <div ref={conversationEndRef} />
             </div>
 
-            <div className={styles.resetSection}>
-              <button onClick={handleReset} className={styles.resetButton} disabled={loading}>
-                Ask Another Question
-              </button>
+            <div className={styles.chatInputSection}>
+              <textarea
+                value={question}
+                onChange={(e) => setQuestion(e.target.value)}
+                placeholder="Ask a follow-up question..."
+                className={styles.chatInput}
+                rows={2}
+                disabled={loading}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && e.ctrlKey) {
+                    handleAsk();
+                  }
+                }}
+              />
+              <div className={styles.chatButtons}>
+                <button
+                  onClick={handleAsk}
+                  disabled={loading || !question.trim()}
+                  className={`${styles.sendButton} ${loading ? styles.loading : ''}`}
+                >
+                  {loading ? 'Sending...' : 'Send'}
+                </button>
+                <button onClick={handleClear} className={styles.clearButton} disabled={loading}>
+                  Clear
+                </button>
+              </div>
             </div>
           </>
         )}

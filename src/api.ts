@@ -250,3 +250,10 @@ export const startInsightsSession = (
 ): Promise<InsightsSessionResponse> => {
   return api.post('/workout-insights/ask', { question, timeframe });
 };
+
+export const askFollowUpQuestion = (
+  sessionId: string,
+  question: string
+): Promise<{ sessionId: string }> => {
+  return api.post('/workout-insights/ask', { question, sessionId });
+};
