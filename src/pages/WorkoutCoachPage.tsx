@@ -25,6 +25,9 @@ interface CoachSSEMessage extends SSEMessage {
   message?: string;
 }
 
+const DEFAULT_PROMPT =
+  'Generate me a balanced full-body workout with 6 exercises covering legs, core, and upper body';
+
 function WorkoutCoachPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -32,6 +35,7 @@ function WorkoutCoachPage() {
   const [error, setError] = useState<string | null>(null);
   const [conversationEnded, setConversationEnded] = useState<boolean>(false);
   const [currentWorkout, setCurrentWorkout] = useState<WorkoutPlan | null>(null);
+  const [customPrompt, setCustomPrompt] = useState<string>(DEFAULT_PROMPT);
 
   // Handle SSE messages
   const handleSSEMessage = useCallback((data: CoachSSEMessage) => {
@@ -125,6 +129,12 @@ function WorkoutCoachPage() {
   };
 
   const handleStartSession = async () => {
+    // Validate prompt
+    if (!customPrompt.trim()) {
+      setError('Please enter a workout request');
+      return;
+    }
+
     setLoading(true);
     setError(null);
     setMessages([]);
@@ -132,7 +142,7 @@ function WorkoutCoachPage() {
     setCurrentWorkout(null);
 
     try {
-      const response = await startCoachSession();
+      const response = await startCoachSession(customPrompt.trim());
       setSessionId(response.sessionId);
 
       // Add initial message
@@ -176,6 +186,7 @@ function WorkoutCoachPage() {
     setConversationEnded(false);
     setCurrentWorkout(null);
     setLoading(false);
+    setCustomPrompt(DEFAULT_PROMPT);
   };
 
   const isWaitingForResponse =
@@ -193,12 +204,26 @@ function WorkoutCoachPage() {
 
         {messages.length === 0 ? (
           <div className={styles.startSection}>
+            <div className={styles.promptSection}>
+              <label htmlFor="customPrompt" className={styles.promptLabel}>
+                What kind of workout would you like?
+              </label>
+              <textarea
+                id="customPrompt"
+                value={customPrompt}
+                onChange={(e) => setCustomPrompt(e.target.value)}
+                className={styles.promptTextarea}
+                rows={3}
+                placeholder="Describe your ideal workout..."
+                disabled={loading}
+              />
+            </div>
             <button
               onClick={handleStartSession}
-              disabled={loading}
+              disabled={loading || !customPrompt.trim()}
               className={`${styles.startButton} ${loading ? styles.loading : ''}`}
             >
-              {loading ? 'Starting...' : 'Start Conversation'}
+              {loading ? 'Starting...' : 'Ask Coach'}
             </button>
           </div>
         ) : (

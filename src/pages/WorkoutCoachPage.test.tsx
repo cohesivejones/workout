@@ -77,7 +77,141 @@ describe('WorkoutCoachPage', () => {
     expect(
       screen.getByText(/Your personal AI workout coach will generate a customized workout/)
     ).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Start Conversation' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Ask Coach' })).toBeInTheDocument();
+  });
+
+  it('renders textarea with default prompt', () => {
+    render(<WorkoutCoachPage />);
+
+    const textarea = screen.getByRole('textbox');
+    expect(textarea).toBeInTheDocument();
+    expect(textarea).toHaveValue(
+      'Generate me a balanced full-body workout with 6 exercises covering legs, core, and upper body'
+    );
+    expect(screen.getByText('What kind of workout would you like?')).toBeInTheDocument();
+  });
+
+  it('allows user to edit the custom prompt', () => {
+    render(<WorkoutCoachPage />);
+
+    const textarea = screen.getByRole('textbox');
+    fireEvent.change(textarea, { target: { value: 'Give me an upper body workout' } });
+
+    expect(textarea).toHaveValue('Give me an upper body workout');
+  });
+
+  it('sends custom prompt when starting session', async () => {
+    const mockResponse = {
+      sessionId: 'test-session-123',
+      message: 'Session created',
+    };
+
+    const customPrompt = 'Generate an intense leg workout';
+
+    server.use(
+      http.post('/api/workout-coach/start', async ({ request }) => {
+        const body = await request.json();
+        expect(body).toEqual({ customPrompt });
+        return HttpResponse.json(mockResponse);
+      })
+    );
+
+    render(<WorkoutCoachPage />);
+
+    const textarea = screen.getByRole('textbox');
+    fireEvent.change(textarea, { target: { value: customPrompt } });
+
+    const startButton = screen.getByRole('button', { name: 'Ask Coach' });
+    fireEvent.click(startButton);
+
+    await waitFor(() => {
+      expect(screen.getAllByText('🤖 Coach').length).toBeGreaterThan(0);
+    });
+  });
+
+  it('disables start button when prompt is empty', () => {
+    render(<WorkoutCoachPage />);
+
+    const textarea = screen.getByRole('textbox');
+    fireEvent.change(textarea, { target: { value: '' } });
+
+    const startButton = screen.getByRole('button', { name: 'Ask Coach' });
+    expect(startButton).toBeDisabled();
+  });
+
+  it('disables start button when prompt is only whitespace', () => {
+    render(<WorkoutCoachPage />);
+
+    const textarea = screen.getByRole('textbox');
+    fireEvent.change(textarea, { target: { value: '   ' } });
+
+    const startButton = screen.getByRole('button', { name: 'Ask Coach' });
+    expect(startButton).toBeDisabled();
+  });
+
+  it('resets prompt to default when starting new conversation', async () => {
+    const mockResponse = {
+      sessionId: 'test-session-123',
+      message: 'Session created',
+    };
+
+    const mockWorkoutPlan = {
+      date: '2025-12-06',
+      exercises: [{ name: 'Squats', reps: 10 }],
+    };
+
+    server.use(
+      http.post('/api/workout-coach/start', () => {
+        return HttpResponse.json(mockResponse);
+      }),
+      http.post('/api/workout-coach/respond', () => {
+        return HttpResponse.json({ message: 'Response recorded' });
+      })
+    );
+
+    render(<WorkoutCoachPage />);
+
+    // Change the prompt
+    const textarea = screen.getByRole('textbox');
+    fireEvent.change(textarea, { target: { value: 'Custom workout request' } });
+
+    // Start session
+    const startButton = screen.getByRole('button', { name: 'Ask Coach' });
+    fireEvent.click(startButton);
+
+    await waitFor(() => {
+      expect(mockEventSource).not.toBeNull();
+    });
+
+    mockEventSource!.simulateMessage({
+      type: 'workout',
+      plan: mockWorkoutPlan,
+    });
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: "Yes, let's do it!" })).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: "Yes, let's do it!" }));
+
+    mockEventSource!.simulateMessage({
+      type: 'saved',
+      workoutId: 123,
+    });
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Start New Conversation' })).toBeInTheDocument();
+    });
+
+    // Reset
+    const restartButton = screen.getByRole('button', { name: 'Start New Conversation' });
+    fireEvent.click(restartButton);
+
+    // Prompt should be back to default
+    const newTextarea = screen.getByRole('textbox');
+    expect(newTextarea).toHaveValue(
+      'Generate me a balanced full-body workout with 6 exercises covering legs, core, and upper body'
+    );
   });
 
   it('starts a session and connects to SSE stream', async () => {
@@ -94,7 +228,7 @@ describe('WorkoutCoachPage', () => {
 
     render(<WorkoutCoachPage />);
 
-    const startButton = screen.getByRole('button', { name: 'Start Conversation' });
+    const startButton = screen.getByRole('button', { name: 'Ask Coach' });
     fireEvent.click(startButton);
 
     await waitFor(() => {
@@ -131,7 +265,7 @@ describe('WorkoutCoachPage', () => {
 
     render(<WorkoutCoachPage />);
 
-    const startButton = screen.getByRole('button', { name: 'Start Conversation' });
+    const startButton = screen.getByRole('button', { name: 'Ask Coach' });
     fireEvent.click(startButton);
 
     await waitFor(() => {
@@ -180,7 +314,7 @@ describe('WorkoutCoachPage', () => {
 
     render(<WorkoutCoachPage />);
 
-    const startButton = screen.getByRole('button', { name: 'Start Conversation' });
+    const startButton = screen.getByRole('button', { name: 'Ask Coach' });
     fireEvent.click(startButton);
 
     await waitFor(() => {
@@ -250,7 +384,7 @@ describe('WorkoutCoachPage', () => {
 
     render(<WorkoutCoachPage />);
 
-    const startButton = screen.getByRole('button', { name: 'Start Conversation' });
+    const startButton = screen.getByRole('button', { name: 'Ask Coach' });
     fireEvent.click(startButton);
 
     await waitFor(() => {
@@ -309,7 +443,7 @@ describe('WorkoutCoachPage', () => {
 
     render(<WorkoutCoachPage />);
 
-    const startButton = screen.getByRole('button', { name: 'Start Conversation' });
+    const startButton = screen.getByRole('button', { name: 'Ask Coach' });
     fireEvent.click(startButton);
 
     await waitFor(() => {
@@ -335,7 +469,7 @@ describe('WorkoutCoachPage', () => {
 
     render(<WorkoutCoachPage />);
 
-    const startButton = screen.getByRole('button', { name: 'Start Conversation' });
+    const startButton = screen.getByRole('button', { name: 'Ask Coach' });
     fireEvent.click(startButton);
 
     await waitFor(() => {
@@ -371,7 +505,7 @@ describe('WorkoutCoachPage', () => {
 
     render(<WorkoutCoachPage />);
 
-    const startButton = screen.getByRole('button', { name: 'Start Conversation' });
+    const startButton = screen.getByRole('button', { name: 'Ask Coach' });
     fireEvent.click(startButton);
 
     await waitFor(() => {
@@ -411,7 +545,7 @@ describe('WorkoutCoachPage', () => {
     render(<WorkoutCoachPage />);
 
     // Start and complete a session
-    const startButton = screen.getByRole('button', { name: 'Start Conversation' });
+    const startButton = screen.getByRole('button', { name: 'Ask Coach' });
     fireEvent.click(startButton);
 
     await waitFor(() => {
@@ -447,7 +581,7 @@ describe('WorkoutCoachPage', () => {
     fireEvent.click(restartButton);
 
     // Should be back to initial state
-    expect(screen.getByRole('button', { name: 'Start Conversation' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Ask Coach' })).toBeInTheDocument();
     expect(screen.queryByText(/Squats/)).not.toBeInTheDocument();
   });
 
@@ -465,7 +599,7 @@ describe('WorkoutCoachPage', () => {
 
     const { unmount } = render(<WorkoutCoachPage />);
 
-    const startButton = screen.getByRole('button', { name: 'Start Conversation' });
+    const startButton = screen.getByRole('button', { name: 'Ask Coach' });
     fireEvent.click(startButton);
 
     await waitFor(() => {

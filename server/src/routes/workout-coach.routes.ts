@@ -16,10 +16,17 @@ const workoutCoach = new WorkoutCoachGraph(workoutCoachSessionStore);
 router.post('/start', authenticateToken, async (req: Request, res: Response) => {
   try {
     const userId = req.user!.id;
+    const { customPrompt } = req.body;
+
+    // Validation
+    if (!customPrompt || typeof customPrompt !== 'string' || customPrompt.trim() === '') {
+      return res.status(400).json({ error: 'Custom prompt is required' });
+    }
+
     const sessionId = uuidv4();
 
-    // Create session in store
-    workoutCoachSessionStore.create(sessionId, userId);
+    // Create session in store with custom prompt
+    workoutCoachSessionStore.create(sessionId, userId, customPrompt);
 
     logger.info('Workout coach session started', { sessionId, userId });
 

@@ -34,6 +34,7 @@ export interface SessionData {
   createdWorkoutId: number | null;
   regenerationCount: number;
   timestamp: number;
+  customPrompt: string;
   sseResponse?: Response;
 }
 
@@ -41,7 +42,7 @@ export class SessionStore {
   private sessions: Map<string, SessionData> = new Map();
   private readonly SESSION_TIMEOUT = 30 * 60 * 1000; // 30 minutes
 
-  create(sessionId: string, userId: number): SessionData {
+  create(sessionId: string, userId: number, customPrompt: string): SessionData {
     const session: SessionData = {
       userId,
       sessionId,
@@ -52,6 +53,7 @@ export class SessionStore {
       createdWorkoutId: null,
       regenerationCount: 0,
       timestamp: Date.now(),
+      customPrompt,
     };
     this.sessions.set(sessionId, session);
     this.scheduleCleanup(sessionId);
