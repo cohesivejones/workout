@@ -61,16 +61,19 @@ export class WorkoutCoachGraph {
   }
 
   /**
-   * Generate a workout plan using OpenAI based on workout history
+   * Generate a workout plan using OpenAI based on workout history and custom prompt
    */
-  private async generateWorkoutWithAI(history: WorkoutHistoryItem[]): Promise<WorkoutPlan> {
+  private async generateWorkoutWithAI(
+    history: WorkoutHistoryItem[],
+    customPrompt: string
+  ): Promise<WorkoutPlan> {
     try {
       const today = new Date().toISOString().split('T')[0];
 
-      const basePrompt =
-        'You are a fitness trainer. Generate a balanced full-body workout with 6 exercises covering legs, core, and upper body. Return ONLY a JSON object with this exact structure: {"exercises": [{"name": "Exercise Name", "reps": number, "weight": number}]}. Do not include any other text, explanation, or markdown formatting.';
+      const systemPrompt =
+        'You are a fitness trainer. Based on the user\'s request, generate an appropriate workout. Return ONLY a JSON object with this exact structure: {"exercises": [{"name": "Exercise Name", "reps": number, "weight": number}]}. Do not include any other text, explanation, or markdown formatting.';
 
-      let prompt = basePrompt;
+      let prompt = `${systemPrompt}\n\nUser request: ${customPrompt}`;
 
       if (history.length > 0) {
         const historyText = history
@@ -80,7 +83,7 @@ export class WorkoutCoachGraph {
           )
           .join('\n');
 
-        prompt = `${basePrompt}\n\nRecent workout history:\n${historyText}\n\nBased on this history, suggest progressive overload where appropriate.`;
+        prompt += `\n\nRecent workout history:\n${historyText}\n\nSuggest progressive overload where appropriate.`;
       }
 
       const response = await this.llm.invoke(prompt);
@@ -254,8 +257,8 @@ export class WorkoutCoachGraph {
       // Fetch workout history
       const history = await this.fetchWorkoutHistory(userId);
 
-      // Generate workout with AI
-      const plan = await this.generateWorkoutWithAI(history);
+      // Generate workout with AI using custom prompt
+      const plan = await this.generateWorkoutWithAI(history, session.customPrompt);
 
       // Update session with the plan
       this.sessionStore.update(sessionId, { currentWorkoutPlan: plan });

@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { SessionStore } from './workoutCoachSessionStore';
 import { Response } from 'express';
 
-describe('SessionStore', () => {
+describe('workoutCoachSessionStore', () => {
   let sessionStore: SessionStore;
 
   beforeEach(() => {
@@ -17,12 +17,14 @@ describe('SessionStore', () => {
     it('should create a new session with initial state', () => {
       const sessionId = 'session-123';
       const userId = 1;
+      const customPrompt = 'Generate a balanced full-body workout';
 
-      const session = sessionStore.create(sessionId, userId);
+      const session = sessionStore.create(sessionId, userId, customPrompt);
 
       expect(session).toBeDefined();
       expect(session.sessionId).toBe(sessionId);
       expect(session.userId).toBe(userId);
+      expect(session.customPrompt).toBe(customPrompt);
       expect(session.messages).toEqual([]);
       expect(session.workoutHistory).toEqual([]);
       expect(session.currentWorkoutPlan).toBeNull();
@@ -34,13 +36,28 @@ describe('SessionStore', () => {
     });
 
     it('should create multiple sessions with different IDs', () => {
-      const session1 = sessionStore.create('session-1', 1);
-      const session2 = sessionStore.create('session-2', 2);
+      const session1 = sessionStore.create('session-1', 1, 'Workout 1');
+      const session2 = sessionStore.create('session-2', 2, 'Workout 2');
 
       expect(session1.sessionId).toBe('session-1');
       expect(session2.sessionId).toBe('session-2');
+      expect(session1.customPrompt).toBe('Workout 1');
+      expect(session2.customPrompt).toBe('Workout 2');
       expect(sessionStore.get('session-1')).toBeDefined();
       expect(sessionStore.get('session-2')).toBeDefined();
+    });
+
+    it('should store customPrompt in session', () => {
+      const sessionId = 'session-123';
+      const userId = 1;
+      const customPrompt = 'Give me an intense upper body workout';
+
+      const session = sessionStore.create(sessionId, userId, customPrompt);
+
+      expect(session.customPrompt).toBe(customPrompt);
+
+      const retrieved = sessionStore.get(sessionId);
+      expect(retrieved!.customPrompt).toBe(customPrompt);
     });
   });
 
@@ -49,7 +66,7 @@ describe('SessionStore', () => {
       const sessionId = 'session-123';
       const userId = 1;
 
-      sessionStore.create(sessionId, userId);
+      sessionStore.create(sessionId, userId, 'Generate a workout');
       const retrieved = sessionStore.get(sessionId);
 
       expect(retrieved).toBeDefined();
@@ -66,7 +83,7 @@ describe('SessionStore', () => {
       vi.useFakeTimers();
 
       const sessionId = 'session-123';
-      sessionStore.create(sessionId, 1);
+      sessionStore.create(sessionId, 1, 'Test prompt');
 
       const originalSession = sessionStore.get(sessionId)!;
       const originalTimestamp = originalSession.timestamp;
@@ -84,7 +101,7 @@ describe('SessionStore', () => {
   describe('update', () => {
     it('should update session data', () => {
       const sessionId = 'session-123';
-      sessionStore.create(sessionId, 1);
+      sessionStore.create(sessionId, 1, 'Test prompt');
 
       const workoutPlan = {
         date: '2024-01-15',
@@ -105,7 +122,7 @@ describe('SessionStore', () => {
       vi.useFakeTimers();
 
       const sessionId = 'session-123';
-      sessionStore.create(sessionId, 1);
+      sessionStore.create(sessionId, 1, 'Test prompt');
 
       const originalTimestamp = sessionStore.get(sessionId)!.timestamp;
 
@@ -128,7 +145,7 @@ describe('SessionStore', () => {
 
     it('should add messages to session', () => {
       const sessionId = 'session-123';
-      sessionStore.create(sessionId, 1);
+      sessionStore.create(sessionId, 1, 'Test prompt');
 
       const messages = [
         { role: 'assistant' as const, content: 'Hello!' },
@@ -146,7 +163,7 @@ describe('SessionStore', () => {
   describe('delete', () => {
     it('should delete an existing session', () => {
       const sessionId = 'session-123';
-      sessionStore.create(sessionId, 1);
+      sessionStore.create(sessionId, 1, 'Test prompt');
 
       expect(sessionStore.get(sessionId)).toBeDefined();
 
@@ -163,7 +180,7 @@ describe('SessionStore', () => {
 
     it('should close SSE response if present', () => {
       const sessionId = 'session-123';
-      sessionStore.create(sessionId, 1);
+      sessionStore.create(sessionId, 1, 'Test prompt');
 
       const mockResponse = {
         end: vi.fn(),
@@ -178,7 +195,7 @@ describe('SessionStore', () => {
 
     it('should handle SSE response close errors gracefully', () => {
       const sessionId = 'session-123';
-      sessionStore.create(sessionId, 1);
+      sessionStore.create(sessionId, 1, 'Test prompt');
 
       const mockResponse = {
         end: vi.fn(() => {
@@ -198,7 +215,7 @@ describe('SessionStore', () => {
   describe('session timeout', () => {
     it('should schedule cleanup for sessions', () => {
       const sessionId = 'session-123';
-      sessionStore.create(sessionId, 1);
+      sessionStore.create(sessionId, 1, 'Test prompt');
 
       // Verify session exists
       const session = sessionStore.get(sessionId);
@@ -208,7 +225,7 @@ describe('SessionStore', () => {
 
     it('should keep active sessions', () => {
       const sessionId = 'session-123';
-      sessionStore.create(sessionId, 1);
+      sessionStore.create(sessionId, 1, 'Test prompt');
 
       // Access session multiple times
       expect(sessionStore.get(sessionId)).toBeDefined();
@@ -218,7 +235,7 @@ describe('SessionStore', () => {
 
     it('should update timestamp when session is accessed', () => {
       const sessionId = 'session-123';
-      sessionStore.create(sessionId, 1);
+      sessionStore.create(sessionId, 1, 'Test prompt');
 
       const originalTimestamp = sessionStore.get(sessionId)!.timestamp;
 
@@ -246,8 +263,8 @@ describe('SessionStore', () => {
       const session1Id = 'session-1';
       const session2Id = 'session-2';
 
-      localStore.create(session1Id, 1);
-      localStore.create(session2Id, 2);
+      localStore.create(session1Id, 1, 'Prompt 1');
+      localStore.create(session2Id, 2, 'Prompt 2');
 
       // Manually set one session to be expired (old timestamp)
       localStore.update(session1Id, {
@@ -266,7 +283,7 @@ describe('SessionStore', () => {
   describe('workflow state management', () => {
     it('should track workout plan through workflow', () => {
       const sessionId = 'session-123';
-      sessionStore.create(sessionId, 1);
+      sessionStore.create(sessionId, 1, 'Generate a workout');
 
       // Initial state
       expect(sessionStore.get(sessionId)!.currentWorkoutPlan).toBeNull();
@@ -323,7 +340,7 @@ describe('SessionStore', () => {
 
     it('should track conversation messages', () => {
       const sessionId = 'session-123';
-      sessionStore.create(sessionId, 1);
+      sessionStore.create(sessionId, 1, 'Generate a workout');
 
       const message1 = { role: 'assistant' as const, content: 'Here is your workout...' };
       sessionStore.update(sessionId, {
@@ -344,7 +361,7 @@ describe('SessionStore', () => {
 
     it('should track regeneration count', () => {
       const sessionId = 'session-123';
-      sessionStore.create(sessionId, 1);
+      sessionStore.create(sessionId, 1, 'Generate a workout');
 
       expect(sessionStore.get(sessionId)!.regenerationCount).toBe(0);
 

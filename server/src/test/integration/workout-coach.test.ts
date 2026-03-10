@@ -49,14 +49,47 @@ describe('Workout Coach API Routes', () => {
 
   describe('POST /api/workout-coach/start', () => {
     it('should require authentication', async () => {
-      const response = await request(app).post('/api/workout-coach/start').expect(401);
+      const response = await request(app)
+        .post('/api/workout-coach/start')
+        .send({ customPrompt: 'Generate a workout' })
+        .expect(401);
       expect(response.body.error).toBeDefined();
+    });
+
+    it('should require customPrompt', async () => {
+      const response = await request(app)
+        .post('/api/workout-coach/start')
+        .set('Cookie', [`token=${testUserData.authToken}`])
+        .expect(400);
+
+      expect(response.body.error).toBe('Custom prompt is required');
+    });
+
+    it('should reject empty customPrompt', async () => {
+      const response = await request(app)
+        .post('/api/workout-coach/start')
+        .set('Cookie', [`token=${testUserData.authToken}`])
+        .send({ customPrompt: '' })
+        .expect(400);
+
+      expect(response.body.error).toBe('Custom prompt is required');
+    });
+
+    it('should reject customPrompt with only whitespace', async () => {
+      const response = await request(app)
+        .post('/api/workout-coach/start')
+        .set('Cookie', [`token=${testUserData.authToken}`])
+        .send({ customPrompt: '   ' })
+        .expect(400);
+
+      expect(response.body.error).toBe('Custom prompt is required');
     });
 
     it('should create a new session and return session ID', async () => {
       const response = await request(app)
         .post('/api/workout-coach/start')
         .set('Cookie', [`token=${testUserData.authToken}`])
+        .send({ customPrompt: 'Generate me a balanced full-body workout with 6 exercises' })
         .expect(200);
 
       expect(response.body).toHaveProperty('sessionId');
@@ -65,10 +98,27 @@ describe('Workout Coach API Routes', () => {
       expect(response.body.message).toBe('Session created');
     });
 
-    it('should initialize session in session store', async () => {
+    it('should store customPrompt in session', async () => {
+      const customPrompt = 'Give me an intense upper body workout with 8 exercises';
       const response = await request(app)
         .post('/api/workout-coach/start')
         .set('Cookie', [`token=${testUserData.authToken}`])
+        .send({ customPrompt })
+        .expect(200);
+
+      const sessionId = response.body.sessionId;
+      const session = workoutCoachSessionStore.get(sessionId);
+
+      expect(session).toBeDefined();
+      expect(session!.customPrompt).toBe(customPrompt);
+    });
+
+    it('should initialize session in session store', async () => {
+      const customPrompt = 'Create a balanced workout';
+      const response = await request(app)
+        .post('/api/workout-coach/start')
+        .set('Cookie', [`token=${testUserData.authToken}`])
+        .send({ customPrompt })
         .expect(200);
 
       const sessionId = response.body.sessionId;
@@ -80,17 +130,20 @@ describe('Workout Coach API Routes', () => {
       expect(session!.regenerationCount).toBe(0);
       expect(session!.currentWorkoutPlan).toBeNull();
       expect(session!.userResponse).toBeNull();
+      expect(session!.customPrompt).toBe(customPrompt);
     });
 
     it('should create unique session IDs for multiple requests', async () => {
       const response1 = await request(app)
         .post('/api/workout-coach/start')
         .set('Cookie', [`token=${testUserData.authToken}`])
+        .send({ customPrompt: 'Workout 1' })
         .expect(200);
 
       const response2 = await request(app)
         .post('/api/workout-coach/start')
         .set('Cookie', [`token=${testUserData.authToken}`])
+        .send({ customPrompt: 'Workout 2' })
         .expect(200);
 
       expect(response1.body.sessionId).not.toBe(response2.body.sessionId);
@@ -109,6 +162,7 @@ describe('Workout Coach API Routes', () => {
       const response = await request(app)
         .post('/api/workout-coach/start')
         .set('Cookie', [`token=${testUserData.authToken}`])
+        .send({ customPrompt: 'Test workout' })
         .expect(200);
 
       sessionId = response.body.sessionId;
@@ -259,6 +313,7 @@ describe('Workout Coach API Routes', () => {
       const response = await request(app)
         .post('/api/workout-coach/start')
         .set('Cookie', [`token=${testUserData.authToken}`])
+        .send({ customPrompt: 'Test workout' })
         .expect(200);
 
       sessionId = response.body.sessionId;
@@ -376,6 +431,7 @@ describe('Workout Coach API Routes', () => {
       const startResponse = await request(app)
         .post('/api/workout-coach/start')
         .set('Cookie', [`token=${testUserData.authToken}`])
+        .send({ customPrompt: 'Generate a balanced workout' })
         .expect(200);
 
       const sessionId = startResponse.body.sessionId;
@@ -417,6 +473,7 @@ describe('Workout Coach API Routes', () => {
       const startResponse = await request(app)
         .post('/api/workout-coach/start')
         .set('Cookie', [`token=${testUserData.authToken}`])
+        .send({ customPrompt: 'Generate a balanced workout' })
         .expect(200);
 
       const sessionId = startResponse.body.sessionId;
@@ -486,11 +543,13 @@ describe('Workout Coach API Routes', () => {
       const session1Response = await request(app)
         .post('/api/workout-coach/start')
         .set('Cookie', [`token=${testUserData.authToken}`])
+        .send({ customPrompt: 'Workout 1' })
         .expect(200);
 
       const session2Response = await request(app)
         .post('/api/workout-coach/start')
         .set('Cookie', [`token=${testUserData.authToken}`])
+        .send({ customPrompt: 'Workout 2' })
         .expect(200);
 
       const sessionId1 = session1Response.body.sessionId;

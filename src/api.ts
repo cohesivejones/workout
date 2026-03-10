@@ -196,8 +196,8 @@ export interface CoachSessionResponse {
   message: string;
 }
 
-export const startCoachSession = (): Promise<CoachSessionResponse> => {
-  return api.post('/workout-coach/start');
+export const startCoachSession = (customPrompt: string): Promise<CoachSessionResponse> => {
+  return api.post('/workout-coach/start', { customPrompt });
 };
 
 export const respondToCoachWorkout = (

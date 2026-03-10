@@ -71,13 +71,15 @@ describe('WorkoutCoachGraph', () => {
   });
 
   describe('generateWorkout', () => {
-    it('should generate workout using OpenAI', async () => {
+    it('should generate workout using OpenAI with custom prompt', async () => {
       const mockHistory = [
         {
           date: '2024-01-15',
           exercises: [{ name: 'Squats', reps: 10, weight: 135 }],
         },
       ];
+
+      const customPrompt = 'Generate a balanced full-body workout with 6 exercises';
 
       const mockWorkoutPlan = {
         date: new Date().toISOString().split('T')[0],
@@ -91,9 +93,9 @@ describe('WorkoutCoachGraph', () => {
       const generateWorkout = vi.fn().mockResolvedValue(mockWorkoutPlan);
       graph['generateWorkoutWithAI'] = generateWorkout;
 
-      const workout = await graph['generateWorkoutWithAI'](mockHistory);
+      const workout = await graph['generateWorkoutWithAI'](mockHistory, customPrompt);
 
-      expect(generateWorkout).toHaveBeenCalledWith(mockHistory);
+      expect(generateWorkout).toHaveBeenCalledWith(mockHistory, customPrompt);
       expect(workout).toBeDefined();
       expect(workout.exercises).toHaveLength(3);
       expect(workout.date).toBeDefined();
@@ -107,10 +109,14 @@ describe('WorkoutCoachGraph', () => {
         },
       ];
 
+      const customPrompt = 'Generate a workout';
+
       const generateWorkout = vi.fn().mockRejectedValue(new Error('OpenAI API error'));
       graph['generateWorkoutWithAI'] = generateWorkout;
 
-      await expect(graph['generateWorkoutWithAI'](mockHistory)).rejects.toThrow('OpenAI API error');
+      await expect(graph['generateWorkoutWithAI'](mockHistory, customPrompt)).rejects.toThrow(
+        'OpenAI API error'
+      );
     });
   });
 
@@ -180,11 +186,11 @@ describe('WorkoutCoachGraph', () => {
       graph['createWorkoutInDB'] = vi.fn().mockResolvedValue(mockWorkoutId);
 
       // Create session
-      sessionStore.create(sessionId, userId);
+      sessionStore.create(sessionId, userId, 'Generate a balanced workout');
 
       // Simulate workflow
       const history = await graph['fetchWorkoutHistory'](userId);
-      const workout = await graph['generateWorkoutWithAI'](history);
+      const workout = await graph['generateWorkoutWithAI'](history, 'Generate a balanced workout');
 
       // Update session with workout
       sessionStore.update(sessionId, {
@@ -240,11 +246,11 @@ describe('WorkoutCoachGraph', () => {
       graph['createWorkoutInDB'] = vi.fn().mockResolvedValue(mockWorkoutId);
 
       // Create session
-      sessionStore.create(sessionId, userId);
+      sessionStore.create(sessionId, userId, 'Generate a workout');
 
       // First generation
       const history = await graph['fetchWorkoutHistory'](userId);
-      const workout1 = await graph['generateWorkoutWithAI'](history);
+      const workout1 = await graph['generateWorkoutWithAI'](history, 'Generate a workout');
       sessionStore.update(sessionId, {
         currentWorkoutPlan: workout1,
         workoutHistory: history,
@@ -257,7 +263,7 @@ describe('WorkoutCoachGraph', () => {
       });
 
       // Regenerate
-      const workout2 = await graph['generateWorkoutWithAI'](history);
+      const workout2 = await graph['generateWorkoutWithAI'](history, 'Generate a workout');
       sessionStore.update(sessionId, {
         currentWorkoutPlan: workout2,
         userResponse: null,
@@ -316,14 +322,14 @@ describe('WorkoutCoachGraph', () => {
       graph['createWorkoutInDB'] = vi.fn().mockResolvedValue(44);
 
       // Create session
-      sessionStore.create(sessionId, userId);
+      sessionStore.create(sessionId, userId, 'Generate a workout');
 
       const history = await graph['fetchWorkoutHistory'](userId);
       sessionStore.update(sessionId, { workoutHistory: history });
 
       // User says no 3 times before saying yes
       for (let i = 0; i < 3; i++) {
-        const workout = await graph['generateWorkoutWithAI'](history);
+        const workout = await graph['generateWorkoutWithAI'](history, 'Generate a workout');
         sessionStore.update(sessionId, {
           currentWorkoutPlan: workout,
           regenerationCount: i,
@@ -420,7 +426,7 @@ describe('WorkoutCoachGraph', () => {
       graph['generateWorkoutWithAI'] = vi.fn().mockResolvedValue(mockWorkoutPlan);
 
       // Create session with mock SSE response
-      sessionStore.create(sessionId, userId);
+      sessionStore.create(sessionId, userId, 'Generate a balanced full-body workout');
       const mockWrite = vi.fn();
       sessionStore.update(sessionId, {
         sseResponse: { write: mockWrite } as any,
@@ -447,7 +453,7 @@ describe('WorkoutCoachGraph', () => {
       graph['fetchWorkoutHistory'] = vi.fn().mockRejectedValue(new Error('DB error'));
 
       // Create session with mock SSE response
-      sessionStore.create(sessionId, userId);
+      sessionStore.create(sessionId, userId, 'Generate a workout');
       const mockWrite = vi.fn();
       sessionStore.update(sessionId, {
         sseResponse: { write: mockWrite } as any,
@@ -490,7 +496,7 @@ describe('WorkoutCoachGraph', () => {
       graph['generateWorkoutWithAI'] = vi.fn().mockResolvedValue(mockWorkoutPlan);
 
       // Create session with mock SSE response
-      sessionStore.create(sessionId, userId);
+      sessionStore.create(sessionId, userId, 'Generate a workout');
       const mockWrite = vi.fn();
       sessionStore.update(sessionId, {
         sseResponse: { write: mockWrite } as any,
@@ -523,7 +529,7 @@ describe('WorkoutCoachGraph', () => {
       graph['createWorkoutInDB'] = vi.fn().mockResolvedValue(mockWorkoutId);
 
       // Create session with mock SSE response and current workout
-      sessionStore.create(sessionId, userId);
+      sessionStore.create(sessionId, userId, 'Generate a workout');
       const mockWrite = vi.fn();
       sessionStore.update(sessionId, {
         sseResponse: { write: mockWrite } as any,
@@ -557,7 +563,7 @@ describe('WorkoutCoachGraph', () => {
       const userId = 1;
 
       // Create session without workout plan
-      sessionStore.create(sessionId, userId);
+      sessionStore.create(sessionId, userId, 'Generate a workout');
 
       await expect(graph.handleUserResponse(userId, sessionId, 'yes')).rejects.toThrow(
         'No workout plan to save'
@@ -577,7 +583,7 @@ describe('WorkoutCoachGraph', () => {
       graph['createWorkoutInDB'] = vi.fn().mockRejectedValue(new Error('DB error'));
 
       // Create session with mock SSE response and workout plan
-      sessionStore.create(sessionId, userId);
+      sessionStore.create(sessionId, userId, 'Generate a workout');
       const mockWrite = vi.fn();
       sessionStore.update(sessionId, {
         sseResponse: { write: mockWrite } as any,

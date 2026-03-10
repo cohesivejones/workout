@@ -17,8 +17,51 @@
 
 .startSection {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
   padding: 32px 0;
+  gap: 20px;
+}
+
+.promptSection {
+  width: 100%;
+  max-width: 600px;
+}
+
+.promptLabel {
+  display: block;
+  font-weight: 600;
+  font-size: 15px;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.promptTextarea {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #dee2e6;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  line-height: 1.5;
+  resize: vertical;
+  transition: border-color 0.2s ease;
+}
+
+.promptTextarea:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.promptTextarea:disabled {
+  background-color: #f8f9fa;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.promptTextarea::placeholder {
+  color: #adb5bd;
 }
 
 .startButton {
@@ -287,6 +330,18 @@
   }
 
   .messageText {
+    font-size: 13px;
+  }
+
+  .promptSection {
+    max-width: 100%;
+  }
+
+  .promptLabel {
+    font-size: 14px;
+  }
+
+  .promptTextarea {
     font-size: 13px;
   }
 
