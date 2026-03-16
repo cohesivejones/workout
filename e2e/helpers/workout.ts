@@ -74,7 +74,10 @@ export async function addExercise(page: Page, exercise: Exercise): Promise<void>
   // Build expected text based on provided fields
   let expectedText = `${exercise.name} - ${exercise.reps} reps`;
   if (exercise.weight) {
-    expectedText += ` - ${exercise.weight} lbs`;
+    // Convert lbs to kg for display (same logic as formatWeightWithKg)
+    const lbs = Number(exercise.weight);
+    const kg = Number((lbs * 0.453592).toFixed(1));
+    expectedText += ` - ${exercise.weight} lbs (${kg} kg)`;
   }
   if (exercise.time) {
     expectedText += ` - ${exercise.time} sec`;

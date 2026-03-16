@@ -9,7 +9,7 @@ import { useUserContext } from '../contexts/useUserContext';
 import { fetchRecentExerciseData } from '../api';
 import { useForm, useFieldArray, Controller, SubmitHandler } from 'react-hook-form';
 import { SingleValue } from 'react-select';
-import { lbsToKg } from '../utils/weight';
+import { lbsToKg, kgToLbs, WeightUnit, formatWeightWithKg } from '../utils/weight';
 import { toExerciseProgressionPath } from '../utils/paths';
 
 interface FormValues {
@@ -41,6 +41,7 @@ function WorkoutForm({
 }: WorkoutFormProps): React.ReactElement {
   const { user } = useUserContext();
   const [isSavingExercise, setIsSavingExercise] = React.useState<boolean>(false);
+  const [weightUnit, setWeightUnit] = React.useState<WeightUnit>('lbs');
 
   // Initialize form with default values
   const {
@@ -124,7 +125,11 @@ function WorkoutForm({
           append({
             name,
             reps: Number(currentExercise.reps),
-            weight: currentExercise.weight ? Number(currentExercise.weight) : null,
+            weight: currentExercise.weight
+              ? weightUnit === 'kgs'
+                ? kgToLbs(Number(currentExercise.weight)) // Convert to lbs for storage
+                : Number(currentExercise.weight)
+              : null,
             time_seconds: currentExercise.time_seconds
               ? Number(currentExercise.time_seconds)
               : null,
@@ -232,17 +237,53 @@ function WorkoutForm({
           />
           <div className={styles.weightInputContainer}>
             <div className={styles.weightInputWrapper}>
-              <input
-                type="number"
-                placeholder="Weight (lbs)"
-                min="0"
-                step="0.5"
-                className={`${styles.exerciseInputField} ${styles.weightInput}`}
-                {...register('currentExercise.weight')}
-              />
-              <span className={styles.weightSuffix}>
-                {currentExercise.weight ? `${lbsToKg(Number(currentExercise.weight))} kg` : '0 kg'}
-              </span>
+              <div className={styles.unitToggle}>
+                <button
+                  type="button"
+                  className={`${styles.unitButton} ${weightUnit === 'lbs' ? styles.unitButtonActive : ''}`}
+                  onClick={() => {
+                    if (weightUnit === 'kgs' && currentExercise.weight) {
+                      // Convert current kg value to lbs
+                      const kgValue = Number(currentExercise.weight);
+                      setValue('currentExercise.weight', String(kgToLbs(kgValue)));
+                    }
+                    setWeightUnit('lbs');
+                  }}
+                >
+                  lbs
+                </button>
+                <button
+                  type="button"
+                  className={`${styles.unitButton} ${weightUnit === 'kgs' ? styles.unitButtonActive : ''}`}
+                  onClick={() => {
+                    if (weightUnit === 'lbs' && currentExercise.weight) {
+                      // Convert current lbs value to kg
+                      const lbsValue = Number(currentExercise.weight);
+                      setValue('currentExercise.weight', String(lbsToKg(lbsValue)));
+                    }
+                    setWeightUnit('kgs');
+                  }}
+                >
+                  kgs
+                </button>
+              </div>
+              <div className={styles.weightInputGroup}>
+                <input
+                  type="number"
+                  placeholder={`Weight (${weightUnit})`}
+                  min="0"
+                  step="0.5"
+                  className={`${styles.exerciseInputField} ${styles.weightInput}`}
+                  {...register('currentExercise.weight')}
+                />
+                {currentExercise.weight && (
+                  <span className={styles.weightSuffix}>
+                    {weightUnit === 'lbs'
+                      ? `${lbsToKg(Number(currentExercise.weight))} kgs`
+                      : `${kgToLbs(Number(currentExercise.weight))} lbs`}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
           <input
@@ -283,7 +324,9 @@ function WorkoutForm({
                       exercises[index].name
                     )}{' '}
                     - {exercises[index].reps} reps
-                    {exercises[index].weight ? ` - ${exercises[index].weight} lbs` : ''}
+                    {exercises[index].weight
+                      ? ` - ${formatWeightWithKg(exercises[index].weight)}`
+                      : ''}
                     {exercises[index].time_seconds ? ` - ${exercises[index].time_seconds} sec` : ''}
                     {(exercises[index].newReps ||
                       exercises[index].newWeight ||

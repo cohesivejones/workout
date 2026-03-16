@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { startCoachSession, respondToCoachWorkout } from '../api';
 import FormContainer from '../components/common/FormContainer';
 import { useSSE, SSEMessage } from '../hooks/useSSE';
+import { formatWeightWithKg } from '../utils/weight';
 import styles from './WorkoutCoachPage.module.css';
 
 interface WorkoutPlan {
@@ -120,7 +121,7 @@ function WorkoutCoachPage() {
     plan.exercises.forEach((exercise, index) => {
       let line = `${index + 1}. ${exercise.name} - ${exercise.reps} reps`;
       if (exercise.weight) {
-        line += ` @ ${exercise.weight} lbs`;
+        line += ` @ ${formatWeightWithKg(exercise.weight)}`;
       }
       lines.push(line);
     });

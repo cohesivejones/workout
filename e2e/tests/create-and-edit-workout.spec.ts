@@ -43,9 +43,9 @@ test.describe('Create and Edit Workout', () => {
     }
 
     // Verify all 6 exercises are added
-    await expect(page.locator('text=Bench Press - 10 reps - 135 lbs')).toBeVisible();
-    await expect(page.locator('text=Squats - 8 reps - 185 lbs')).toBeVisible();
-    await expect(page.locator('text=Deadlift - 5 reps - 225 lbs')).toBeVisible();
+    await expect(page.locator('text=Bench Press - 10 reps - 135 lbs (61.2 kg)')).toBeVisible();
+    await expect(page.locator('text=Squats - 8 reps - 185 lbs (83.9 kg)')).toBeVisible();
+    await expect(page.locator('text=Deadlift - 5 reps - 225 lbs (102.1 kg)')).toBeVisible();
     await expect(page.locator('text=Planks - 1 reps - 2 sec')).toBeVisible();
     await expect(page.locator('text=Wall Sit - 1 reps - 1.5 sec')).toBeVisible();
     await expect(page.locator('text=Push-ups - 20 reps')).toBeVisible();
@@ -104,24 +104,26 @@ test.describe('Create and Edit Workout', () => {
     // We need to remove and re-add exercises with new values
 
     // Modify Bench Press: 10 reps → 12 reps (keep weight same)
-    const benchPressExercise = page.locator('li:has-text("Bench Press - 10 reps - 135 lbs")');
+    const benchPressExercise = page.locator(
+      'li:has-text("Bench Press - 10 reps - 135 lbs (61.2 kg)")'
+    );
     await expect(benchPressExercise).toBeVisible();
     await benchPressExercise.locator('button[title="Remove exercise"]').click();
-    await expect(page.locator('text=Bench Press - 10 reps - 135 lbs')).not.toBeVisible();
+    await expect(page.locator('text=Bench Press - 10 reps - 135 lbs (61.2 kg)')).not.toBeVisible();
     await addExercise(page, { name: 'Bench Press', reps: '12', weight: '135', time: '' });
 
     // Modify Squat: 185 lbs → 200 lbs (keep reps same)
-    const squatExercise = page.locator('li:has-text("Squats - 8 reps - 185 lbs")');
+    const squatExercise = page.locator('li:has-text("Squats - 8 reps - 185 lbs (83.9 kg)")');
     await expect(squatExercise).toBeVisible();
     await squatExercise.locator('button[title="Remove exercise"]').click();
-    await expect(page.locator('text=Squats - 8 reps - 185 lbs')).not.toBeVisible();
+    await expect(page.locator('text=Squats - 8 reps - 185 lbs (83.9 kg)')).not.toBeVisible();
     await addExercise(page, { name: 'Squats', reps: '8', weight: '200', time: '' });
 
     // Modify Deadlift: 5 reps → 6 reps, 225 lbs → 245 lbs
-    const deadliftExercise = page.locator('li:has-text("Deadlift - 5 reps - 225 lbs")');
+    const deadliftExercise = page.locator('li:has-text("Deadlift - 5 reps - 225 lbs (102.1 kg)")');
     await expect(deadliftExercise).toBeVisible();
     await deadliftExercise.locator('button[title="Remove exercise"]').click();
-    await expect(page.locator('text=Deadlift - 5 reps - 225 lbs')).not.toBeVisible();
+    await expect(page.locator('text=Deadlift - 5 reps - 225 lbs (102.1 kg)')).not.toBeVisible();
     await addExercise(page, { name: 'Deadlift', reps: '6', weight: '245', time: '' });
 
     // Modify Plank: 2 min → 2.5 min
@@ -140,12 +142,12 @@ test.describe('Create and Edit Workout', () => {
     await expect(exerciseList).toHaveCount(7);
 
     // Verify all modified and new exercises are present
-    await expect(page.locator('text=Bench Press - 12 reps - 135 lbs')).toBeVisible();
-    await expect(page.locator('text=Squats - 8 reps - 200 lbs')).toBeVisible();
-    await expect(page.locator('text=Deadlift - 6 reps - 245 lbs')).toBeVisible();
+    await expect(page.locator('text=Bench Press - 12 reps - 135 lbs (61.2 kg)')).toBeVisible();
+    await expect(page.locator('text=Squats - 8 reps - 200 lbs (90.7 kg)')).toBeVisible();
+    await expect(page.locator('text=Deadlift - 6 reps - 245 lbs (111.1 kg)')).toBeVisible();
     await expect(page.locator('text=Planks - 1 reps - 2.5 sec')).toBeVisible();
     await expect(page.locator('text=Push-ups - 20 reps')).toBeVisible();
-    await expect(page.locator('text=Dumbbell Rows - 12 reps - 50 lbs')).toBeVisible();
+    await expect(page.locator('text=Dumbbell Rows - 12 reps - 50 lbs (22.7 kg)')).toBeVisible();
     await expect(page.locator('text=Lunges - 15 reps')).toBeVisible();
 
     // Verify deleted exercise is NOT present
@@ -174,11 +176,11 @@ test.describe('Create and Edit Workout', () => {
 
     // Verify exercises are shown in list view with specific details
     await expect(updatedWorkoutCard.locator('text=Bench Press')).toBeVisible();
-    await expect(updatedWorkoutCard.locator('text=12 reps - 135 lbs')).toBeVisible();
+    await expect(updatedWorkoutCard.locator('text=12 reps - 135 lbs (61.2 kg)')).toBeVisible();
     await expect(updatedWorkoutCard.locator('text=Squats')).toBeVisible();
-    await expect(updatedWorkoutCard.locator('text=8 reps - 200 lbs')).toBeVisible();
+    await expect(updatedWorkoutCard.locator('text=8 reps - 200 lbs (90.7 kg)')).toBeVisible();
     await expect(updatedWorkoutCard.locator('text=Dumbbell Rows')).toBeVisible();
-    await expect(updatedWorkoutCard.locator('text=12 reps - 50 lbs')).toBeVisible();
+    await expect(updatedWorkoutCard.locator('text=12 reps - 50 lbs (22.7 kg)')).toBeVisible();
     await expect(updatedWorkoutCard.locator('text=Lunges')).toBeVisible();
     await expect(updatedWorkoutCard.locator('text=15 reps')).toBeVisible();
 
