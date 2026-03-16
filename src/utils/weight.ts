@@ -3,6 +3,7 @@
  */
 
 const LBS_TO_KG_FACTOR = 0.453592;
+const KG_TO_LBS_FACTOR = 2.20462;
 
 /**
  * Convert pounds to kilograms
@@ -14,6 +15,15 @@ export function lbsToKg(lbs: number): number {
 }
 
 /**
+ * Convert kilograms to pounds
+ * @param kg - Weight in kilograms
+ * @returns Weight in pounds, rounded to 1 decimal place
+ */
+export function kgToLbs(kg: number): number {
+  return Number((kg * KG_TO_LBS_FACTOR).toFixed(1));
+}
+
+/**
  * Format weight display showing both lbs and kg
  * @param lbs - Weight in pounds
  * @returns Formatted string like "20 lbs (9.1 kg)"
@@ -21,3 +31,5 @@ export function lbsToKg(lbs: number): number {
 export function formatWeightWithKg(lbs: number): string {
   return `${lbs} lbs (${lbsToKg(lbs)} kg)`;
 }
+
+export type WeightUnit = 'lbs' | 'kgs';

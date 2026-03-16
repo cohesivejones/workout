@@ -50,18 +50,69 @@
 }
 
 .weightInputContainer {
-  position: relative;
   width: 100%;
   margin-bottom: 10px;
 }
 
 .weightInputWrapper {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.unitToggle {
+  display: flex;
+  flex-shrink: 0;
+  background: #e8e8e8;
+  border-radius: 8px;
+  padding: 4px;
+  gap: 2px;
+  height: 44px;
+  box-sizing: border-box;
+}
+
+.unitButton {
+  padding: 0 14px;
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  background: transparent;
+  color: #666;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  min-width: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.unitButton:hover {
+  color: #333;
+}
+
+.unitButton:active {
+  transform: scale(0.97);
+}
+
+.unitButtonActive {
+  background: white;
+  color: #4caf50;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.weightInputGroup {
   position: relative;
+  flex: 1;
 }
 
 .weightInput {
-  padding-right: 70px !important; /* Make room for the suffix */
+  width: 100%;
+  padding-right: 70px !important;
   -moz-appearance: textfield;
+  font-size: 16px;
 }
 
 .weightInput::-webkit-outer-spin-button,
@@ -73,17 +124,20 @@
 .weightSuffix {
   position: absolute;
   right: 10px;
-  top: 9px; /* Exact positioning */
+  top: 50%;
+  transform: translateY(-50%);
   color: #666;
-  font-size: 14px;
+  font-size: 13px;
   pointer-events: none; /* Allows clicks to pass through to the input */
+  white-space: nowrap;
 }
 
 /* Ensure consistent input height and alignment */
 .exerciseInputField[type='number'] {
-  height: 36px; /* Set a fixed height */
-  padding: 0 8px; /* Horizontal padding only */
-  line-height: 36px; /* Match line-height to height */
+  height: 44px; /* Mobile-friendly height (44px minimum for touch targets) */
+  padding: 0 12px; /* Horizontal padding */
+  line-height: 44px; /* Match line-height to height */
+  font-size: 16px; /* Prevents zoom on iOS */
 }
 
 /* React Select Styles */

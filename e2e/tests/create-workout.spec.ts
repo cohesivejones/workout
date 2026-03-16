@@ -51,8 +51,8 @@ test.describe('Create Workout with Multiple Exercises', () => {
     }
 
     // Verify all 6 exercises are in the current exercises list
-    await expect(page.locator('text=Bench Press - 10 reps - 135 lbs')).toBeVisible();
-    await expect(page.locator('text=Squats - 8 reps - 185 lbs')).toBeVisible();
+    await expect(page.locator('text=Bench Press - 10 reps - 135 lbs (61.2 kg)')).toBeVisible();
+    await expect(page.locator('text=Squats - 8 reps - 185 lbs (83.9 kg)')).toBeVisible();
     await expect(page.locator('text=Planks - 1 reps - 2 sec')).toBeVisible();
     await expect(page.locator('text=Wall Sit - 1 reps - 1.5 sec')).toBeVisible();
     await expect(page.locator('text=Push-ups - 20 reps')).toBeVisible();

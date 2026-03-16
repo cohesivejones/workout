@@ -7,6 +7,7 @@ import { Link, useLocation } from 'wouter';
 import { toWorkoutPath, toPainScoreEditPath, toSleepScoreEditPath } from '../utils/paths';
 import { GenericCalendarView, CalendarItem } from './GenericCalendarView';
 import { fetchTimeline } from '../api';
+import { formatWeightWithKg } from '../utils/weight';
 import { useUserContext } from '../contexts/useUserContext';
 import { format } from 'date-fns';
 
@@ -305,7 +306,7 @@ const CalendarView = () => {
                 <span className={styles.exerciseName}>{exercise.name}</span>
                 <span className={styles.exerciseDetails}>
                   {exercise.reps} reps
-                  {exercise.weight ? ` - ${exercise.weight} lbs` : ''}
+                  {exercise.weight ? ` - ${formatWeightWithKg(exercise.weight)}` : ''}
                 </span>
               </div>
             ))}

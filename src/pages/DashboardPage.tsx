@@ -7,6 +7,7 @@ import {
   PainScoreProgression,
   SleepScoreProgression,
 } from '../api';
+import { formatWeightWithKg } from '../utils/weight';
 import {
   LineChart,
   Line,
@@ -122,7 +123,7 @@ const formatTooltip = (
   if (name === 'Weight' && props.payload) {
     const { weight, reps, newReps, newWeight } = props.payload;
 
-    const tooltipContent = [`${weight} lbs • ${reps} reps`, 'Weight & Reps'];
+    const tooltipContent = [`${formatWeightWithKg(weight)} • ${reps} reps`, 'Weight & Reps'];
 
     // Add PR indicators
     const prIndicators = [];

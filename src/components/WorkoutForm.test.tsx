@@ -100,6 +100,10 @@ describe('WorkoutForm', () => {
     expect(screen.getByPlaceholderText('Reps')).toBeInTheDocument();
     expect(screen.getByPlaceholderText('Weight (lbs)')).toBeInTheDocument();
 
+    // Check unit toggle buttons
+    expect(screen.getByRole('button', { name: 'lbs' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'kgs' })).toBeInTheDocument();
+
     // Check add exercise button
     expect(screen.getByText('Add Exercise')).toBeInTheDocument();
     expect(screen.getByText('Add Exercise')).toBeDisabled();
@@ -139,7 +143,7 @@ describe('WorkoutForm', () => {
     expect(screen.getByRole('link', { name: 'Push-ups' })).toBeInTheDocument();
     expect(screen.getByText('- 10 reps')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Squats' })).toBeInTheDocument();
-    expect(screen.getByText('- 15 reps - 20 lbs')).toBeInTheDocument();
+    expect(screen.getByText('- 15 reps - 20 lbs (9.1 kg)')).toBeInTheDocument();
 
     // Check save workout button
     expect(screen.getByText('Update Workout')).toBeInTheDocument();
@@ -237,7 +241,7 @@ describe('WorkoutForm', () => {
 
     // Wait for the exercise to be added
     await waitFor(() => {
-      expect(screen.getByText('Squats - 15 reps - 20 lbs')).toBeInTheDocument();
+      expect(screen.getByText('Squats - 15 reps - 20 lbs (9.1 kg)')).toBeInTheDocument();
     });
 
     // Submit the form
@@ -375,5 +379,132 @@ describe('WorkoutForm', () => {
     // Verify the text is present in the exercise list (not in the dropdown)
     const exerciseList = screen.getByTestId('exercise-list');
     expect(exerciseList).toHaveTextContent('Push-ups');
+  });
+
+  describe('weight unit toggle', () => {
+    it('defaults to lb unit', () => {
+      render(<WorkoutForm {...defaultProps} />);
+
+      expect(screen.getByPlaceholderText('Weight (lbs)')).toBeInTheDocument();
+    });
+
+    it('switches to kgs unit when kgs button is clicked', async () => {
+      render(<WorkoutForm {...defaultProps} />);
+
+      const kgsButton = screen.getByRole('button', { name: 'kgs' });
+      fireEvent.click(kgsButton);
+
+      await waitFor(() => {
+        expect(screen.getByPlaceholderText('Weight (kgs)')).toBeInTheDocument();
+      });
+    });
+
+    it('converts weight value when switching from lbs to kgs', async () => {
+      render(<WorkoutForm {...defaultProps} />);
+
+      const weightInput = screen.getByPlaceholderText('Weight (lbs)');
+      fireEvent.change(weightInput, { target: { value: '100' } });
+
+      const kgsButton = screen.getByRole('button', { name: 'kgs' });
+      fireEvent.click(kgsButton);
+
+      await waitFor(() => {
+        expect(weightInput).toHaveValue(45.4); // 100 lbs = 45.4 kg
+      });
+    });
+
+    it('converts weight value when switching from kgs to lbs', async () => {
+      render(<WorkoutForm {...defaultProps} />);
+
+      // Switch to kgs first
+      const kgsButton = screen.getByRole('button', { name: 'kgs' });
+      fireEvent.click(kgsButton);
+
+      await waitFor(() => {
+        expect(screen.getByPlaceholderText('Weight (kgs)')).toBeInTheDocument();
+      });
+
+      const weightInput = screen.getByPlaceholderText('Weight (kgs)');
+      fireEvent.change(weightInput, { target: { value: '45.4' } });
+
+      const lbsButton = screen.getByRole('button', { name: 'lbs' });
+      fireEvent.click(lbsButton);
+
+      await waitFor(() => {
+        expect(weightInput).toHaveValue(100.1); // 45.4 kg ≈ 100.1 lbs
+      });
+    });
+
+    it('stores weight in lbs when input is in kgs', async () => {
+      render(<WorkoutForm {...defaultProps} />);
+
+      // Switch to kgs
+      const kgsButton = screen.getByRole('button', { name: 'kgs' });
+      fireEvent.click(kgsButton);
+
+      await waitFor(() => {
+        expect(screen.getByPlaceholderText('Weight (kgs)')).toBeInTheDocument();
+      });
+
+      // Add an exercise with kg weight
+      const exerciseSelect = screen.getByTestId('exercise-select');
+      fireEvent.change(exerciseSelect, { target: { value: 'Squats' } });
+
+      const repsInput = screen.getByPlaceholderText('Reps');
+      fireEvent.change(repsInput, { target: { value: '10' } });
+
+      const weightInput = screen.getByPlaceholderText('Weight (kgs)');
+      fireEvent.change(weightInput, { target: { value: '45.4' } });
+
+      const addButton = screen.getByText('Add Exercise');
+      fireEvent.click(addButton);
+
+      // Exercise should be stored and displayed in lbs with kg conversion
+      await waitFor(() => {
+        expect(screen.getByText(/Squats - 10 reps - 100\.1 lbs \(45\.4 kg\)/)).toBeInTheDocument();
+      });
+    });
+
+    it('shows conversion suffix when weight is entered in lbs', async () => {
+      render(<WorkoutForm {...defaultProps} />);
+
+      const weightInput = screen.getByPlaceholderText('Weight (lbs)');
+      fireEvent.change(weightInput, { target: { value: '100' } });
+
+      await waitFor(() => {
+        expect(screen.getByText('45.4 kgs')).toBeInTheDocument();
+      });
+    });
+
+    it('shows conversion suffix when weight is entered in kgs', async () => {
+      render(<WorkoutForm {...defaultProps} />);
+
+      // Switch to kgs
+      const kgsButton = screen.getByRole('button', { name: 'kgs' });
+      fireEvent.click(kgsButton);
+
+      await waitFor(() => {
+        expect(screen.getByPlaceholderText('Weight (kgs)')).toBeInTheDocument();
+      });
+
+      const weightInput = screen.getByPlaceholderText('Weight (kgs)');
+      fireEvent.change(weightInput, { target: { value: '45.4' } });
+
+      await waitFor(() => {
+        expect(screen.getByText('100.1 lbs')).toBeInTheDocument();
+      });
+    });
+
+    it('does not convert empty weight when switching units', async () => {
+      render(<WorkoutForm {...defaultProps} />);
+
+      const kgsButton = screen.getByRole('button', { name: 'kgs' });
+      fireEvent.click(kgsButton);
+
+      await waitFor(() => {
+        const weightInput = screen.getByPlaceholderText('Weight (kgs)');
+        expect(weightInput).toHaveValue(null);
+      });
+    });
   });
 });
