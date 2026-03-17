@@ -188,174 +188,184 @@ function WorkoutForm({
       <h2>{existingWorkout ? 'Edit Workout' : 'New Workout'}</h2>
       {errors.root && <div className={styles.errorMessage}>{errors.root.message}</div>}
       <form onSubmit={handleSubmit(onFormSubmit)}>
-        <div className={styles.dateInput}>
-          <label htmlFor="workout-date">Workout Date:</label>
-          <input
-            type="date"
-            id="workout-date"
-            className={styles.exerciseInputField}
-            {...register('date')}
-          />
-        </div>
-        <div className={styles.instructorCheckbox}>
-          <label htmlFor="with-instructor">
-            <input type="checkbox" id="with-instructor" {...register('withInstructor')} />
-            With Instructor
-          </label>
-        </div>
-        <div className={styles.exerciseInput}>
-          <Controller
-            name="currentExercise.name"
-            control={control}
-            render={({ field }) => {
-              const selectedExerciseOption = field.value
-                ? { label: field.value, value: field.value }
-                : null;
-              return (
-                <CreatableSelect
-                  isClearable
-                  placeholder="Select or create an exercise"
-                  options={exerciseSelectOptions}
-                  onChange={(val) => {
-                    field.onChange(val ? val.value : '');
-                    handlePopulateRepsAndWeight(val);
-                  }}
-                  value={selectedExerciseOption}
-                  className={styles.reactSelectContainer}
-                  classNamePrefix="reactSelect"
-                  formatCreateLabel={(inputValue) => `Create "${inputValue}"`}
-                />
-              );
-            }}
-          />
-          <input
-            type="number"
-            placeholder="Reps"
-            min="1"
-            className={styles.exerciseInputField}
-            {...register('currentExercise.reps')}
-          />
-          <div className={styles.weightInputContainer}>
-            <div className={styles.weightInputWrapper}>
-              <div className={styles.unitToggle}>
-                <button
-                  type="button"
-                  className={`${styles.unitButton} ${weightUnit === 'lbs' ? styles.unitButtonActive : ''}`}
-                  onClick={() => {
-                    if (weightUnit === 'kgs' && currentExercise.weight) {
-                      // Convert current kg value to lbs
-                      const kgValue = Number(currentExercise.weight);
-                      setValue('currentExercise.weight', String(kgToLbs(kgValue)));
-                    }
-                    setWeightUnit('lbs');
-                  }}
-                >
-                  lbs
-                </button>
-                <button
-                  type="button"
-                  className={`${styles.unitButton} ${weightUnit === 'kgs' ? styles.unitButtonActive : ''}`}
-                  onClick={() => {
-                    if (weightUnit === 'lbs' && currentExercise.weight) {
-                      // Convert current lbs value to kg
-                      const lbsValue = Number(currentExercise.weight);
-                      setValue('currentExercise.weight', String(lbsToKg(lbsValue)));
-                    }
-                    setWeightUnit('kgs');
-                  }}
-                >
-                  kgs
-                </button>
-              </div>
-              <div className={styles.weightInputGroup}>
-                <input
-                  type="number"
-                  placeholder={`Weight (${weightUnit})`}
-                  min="0"
-                  step="0.5"
-                  className={`${styles.exerciseInputField} ${styles.weightInput}`}
-                  {...register('currentExercise.weight')}
-                />
-                {currentExercise.weight && (
-                  <span className={styles.weightSuffix}>
-                    {weightUnit === 'lbs'
-                      ? `${lbsToKg(Number(currentExercise.weight))} kgs`
-                      : `${kgToLbs(Number(currentExercise.weight))} lbs`}
-                  </span>
-                )}
-              </div>
-            </div>
+        <div className={styles.formSection}>
+          <div className={styles.dateInput}>
+            <label htmlFor="workout-date">Workout Date</label>
+            <input
+              type="date"
+              id="workout-date"
+              className={styles.exerciseInputField}
+              {...register('date')}
+            />
           </div>
-          <input
-            type="number"
-            placeholder="Time (sec)"
-            min="0"
-            step="1"
-            className={styles.exerciseInputField}
-            {...register('currentExercise.time_seconds')}
-          />
-          <button
-            type="button"
-            onClick={addExercise}
-            disabled={
-              !currentExercise.name || !currentExercise.reps || isSavingExercise || isSubmitting
-            }
-            className={classNames(styles.addExerciseBtn, buttonStyles.secondaryBtn)}
-            title="Add exercise to workout"
-          >
-            {isSavingExercise ? 'Adding...' : <>Add Exercise</>}
-          </button>
+          <div className={styles.instructorCheckbox}>
+            <label htmlFor="with-instructor">
+              <input type="checkbox" id="with-instructor" {...register('withInstructor')} />
+              With Instructor
+            </label>
+          </div>
         </div>
 
-        <div className={styles.exerciseList}>
-          <h3>Current Exercises:</h3>
-          {fields.length === 0 ? (
-            <p>No exercises added yet</p>
-          ) : (
-            <ul data-testid="exercise-list">
-              {fields.map((field, index) => (
-                <li key={field.id} className={styles.exerciseItem}>
-                  <div className={styles.exerciseInfo}>
-                    {exercises[index].id ? (
-                      <Link to={toExerciseProgressionPath(exercises[index].id!)}>
-                        {exercises[index].name}
-                      </Link>
-                    ) : (
-                      exercises[index].name
-                    )}{' '}
-                    - {exercises[index].reps} reps
-                    {exercises[index].weight
-                      ? ` - ${formatWeightWithKg(exercises[index].weight)}`
-                      : ''}
-                    {exercises[index].time_seconds ? ` - ${exercises[index].time_seconds} sec` : ''}
-                    {(exercises[index].newReps ||
-                      exercises[index].newWeight ||
-                      exercises[index].newTime) && (
-                      <div className={styles.badgeContainer}>
-                        {exercises[index].newReps && (
-                          <span className={styles.newBadge}>NEW REPS</span>
-                        )}
-                        {exercises[index].newWeight && (
-                          <span className={styles.newBadge}>NEW WEIGHT</span>
-                        )}
-                        {exercises[index].newTime && (
-                          <span className={styles.newBadge}>NEW TIME</span>
-                        )}
-                      </div>
-                    )}
-                  </div>
+        <div className={styles.formSection}>
+          <h3 className={styles.sectionTitle}>Add Exercises</h3>
+          <div className={styles.exerciseInput}>
+            <Controller
+              name="currentExercise.name"
+              control={control}
+              render={({ field }) => {
+                const selectedExerciseOption = field.value
+                  ? { label: field.value, value: field.value }
+                  : null;
+                return (
+                  <CreatableSelect
+                    isClearable
+                    placeholder="Select or create an exercise"
+                    options={exerciseSelectOptions}
+                    onChange={(val) => {
+                      field.onChange(val ? val.value : '');
+                      handlePopulateRepsAndWeight(val);
+                    }}
+                    value={selectedExerciseOption}
+                    className={styles.reactSelectContainer}
+                    classNamePrefix="reactSelect"
+                    formatCreateLabel={(inputValue) => `Create "${inputValue}"`}
+                  />
+                );
+              }}
+            />
+            <input
+              type="number"
+              placeholder="Reps"
+              min="1"
+              className={styles.exerciseInputField}
+              {...register('currentExercise.reps')}
+            />
+            <div className={styles.weightInputContainer}>
+              <div className={styles.weightInputWrapper}>
+                <div className={styles.unitToggle}>
                   <button
                     type="button"
-                    className={classNames(styles.removeExerciseBtn, buttonStyles.secondaryBtn)}
-                    onClick={() => remove(index)}
-                    title="Remove exercise"
+                    className={`${styles.unitButton} ${weightUnit === 'lbs' ? styles.unitButtonActive : ''}`}
+                    onClick={() => {
+                      if (weightUnit === 'kgs' && currentExercise.weight) {
+                        // Convert current kg value to lbs
+                        const kgValue = Number(currentExercise.weight);
+                        setValue('currentExercise.weight', String(kgToLbs(kgValue)));
+                      }
+                      setWeightUnit('lbs');
+                    }}
                   >
-                    x
+                    lbs
                   </button>
-                </li>
-              ))}
-            </ul>
-          )}
+                  <button
+                    type="button"
+                    className={`${styles.unitButton} ${weightUnit === 'kgs' ? styles.unitButtonActive : ''}`}
+                    onClick={() => {
+                      if (weightUnit === 'lbs' && currentExercise.weight) {
+                        // Convert current lbs value to kg
+                        const lbsValue = Number(currentExercise.weight);
+                        setValue('currentExercise.weight', String(lbsToKg(lbsValue)));
+                      }
+                      setWeightUnit('kgs');
+                    }}
+                  >
+                    kgs
+                  </button>
+                </div>
+                <div className={styles.weightInputGroup}>
+                  <input
+                    type="number"
+                    placeholder={`Weight (${weightUnit})`}
+                    min="0"
+                    step="0.5"
+                    className={`${styles.exerciseInputField} ${styles.weightInput}`}
+                    {...register('currentExercise.weight')}
+                  />
+                  {currentExercise.weight && (
+                    <span className={styles.weightSuffix}>
+                      {weightUnit === 'lbs'
+                        ? `${lbsToKg(Number(currentExercise.weight))} kgs`
+                        : `${kgToLbs(Number(currentExercise.weight))} lbs`}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+            <input
+              type="number"
+              placeholder="Time (sec)"
+              min="0"
+              step="1"
+              className={styles.exerciseInputField}
+              {...register('currentExercise.time_seconds')}
+            />
+            <button
+              type="button"
+              onClick={addExercise}
+              disabled={
+                !currentExercise.name || !currentExercise.reps || isSavingExercise || isSubmitting
+              }
+              className={classNames(styles.addExerciseBtn, buttonStyles.secondaryBtn)}
+              title="Add exercise to workout"
+            >
+              {isSavingExercise ? 'Adding...' : <>Add Exercise</>}
+            </button>
+          </div>
+        </div>
+
+        <div className={styles.formSection}>
+          <div className={styles.exerciseList}>
+            <h3>Exercises</h3>
+            {fields.length === 0 ? (
+              <p>No exercises added yet</p>
+            ) : (
+              <ul data-testid="exercise-list">
+                {fields.map((field, index) => (
+                  <li key={field.id} className={styles.exerciseItem}>
+                    <div className={styles.exerciseInfo}>
+                      {exercises[index].id ? (
+                        <Link to={toExerciseProgressionPath(exercises[index].id!)}>
+                          {exercises[index].name}
+                        </Link>
+                      ) : (
+                        exercises[index].name
+                      )}{' '}
+                      - {exercises[index].reps} reps
+                      {exercises[index].weight
+                        ? ` - ${formatWeightWithKg(exercises[index].weight)}`
+                        : ''}
+                      {exercises[index].time_seconds
+                        ? ` - ${exercises[index].time_seconds} sec`
+                        : ''}
+                      {(exercises[index].newReps ||
+                        exercises[index].newWeight ||
+                        exercises[index].newTime) && (
+                        <div className={styles.badgeContainer}>
+                          {exercises[index].newReps && (
+                            <span className={styles.newBadge}>NEW REPS</span>
+                          )}
+                          {exercises[index].newWeight && (
+                            <span className={styles.newBadge}>NEW WEIGHT</span>
+                          )}
+                          {exercises[index].newTime && (
+                            <span className={styles.newBadge}>NEW TIME</span>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      className={classNames(styles.removeExerciseBtn, buttonStyles.secondaryBtn)}
+                      onClick={() => remove(index)}
+                      title="Remove exercise"
+                    >
+                      x
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </div>
 
         <div className={styles.formButtons}>
