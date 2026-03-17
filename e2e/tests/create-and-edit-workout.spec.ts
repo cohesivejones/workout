@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../helpers/auth';
 import { clearTestData } from '../helpers/testData';
-import { addExercise } from '../helpers/workout';
+import { addExercise, assertExerciseAdded } from '../helpers/workout';
 import { clickFabMenuItem } from '../helpers/navigation';
 
 test.describe('Create and Edit Workout', () => {
@@ -30,7 +30,7 @@ test.describe('Create and Edit Workout', () => {
     const initialExercises = [
       { name: 'Bench Press', reps: '10', weight: '135', time: '' },
       { name: 'Squats', reps: '8', weight: '185', time: '' },
-      { name: 'Deadlift', reps: '5', weight: '225', time: '' },
+      { name: 'Deadlifts', reps: '5', weight: '225', time: '' },
       { name: 'Planks', reps: '1', weight: '', time: '2' },
       { name: 'Wall Sit', reps: '1', weight: '', time: '1.5' },
       { name: 'Push-ups', reps: '20', weight: '', time: '' },
@@ -43,12 +43,9 @@ test.describe('Create and Edit Workout', () => {
     }
 
     // Verify all 6 exercises are added
-    await expect(page.locator('text=Bench Press - 10 reps - 135 lbs (61.2 kg)')).toBeVisible();
-    await expect(page.locator('text=Squats - 8 reps - 185 lbs (83.9 kg)')).toBeVisible();
-    await expect(page.locator('text=Deadlift - 5 reps - 225 lbs (102.1 kg)')).toBeVisible();
-    await expect(page.locator('text=Planks - 1 reps - 2 sec')).toBeVisible();
-    await expect(page.locator('text=Wall Sit - 1 reps - 1.5 sec')).toBeVisible();
-    await expect(page.locator('text=Push-ups - 20 reps')).toBeVisible();
+    for (const exercise of initialExercises) {
+      await assertExerciseAdded(page, exercise);
+    }
 
     // Step 4: Save the workout
     await page.getByRole('button', { name: 'Save Workout' }).click();
@@ -91,46 +88,44 @@ test.describe('Create and Edit Workout', () => {
     await expect(instructorCheckbox).toBeChecked();
 
     // Step 8: Delete Wall Sit exercise
-    // Find the Wall Sit exercise in the list and click its remove button
-    const wallSitExercise = page.locator('li:has-text("Wall Sit - 1 reps - 1.5 sec")');
+    // Find the Wall Sit exercise in the list using test ID and click its remove button
+    const wallSitExercise = page.getByTestId('added-exercise-wall-sit');
     await expect(wallSitExercise).toBeVisible();
     const removeButton = wallSitExercise.locator('button[title="Remove exercise"]');
     await removeButton.click();
 
     // Verify Wall Sit is removed
-    await expect(page.locator('text=Wall Sit - 1 reps - 1.5 sec')).not.toBeVisible();
+    await expect(page.getByTestId('added-exercise-wall-sit')).not.toBeVisible();
 
     // Step 9: Modify existing exercises
     // We need to remove and re-add exercises with new values
 
     // Modify Bench Press: 10 reps → 12 reps (keep weight same)
-    const benchPressExercise = page.locator(
-      'li:has-text("Bench Press - 10 reps - 135 lbs (61.2 kg)")'
-    );
+    const benchPressExercise = page.getByTestId('added-exercise-bench-press');
     await expect(benchPressExercise).toBeVisible();
     await benchPressExercise.locator('button[title="Remove exercise"]').click();
-    await expect(page.locator('text=Bench Press - 10 reps - 135 lbs (61.2 kg)')).not.toBeVisible();
+    await expect(page.getByTestId('added-exercise-bench-press')).not.toBeVisible();
     await addExercise(page, { name: 'Bench Press', reps: '12', weight: '135', time: '' });
 
     // Modify Squat: 185 lbs → 200 lbs (keep reps same)
-    const squatExercise = page.locator('li:has-text("Squats - 8 reps - 185 lbs (83.9 kg)")');
+    const squatExercise = page.getByTestId('added-exercise-squats');
     await expect(squatExercise).toBeVisible();
     await squatExercise.locator('button[title="Remove exercise"]').click();
-    await expect(page.locator('text=Squats - 8 reps - 185 lbs (83.9 kg)')).not.toBeVisible();
+    await expect(page.getByTestId('added-exercise-squats')).not.toBeVisible();
     await addExercise(page, { name: 'Squats', reps: '8', weight: '200', time: '' });
 
     // Modify Deadlift: 5 reps → 6 reps, 225 lbs → 245 lbs
-    const deadliftExercise = page.locator('li:has-text("Deadlift - 5 reps - 225 lbs (102.1 kg)")');
+    const deadliftExercise = page.getByTestId('added-exercise-deadlifts');
     await expect(deadliftExercise).toBeVisible();
     await deadliftExercise.locator('button[title="Remove exercise"]').click();
-    await expect(page.locator('text=Deadlift - 5 reps - 225 lbs (102.1 kg)')).not.toBeVisible();
-    await addExercise(page, { name: 'Deadlift', reps: '6', weight: '245', time: '' });
+    await expect(page.getByTestId('added-exercise-deadlifts')).not.toBeVisible();
+    await addExercise(page, { name: 'Deadlifts', reps: '6', weight: '245', time: '' });
 
     // Modify Plank: 2 min → 2.5 min
-    const plankExercise = page.locator('li:has-text("Planks - 1 reps - 2 sec")');
+    const plankExercise = page.getByTestId('added-exercise-planks');
     await expect(plankExercise).toBeVisible();
     await plankExercise.locator('button[title="Remove exercise"]').click();
-    await expect(page.locator('text=Planks - 1 reps - 2 sec')).not.toBeVisible();
+    await expect(page.getByTestId('added-exercise-planks')).not.toBeVisible();
     await addExercise(page, { name: 'Planks', reps: '1', weight: '', time: '2.5' });
 
     // Step 10: Add 2 new exercises
@@ -142,16 +137,16 @@ test.describe('Create and Edit Workout', () => {
     await expect(exerciseList).toHaveCount(7);
 
     // Verify all modified and new exercises are present
-    await expect(page.locator('text=Bench Press - 12 reps - 135 lbs (61.2 kg)')).toBeVisible();
-    await expect(page.locator('text=Squats - 8 reps - 200 lbs (90.7 kg)')).toBeVisible();
-    await expect(page.locator('text=Deadlift - 6 reps - 245 lbs (111.1 kg)')).toBeVisible();
-    await expect(page.locator('text=Planks - 1 reps - 2.5 sec')).toBeVisible();
-    await expect(page.locator('text=Push-ups - 20 reps')).toBeVisible();
-    await expect(page.locator('text=Dumbbell Rows - 12 reps - 50 lbs (22.7 kg)')).toBeVisible();
-    await expect(page.locator('text=Lunges - 15 reps')).toBeVisible();
+    await assertExerciseAdded(page, { name: 'Bench Press', reps: '12', weight: '135', time: '' });
+    await assertExerciseAdded(page, { name: 'Squats', reps: '8', weight: '200', time: '' });
+    await assertExerciseAdded(page, { name: 'Deadlifts', reps: '6', weight: '245', time: '' });
+    await assertExerciseAdded(page, { name: 'Planks', reps: '1', weight: '', time: '2.5' });
+    await assertExerciseAdded(page, { name: 'Push-ups', reps: '20', weight: '', time: '' });
+    await assertExerciseAdded(page, { name: 'Dumbbell Rows', reps: '12', weight: '50', time: '' });
+    await assertExerciseAdded(page, { name: 'Lunges', reps: '15', weight: '', time: '' });
 
     // Verify deleted exercise is NOT present
-    await expect(page.locator('text=Wall Sit')).not.toBeVisible();
+    await expect(page.getByTestId('added-exercise-wall-sit')).not.toBeVisible();
 
     // Step 12: Save the updated workout
     await page.getByRole('button', { name: 'Update Workout' }).click();

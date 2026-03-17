@@ -113,7 +113,7 @@ describe('WorkoutForm', () => {
     expect(screen.getByText('Save Workout')).toBeDisabled();
 
     // Check no exercises message
-    expect(screen.getByText('No exercises added yet')).toBeInTheDocument();
+    expect(screen.getByText(/No exercises added yet/i)).toBeInTheDocument();
   });
 
   it('renders the form with correct initial state for existing workout', () => {
@@ -141,9 +141,10 @@ describe('WorkoutForm', () => {
 
     // Check exercises are displayed (now as links since they have IDs)
     expect(screen.getByRole('link', { name: 'Push-ups' })).toBeInTheDocument();
-    expect(screen.getByText('- 10 reps')).toBeInTheDocument();
+    expect(screen.getByText('10 reps')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Squats' })).toBeInTheDocument();
-    expect(screen.getByText('- 15 reps - 20 lbs (9.1 kg)')).toBeInTheDocument();
+    expect(screen.getByText('15 reps')).toBeInTheDocument();
+    expect(screen.getByText('20 lbs (9.1 kg)')).toBeInTheDocument();
 
     // Check save workout button
     expect(screen.getByText('Update Workout')).toBeInTheDocument();
@@ -170,11 +171,15 @@ describe('WorkoutForm', () => {
     expect(addButton).toBeEnabled();
     fireEvent.click(addButton);
 
-    // Wait for the exercise to be added
+    // Wait for the exercise to be added - use test ID to target the added exercise specifically
     await waitFor(() => {
       expect(mockOnSaveExercise).toHaveBeenCalledWith('Push-ups');
-      expect(screen.getByText('Push-ups - 12 reps')).toBeInTheDocument();
     });
+
+    const addedExercise = await screen.findByTestId('added-exercise-push-ups');
+    expect(addedExercise).toBeInTheDocument();
+    expect(addedExercise).toHaveTextContent('Push-ups');
+    expect(addedExercise).toHaveTextContent('12 reps');
 
     // Check that the form is reset
     expect(repsInput).toHaveValue(null);
@@ -239,10 +244,11 @@ describe('WorkoutForm', () => {
     const addButton = screen.getByText('Add Exercise');
     fireEvent.click(addButton);
 
-    // Wait for the exercise to be added
-    await waitFor(() => {
-      expect(screen.getByText('Squats - 15 reps - 20 lbs (9.1 kg)')).toBeInTheDocument();
-    });
+    const addedExercise = await screen.findByTestId('added-exercise-squats');
+    expect(addedExercise).toBeInTheDocument();
+    expect(addedExercise).toHaveTextContent('Squats');
+    expect(addedExercise).toHaveTextContent('15 reps');
+    expect(addedExercise).toHaveTextContent('20 lbs (9.1 kg)');
 
     // Submit the form
     const submitButton = screen.getByText('Save Workout');
@@ -369,7 +375,7 @@ describe('WorkoutForm', () => {
     await waitFor(() => {
       const exerciseList = screen.getByTestId('exercise-list');
       expect(exerciseList).toHaveTextContent('Push-ups');
-      expect(exerciseList).toHaveTextContent('- 12 reps');
+      expect(exerciseList).toHaveTextContent('12 reps');
     });
 
     // Check that the exercise name is not a link
@@ -460,9 +466,11 @@ describe('WorkoutForm', () => {
       fireEvent.click(addButton);
 
       // Exercise should be stored and displayed in lbs with kg conversion
-      await waitFor(() => {
-        expect(screen.getByText(/Squats - 10 reps - 100\.1 lbs \(45\.4 kg\)/)).toBeInTheDocument();
-      });
+      const addedExercise = await screen.findByTestId('added-exercise-squats');
+      expect(addedExercise).toBeInTheDocument();
+      expect(addedExercise).toHaveTextContent('Squats');
+      expect(addedExercise).toHaveTextContent('10 reps');
+      expect(addedExercise).toHaveTextContent('100.1 lbs (45.4 kg)');
     });
 
     it('shows conversion suffix when weight is entered in lbs', async () => {
