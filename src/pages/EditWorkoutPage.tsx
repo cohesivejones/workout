@@ -99,7 +99,8 @@ export default function EditWorkoutPage() {
   }
 
   return (
-    <div>
+    <div className={styles.container}>
+      {error && <div className={styles.errorMessage}>{error}</div>}
       <WorkoutForm
         onSubmit={handleUpdateWorkout}
         savedExercises={savedExercises}
