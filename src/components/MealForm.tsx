@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { Meal } from '../types';
-import { searchMeals } from '../api';
+import { searchMeals, analyzeMealNutrition } from '../api';
 import styles from './MealForm.module.css';
 import classNames from 'classnames';
 import buttonStyles from '../styles/common/buttons.module.css';
@@ -54,6 +54,7 @@ function MealForm({
   const [searchResults, setSearchResults] = useState<Meal[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
+  const [isAnalyzingAI, setIsAnalyzingAI] = useState(false);
   const suggestionsRef = useRef<HTMLDivElement>(null);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -117,6 +118,40 @@ function MealForm({
     setValue('fat', meal.fat.toString());
     setShowSuggestions(false);
     setSearchResults([]);
+  };
+
+  // Handle AI nutrition analysis
+  const handleAIAnalysis = async () => {
+    const description = descriptionValue?.trim();
+
+    if (!description || description.length < 3) {
+      setError('description', {
+        type: 'manual',
+        message: 'Please enter a meal description first',
+      });
+      return;
+    }
+
+    try {
+      setIsAnalyzingAI(true);
+      setError('root', { type: 'manual', message: '' }); // Clear any existing errors
+
+      const nutritionData = await analyzeMealNutrition(description);
+
+      // Populate form fields with AI results
+      setValue('calories', nutritionData.calories.toString());
+      setValue('protein', nutritionData.protein.toString());
+      setValue('carbs', nutritionData.carbs.toString());
+      setValue('fat', nutritionData.fat.toString());
+    } catch (err) {
+      console.error('AI analysis failed:', err);
+      setError('root', {
+        type: 'manual',
+        message: err instanceof Error ? err.message : 'Failed to analyze meal. Please try again.',
+      });
+    } finally {
+      setIsAnalyzingAI(false);
+    }
   };
 
   // Form submission handler
@@ -210,6 +245,25 @@ function MealForm({
           )}
         </div>
       </div>
+
+      {!existingMeal && (
+        <div className={styles.formRow}>
+          <button
+            type="button"
+            onClick={handleAIAnalysis}
+            disabled={
+              isAnalyzingAI || isSubmitting || !descriptionValue || descriptionValue.length < 3
+            }
+            className={classNames(styles.aiAnalyzeBtn, buttonStyles.secondaryBtn)}
+            title="Use AI to estimate nutrition from description"
+          >
+            {isAnalyzingAI ? '🤖 Analyzing...' : '🤖 Get Nutrition with AI'}
+          </button>
+          <p className={styles.aiHint}>
+            Enter a meal description above, then click to get estimated nutrition info
+          </p>
+        </div>
+      )}
 
       <div className={styles.formRow}>
         <div className={styles.formGroup}>
