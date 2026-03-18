@@ -4,6 +4,7 @@ import {
   Exercise,
   PainScore,
   SleepScore,
+  Meal,
   User,
   TimelineResponse,
   ActivityResponse,
@@ -92,6 +93,22 @@ export const updateSleepScore = (
 
 export const deleteSleepScore = (sleepScoreId: number): Promise<{ id: number }> =>
   api.delete(`/sleep-scores/${sleepScoreId}`);
+
+// Meal API functions
+export const fetchMeal = (mealId: number): Promise<Meal> => api.get(`/meals/${mealId}`);
+
+export const createMeal = (meal: Omit<Meal, 'id'>): Promise<Meal> => api.post('/meals', meal);
+
+export const updateMeal = (mealId: number, meal: Omit<Meal, 'id'>): Promise<Meal> =>
+  api.put(`/meals/${mealId}`, meal);
+
+export const deleteMeal = (mealId: number): Promise<{ id: number }> =>
+  api.delete(`/meals/${mealId}`);
+
+export const fetchMealsByDate = (date: string): Promise<Meal[]> => api.get(`/meals?date=${date}`);
+
+export const searchMeals = (query: string): Promise<Meal[]> =>
+  api.get(`/meals/search?q=${encodeURIComponent(query)}`);
 
 // Auth API functions
 export const getCurrentUser = (): Promise<User> => api.get('/auth/me');

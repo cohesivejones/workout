@@ -12,6 +12,8 @@ import DiagnosticianPage from './pages/DiagnosticianPage';
 import DashboardPage from './pages/DashboardPage';
 import WorkoutCoachPage from './pages/WorkoutCoachPage';
 import WorkoutInsightsPage from './pages/WorkoutInsightsPage';
+import NutritionPage from './pages/NutritionPage';
+import MealFormPage from './pages/MealFormPage';
 import NotFoundPage from './pages/NotFoundPage';
 import { Layout } from './Layout';
 
@@ -92,6 +94,21 @@ function App() {
         <Route path="/workout-insights">
           <Layout>
             <WorkoutInsightsPage />
+          </Layout>
+        </Route>
+        <Route path="/nutrition">
+          <Layout>
+            <NutritionPage />
+          </Layout>
+        </Route>
+        <Route path="/nutrition/meals/new">
+          <Layout>
+            <MealFormPage />
+          </Layout>
+        </Route>
+        <Route path="/nutrition/meals/:id/edit">
+          <Layout>
+            <MealFormPage />
           </Layout>
         </Route>
         <Route>

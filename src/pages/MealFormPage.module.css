@@ -1,0 +1,23 @@
+.mealFormPage {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  font-size: 1.2rem;
+  color: #666;
+}
+
+.errorMessage {
+  color: #ff4444;
+  margin-bottom: 20px;
+  padding: 12px;
+  background-color: #fff5f5;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+}
