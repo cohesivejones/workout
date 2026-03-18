@@ -11,6 +11,7 @@ describe('Layout - Header Navigation', () => {
     { text: 'Timeline', href: '/' },
     { text: 'Dashboard', href: '/dashboard' },
     { text: 'Exercises', href: '/exercises' },
+    { text: 'Nutrition', href: '/nutrition' },
   ];
 
   describe('when user is not logged in', () => {

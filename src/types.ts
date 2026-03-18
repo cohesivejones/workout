@@ -23,6 +23,17 @@ export interface SleepScore {
   notes?: string | null;
 }
 
+export interface Meal {
+  id: number;
+  userId?: number;
+  date: string;
+  description: string;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+}
+
 export interface WorkoutExercise {
   id?: number;
   name: string;

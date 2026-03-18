@@ -115,6 +115,9 @@ const Header = () => {
             <Link to="/exercises" className={styles.navLink}>
               Exercises
             </Link>
+            <Link to="/nutrition" className={styles.navLink}>
+              Nutrition
+            </Link>
             <div
               className={`${styles.navDropdown} ${aiDropdownOpen ? styles.open : ''}`}
               ref={aiDropdownRef}
@@ -230,6 +233,13 @@ const Header = () => {
                 onClick={() => setMobileNavOpen(false)}
               >
                 Exercises
+              </Link>
+              <Link
+                to="/nutrition"
+                className={styles.mobileMenuLink}
+                onClick={() => setMobileNavOpen(false)}
+              >
+                Nutrition
               </Link>
               <div className={styles.mobileMenuSection}>
                 <div className={styles.mobileMenuSectionTitle}>AI</div>

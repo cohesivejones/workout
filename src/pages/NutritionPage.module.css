@@ -1,0 +1,305 @@
+.nutritionPage {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.pageHeader {
+  margin-bottom: 20px;
+}
+
+.pageHeader h2 {
+  font-size: 2rem;
+  color: #333;
+  margin: 0;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  font-size: 1.2rem;
+  color: #666;
+}
+
+.errorMessage {
+  background-color: #f8d7da;
+  color: #721c24;
+  padding: 12px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  border: 1px solid #f5c6cb;
+}
+
+.dateNavigator {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+}
+
+.navButton {
+  padding: 8px 16px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.navButton:hover {
+  background-color: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+.dateDisplay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.dateText {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.todayButton {
+  padding: 4px 12px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background-color 0.2s;
+}
+
+.todayButton:hover {
+  background-color: #218838;
+}
+
+.contentContainer {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 30px;
+}
+
+.mealsSection {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.sectionHeader h3 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.addMealButton {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: background-color 0.2s;
+}
+
+.addMealButton:hover {
+  background-color: #0056b3;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.emptyState p {
+  font-size: 1.1rem;
+  color: #666;
+  margin-bottom: 20px;
+}
+
+.addMealButtonLarge {
+  padding: 14px 28px;
+  font-size: 1.1rem;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.addMealButtonLarge:hover {
+  background-color: #0056b3;
+}
+
+.mealsList {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.mealCard {
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  border-left: 4px solid #007bff;
+}
+
+.mealHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.mealDescription {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #333;
+  flex: 1;
+}
+
+.mealActions {
+  display: flex;
+  gap: 8px;
+}
+
+.editButton,
+.deleteButton {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+}
+
+.editButton {
+  background-color: #ffc107;
+  color: #000;
+}
+
+.editButton:hover {
+  background-color: #e0a800;
+}
+
+.deleteButton {
+  background-color: #dc3545;
+  color: white;
+}
+
+.deleteButton:hover {
+  background-color: #c82333;
+}
+
+.mealMacros {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.macroItem {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.macroItem strong {
+  color: #333;
+  font-weight: 600;
+}
+
+.summarySection {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  height: fit-content;
+  position: sticky;
+  top: 20px;
+}
+
+.summarySection h3 {
+  margin: 0 0 20px 0;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.totalsCard {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.totalRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+}
+
+.totalLabel {
+  font-weight: 600;
+  color: #666;
+}
+
+.totalValue {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #007bff;
+}
+
+@media (max-width: 768px) {
+  .contentContainer {
+    grid-template-columns: 1fr;
+  }
+
+  .dateNavigator {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .navButton {
+    width: 100%;
+  }
+
+  .summarySection {
+    position: static;
+  }
+
+  .mealHeader {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .mealActions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}

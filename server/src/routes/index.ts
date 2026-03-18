@@ -6,6 +6,7 @@ import workoutCoach from './workout-coach.routes';
 import workoutInsights from './workout-insights.routes';
 import painScores from './pain-scores.routes';
 import sleepScores from './sleep-scores.routes';
+import meals from './meals.routes';
 import diagnostics from './diagnostics.routes';
 import dashboard from './dashboard.routes';
 import timeline from './timeline.routes';
@@ -22,6 +23,7 @@ router.use('/workout-coach', workoutCoach);
 router.use('/workout-insights', workoutInsights);
 router.use('/pain-scores', painScores);
 router.use('/sleep-scores', sleepScores);
+router.use('/meals', meals);
 router.use('/diagnostics', diagnostics);
 router.use('/dashboard', dashboard);
 router.use('/timeline', timeline);
@@ -47,6 +49,10 @@ if (process.env.NODE_ENV === 'test') {
       );
       await dataSource.query(
         'DELETE FROM sleep_scores WHERE "userId" = (SELECT id FROM users WHERE email = $1)',
+        [testUserEmail]
+      );
+      await dataSource.query(
+        'DELETE FROM meals WHERE "userId" = (SELECT id FROM users WHERE email = $1)',
         [testUserEmail]
       );
       logger.info('Test data cleared');
