@@ -73,8 +73,8 @@ describe('Workout API Routes', () => {
         date: '2024-01-15',
         withInstructor: false,
         exercises: [
-          { name: 'Plank', reps: 1, time_seconds: 2 },
-          { name: 'Wall Sit', reps: 1, time_seconds: 1.5 },
+          { name: 'Plank', reps: 1, timeSeconds: 2 },
+          { name: 'Wall Sit', reps: 1, timeSeconds: 1.5 },
         ],
       };
 
@@ -83,9 +83,9 @@ describe('Workout API Routes', () => {
 
       expect(response.body.exercises).toHaveLength(2);
       expect(response.body.exercises[0].name).toBe('Plank');
-      expect(response.body.exercises[0].time_seconds).toBe(2);
+      expect(response.body.exercises[0].timeSeconds).toBe(2);
       expect(response.body.exercises[1].name).toBe('Wall Sit');
-      expect(response.body.exercises[1].time_seconds).toBe(1.5);
+      expect(response.body.exercises[1].timeSeconds).toBe(1.5);
     });
 
     it('should create a workout with bodyweight exercises', async () => {
@@ -103,7 +103,7 @@ describe('Workout API Routes', () => {
 
       expect(response.body.exercises).toHaveLength(2);
       expect(response.body.exercises[0].weight).toBeNull();
-      expect(response.body.exercises[0].time_seconds).toBeNull();
+      expect(response.body.exercises[0].timeSeconds).toBeNull();
     });
 
     it('should create a workout with instructor flag', async () => {
@@ -176,7 +176,7 @@ describe('Workout API Routes', () => {
       const firstWorkout = {
         date: '2024-01-15',
         withInstructor: false,
-        exercises: [{ name: 'Plank', reps: 1, time_seconds: 2 }],
+        exercises: [{ name: 'Plank', reps: 1, timeSeconds: 2 }],
       };
 
       await authReq.post('/api/workouts').send(firstWorkout).expect(200);
@@ -185,7 +185,7 @@ describe('Workout API Routes', () => {
       const secondWorkout = {
         date: '2024-01-16',
         withInstructor: false,
-        exercises: [{ name: 'Plank', reps: 1, time_seconds: 2.5 }],
+        exercises: [{ name: 'Plank', reps: 1, timeSeconds: 2.5 }],
       };
 
       const response = await authReq.post('/api/workouts').send(secondWorkout).expect(200);
@@ -258,7 +258,7 @@ describe('Workout API Routes', () => {
         withInstructor: false,
         exercises: [
           { name: 'Bench Press', reps: 10, weight: 135 },
-          { name: 'Plank', reps: 1, time_seconds: 2 },
+          { name: 'Plank', reps: 1, timeSeconds: 2 },
           { name: 'Push-ups', reps: 20 },
         ],
       };
@@ -268,9 +268,9 @@ describe('Workout API Routes', () => {
 
       expect(response.body.exercises).toHaveLength(3);
       expect(response.body.exercises[0].weight).toBe(135);
-      expect(response.body.exercises[1].time_seconds).toBe(2);
+      expect(response.body.exercises[1].timeSeconds).toBe(2);
       expect(response.body.exercises[2].weight).toBeNull();
-      expect(response.body.exercises[2].time_seconds).toBeNull();
+      expect(response.body.exercises[2].timeSeconds).toBeNull();
     });
 
     it('should persist workout to database', async () => {

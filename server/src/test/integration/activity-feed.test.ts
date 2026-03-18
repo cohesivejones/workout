@@ -94,6 +94,48 @@ describe('Activity Feed API', () => {
     }
   });
 
+  it('returns workout exercises with timeSeconds in camelCase', async () => {
+    const now = new Date();
+    const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-15`;
+
+    // Create a workout with time-based exercises
+    await createTestWorkoutWithExercises(testUserData.user.id, { date: dateStr }, [
+      { name: 'Plank', reps: 1, time_seconds: 60 },
+      { name: 'Bench Press', reps: 10, weight: 135 },
+      { name: 'Wall Sit', reps: 1, time_seconds: 45 },
+    ]);
+
+    const authReq = authenticatedRequest(app, testUserData.authToken);
+    const res = await authReq.get('/api/activity').expect(200);
+
+    expect(res.body.items.length).toBe(1);
+    const activityItem = res.body.items[0];
+    expect(activityItem.type).toBe('workout');
+    expect(activityItem.workout).toBeDefined();
+    expect(activityItem.workout.exercises).toHaveLength(3);
+
+    // Check that timeSeconds is in camelCase, not snake_case
+    const plankExercise = activityItem.workout.exercises.find(
+      (e: { name: string }) => e.name === 'Plank'
+    );
+    expect(plankExercise).toBeDefined();
+    expect(plankExercise.timeSeconds).toBe(60);
+
+    const wallSitExercise = activityItem.workout.exercises.find(
+      (e: { name: string }) => e.name === 'Wall Sit'
+    );
+    expect(wallSitExercise).toBeDefined();
+    expect(wallSitExercise.timeSeconds).toBe(45);
+
+    // Check that weight-based exercises have null timeSeconds
+    const benchPressExercise = activityItem.workout.exercises.find(
+      (e: { name: string }) => e.name === 'Bench Press'
+    );
+    expect(benchPressExercise).toBeDefined();
+    expect(benchPressExercise.weight).toBe(135);
+    expect(benchPressExercise.timeSeconds).toBeNull();
+  });
+
   it('supports month-based pagination via offset (offset=1 => one month earlier)', async () => {
     const now = new Date();
     const futureMonth = new Date(now.getFullYear(), now.getMonth() + 2, 1);

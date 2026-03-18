@@ -21,7 +21,7 @@ vi.mock('@langchain/openai', () => ({
           { name: 'Bench Press', reps: 10, weight: 155 },
           { name: 'Deadlifts', reps: 8, weight: 185 },
           { name: 'Pull-ups', reps: 12 },
-          { name: 'Plank', reps: 1, time_seconds: 60 },
+          { name: 'Plank', reps: 1, timeSeconds: 60 },
           { name: 'Lunges', reps: 10, weight: 50 },
         ],
       }),

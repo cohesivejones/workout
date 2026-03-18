@@ -338,10 +338,10 @@ describe('Exercise API Routes', () => {
 
       expect(response.body.reps).toBe(10);
       expect(response.body.weight).toBe(145);
-      expect(response.body.time_seconds).toBeNull();
+      expect(response.body.timeSeconds).toBeNull();
     });
 
-    it('should return time_seconds for time-based exercises', async () => {
+    it('should return timeSeconds for time-based exercises', async () => {
       const exerciseRepository = dataSource.getRepository(Exercise);
       const workoutRepository = dataSource.getRepository(Workout);
       const workoutExerciseRepository = dataSource.getRepository(WorkoutExercise);
@@ -377,7 +377,7 @@ describe('Exercise API Routes', () => {
 
       expect(response.body.reps).toBe(1);
       expect(response.body.weight).toBeNull();
-      expect(response.body.time_seconds).toBe(2.5);
+      expect(response.body.timeSeconds).toBe(2.5);
     });
   });
 

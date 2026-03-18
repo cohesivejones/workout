@@ -23,7 +23,7 @@ export interface WorkoutResponse {
     name: string;
     reps: number;
     weight?: number | null;
-    time_seconds?: number | null;
+    timeSeconds?: number | null;
     newReps?: boolean;
     newWeight?: boolean;
     newTime?: boolean;
@@ -38,7 +38,7 @@ export interface CreateWorkoutRequest {
     name: string;
     reps: number;
     weight?: number | null;
-    time_seconds?: number | null;
+    timeSeconds?: number | null;
   }>;
 }
 

@@ -57,7 +57,7 @@ export const fetchWorkout = (workoutId: number): Promise<Workout> =>
 export interface RecentExerciseData {
   reps: number;
   weight: number | null;
-  time_seconds: number | null;
+  timeSeconds: number | null;
 }
 
 export const fetchRecentExerciseData = (exerciseId: number): Promise<RecentExerciseData> =>
