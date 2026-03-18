@@ -110,8 +110,8 @@ const WorkoutShowPage: React.FC = () => {
                         {formatWeightWithKg(exercise.weight)}
                       </span>
                     )}
-                    {exercise.time_seconds && (
-                      <span className={styles.exerciseDetailTime}>{exercise.time_seconds} sec</span>
+                    {exercise.timeSeconds && (
+                      <span className={styles.exerciseDetailTime}>{exercise.timeSeconds} sec</span>
                     )}
                     {(exercise.newReps || exercise.newWeight || exercise.newTime) && (
                       <div className={styles.badgeContainer}>

@@ -35,7 +35,7 @@ router.get('/recent', authenticateToken, async (req: Request, res: Response) => 
     res.json({
       reps: result[0].reps,
       weight: result[0].weight,
-      time_seconds: result[0].time_seconds,
+      timeSeconds: result[0].time_seconds,
     });
   } catch (err) {
     logger.error('Get recent exercise error', {

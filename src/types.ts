@@ -28,7 +28,7 @@ export interface WorkoutExercise {
   name: string;
   reps: number;
   weight?: number | null;
-  time_seconds?: number | null;
+  timeSeconds?: number | null;
   newReps?: boolean;
   newWeight?: boolean;
   newTime?: boolean;

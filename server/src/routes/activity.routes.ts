@@ -98,7 +98,7 @@ router.get('/', authenticateToken, async (req: Request, res: Response) => {
           name: we.exercise.name,
           reps: we.reps,
           weight: we.weight,
-          time_seconds: we.time_seconds,
+          timeSeconds: we.time_seconds,
           newReps: we.new_reps,
           newWeight: we.new_weight,
           newTime: we.new_time,

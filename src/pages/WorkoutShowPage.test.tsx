@@ -195,12 +195,12 @@ describe('WorkoutShowPage', () => {
     expect(screen.queryByText(/lbs/i)).not.toBeInTheDocument();
   });
 
-  it('renders exercises with time when time_seconds is provided', async () => {
+  it('renders exercises with time when timeSeconds is provided', async () => {
     const workoutWithTime = {
       ...mockWorkout,
       exercises: [
-        { id: 1, name: 'Plank', reps: 3, time_seconds: 2.5 },
-        { id: 2, name: 'Wall Sit', reps: 2, weight: 0, time_seconds: 1.5 },
+        { id: 1, name: 'Plank', reps: 3, timeSeconds: 2.5 },
+        { id: 2, name: 'Wall Sit', reps: 2, weight: 0, timeSeconds: 1.5 },
       ],
     };
 

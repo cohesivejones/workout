@@ -264,7 +264,7 @@ describe('WorkoutForm', () => {
             name: 'Squats',
             reps: 15,
             weight: 20,
-            time_seconds: null,
+            timeSeconds: null,
           },
         ],
       });
