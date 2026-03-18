@@ -11,6 +11,11 @@ import { useForm, useFieldArray, Controller, SubmitHandler } from 'react-hook-fo
 import { SingleValue } from 'react-select';
 import { lbsToKg, kgToLbs, WeightUnit, formatWeightWithKg } from '../utils/weight';
 import { toExerciseProgressionPath } from '../utils/paths';
+import { toKebabCase } from '../utils/strings';
+import { GiMuscleUp } from 'react-icons/gi';
+import { IoRepeat } from 'react-icons/io5';
+import { IoMdStopwatch } from 'react-icons/io';
+import { FaWeightHanging } from 'react-icons/fa';
 
 interface FormValues {
   date: string;
@@ -317,49 +322,89 @@ function WorkoutForm({
           <div className={styles.exerciseList}>
             <h3>Exercises</h3>
             {fields.length === 0 ? (
-              <p>No exercises added yet</p>
+              <p
+                style={{
+                  textAlign: 'center',
+                  color: '#9ca3af',
+                  padding: '32px 16px',
+                  fontSize: '14px',
+                }}
+              >
+                <GiMuscleUp
+                  style={{
+                    display: 'inline',
+                    marginRight: '8px',
+                    fontSize: '20px',
+                    verticalAlign: 'middle',
+                  }}
+                />{' '}
+                No exercises added yet. Add your first exercise above to get started!
+              </p>
             ) : (
               <ul data-testid="exercise-list">
                 {fields.map((field, index) => (
-                  <li key={field.id} className={styles.exerciseItem}>
+                  <li
+                    key={field.id}
+                    className={styles.exerciseItem}
+                    data-testid={`added-exercise-${toKebabCase(exercises[index].name)}`}
+                  >
                     <div className={styles.exerciseInfo}>
-                      {exercises[index].id ? (
-                        <Link to={toExerciseProgressionPath(exercises[index].id!)}>
-                          {exercises[index].name}
-                        </Link>
-                      ) : (
-                        exercises[index].name
-                      )}{' '}
-                      - {exercises[index].reps} reps
-                      {exercises[index].weight
-                        ? ` - ${formatWeightWithKg(exercises[index].weight)}`
-                        : ''}
-                      {exercises[index].time_seconds
-                        ? ` - ${exercises[index].time_seconds} sec`
-                        : ''}
-                      {(exercises[index].newReps ||
-                        exercises[index].newWeight ||
-                        exercises[index].newTime) && (
-                        <div className={styles.badgeContainer}>
-                          {exercises[index].newReps && (
-                            <span className={styles.newBadge}>NEW REPS</span>
-                          )}
-                          {exercises[index].newWeight && (
-                            <span className={styles.newBadge}>NEW WEIGHT</span>
-                          )}
-                          {exercises[index].newTime && (
-                            <span className={styles.newBadge}>NEW TIME</span>
-                          )}
-                        </div>
-                      )}
+                      <div className={styles.exerciseName}>
+                        {exercises[index].id ? (
+                          <Link to={toExerciseProgressionPath(exercises[index].id!)}>
+                            {exercises[index].name}
+                          </Link>
+                        ) : (
+                          exercises[index].name
+                        )}
+                      </div>
+                      <div className={styles.exerciseDetails}>
+                        <span className={styles.exerciseDetail}>
+                          <span className={styles.exerciseDetailIcon}>
+                            <IoRepeat />
+                          </span>
+                          {exercises[index].reps} reps
+                        </span>
+                        {exercises[index].weight && (
+                          <span className={styles.exerciseDetail}>
+                            <span className={styles.exerciseDetailIcon}>
+                              <FaWeightHanging />
+                            </span>
+                            {formatWeightWithKg(exercises[index].weight)}
+                          </span>
+                        )}
+                        {exercises[index].time_seconds && (
+                          <span className={styles.exerciseDetail}>
+                            <span className={styles.exerciseDetailIcon}>
+                              <IoMdStopwatch />
+                            </span>
+                            {exercises[index].time_seconds} sec
+                          </span>
+                        )}
+                        {(exercises[index].newReps ||
+                          exercises[index].newWeight ||
+                          exercises[index].newTime) && (
+                          <div className={styles.badgeContainer}>
+                            {exercises[index].newReps && (
+                              <span className={styles.newBadge}>NEW REPS</span>
+                            )}
+                            {exercises[index].newWeight && (
+                              <span className={styles.newBadge}>NEW WEIGHT</span>
+                            )}
+                            {exercises[index].newTime && (
+                              <span className={styles.newBadge}>NEW TIME</span>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </div>
                     <button
                       type="button"
-                      className={classNames(styles.removeExerciseBtn, buttonStyles.secondaryBtn)}
+                      className={styles.removeExerciseBtn}
                       onClick={() => remove(index)}
                       title="Remove exercise"
                     >
-                      x
+                      ×
                     </button>
                   </li>
                 ))}

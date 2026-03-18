@@ -81,7 +81,7 @@ test.describe('Dashboard Alphabetical Navigation', () => {
       });
 
       await addExercise(page, {
-        name: 'Deadlift',
+        name: 'Deadlifts',
         reps: plan.reps,
         weight: plan.deadliftWeight,
       });
@@ -140,7 +140,7 @@ test.describe('Dashboard Alphabetical Navigation', () => {
     await letterD.click();
     await page.waitForTimeout(500);
 
-    const deadliftHeading = page.getByRole('heading', { name: 'Deadlift', level: 4 });
+    const deadliftHeading = page.getByRole('heading', { name: 'Deadlifts', level: 4 });
     await expect(deadliftHeading).toBeInViewport();
 
     // Verify Deadlift chart is visible

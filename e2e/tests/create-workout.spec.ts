@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../helpers/auth';
 import { clearTestData } from '../helpers/testData';
-import { addExercise, setWorkoutDate } from '../helpers/workout';
+import { addExercise, setWorkoutDate, assertExerciseAdded } from '../helpers/workout';
 import { clickFabMenuItem } from '../helpers/navigation';
 
 test.describe('Create Workout with Multiple Exercises', () => {
@@ -51,12 +51,9 @@ test.describe('Create Workout with Multiple Exercises', () => {
     }
 
     // Verify all 6 exercises are in the current exercises list
-    await expect(page.locator('text=Bench Press - 10 reps - 135 lbs (61.2 kg)')).toBeVisible();
-    await expect(page.locator('text=Squats - 8 reps - 185 lbs (83.9 kg)')).toBeVisible();
-    await expect(page.locator('text=Planks - 1 reps - 2 sec')).toBeVisible();
-    await expect(page.locator('text=Wall Sit - 1 reps - 1.5 sec')).toBeVisible();
-    await expect(page.locator('text=Push-ups - 20 reps')).toBeVisible();
-    await expect(page.locator('text=Pull-ups - 12 reps')).toBeVisible();
+    for (const exercise of exercises) {
+      await assertExerciseAdded(page, exercise);
+    }
 
     // Step 5: Submit the workout
     await page.getByRole('button', { name: 'Save Workout' }).click();

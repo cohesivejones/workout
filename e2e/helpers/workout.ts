@@ -69,22 +69,67 @@ export async function addExercise(page: Page, exercise: Exercise): Promise<void>
   }
 
   // Click Add Exercise button
-  await page.getByRole('button', { name: 'Add Exercise' }).click();
+  const addButton = page.getByRole('button', { name: 'Add Exercise' });
+  await addButton.click();
 
-  // Build expected text based on provided fields
-  let expectedText = `${exercise.name} - ${exercise.reps} reps`;
+  // Convert exercise name to kebab-case for test ID (same logic as toKebabCase)
+  const kebabCaseName = exercise.name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+
+  // Find the exercise element
+  const addedExercise = page.getByTestId(`added-exercise-${kebabCaseName}`);
+
+  // Scroll the element into view if needed (handles exercises below fold)
+  await addedExercise.scrollIntoViewIfNeeded({ timeout: 5000 });
+
+  // Wait for exercise to be visible
+  await expect(addedExercise).toBeVisible({ timeout: 5000 });
+
+  // Verify the exercise contains expected text
+  await expect(addedExercise).toContainText(exercise.name);
+  await expect(addedExercise).toContainText(`${exercise.reps} reps`);
+
   if (exercise.weight) {
     // Convert lbs to kg for display (same logic as formatWeightWithKg)
     const lbs = Number(exercise.weight);
     const kg = Number((lbs * 0.453592).toFixed(1));
-    expectedText += ` - ${exercise.weight} lbs (${kg} kg)`;
-  }
-  if (exercise.time) {
-    expectedText += ` - ${exercise.time} sec`;
+    await expect(addedExercise).toContainText(`${exercise.weight} lbs (${kg} kg)`);
   }
 
-  // Wait for exercise to be added to the list
-  await expect(page.locator(`text=${expectedText}`)).toBeVisible({
-    timeout: 3000,
-  });
+  if (exercise.time) {
+    await expect(addedExercise).toContainText(`${exercise.time} sec`);
+  }
+}
+
+/**
+ * Assert that an exercise was added to the workout form
+ * This verifies the exercise appears in the list with correct details
+ */
+export async function assertExerciseAdded(page: Page, exercise: Exercise): Promise<void> {
+  // Convert exercise name to kebab-case for test ID
+  const kebabCaseName = exercise.name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+
+  // Find the exercise using test ID
+  const addedExercise = page.getByTestId(`added-exercise-${kebabCaseName}`);
+  await expect(addedExercise).toBeVisible();
+
+  // Verify the exercise contains expected text
+  await expect(addedExercise).toContainText(exercise.name);
+  await expect(addedExercise).toContainText(`${exercise.reps} reps`);
+
+  if (exercise.weight) {
+    // Convert lbs to kg for display (same logic as formatWeightWithKg)
+    const lbs = Number(exercise.weight);
+    const kg = Number((lbs * 0.453592).toFixed(1));
+    await expect(addedExercise).toContainText(`${exercise.weight} lbs (${kg} kg)`);
+  }
+
+  if (exercise.time) {
+    await expect(addedExercise).toContainText(`${exercise.time} sec`);
+  }
 }

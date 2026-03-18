@@ -271,7 +271,7 @@ test.describe('Timeline Pagination', () => {
       { date: new Date(2025, 1, 4), exerciseName: 'Bench Press' }, // Feb 4, 2025
       // Second week of February 2025
       { date: new Date(2025, 1, 10), exerciseName: 'Lunges' }, // Feb 10, 2025
-      { date: new Date(2025, 1, 12), exerciseName: 'Rows' }, // Feb 12, 2025
+      { date: new Date(2025, 1, 12), exerciseName: 'Dumbbell Rows' }, // Feb 12, 2025
     ];
 
     for (const workout of workoutDates) {
