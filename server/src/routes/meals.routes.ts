@@ -16,6 +16,46 @@ interface CreateMealRequest {
   fat: number;
 }
 
+// Search meals by description (for autocomplete)
+router.get('/search', authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const query = req.query.q as string;
+    const userId = req.user!.id;
+
+    if (!query || query.trim().length === 0) {
+      return res.json([]);
+    }
+
+    const repo = dataSource.getRepository(Meal);
+
+    // Get unique meal descriptions that match the search query
+    const meals = await repo
+      .createQueryBuilder('meal')
+      .where('meal.userId = :userId', { userId })
+      .andWhere('LOWER(meal.description) LIKE LOWER(:query)', { query: `%${query}%` })
+      .orderBy('meal.id', 'DESC')
+      .limit(10)
+      .getMany();
+
+    // Return unique meals based on description (most recent version)
+    const uniqueMeals = new Map();
+    meals.forEach((meal) => {
+      if (!uniqueMeals.has(meal.description)) {
+        uniqueMeals.set(meal.description, meal);
+      }
+    });
+
+    res.json(Array.from(uniqueMeals.values()));
+  } catch (err) {
+    logger.error('Search meals error', {
+      error: err,
+      query: req.query.q,
+      userId: req.user?.id,
+    });
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // Get meals by date query param
 router.get('/', authenticateToken, async (req: Request, res: Response) => {
   try {

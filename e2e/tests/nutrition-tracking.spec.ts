@@ -103,6 +103,60 @@ test.describe('Nutrition Tracking', () => {
     await expect(totalsSection.getByText('35.0g')).toBeVisible(); // fat: 10 + 25
   });
 
+  test('should search for past meals and auto-populate', async ({ page, request }) => {
+    // Step 1: Login and create a meal
+    await login(page);
+    await clearTestData(request);
+
+    // Create a meal we'll search for later
+    await page.goto('/nutrition');
+    await page.getByRole('button', { name: /add meal/i }).click();
+
+    await page.fill('input[name="description"]', 'Chicken and Rice');
+    await page.fill('input[name="calories"]', '650');
+    await page.fill('input[name="protein"]', '45');
+    await page.fill('input[name="carbs"]', '70');
+    await page.fill('input[name="fat"]', '15');
+    await page.getByRole('button', { name: 'Save Meal' }).click();
+
+    await page.waitForURL('/nutrition', { timeout: 10000 });
+
+    // Step 2: Navigate to next day and add a new meal
+    await page.getByRole('button', { name: /next day/i }).click();
+
+    // Step 3: Start adding a meal and use search
+    await page.getByRole('button', { name: /add meal/i }).click();
+
+    // Type in the description field to trigger search
+    const descriptionInput = page.locator('input[name="description"]');
+    await descriptionInput.fill('chick');
+
+    // Wait for autocomplete suggestions to appear
+    await page.waitForSelector('[data-testid="meal-suggestions"]', { timeout: 5000 });
+
+    // Click on the suggested meal
+    await page.getByText('Chicken and Rice').first().click();
+
+    // Step 4: Verify all fields are auto-populated
+    await expect(descriptionInput).toHaveValue('Chicken and Rice');
+    // Database returns decimals, so values may be "650.00" or "650"
+    const caloriesValue = await page.locator('input[name="calories"]').inputValue();
+    expect(parseFloat(caloriesValue)).toBe(650);
+    const proteinValue = await page.locator('input[name="protein"]').inputValue();
+    expect(parseFloat(proteinValue)).toBe(45);
+    const carbsValue = await page.locator('input[name="carbs"]').inputValue();
+    expect(parseFloat(carbsValue)).toBe(70);
+    const fatValue = await page.locator('input[name="fat"]').inputValue();
+    expect(parseFloat(fatValue)).toBe(15);
+
+    // Save the meal
+    await page.getByRole('button', { name: 'Save Meal' }).click();
+    await page.waitForURL('/nutrition', { timeout: 10000 });
+
+    // Verify the meal was saved
+    await expect(page.getByText('Chicken and Rice').first()).toBeVisible();
+  });
+
   test('should edit and delete meals', async ({ page, request }) => {
     // Step 1: Login and create a meal
     await login(page);

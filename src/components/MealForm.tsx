@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { Meal } from '../types';
+import { searchMeals } from '../api';
 import styles from './MealForm.module.css';
 import classNames from 'classnames';
 import buttonStyles from '../styles/common/buttons.module.css';
@@ -34,6 +35,8 @@ function MealForm({
     handleSubmit,
     formState: { errors, isSubmitting },
     setError,
+    setValue,
+    watch,
   } = useForm<FormValues>({
     defaultValues: {
       date: existingMeal
@@ -46,6 +49,75 @@ function MealForm({
       fat: existingMeal?.fat?.toString() || '',
     },
   });
+
+  // Autocomplete state
+  const [searchResults, setSearchResults] = useState<Meal[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const suggestionsRef = useRef<HTMLDivElement>(null);
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Watch description field for changes
+  const descriptionValue = watch('description');
+
+  // Handle clicks outside suggestions to close them
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (suggestionsRef.current && !suggestionsRef.current.contains(event.target as Node)) {
+        setShowSuggestions(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Debounced search effect
+  useEffect(() => {
+    // Don't search if editing existing meal or if description is too short
+    if (existingMeal || !descriptionValue || descriptionValue.length < 2) {
+      setSearchResults([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    // Clear previous timeout
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    // Set new timeout for debounced search
+    searchTimeoutRef.current = setTimeout(async () => {
+      try {
+        setIsSearching(true);
+        const results = await searchMeals(descriptionValue);
+        setSearchResults(results);
+        setShowSuggestions(results.length > 0);
+      } catch (err) {
+        console.error('Search failed:', err);
+        setSearchResults([]);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 300); // 300ms debounce
+
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, [descriptionValue, existingMeal]);
+
+  // Handle selecting a meal from suggestions
+  const handleSelectMeal = (meal: Meal) => {
+    setValue('description', meal.description);
+    setValue('calories', meal.calories.toString());
+    setValue('protein', meal.protein.toString());
+    setValue('carbs', meal.carbs.toString());
+    setValue('fat', meal.fat.toString());
+    setShowSuggestions(false);
+    setSearchResults([]);
+  };
 
   // Form submission handler
   const onFormSubmit: SubmitHandler<FormValues> = async (data) => {
@@ -95,12 +167,44 @@ function MealForm({
       <div className={styles.formRow}>
         <div className={styles.formGroup}>
           <label htmlFor="meal-description">Description:</label>
-          <input
-            type="text"
-            id="meal-description"
-            {...register('description', { required: 'Description is required' })}
-            placeholder="e.g., Chicken and Rice, Breakfast - Oats"
-          />
+          <div className={styles.autocompleteWrapper}>
+            <input
+              type="text"
+              id="meal-description"
+              {...register('description', { required: 'Description is required' })}
+              placeholder="e.g., Chicken and Rice, Breakfast - Oats"
+              autoComplete="off"
+            />
+            {isSearching && <span className={styles.searchingIndicator}>Searching...</span>}
+            {showSuggestions && searchResults.length > 0 && (
+              <div
+                ref={suggestionsRef}
+                className={styles.suggestions}
+                data-testid="meal-suggestions"
+              >
+                {searchResults.map((meal) => (
+                  <div
+                    key={meal.id}
+                    className={styles.suggestionItem}
+                    onClick={() => handleSelectMeal(meal)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        handleSelectMeal(meal);
+                      }
+                    }}
+                    role="button"
+                    tabIndex={0}
+                  >
+                    <div className={styles.suggestionDescription}>{meal.description}</div>
+                    <div className={styles.suggestionMacros}>
+                      {meal.calories}cal • {meal.protein}g protein • {meal.carbs}g carbs •{' '}
+                      {meal.fat}g fat
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
           {errors.description && (
             <span className={styles.errorMessage}>{errors.description.message}</span>
           )}

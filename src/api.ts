@@ -107,6 +107,9 @@ export const deleteMeal = (mealId: number): Promise<{ id: number }> =>
 
 export const fetchMealsByDate = (date: string): Promise<Meal[]> => api.get(`/meals?date=${date}`);
 
+export const searchMeals = (query: string): Promise<Meal[]> =>
+  api.get(`/meals/search?q=${encodeURIComponent(query)}`);
+
 // Auth API functions
 export const getCurrentUser = (): Promise<User> => api.get('/auth/me');
 

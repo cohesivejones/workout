@@ -256,6 +256,185 @@ describe('Meal API Routes', () => {
     });
   });
 
+  describe('GET /api/meals/search', () => {
+    it('should require authentication', async () => {
+      const response = await request(app).get('/api/meals/search?q=chicken').expect(401);
+      expect(response.body.error).toBeDefined();
+    });
+
+    it('should return empty array for empty query', async () => {
+      const authReq = authenticatedRequest(app, testUserData.authToken);
+      const response = await authReq.get('/api/meals/search?q=').expect(200);
+      expect(response.body).toEqual([]);
+    });
+
+    it('should return empty array when no meals match', async () => {
+      const repo = dataSource.getRepository(Meal);
+      await repo.save(
+        repo.create({
+          userId: testUserData.user.id,
+          date: '2024-01-15',
+          description: 'Chicken and Rice',
+          calories: 650,
+          protein: 45,
+          carbs: 70,
+          fat: 15,
+        })
+      );
+
+      const authReq = authenticatedRequest(app, testUserData.authToken);
+      const response = await authReq.get('/api/meals/search?q=pizza').expect(200);
+      expect(response.body).toEqual([]);
+    });
+
+    it('should search meals by description (case insensitive)', async () => {
+      const repo = dataSource.getRepository(Meal);
+      await repo.save(
+        repo.create({
+          userId: testUserData.user.id,
+          date: '2024-01-15',
+          description: 'Chicken and Rice',
+          calories: 650,
+          protein: 45,
+          carbs: 70,
+          fat: 15,
+        })
+      );
+      await repo.save(
+        repo.create({
+          userId: testUserData.user.id,
+          date: '2024-01-16',
+          description: 'Grilled Chicken Salad',
+          calories: 400,
+          protein: 40,
+          carbs: 20,
+          fat: 15,
+        })
+      );
+      await repo.save(
+        repo.create({
+          userId: testUserData.user.id,
+          date: '2024-01-17',
+          description: 'Breakfast - Oats',
+          calories: 300,
+          protein: 10,
+          carbs: 50,
+          fat: 8,
+        })
+      );
+
+      const authReq = authenticatedRequest(app, testUserData.authToken);
+      const response = await authReq.get('/api/meals/search?q=chicken').expect(200);
+
+      expect(response.body).toHaveLength(2);
+      expect(response.body[0].description).toContain('Chicken');
+      expect(response.body[1].description).toContain('Chicken');
+    });
+
+    it('should return most recent version of duplicate meal descriptions', async () => {
+      const repo = dataSource.getRepository(Meal);
+
+      // Create older version
+      await repo.save(
+        repo.create({
+          userId: testUserData.user.id,
+          date: '2024-01-10',
+          description: 'Chicken and Rice',
+          calories: 600,
+          protein: 40,
+          carbs: 65,
+          fat: 18,
+        })
+      );
+
+      // Create newer version with same description
+      const newerMeal = await repo.save(
+        repo.create({
+          userId: testUserData.user.id,
+          date: '2024-01-15',
+          description: 'Chicken and Rice',
+          calories: 650,
+          protein: 45,
+          carbs: 70,
+          fat: 15,
+        })
+      );
+
+      const authReq = authenticatedRequest(app, testUserData.authToken);
+      const response = await authReq.get('/api/meals/search?q=chicken').expect(200);
+
+      expect(response.body).toHaveLength(1);
+      expect(response.body[0].id).toBe(newerMeal.id);
+      expect(parseFloat(response.body[0].calories)).toBe(650);
+    });
+
+    it('should limit results to 10 meals', async () => {
+      const repo = dataSource.getRepository(Meal);
+
+      // Create 15 meals with "Meal" in the description
+      for (let i = 1; i <= 15; i++) {
+        await repo.save(
+          repo.create({
+            userId: testUserData.user.id,
+            date: '2024-01-15',
+            description: `Meal ${i}`,
+            calories: 500,
+            protein: 30,
+            carbs: 50,
+            fat: 20,
+          })
+        );
+      }
+
+      const authReq = authenticatedRequest(app, testUserData.authToken);
+      const response = await authReq.get('/api/meals/search?q=meal').expect(200);
+
+      expect(response.body.length).toBeLessThanOrEqual(10);
+    });
+
+    it('should only return meals for authenticated user', async () => {
+      const repo = dataSource.getRepository(Meal);
+
+      // Create meal for test user
+      await repo.save(
+        repo.create({
+          userId: testUserData.user.id,
+          date: '2024-01-15',
+          description: 'My Chicken Meal',
+          calories: 650,
+          protein: 45,
+          carbs: 70,
+          fat: 15,
+        })
+      );
+
+      // Create meal for different user
+      const otherUser = await createTestUser('other-meal-test@example.com', 'Other User');
+      await repo.save(
+        repo.create({
+          userId: otherUser.user.id,
+          date: '2024-01-15',
+          description: 'Other User Chicken Meal',
+          calories: 500,
+          protein: 30,
+          carbs: 50,
+          fat: 20,
+        })
+      );
+
+      const authReq = authenticatedRequest(app, testUserData.authToken);
+      const response = await authReq.get('/api/meals/search?q=chicken').expect(200);
+
+      expect(response.body).toHaveLength(1);
+      expect(response.body[0].description).toBe('My Chicken Meal');
+      expect(response.body[0].userId).toBe(testUserData.user.id);
+
+      // Cleanup other user
+      await cleanupUserData(otherUser.user.id);
+      await cleanupTestUser(otherUser.user);
+    });
+  });
+
   describe('DELETE /api/meals/:id', () => {
     it('should require authentication', async () => {
       const repo = dataSource.getRepository(Meal);

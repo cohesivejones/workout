@@ -1,7 +1,7 @@
 .mealFormPage {
-  padding: 20px;
-  max-width: 800px;
+  max-width: 600px;
   margin: 0 auto;
+  padding: 20px;
 }
 
 .loading {
@@ -14,10 +14,10 @@
 }
 
 .errorMessage {
-  background-color: #f8d7da;
-  color: #721c24;
-  padding: 12px;
-  border-radius: 4px;
+  color: #ff4444;
   margin-bottom: 20px;
-  border: 1px solid #f5c6cb;
+  padding: 12px;
+  background-color: #fff5f5;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
 }

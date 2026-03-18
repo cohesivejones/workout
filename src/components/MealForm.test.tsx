@@ -1,6 +1,13 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import MealForm from './MealForm';
 import { Meal } from '../types';
+import * as api from '../api';
+
+// Mock the API
+vi.mock('../api', () => ({
+  searchMeals: vi.fn(),
+}));
 
 describe('MealForm', () => {
   const mockOnSubmit = vi.fn().mockResolvedValue(true);
@@ -216,6 +223,196 @@ describe('MealForm', () => {
     // Wait for the submission to complete
     await waitFor(() => {
       expect(mockDelayedSubmit).toHaveBeenCalled();
+    });
+  });
+
+  describe('Meal Search Autocomplete', () => {
+    it('searches for meals when typing in description field', async () => {
+      const mockSearchResults: Meal[] = [
+        {
+          id: 1,
+          userId: 1,
+          date: '2025-04-01',
+          description: 'Chicken and Rice',
+          calories: 650,
+          protein: 45,
+          carbs: 70,
+          fat: 15,
+        },
+      ];
+
+      vi.mocked(api.searchMeals).mockResolvedValue(mockSearchResults);
+
+      render(<MealForm {...defaultProps} />);
+
+      const descriptionInput = screen.getByLabelText(/Description:/i);
+      fireEvent.change(descriptionInput, { target: { value: 'chick' } });
+
+      // Wait for debounce and API call
+      await waitFor(
+        () => {
+          expect(api.searchMeals).toHaveBeenCalledWith('chick');
+        },
+        { timeout: 500 }
+      );
+    });
+
+    it('displays suggestions when search returns results', async () => {
+      const mockSearchResults: Meal[] = [
+        {
+          id: 1,
+          userId: 1,
+          date: '2025-04-01',
+          description: 'Chicken and Rice',
+          calories: 650,
+          protein: 45,
+          carbs: 70,
+          fat: 15,
+        },
+        {
+          id: 2,
+          userId: 1,
+          date: '2025-04-02',
+          description: 'Grilled Chicken Salad',
+          calories: 400,
+          protein: 40,
+          carbs: 20,
+          fat: 15,
+        },
+      ];
+
+      vi.mocked(api.searchMeals).mockResolvedValue(mockSearchResults);
+
+      render(<MealForm {...defaultProps} />);
+
+      const descriptionInput = screen.getByLabelText(/Description:/i);
+      fireEvent.change(descriptionInput, { target: { value: 'chicken' } });
+
+      // Wait for suggestions to appear
+      await waitFor(() => {
+        expect(screen.getByTestId('meal-suggestions')).toBeInTheDocument();
+      });
+
+      // Check that both suggestions are displayed
+      expect(screen.getByText('Chicken and Rice')).toBeInTheDocument();
+      expect(screen.getByText('Grilled Chicken Salad')).toBeInTheDocument();
+      expect(screen.getByText(/650cal/i)).toBeInTheDocument();
+      expect(screen.getByText(/400cal/i)).toBeInTheDocument();
+    });
+
+    it('auto-populates form fields when clicking a suggestion', async () => {
+      const mockSearchResults: Meal[] = [
+        {
+          id: 1,
+          userId: 1,
+          date: '2025-04-01',
+          description: 'Chicken and Rice',
+          calories: 650,
+          protein: 45,
+          carbs: 70,
+          fat: 15,
+        },
+      ];
+
+      vi.mocked(api.searchMeals).mockResolvedValue(mockSearchResults);
+
+      render(<MealForm {...defaultProps} />);
+
+      const descriptionInput = screen.getByLabelText(/Description:/i) as HTMLInputElement;
+      fireEvent.change(descriptionInput, { target: { value: 'chick' } });
+
+      // Wait for suggestions to appear
+      await waitFor(() => {
+        expect(screen.getByTestId('meal-suggestions')).toBeInTheDocument();
+      });
+
+      // Click the suggestion
+      const suggestion = screen.getByText('Chicken and Rice');
+      fireEvent.click(suggestion);
+
+      // Check that all fields are populated
+      expect(descriptionInput.value).toBe('Chicken and Rice');
+      expect((screen.getByLabelText(/Calories:/i) as HTMLInputElement).value).toBe('650');
+      expect((screen.getByLabelText(/Protein \(g\):/i) as HTMLInputElement).value).toBe('45');
+      expect((screen.getByLabelText(/Carbs \(g\):/i) as HTMLInputElement).value).toBe('70');
+      expect((screen.getByLabelText(/Fat \(g\):/i) as HTMLInputElement).value).toBe('15');
+
+      // Check that suggestions are hidden after selection
+      expect(screen.queryByTestId('meal-suggestions')).not.toBeInTheDocument();
+    });
+
+    it('does not search when description is less than 2 characters', async () => {
+      render(<MealForm {...defaultProps} />);
+
+      const descriptionInput = screen.getByLabelText(/Description:/i);
+      fireEvent.change(descriptionInput, { target: { value: 'c' } });
+
+      // Wait a bit to ensure no search is triggered
+      await new Promise((resolve) => setTimeout(resolve, 400));
+
+      expect(api.searchMeals).not.toHaveBeenCalled();
+    });
+
+    it('does not search when editing existing meal', async () => {
+      const existingMeal: Meal = {
+        id: 1,
+        userId: 1,
+        date: '2025-04-10',
+        description: 'Chicken and Rice',
+        calories: 650,
+        protein: 45,
+        carbs: 70,
+        fat: 15,
+      };
+
+      render(<MealForm {...defaultProps} existingMeal={existingMeal} />);
+
+      const descriptionInput = screen.getByLabelText(/Description:/i);
+      fireEvent.change(descriptionInput, { target: { value: 'chicken salad' } });
+
+      // Wait a bit to ensure no search is triggered
+      await new Promise((resolve) => setTimeout(resolve, 400));
+
+      expect(api.searchMeals).not.toHaveBeenCalled();
+    });
+
+    it('shows searching indicator while searching', async () => {
+      // Mock searchMeals to return a delayed promise
+      vi.mocked(api.searchMeals).mockImplementation(() => {
+        return new Promise((resolve) => {
+          setTimeout(() => resolve([]), 200);
+        });
+      });
+
+      render(<MealForm {...defaultProps} />);
+
+      const descriptionInput = screen.getByLabelText(/Description:/i);
+      fireEvent.change(descriptionInput, { target: { value: 'chicken' } });
+
+      // Wait for debounce, then check for searching indicator
+      await waitFor(
+        () => {
+          expect(screen.getByText('Searching...')).toBeInTheDocument();
+        },
+        { timeout: 500 }
+      );
+    });
+
+    it('does not show suggestions when search returns empty array', async () => {
+      vi.mocked(api.searchMeals).mockResolvedValue([]);
+
+      render(<MealForm {...defaultProps} />);
+
+      const descriptionInput = screen.getByLabelText(/Description:/i);
+      fireEvent.change(descriptionInput, { target: { value: 'xyz123' } });
+
+      // Wait for search to complete
+      await waitFor(() => {
+        expect(api.searchMeals).toHaveBeenCalledWith('xyz123');
+      });
+
+      // Suggestions should not appear
+      expect(screen.queryByTestId('meal-suggestions')).not.toBeInTheDocument();
     });
   });
 });
