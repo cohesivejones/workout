@@ -1,9 +1,10 @@
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { http, HttpResponse } from 'msw';
 import { server } from '../mocks/server';
 import NutritionPage from './NutritionPage';
 import { useUserContext } from '../contexts/useUserContext';
+import { format, addDays } from 'date-fns';
 
 vi.mock('../contexts/useUserContext', () => ({
   useUserContext: vi.fn(),
@@ -36,8 +37,12 @@ describe('NutritionPage', () => {
     });
   });
 
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it('renders nutrition page with meals and weight tracking', async () => {
-    const today = new Date().toISOString().split('T')[0];
+    const today = format(new Date(), 'yyyy-MM-dd');
     const todayMeals = [
       {
         id: 1,
@@ -328,10 +333,8 @@ describe('NutritionPage', () => {
 
   it('updates weight entry when navigating to different date', async () => {
     // Use today's date for consistency
-    const today = new Date().toISOString().split('T')[0];
-    const tomorrow = new Date(new Date().setDate(new Date().getDate() + 1))
-      .toISOString()
-      .split('T')[0];
+    const today = format(new Date(), 'yyyy-MM-dd');
+    const tomorrow = format(addDays(new Date(), 1), 'yyyy-MM-dd');
 
     const weight1 = { id: 1, userId: 1, date: today, weight: 85.5 };
     const weight2 = { id: 2, userId: 1, date: tomorrow, weight: 84.8 };
@@ -394,6 +397,49 @@ describe('NutritionPage', () => {
 
     // Should not show "Last Known Weight" text when there's no weight data
     expect(screen.queryByText(/last known weight/i)).not.toBeInTheDocument();
+  });
+
+  it('correctly handles timezone when determining todays date', async () => {
+    // Mock date to be March 20, 2026 at 6:36 AM in Perth (UTC+8)
+    // In UTC, this would be March 19, 2026 at 10:36 PM
+    // The bug would cause the page to think it's March 19 instead of March 20
+    const mockDate = new Date('2026-03-20T06:36:00+08:00');
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    vi.setSystemTime(mockDate);
+
+    const expectedLocalDate = '2026-03-20'; // Local date in Perth
+    const incorrectUTCDate = '2026-03-19'; // What UTC conversion would give
+
+    let fetchedDate: string | null = null;
+
+    server.use(
+      http.get('/api/meals', ({ request }) => {
+        const url = new URL(request.url);
+        fetchedDate = url.searchParams.get('date');
+        return HttpResponse.json([]);
+      }),
+      http.get('/api/weight-entries/by-date', () => {
+        return HttpResponse.json(null, { status: 404 });
+      }),
+      http.get('/api/weight-entries/latest', () => {
+        return HttpResponse.json(null, { status: 404 });
+      })
+    );
+
+    render(<NutritionPage />);
+
+    await screen.findByLabelText(/weight/i);
+
+    // Verify that the page is using the correct local date, not UTC date
+    expect(fetchedDate).toBe(expectedLocalDate);
+    expect(fetchedDate).not.toBe(incorrectUTCDate);
+
+    // Also verify that clicking "Today" button uses the correct local date
+    const todayButton = screen.getByRole('button', { name: /today/i });
+    fireEvent.click(todayButton);
+
+    await screen.findByLabelText(/weight/i);
+    expect(fetchedDate).toBe(expectedLocalDate);
   });
 
   it('when the page has a known last weight', async () => {
