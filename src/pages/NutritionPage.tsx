@@ -11,7 +11,10 @@ import {
 import { Meal, WeightEntry } from '../types';
 import { useUserContext } from '../contexts/useUserContext';
 import { format } from 'date-fns';
+import { MdOutlineEdit } from 'react-icons/md';
+import classNames from 'classnames';
 import styles from './NutritionPage.module.css';
+import buttonStyles from '../styles/common/buttons.module.css';
 
 function NutritionPage(): React.ReactElement {
   const [, setLocation] = useLocation();
@@ -202,17 +205,18 @@ function NutritionPage(): React.ReactElement {
                     <div className={styles.mealActions}>
                       <button
                         onClick={() => handleEditMeal(meal.id)}
-                        className={styles.editButton}
+                        className={classNames(styles.editBtn, buttonStyles.tertiaryIconBtn)}
                         title="Edit meal"
                       >
-                        Edit
+                        <MdOutlineEdit />
                       </button>
                       <button
                         onClick={() => handleDeleteMeal(meal.id)}
-                        className={styles.deleteButton}
+                        className={classNames(styles.deleteBtn, buttonStyles.secondaryIconBtn)}
                         title="Delete meal"
+                        aria-label="Delete meal"
                       >
-                        Delete
+                        x
                       </button>
                     </div>
                   </div>
