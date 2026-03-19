@@ -32,6 +32,22 @@
   margin-bottom: 20px;
 }
 
+.aiAnalyzeBtn {
+  width: 100%;
+  padding: 12px 24px;
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.aiHint {
+  font-size: 13px;
+  color: #6b7280;
+  margin: 0;
+  text-align: center;
+  font-style: italic;
+}
+
 .formGroup {
   display: flex;
   flex-direction: column;

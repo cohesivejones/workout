@@ -7,6 +7,7 @@ import * as api from '../api';
 // Mock the API
 vi.mock('../api', () => ({
   searchMeals: vi.fn(),
+  analyzeMealNutrition: vi.fn(),
 }));
 
 describe('MealForm', () => {
@@ -413,6 +414,223 @@ describe('MealForm', () => {
 
       // Suggestions should not appear
       expect(screen.queryByTestId('meal-suggestions')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('AI Nutrition Analysis', () => {
+    it('shows AI analyze button for new meals', () => {
+      render(<MealForm {...defaultProps} />);
+
+      expect(screen.getByText(/Get Nutrition with AI/i)).toBeInTheDocument();
+      expect(screen.getByText(/Enter a meal description above/i)).toBeInTheDocument();
+    });
+
+    it('does not show AI analyze button when editing existing meal', () => {
+      const existingMeal: Meal = {
+        id: 1,
+        userId: 1,
+        date: '2025-04-10',
+        description: 'Chicken and Rice',
+        calories: 650,
+        protein: 45,
+        carbs: 70,
+        fat: 15,
+      };
+
+      render(<MealForm {...defaultProps} existingMeal={existingMeal} />);
+
+      expect(screen.queryByText(/Get Nutrition with AI/i)).not.toBeInTheDocument();
+    });
+
+    it('AI button is disabled when description is empty', () => {
+      render(<MealForm {...defaultProps} />);
+
+      const aiButton = screen.getByText(/Get Nutrition with AI/i) as HTMLButtonElement;
+      expect(aiButton.disabled).toBe(true);
+    });
+
+    it('AI button is disabled when description is too short', () => {
+      render(<MealForm {...defaultProps} />);
+
+      const descriptionInput = screen.getByLabelText(/Description:/i);
+      fireEvent.change(descriptionInput, { target: { value: 'ch' } });
+
+      const aiButton = screen.getByText(/Get Nutrition with AI/i) as HTMLButtonElement;
+      expect(aiButton.disabled).toBe(true);
+    });
+
+    it('AI button is enabled when description is 3+ characters', () => {
+      render(<MealForm {...defaultProps} />);
+
+      const descriptionInput = screen.getByLabelText(/Description:/i);
+      fireEvent.change(descriptionInput, { target: { value: 'chicken' } });
+
+      const aiButton = screen.getByText(/Get Nutrition with AI/i) as HTMLButtonElement;
+      expect(aiButton.disabled).toBe(false);
+    });
+
+    it('analyzes meal and populates nutrition fields on AI button click', async () => {
+      const mockNutritionData = {
+        calories: 650,
+        protein: 45,
+        carbs: 70,
+        fat: 15,
+      };
+
+      vi.mocked(api.analyzeMealNutrition).mockResolvedValue(mockNutritionData);
+
+      render(<MealForm {...defaultProps} />);
+
+      // Enter description
+      const descriptionInput = screen.getByLabelText(/Description:/i);
+      fireEvent.change(descriptionInput, { target: { value: 'Chicken breast with rice' } });
+
+      // Click AI button
+      const aiButton = screen.getByText(/Get Nutrition with AI/i);
+      fireEvent.click(aiButton);
+
+      // Wait for API call
+      await waitFor(() => {
+        expect(api.analyzeMealNutrition).toHaveBeenCalledWith('Chicken breast with rice');
+      });
+
+      // Check that fields are populated
+      await waitFor(() => {
+        expect((screen.getByLabelText(/Calories:/i) as HTMLInputElement).value).toBe('650');
+        expect((screen.getByLabelText(/Protein \(g\):/i) as HTMLInputElement).value).toBe('45');
+        expect((screen.getByLabelText(/Carbs \(g\):/i) as HTMLInputElement).value).toBe('70');
+        expect((screen.getByLabelText(/Fat \(g\):/i) as HTMLInputElement).value).toBe('15');
+      });
+    });
+
+    it('shows analyzing state while AI request is in progress', async () => {
+      vi.mocked(api.analyzeMealNutrition).mockImplementation(() => {
+        return new Promise((resolve) => {
+          setTimeout(
+            () =>
+              resolve({
+                calories: 500,
+                protein: 30,
+                carbs: 50,
+                fat: 20,
+              }),
+            100
+          );
+        });
+      });
+
+      render(<MealForm {...defaultProps} />);
+
+      const descriptionInput = screen.getByLabelText(/Description:/i);
+      fireEvent.change(descriptionInput, { target: { value: 'Pizza slice' } });
+
+      const aiButton = screen.getByText(/Get Nutrition with AI/i);
+      fireEvent.click(aiButton);
+
+      // Check for analyzing state
+      expect(screen.getByText(/Analyzing\.\.\./i)).toBeInTheDocument();
+
+      // Wait for completion
+      await waitFor(() => {
+        expect(screen.queryByText(/Analyzing\.\.\./i)).not.toBeInTheDocument();
+      });
+    });
+
+    it('disables buttons during AI analysis', async () => {
+      vi.mocked(api.analyzeMealNutrition).mockImplementation(() => {
+        return new Promise((resolve) => {
+          setTimeout(
+            () =>
+              resolve({
+                calories: 500,
+                protein: 30,
+                carbs: 50,
+                fat: 20,
+              }),
+            100
+          );
+        });
+      });
+
+      render(<MealForm {...defaultProps} />);
+
+      const descriptionInput = screen.getByLabelText(/Description:/i);
+      fireEvent.change(descriptionInput, { target: { value: 'Pasta carbonara' } });
+
+      const aiButton = screen.getByText(/Get Nutrition with AI/i) as HTMLButtonElement;
+      fireEvent.click(aiButton);
+
+      // AI button should be disabled during analysis
+      expect(aiButton.disabled).toBe(true);
+
+      // Wait for completion
+      await waitFor(() => {
+        expect(aiButton.disabled).toBe(false);
+      });
+    });
+
+    it('handles AI analysis errors gracefully', async () => {
+      vi.mocked(api.analyzeMealNutrition).mockRejectedValue(new Error('Failed to analyze meal'));
+
+      render(<MealForm {...defaultProps} />);
+
+      const descriptionInput = screen.getByLabelText(/Description:/i);
+      fireEvent.change(descriptionInput, { target: { value: 'Burger and fries' } });
+
+      const aiButton = screen.getByText(/Get Nutrition with AI/i);
+      fireEvent.click(aiButton);
+
+      // Wait for error message
+      await waitFor(() => {
+        expect(screen.getByText(/Failed to analyze meal/i)).toBeInTheDocument();
+      });
+
+      // Fields should remain empty
+      expect((screen.getByLabelText(/Calories:/i) as HTMLInputElement).value).toBe('');
+      expect((screen.getByLabelText(/Protein \(g\):/i) as HTMLInputElement).value).toBe('');
+    });
+
+    it('can submit form after AI populates fields', async () => {
+      const mockNutritionData = {
+        calories: 800,
+        protein: 35,
+        carbs: 90,
+        fat: 30,
+      };
+
+      vi.mocked(api.analyzeMealNutrition).mockResolvedValue(mockNutritionData);
+
+      render(<MealForm {...defaultProps} />);
+
+      // Enter description
+      const descriptionInput = screen.getByLabelText(/Description:/i);
+      fireEvent.change(descriptionInput, { target: { value: 'Large burger with fries' } });
+
+      // Click AI button
+      const aiButton = screen.getByText(/Get Nutrition with AI/i);
+      fireEvent.click(aiButton);
+
+      // Wait for fields to be populated
+      await waitFor(() => {
+        expect((screen.getByLabelText(/Calories:/i) as HTMLInputElement).value).toBe('800');
+      });
+
+      // Submit the form
+      const submitButton = screen.getByText('Save Meal');
+      fireEvent.click(submitButton);
+
+      // Check that onSubmit was called with AI data
+      await waitFor(() => {
+        expect(mockOnSubmit).toHaveBeenCalledWith(
+          expect.objectContaining({
+            description: 'Large burger with fries',
+            calories: 800,
+            protein: 35,
+            carbs: 90,
+            fat: 30,
+          })
+        );
+      });
     });
   });
 });

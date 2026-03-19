@@ -110,6 +110,16 @@ export const fetchMealsByDate = (date: string): Promise<Meal[]> => api.get(`/mea
 export const searchMeals = (query: string): Promise<Meal[]> =>
   api.get(`/meals/search?q=${encodeURIComponent(query)}`);
 
+export interface AnalyzeMealNutritionResponse {
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+}
+
+export const analyzeMealNutrition = (description: string): Promise<AnalyzeMealNutritionResponse> =>
+  api.post('/meal-nutrition-ai/analyze', { description });
+
 // Auth API functions
 export const getCurrentUser = (): Promise<User> => api.get('/auth/me');
 
