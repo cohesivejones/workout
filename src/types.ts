@@ -34,6 +34,13 @@ export interface Meal {
   fat: number;
 }
 
+export interface WeightEntry {
+  id: number;
+  userId?: number;
+  date: string;
+  weight: number;
+}
+
 export interface WorkoutExercise {
   id?: number;
   name: string;

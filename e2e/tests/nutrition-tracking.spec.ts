@@ -204,4 +204,35 @@ test.describe('Nutrition Tracking', () => {
     // Verify empty state returns
     await expect(page.getByText(/no meals logged/i)).toBeVisible();
   });
+
+  test('should track weight entries and display last known weight', async ({ page, request }) => {
+    // Step 1: Login
+    await login(page);
+    await clearTestData(request);
+
+    // Step 2: Navigate to nutrition page
+    await page.goto('/nutrition');
+    await expect(page.getByRole('heading', { name: 'Nutrition' })).toBeVisible({ timeout: 5000 });
+
+    // Step 3: Enter weight for today
+    const weightInput = page.locator('input[name="weight"]');
+    await expect(weightInput).toBeVisible({ timeout: 5000 });
+    await weightInput.fill('85.5');
+
+    // Save the weight - wait for button to be enabled after input
+    const saveWeightButton = page.getByRole('button', { name: /save weight/i });
+    await expect(saveWeightButton).toBeEnabled({ timeout: 5000 });
+    await page.waitForTimeout(500); // Let the component stabilize
+    await saveWeightButton.click();
+
+    // Step 4: Verify weight is saved and displayed
+    await expect(page.getByText(/current weight.*85\.5.*kg/i)).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText(/last known weight.*85\.5.*kg/i)).toBeVisible({ timeout: 5000 });
+
+    // Step 5: Navigate to next day
+    await page.getByRole('button', { name: /next day/i }).click();
+
+    // Step 6: Verify last known weight still shows previous day's weight
+    await expect(page.getByText(/last known weight.*85\.5.*kg/i)).toBeVisible({ timeout: 5000 });
+  });
 });
