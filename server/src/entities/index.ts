@@ -5,3 +5,4 @@ export { User } from './User';
 export { PainScore } from './PainScore';
 export { SleepScore } from './SleepScore';
 export { Meal } from './Meal';
+export { WeightEntry } from './WeightEntry';

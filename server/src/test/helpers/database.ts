@@ -13,6 +13,7 @@ export async function cleanupUserData(
     painScores?: boolean;
     sleepScores?: boolean;
     meals?: boolean;
+    weightEntries?: boolean;
   }
 ): Promise<void> {
   const {
@@ -21,6 +22,7 @@ export async function cleanupUserData(
     painScores = true,
     sleepScores = true,
     meals = true,
+    weightEntries = true,
   } = options || {};
 
   // Always clean workout_exercises first due to foreign key constraints
@@ -46,6 +48,10 @@ export async function cleanupUserData(
 
   if (meals) {
     await dataSource.query('DELETE FROM meals WHERE "userId" = $1', [userId]);
+  }
+
+  if (weightEntries) {
+    await dataSource.query('DELETE FROM weight_entries WHERE "userId" = $1', [userId]);
   }
 }
 

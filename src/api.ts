@@ -5,6 +5,7 @@ import {
   PainScore,
   SleepScore,
   Meal,
+  WeightEntry,
   User,
   TimelineResponse,
   ActivityResponse,
@@ -119,6 +120,23 @@ export interface AnalyzeMealNutritionResponse {
 
 export const analyzeMealNutrition = (description: string): Promise<AnalyzeMealNutritionResponse> =>
   api.post('/meal-nutrition-ai/analyze', { description });
+
+// Weight Entry API functions
+export const fetchWeightEntryByDate = (date: string): Promise<WeightEntry> =>
+  api.get(`/weight-entries/by-date?date=${date}`);
+
+export const fetchLatestWeightEntry = (): Promise<WeightEntry> => api.get('/weight-entries/latest');
+
+export const createWeightEntry = (weightEntry: Omit<WeightEntry, 'id'>): Promise<WeightEntry> =>
+  api.post('/weight-entries', weightEntry);
+
+export const updateWeightEntry = (
+  weightEntryId: number,
+  weightEntry: Omit<WeightEntry, 'id'>
+): Promise<WeightEntry> => api.put(`/weight-entries/${weightEntryId}`, weightEntry);
+
+export const deleteWeightEntry = (weightEntryId: number): Promise<{ id: number }> =>
+  api.delete(`/weight-entries/${weightEntryId}`);
 
 // Auth API functions
 export const getCurrentUser = (): Promise<User> => api.get('/auth/me');

@@ -7,6 +7,7 @@ import workoutInsights from './workout-insights.routes';
 import painScores from './pain-scores.routes';
 import sleepScores from './sleep-scores.routes';
 import meals from './meals.routes';
+import weightEntries from './weight-entries.routes';
 import mealNutritionAi from './meal-nutrition-ai.routes';
 import diagnostics from './diagnostics.routes';
 import dashboard from './dashboard.routes';
@@ -25,6 +26,7 @@ router.use('/workout-insights', workoutInsights);
 router.use('/pain-scores', painScores);
 router.use('/sleep-scores', sleepScores);
 router.use('/meals', meals);
+router.use('/weight-entries', weightEntries);
 router.use('/meal-nutrition-ai', mealNutritionAi);
 router.use('/diagnostics', diagnostics);
 router.use('/dashboard', dashboard);
@@ -55,6 +57,10 @@ if (process.env.NODE_ENV === 'test') {
       );
       await dataSource.query(
         'DELETE FROM meals WHERE "userId" = (SELECT id FROM users WHERE email = $1)',
+        [testUserEmail]
+      );
+      await dataSource.query(
+        'DELETE FROM weight_entries WHERE "userId" = (SELECT id FROM users WHERE email = $1)',
         [testUserEmail]
       );
       logger.info('Test data cleared');

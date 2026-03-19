@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
-import { fetchMealsByDate, deleteMeal } from '../api';
-import { Meal } from '../types';
+import {
+  fetchMealsByDate,
+  deleteMeal,
+  fetchWeightEntryByDate,
+  fetchLatestWeightEntry,
+  createWeightEntry,
+  updateWeightEntry,
+} from '../api';
+import { Meal, WeightEntry } from '../types';
 import { useUserContext } from '../contexts/useUserContext';
 import styles from './NutritionPage.module.css';
 
@@ -12,25 +19,47 @@ function NutritionPage(): React.ReactElement {
   const [meals, setMeals] = useState<Meal[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [weightEntry, setWeightEntry] = useState<WeightEntry | null>(null);
+  const [latestWeight, setLatestWeight] = useState<WeightEntry | null>(null);
+  const [weightInput, setWeightInput] = useState<string>('');
+  const [weightError, setWeightError] = useState<string | null>(null);
+  const [savingWeight, setSavingWeight] = useState<boolean>(false);
 
   useEffect(() => {
-    const loadMeals = async () => {
+    const loadData = async () => {
       if (!user) return;
 
       try {
         setLoading(true);
-        const data = await fetchMealsByDate(selectedDate);
-        setMeals(data);
+        const [mealsData, latestWeightData] = await Promise.all([
+          fetchMealsByDate(selectedDate),
+          fetchLatestWeightEntry().catch(() => null),
+        ]);
+
+        setMeals(mealsData);
+        setLatestWeight(latestWeightData);
+
+        // Fetch weight entry for selected date
+        try {
+          const weightData = await fetchWeightEntryByDate(selectedDate);
+          setWeightEntry(weightData);
+          setWeightInput(weightData.weight.toString());
+        } catch {
+          // No weight entry for this date
+          setWeightEntry(null);
+          setWeightInput('');
+        }
+
         setError(null);
       } catch (err) {
-        console.error('Failed to load meals:', err);
-        setError('Failed to load meals. Please try again later.');
+        console.error('Failed to load data:', err);
+        setError('Failed to load data. Please try again later.');
       } finally {
         setLoading(false);
       }
     };
 
-    loadMeals();
+    loadData();
   }, [selectedDate, user]);
 
   const handleAddMeal = () => {
@@ -63,6 +92,40 @@ function NutritionPage(): React.ReactElement {
 
   const handleToday = () => {
     setSelectedDate(new Date().toISOString().split('T')[0]);
+  };
+
+  const handleSaveWeight = async () => {
+    if (!user || !weightInput.trim()) return;
+
+    const weight = parseFloat(weightInput);
+    if (isNaN(weight) || weight <= 0) {
+      setWeightError('Please enter a valid weight');
+      return;
+    }
+
+    try {
+      setSavingWeight(true);
+      setWeightError(null);
+
+      const weightData = { date: selectedDate, weight };
+
+      if (weightEntry) {
+        // Update existing entry
+        const updated = await updateWeightEntry(weightEntry.id, weightData);
+        setWeightEntry(updated);
+        setLatestWeight(updated);
+      } else {
+        // Create new entry
+        const created = await createWeightEntry(weightData);
+        setWeightEntry(created);
+        setLatestWeight(created);
+      }
+    } catch (err) {
+      console.error('Failed to save weight:', err);
+      setWeightError('Failed to save weight. Please try again.');
+    } finally {
+      setSavingWeight(false);
+    }
   };
 
   // Calculate daily totals
@@ -173,7 +236,52 @@ function NutritionPage(): React.ReactElement {
         </div>
 
         <div className={styles.summarySection}>
-          <h3>Daily Totals</h3>
+          <h3>Daily Summary</h3>
+
+          {/* Weight Tracking Section */}
+          <div className={styles.weightSection}>
+            <h4>Weight Tracking</h4>
+            {latestWeight && (
+              <div className={styles.lastKnownWeight}>
+                <span className={styles.weightLabel}>Last Known Weight:</span>
+                <span className={styles.weightValue}>{latestWeight.weight.toFixed(1)} kg</span>
+                <span className={styles.weightDate}>(as of {formatDate(latestWeight.date)})</span>
+              </div>
+            )}
+            <div className={styles.weightInputGroup}>
+              <label htmlFor="weight-input">Weight (kg) for {formatDate(selectedDate)}:</label>
+              <div className={styles.weightInputRow}>
+                <input
+                  id="weight-input"
+                  name="weight"
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  value={weightInput}
+                  onChange={(e) => setWeightInput(e.target.value)}
+                  placeholder="Enter weight"
+                  className={styles.weightInput}
+                  aria-label="Weight (kg)"
+                />
+                <button
+                  onClick={handleSaveWeight}
+                  disabled={savingWeight || !weightInput.trim()}
+                  className={styles.saveWeightButton}
+                >
+                  {savingWeight ? 'Saving...' : 'Save Weight'}
+                </button>
+              </div>
+              {weightError && <div className={styles.weightError}>{weightError}</div>}
+              {weightEntry && (
+                <div className={styles.currentWeight}>
+                  Current weight: {weightEntry.weight.toFixed(1)} kg
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Daily Totals Section */}
+          <h4>Daily Totals</h4>
           <div className={styles.totalsCard}>
             <div className={styles.totalRow}>
               <span className={styles.totalLabel}>Calories:</span>
