@@ -11,7 +11,6 @@ describe('Layout - Header Navigation', () => {
     { text: 'Timeline', href: '/' },
     { text: 'Dashboard', href: '/dashboard' },
     { text: 'Exercises', href: '/exercises' },
-    { text: 'Nutrition', href: '/nutrition' },
   ];
 
   describe('when user is not logged in', () => {
@@ -70,6 +69,24 @@ describe('Layout - Header Navigation', () => {
       await waitFor(() => {
         const link = screen.queryByRole('link', { name: text });
         expect(link).toBeInTheDocument();
+      });
+    });
+
+    it('shows Nutrition dropdown', async () => {
+      render(
+        <Router>
+          <UserContextProvider>
+            <Layout>
+              <div>Test Content</div>
+            </Layout>
+          </UserContextProvider>
+        </Router>
+      );
+
+      // Wait for auth check to complete and check for Nutrition dropdown button
+      await waitFor(() => {
+        const nutritionButton = screen.getByRole('button', { name: /Nutrition/i });
+        expect(nutritionButton).toBeInTheDocument();
       });
     });
 
