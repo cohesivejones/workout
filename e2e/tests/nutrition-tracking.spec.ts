@@ -177,7 +177,7 @@ test.describe('Nutrition Tracking', () => {
     // Step 2: Edit the meal
     // Find the meal card containing "Dinner - Pasta" and click its Edit button
     const mealCard = page.locator('[class*="mealCard"]', { hasText: 'Dinner - Pasta' }).first();
-    await mealCard.getByRole('button', { name: 'Edit' }).click();
+    await mealCard.getByRole('button', { name: 'Edit meal' }).click();
     await expect(page.getByRole('heading', { name: 'Edit Meal' })).toBeVisible({ timeout: 5000 });
 
     // Update calories
@@ -196,7 +196,7 @@ test.describe('Nutrition Tracking', () => {
 
     // Handle the confirm dialog
     page.on('dialog', (dialog) => dialog.accept());
-    await mealCardForDelete.getByRole('button', { name: 'Delete' }).click();
+    await mealCardForDelete.getByRole('button', { name: 'Delete meal' }).click();
 
     // Verify meal is removed
     await expect(page.getByText('Dinner - Pasta')).not.toBeVisible({ timeout: 5000 });

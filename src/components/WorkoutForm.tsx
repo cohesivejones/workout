@@ -398,11 +398,14 @@ function WorkoutForm({
                     </div>
                     <button
                       type="button"
-                      className={styles.removeExerciseBtn}
+                      className={classNames(
+                        styles.removeExerciseBtn,
+                        buttonStyles.secondaryIconBtn
+                      )}
                       onClick={() => remove(index)}
                       title="Remove exercise"
                     >
-                      ×
+                      x
                     </button>
                   </li>
                 ))}
