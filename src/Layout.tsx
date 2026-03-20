@@ -10,15 +10,23 @@ const Header = () => {
   const { user, logout } = useUserContext();
   const [aiDropdownOpen, setAIDropdownOpen] = useState(false);
   const aiDropdownRef = useRef<HTMLDivElement | null>(null);
+  const [nutritionDropdownOpen, setNutritionDropdownOpen] = useState(false);
+  const nutritionDropdownRef = useRef<HTMLDivElement | null>(null);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const userDropdownRef = useRef<HTMLDivElement | null>(null);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
-  // Close AI and user dropdowns when clicking outside
+  // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (aiDropdownRef.current && !aiDropdownRef.current.contains(event.target as Node)) {
         setAIDropdownOpen(false);
+      }
+      if (
+        nutritionDropdownRef.current &&
+        !nutritionDropdownRef.current.contains(event.target as Node)
+      ) {
+        setNutritionDropdownOpen(false);
       }
       if (userDropdownRef.current && !userDropdownRef.current.contains(event.target as Node)) {
         setUserDropdownOpen(false);
@@ -44,6 +52,9 @@ const Header = () => {
 
   const toggleAIDropdown = () => {
     setAIDropdownOpen((open) => !open);
+  };
+  const toggleNutritionDropdown = () => {
+    setNutritionDropdownOpen((open) => !open);
   };
   const toggleUserDropdown = () => {
     setUserDropdownOpen((open) => !open);
@@ -115,9 +126,36 @@ const Header = () => {
             <Link to="/exercises" className={styles.navLink}>
               Exercises
             </Link>
-            <Link to="/nutrition" className={styles.navLink}>
-              Nutrition
-            </Link>
+            <div
+              className={`${styles.navDropdown} ${nutritionDropdownOpen ? styles.open : ''}`}
+              ref={nutritionDropdownRef}
+            >
+              <button
+                className={styles.navLink}
+                type="button"
+                aria-haspopup="true"
+                aria-expanded={nutritionDropdownOpen}
+                onClick={toggleNutritionDropdown}
+              >
+                Nutrition
+              </button>
+              <div className={styles.dropdownMenu}>
+                <Link
+                  to="/nutrition"
+                  className={styles.dropdownMenuItem}
+                  onClick={() => setNutritionDropdownOpen(false)}
+                >
+                  Daily Tracker
+                </Link>
+                <Link
+                  to="/nutrition/weekly"
+                  className={styles.dropdownMenuItem}
+                  onClick={() => setNutritionDropdownOpen(false)}
+                >
+                  Weekly Analytics
+                </Link>
+              </div>
+            </div>
             <div
               className={`${styles.navDropdown} ${aiDropdownOpen ? styles.open : ''}`}
               ref={aiDropdownRef}
@@ -234,13 +272,23 @@ const Header = () => {
               >
                 Exercises
               </Link>
-              <Link
-                to="/nutrition"
-                className={styles.mobileMenuLink}
-                onClick={() => setMobileNavOpen(false)}
-              >
-                Nutrition
-              </Link>
+              <div className={styles.mobileMenuSection}>
+                <div className={styles.mobileMenuSectionTitle}>Nutrition</div>
+                <Link
+                  to="/nutrition"
+                  className={styles.mobileMenuLink}
+                  onClick={() => setMobileNavOpen(false)}
+                >
+                  Daily Tracker
+                </Link>
+                <Link
+                  to="/nutrition/weekly"
+                  className={styles.mobileMenuLink}
+                  onClick={() => setMobileNavOpen(false)}
+                >
+                  Weekly Analytics
+                </Link>
+              </div>
               <div className={styles.mobileMenuSection}>
                 <div className={styles.mobileMenuSectionTitle}>AI</div>
                 <Link

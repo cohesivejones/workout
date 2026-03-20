@@ -302,3 +302,24 @@ export const askFollowUpQuestion = (
 ): Promise<{ sessionId: string }> => {
   return api.post('/workout-insights/ask', { question, sessionId });
 };
+
+// Weekly Nutrition Summary
+export interface WeeklyNutritionSummary {
+  weekStart: string;
+  weekEnd: string;
+  dailyData: {
+    date: string;
+    weight: number | null;
+    totalCalories: number | null;
+    totalProtein: number | null;
+    totalCarbs: number | null;
+    totalFat: number | null;
+  }[];
+}
+
+export const fetchWeeklyNutritionSummary = (
+  startDate?: string
+): Promise<WeeklyNutritionSummary> => {
+  const params = startDate ? `?startDate=${startDate}` : '';
+  return api.get(`/nutrition/weekly-summary${params}`);
+};

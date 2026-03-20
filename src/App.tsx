@@ -13,6 +13,7 @@ import DashboardPage from './pages/DashboardPage';
 import WorkoutCoachPage from './pages/WorkoutCoachPage';
 import WorkoutInsightsPage from './pages/WorkoutInsightsPage';
 import NutritionPage from './pages/NutritionPage';
+import WeeklyNutritionPage from './pages/WeeklyNutritionPage';
 import MealFormPage from './pages/MealFormPage';
 import NotFoundPage from './pages/NotFoundPage';
 import { Layout } from './Layout';
@@ -99,6 +100,11 @@ function App() {
         <Route path="/nutrition">
           <Layout>
             <NutritionPage />
+          </Layout>
+        </Route>
+        <Route path="/nutrition/weekly">
+          <Layout>
+            <WeeklyNutritionPage />
           </Layout>
         </Route>
         <Route path="/nutrition/meals/new">
