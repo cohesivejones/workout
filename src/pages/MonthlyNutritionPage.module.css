@@ -1,4 +1,4 @@
-.weeklyNutritionPage {
+.MonthlyNutritionPage {
   padding: 20px;
   max-width: 1200px;
   margin: 0 auto;
@@ -92,6 +92,30 @@
   font-size: 18px;
 }
 
+.chartHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.chartHeader h3 {
+  margin: 0;
+}
+
+.legend {
+  display: flex;
+  gap: 15px;
+}
+
+.legendItem {
+  font-size: 14px;
+  color: #666;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
 .loading {
   display: flex;
   justify-content: center;
@@ -132,7 +156,7 @@
 
 /* Mobile responsive */
 @media (max-width: 768px) {
-  .weeklyNutritionPage {
+  .MonthlyNutritionPage {
     padding: 15px;
   }
 

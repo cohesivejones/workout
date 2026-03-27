@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { fetchWeeklyNutritionSummary, WeeklyNutritionSummary } from '../api';
+import { fetchMonthlyNutritionSummary, MonthlyNutritionSummary } from '../api';
 import {
   LineChart,
   Line,
@@ -10,14 +10,12 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
-import { startOfWeek, addDays, addWeeks, format } from 'date-fns';
-import styles from './WeeklyNutritionPage.module.css';
+import { startOfMonth, addMonths, format } from 'date-fns';
+import styles from './MonthlyNutritionPage.module.css';
 
-function WeeklyNutritionPage() {
-  const [weekStart, setWeekStart] = useState<Date>(() =>
-    startOfWeek(new Date(), { weekStartsOn: 1 })
-  );
-  const [data, setData] = useState<WeeklyNutritionSummary | null>(null);
+function MonthlyNutritionPage() {
+  const [monthStart, setMonthStart] = useState<Date>(() => startOfMonth(new Date()));
+  const [data, setData] = useState<MonthlyNutritionSummary | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -26,11 +24,11 @@ function WeeklyNutritionPage() {
       try {
         setLoading(true);
         setError(null);
-        const weekStartStr = format(weekStart, 'yyyy-MM-dd');
-        const summaryData = await fetchWeeklyNutritionSummary(weekStartStr);
+        const monthStartStr = format(monthStart, 'yyyy-MM-dd');
+        const summaryData = await fetchMonthlyNutritionSummary(monthStartStr);
         setData(summaryData);
       } catch (err) {
-        console.error('Failed to load weekly nutrition data:', err);
+        console.error('Failed to load monthly nutrition data:', err);
         setError('Failed to load data. Please try again later.');
       } finally {
         setLoading(false);
@@ -38,23 +36,22 @@ function WeeklyNutritionPage() {
     };
 
     loadData();
-  }, [weekStart]);
+  }, [monthStart]);
 
-  const handlePreviousWeek = () => {
-    setWeekStart((prev) => addWeeks(prev, -1));
+  const handlePreviousMonth = () => {
+    setMonthStart((prev) => addMonths(prev, -1));
   };
 
-  const handleNextWeek = () => {
-    setWeekStart((prev) => addWeeks(prev, 1));
+  const handleNextMonth = () => {
+    setMonthStart((prev) => addMonths(prev, 1));
   };
 
-  const handleCurrentWeek = () => {
-    setWeekStart(startOfWeek(new Date(), { weekStartsOn: 1 }));
+  const handleCurrentMonth = () => {
+    setMonthStart(startOfMonth(new Date()));
   };
 
-  const formatWeekDisplay = () => {
-    const weekEnd = addDays(weekStart, 6);
-    return `${format(weekStart, 'MMM d')} - ${format(weekEnd, 'MMM d, yyyy')}`;
+  const formatMonthDisplay = () => {
+    return format(monthStart, 'MMMM yyyy');
   };
 
   if (loading) {
@@ -69,7 +66,7 @@ function WeeklyNutritionPage() {
   const chartData =
     data?.dailyData.map((day) => ({
       ...day,
-      dayOfWeek: format(new Date(day.date), 'EEE'), // Mon, Tue, etc.
+      dayOfMonth: format(new Date(day.date), 'd'),
       displayDate: format(new Date(day.date), 'MMM d'),
     })) || [];
 
@@ -78,31 +75,54 @@ function WeeklyNutritionPage() {
   const hasCalorieData = data?.dailyData.some((day) => day.totalCalories !== null) || false;
   const hasAnyData = hasWeightData || hasCalorieData;
 
+  // Custom label component for workout day markers
+  interface LabelProps {
+    cx?: number;
+    cy?: number;
+    payload?: {
+      workoutDay?: boolean;
+      totalCalories?: number | null;
+    };
+  }
+
+  const renderWorkoutMarker = (props: LabelProps) => {
+    const { cx, cy, payload } = props;
+    if (cx && cy && payload?.workoutDay && payload?.totalCalories !== null) {
+      return (
+        <text x={cx} y={cy - 15} textAnchor="middle" fill="#666" fontSize="16" fontWeight="bold">
+          🏋️
+        </text>
+      );
+    }
+    // Return empty g element instead of null to satisfy TypeScript
+    return <g />;
+  };
+
   return (
-    <div className={styles.weeklyNutritionPage}>
+    <div className={styles.MonthlyNutritionPage}>
       <div className={styles.pageHeader}>
-        <h2>Weekly Nutrition Analytics</h2>
-        <p className={styles.subtitle}>Track your weight and calorie trends throughout the week</p>
+        <h2>Monthly Nutrition Analytics</h2>
+        <p className={styles.subtitle}>Track your weight and calorie trends throughout the month</p>
       </div>
 
       <div className={styles.weekNavigator}>
-        <button onClick={handlePreviousWeek} className={styles.navButton}>
-          ← Previous Week
+        <button onClick={handlePreviousMonth} className={styles.navButton}>
+          ← Previous Month
         </button>
         <div className={styles.weekDisplay}>
-          <span className={styles.weekText}>{formatWeekDisplay()}</span>
-          <button onClick={handleCurrentWeek} className={styles.currentWeekButton}>
-            Current Week
+          <span className={styles.weekText}>{formatMonthDisplay()}</span>
+          <button onClick={handleCurrentMonth} className={styles.currentWeekButton}>
+            Current Month
           </button>
         </div>
-        <button onClick={handleNextWeek} className={styles.navButton}>
-          Next Week →
+        <button onClick={handleNextMonth} className={styles.navButton}>
+          Next Month →
         </button>
       </div>
 
       {!hasAnyData && (
         <div className={styles.emptyState}>
-          <p>No data available for this week.</p>
+          <p>No data available for this month.</p>
           <p>Start logging meals and weight entries to see your progress!</p>
         </div>
       )}
@@ -117,10 +137,10 @@ function WeeklyNutritionPage() {
                 <LineChart data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis
-                    dataKey="dayOfWeek"
+                    dataKey="dayOfMonth"
                     tick={{ fontSize: 12 }}
                     label={{
-                      value: 'Day of Week',
+                      value: 'Day of Month',
                       position: 'insideBottom',
                       offset: -5,
                       style: { fontSize: 12 },
@@ -172,15 +192,20 @@ function WeeklyNutritionPage() {
           {/* Calories Chart */}
           {hasCalorieData && (
             <div className={styles.chartCard}>
-              <h3>Calorie Intake</h3>
+              <div className={styles.chartHeader}>
+                <h3>Calorie Intake</h3>
+                <div className={styles.legend}>
+                  <span className={styles.legendItem}>🏋️ = Workout Day</span>
+                </div>
+              </div>
               <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis
-                    dataKey="dayOfWeek"
+                    dataKey="dayOfMonth"
                     tick={{ fontSize: 12 }}
                     label={{
-                      value: 'Day of Week',
+                      value: 'Day of Month',
                       position: 'insideBottom',
                       offset: -5,
                       style: { fontSize: 12 },
@@ -207,7 +232,9 @@ function WeeklyNutritionPage() {
                     labelFormatter={(label, payload) => {
                       if (payload && payload.length > 0) {
                         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                        return (payload[0].payload as any).displayDate;
+                        const day = payload[0].payload as any;
+                        const workoutIndicator = day.workoutDay ? ' 🏋️' : '';
+                        return `${day.displayDate}${workoutIndicator}`;
                       }
                       return label;
                     }}
@@ -223,6 +250,7 @@ function WeeklyNutritionPage() {
                     connectNulls={true}
                     name="Calories"
                     dot={{ r: 4 }}
+                    label={renderWorkoutMarker}
                   />
                 </LineChart>
               </ResponsiveContainer>
@@ -234,4 +262,4 @@ function WeeklyNutritionPage() {
   );
 }
 
-export default WeeklyNutritionPage;
+export default MonthlyNutritionPage;
