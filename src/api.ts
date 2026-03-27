@@ -303,10 +303,10 @@ export const askFollowUpQuestion = (
   return api.post('/workout-insights/ask', { question, sessionId });
 };
 
-// Weekly Nutrition Summary
-export interface WeeklyNutritionSummary {
-  weekStart: string;
-  weekEnd: string;
+// Monthly Nutrition Summary
+export interface MonthlyNutritionSummary {
+  monthStart: string;
+  monthEnd: string;
   dailyData: {
     date: string;
     weight: number | null;
@@ -314,12 +314,13 @@ export interface WeeklyNutritionSummary {
     totalProtein: number | null;
     totalCarbs: number | null;
     totalFat: number | null;
+    workoutDay: boolean;
   }[];
 }
 
-export const fetchWeeklyNutritionSummary = (
+export const fetchMonthlyNutritionSummary = (
   startDate?: string
-): Promise<WeeklyNutritionSummary> => {
+): Promise<MonthlyNutritionSummary> => {
   const params = startDate ? `?startDate=${startDate}` : '';
-  return api.get(`/nutrition/weekly-summary${params}`);
+  return api.get(`/nutrition/monthly-summary${params}`);
 };

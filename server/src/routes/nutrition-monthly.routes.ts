@@ -1,10 +1,10 @@
 import { Router, Request, Response } from 'express';
 import { Between } from 'typeorm';
 import dataSource from '../data-source';
-import { Meal, WeightEntry } from '../entities';
+import { Meal, WeightEntry, Workout } from '../entities';
 import { authenticateToken } from '../middleware/auth';
 import logger from '../logger';
-import { startOfWeek, addDays, format, isValid, getDay } from 'date-fns';
+import { startOfMonth, endOfMonth, addDays, format, isValid, getDate } from 'date-fns';
 
 const router = Router();
 
@@ -15,20 +15,22 @@ interface DailyData {
   totalProtein: number | null;
   totalCarbs: number | null;
   totalFat: number | null;
+  workoutDay: boolean;
 }
 
-interface WeeklySummaryResponse {
-  weekStart: string;
-  weekEnd: string;
+interface MonthlySummaryResponse {
+  monthStart: string;
+  monthEnd: string;
   dailyData: DailyData[];
 }
 
-router.get('/weekly-summary', authenticateToken, async (req: Request, res: Response) => {
+router.get('/monthly-summary', authenticateToken, async (req: Request, res: Response) => {
   try {
     const userId = req.user!.id;
-    let weekStart: Date;
+    let monthStart: Date;
+    let monthEnd: Date;
 
-    // If startDate is provided, validate and use it; otherwise use current week
+    // If startDate is provided, validate and use it; otherwise use current month
     if (req.query.startDate) {
       const startDateStr = req.query.startDate as string;
       const parsedDate = new Date(startDateStr);
@@ -37,35 +39,46 @@ router.get('/weekly-summary', authenticateToken, async (req: Request, res: Respo
         return res.status(400).json({ error: 'Invalid date format' });
       }
 
-      // Check if it's a Monday (getDay() returns 1 for Monday)
-      if (getDay(parsedDate) !== 1) {
-        return res.status(400).json({ error: 'Start date must be a Monday' });
+      // Check if it's the first day of the month
+      if (getDate(parsedDate) !== 1) {
+        return res.status(400).json({ error: 'Start date must be the first day of a month' });
       }
 
-      weekStart = parsedDate;
+      monthStart = parsedDate;
+      monthEnd = endOfMonth(parsedDate);
     } else {
-      // Get current week's Monday
-      weekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
+      // Get current month's first and last day
+      const now = new Date();
+      monthStart = startOfMonth(now);
+      monthEnd = endOfMonth(now);
     }
 
-    const weekEnd = addDays(weekStart, 6); // Sunday
-    const weekStartStr = format(weekStart, 'yyyy-MM-dd');
-    const weekEndStr = format(weekEnd, 'yyyy-MM-dd');
+    const monthStartStr = format(monthStart, 'yyyy-MM-dd');
+    const monthEndStr = format(monthEnd, 'yyyy-MM-dd');
 
-    // Fetch all meals for the week
+    // Fetch all meals for the month
     const meals = await dataSource.getRepository(Meal).find({
       where: {
         userId: Number(userId),
-        date: Between(weekStartStr, weekEndStr),
+        date: Between(monthStartStr, monthEndStr),
       },
       order: { date: 'ASC' },
     });
 
-    // Fetch all weight entries for the week
+    // Fetch all weight entries for the month
     const weightEntries = await dataSource.getRepository(WeightEntry).find({
       where: {
         userId: Number(userId),
-        date: Between(weekStartStr, weekEndStr),
+        date: Between(monthStartStr, monthEndStr),
+      },
+      order: { date: 'ASC' },
+    });
+
+    // Fetch all workouts for the month to determine workout days
+    const workouts = await dataSource.getRepository(Workout).find({
+      where: {
+        userId: Number(userId),
+        date: Between(monthStartStr, monthEndStr),
       },
       order: { date: 'ASC' },
     });
@@ -91,10 +104,15 @@ router.get('/weekly-summary', authenticateToken, async (req: Request, res: Respo
       {} as Record<string, number>
     );
 
-    // Generate daily data for all 7 days
+    // Create a set of workout dates
+    const workoutDates = new Set(workouts.map((workout) => workout.date));
+
+    // Generate daily data for all days in the month
     const dailyData: DailyData[] = [];
-    for (let i = 0; i < 7; i++) {
-      const currentDate = addDays(weekStart, i);
+    const daysInMonth = monthEnd.getDate();
+
+    for (let i = 0; i < daysInMonth; i++) {
+      const currentDate = addDays(monthStart, i);
       const dateStr = format(currentDate, 'yyyy-MM-dd');
 
       // Aggregate meals for this date
@@ -119,18 +137,19 @@ router.get('/weekly-summary', authenticateToken, async (req: Request, res: Respo
         totalProtein,
         totalCarbs,
         totalFat,
+        workoutDay: workoutDates.has(dateStr),
       });
     }
 
-    const response: WeeklySummaryResponse = {
-      weekStart: weekStartStr,
-      weekEnd: weekEndStr,
+    const response: MonthlySummaryResponse = {
+      monthStart: monthStartStr,
+      monthEnd: monthEndStr,
       dailyData,
     };
 
     res.json(response);
   } catch (err) {
-    logger.error('Get weekly nutrition summary error', {
+    logger.error('Get monthly nutrition summary error', {
       error: err,
       userId: req.user?.id,
       startDate: req.query.startDate,

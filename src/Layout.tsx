@@ -152,7 +152,7 @@ const Header = () => {
                   className={styles.dropdownMenuItem}
                   onClick={() => setNutritionDropdownOpen(false)}
                 >
-                  Weekly Analytics
+                  Monthly Analytics
                 </Link>
               </div>
             </div>
@@ -286,7 +286,7 @@ const Header = () => {
                   className={styles.mobileMenuLink}
                   onClick={() => setMobileNavOpen(false)}
                 >
-                  Weekly Analytics
+                  Monthly Analytics
                 </Link>
               </div>
               <div className={styles.mobileMenuSection}>
