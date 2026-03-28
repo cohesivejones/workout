@@ -148,7 +148,7 @@ const Header = () => {
                   Daily Tracker
                 </Link>
                 <Link
-                  to="/nutrition/weekly"
+                  to="/nutrition/monthly"
                   className={styles.dropdownMenuItem}
                   onClick={() => setNutritionDropdownOpen(false)}
                 >
@@ -282,7 +282,7 @@ const Header = () => {
                   Daily Tracker
                 </Link>
                 <Link
-                  to="/nutrition/weekly"
+                  to="/nutrition/monthly"
                   className={styles.mobileMenuLink}
                   onClick={() => setMobileNavOpen(false)}
                 >
