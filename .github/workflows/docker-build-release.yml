@@ -47,7 +47,7 @@ jobs:
             drnatejones/natetastic-adventures:workout-latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
 
       - name: Image digest
         run: echo "Image pushed successfully with tags workout, workout-${{ steps.meta.outputs.version }}, workout-latest"
