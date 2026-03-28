@@ -102,7 +102,7 @@ function App() {
             <NutritionPage />
           </Layout>
         </Route>
-        <Route path="/nutrition/weekly">
+        <Route path="/nutrition/monthly">
           <Layout>
             <MonthlyNutritionPage />
           </Layout>
