@@ -28,3 +28,4 @@ nginx/certs/
 *.sw?
 test-results/*
 playwright-report/*
+.claude/
