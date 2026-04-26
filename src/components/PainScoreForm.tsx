@@ -1,6 +1,7 @@
 import React from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { PainScore } from '../types';
+import { getLocalDateString } from '../utils/dates';
 import styles from './PainScoreForm.module.css';
 import classNames from 'classnames';
 import buttonStyles from '../styles/common/buttons.module.css';
@@ -43,9 +44,7 @@ function PainScoreForm({
     setError,
   } = useForm<FormValues>({
     defaultValues: {
-      date: existingPainScore
-        ? new Date(existingPainScore.date).toISOString().split('T')[0]
-        : selectedDate || new Date().toISOString().split('T')[0],
+      date: existingPainScore ? existingPainScore.date : selectedDate || getLocalDateString(),
       score: existingPainScore?.score?.toString() || '',
       notes: existingPainScore?.notes || '',
     },
