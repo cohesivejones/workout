@@ -11,6 +11,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { startOfMonth, addMonths, format } from 'date-fns';
+import { formatShortDate, formatDayOfMonth } from '../utils/dates';
 import styles from './MonthlyNutritionPage.module.css';
 
 function MonthlyNutritionPage() {
@@ -66,8 +67,8 @@ function MonthlyNutritionPage() {
   const chartData =
     data?.dailyData.map((day) => ({
       ...day,
-      dayOfMonth: format(new Date(day.date), 'd'),
-      displayDate: format(new Date(day.date), 'MMM d'),
+      dayOfMonth: formatDayOfMonth(day.date),
+      displayDate: formatShortDate(day.date),
     })) || [];
 
   // Check if there's any data

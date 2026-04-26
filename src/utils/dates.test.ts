@@ -1,4 +1,22 @@
-import { getLocalDateString } from './dates';
+import { getLocalDateString, formatShortDate, formatLongDate, formatDayOfMonth } from './dates';
+
+describe('formatShortDate', () => {
+  it('formats a date string as "MMM d"', () => {
+    expect(formatShortDate('2026-04-26')).toBe('Apr 26');
+  });
+});
+
+describe('formatLongDate', () => {
+  it('formats a date string as "MMM d, yyyy"', () => {
+    expect(formatLongDate('2026-04-26')).toBe('Apr 26, 2026');
+  });
+});
+
+describe('formatDayOfMonth', () => {
+  it('returns the numeric day of the month', () => {
+    expect(formatDayOfMonth('2026-04-26')).toBe('26');
+  });
+});
 
 describe('getLocalDateString', () => {
   it('returns the local date in YYYY-MM-DD format', () => {
