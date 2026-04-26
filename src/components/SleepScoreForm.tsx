@@ -1,6 +1,7 @@
 import React from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { SleepScore } from '../types';
+import { getLocalDateString } from '../utils/dates';
 import styles from './SleepScoreForm.module.css';
 import classNames from 'classnames';
 import buttonStyles from '../styles/common/buttons.module.css';
@@ -41,9 +42,7 @@ function SleepScoreForm({
     setError,
   } = useForm<FormValues>({
     defaultValues: {
-      date: existingSleepScore
-        ? new Date(existingSleepScore.date).toISOString().split('T')[0]
-        : selectedDate || new Date().toISOString().split('T')[0],
+      date: existingSleepScore ? existingSleepScore.date : selectedDate || getLocalDateString(),
       score: existingSleepScore?.score?.toString() || '',
       notes: existingSleepScore?.notes || '',
     },

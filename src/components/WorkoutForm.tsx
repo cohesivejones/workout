@@ -12,6 +12,7 @@ import { SingleValue } from 'react-select';
 import { lbsToKg, kgToLbs, WeightUnit, formatWeightWithKg } from '../utils/weight';
 import { toExerciseProgressionPath } from '../utils/paths';
 import { toKebabCase } from '../utils/strings';
+import { getLocalDateString } from '../utils/dates';
 import { GiMuscleUp } from 'react-icons/gi';
 import { IoRepeat } from 'react-icons/io5';
 import { IoMdStopwatch } from 'react-icons/io';
@@ -28,14 +29,6 @@ interface FormValues {
     timeSeconds: string;
   };
 }
-
-// Helper function to get local date string in YYYY-MM-DD format
-const getLocalDateString = (date: Date = new Date()): string => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-};
 
 function WorkoutForm({
   onSubmit,

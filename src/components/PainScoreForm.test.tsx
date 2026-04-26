@@ -41,6 +41,18 @@ describe('PainScoreForm', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.useRealTimers();
+  });
+
+  it("defaults to today's local date for a new pain score", () => {
+    vi.stubEnv('TZ', 'Australia/Perth');
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-04-25T17:00:00.000Z'));
+
+    render(<PainScoreForm {...defaultProps} />);
+
+    const dateInput = screen.getByLabelText(/Date:/i) as HTMLInputElement;
+    expect(dateInput.value).toBe('2026-04-26');
   });
 
   it('renders the form with correct initial state for new pain score', () => {

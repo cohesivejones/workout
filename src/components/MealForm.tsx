@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { Meal } from '../types';
 import { searchMeals, analyzeMealNutrition } from '../api';
+import { getLocalDateString } from '../utils/dates';
 import styles from './MealForm.module.css';
 import classNames from 'classnames';
 import buttonStyles from '../styles/common/buttons.module.css';
@@ -39,9 +40,7 @@ function MealForm({
     watch,
   } = useForm<FormValues>({
     defaultValues: {
-      date: existingMeal
-        ? new Date(existingMeal.date).toISOString().split('T')[0]
-        : selectedDate || new Date().toISOString().split('T')[0],
+      date: existingMeal ? existingMeal.date : selectedDate || getLocalDateString(),
       description: existingMeal?.description || '',
       calories: existingMeal?.calories?.toString() || '',
       protein: existingMeal?.protein?.toString() || '',

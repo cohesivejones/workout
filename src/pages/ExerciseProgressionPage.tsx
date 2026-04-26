@@ -11,7 +11,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
-import { format } from 'date-fns';
+import { formatShortDate, formatLongDate } from '../utils/dates';
 import styles from './ExerciseProgressionPage.module.css';
 import buttonStyles from '../styles/common/buttons.module.css';
 import classNames from 'classnames';
@@ -132,7 +132,7 @@ function ExerciseProgressionPage() {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis
                   dataKey="date"
-                  tickFormatter={(date) => format(new Date(date), 'MMM d')}
+                  tickFormatter={(date) => formatShortDate(date)}
                   tick={{ fontSize: 12 }}
                 />
                 <YAxis
@@ -148,7 +148,7 @@ function ExerciseProgressionPage() {
                 />
                 <Tooltip
                   formatter={(value: number, _name: string) => [`${value} lbs`, 'Weight']}
-                  labelFormatter={(date) => format(new Date(date), 'MMM d, yyyy')}
+                  labelFormatter={(date) => formatLongDate(date)}
                   contentStyle={{ fontSize: '12px', padding: '8px' }}
                   wrapperStyle={{ zIndex: 1000 }}
                   isAnimationActive={false}
@@ -187,7 +187,7 @@ function ExerciseProgressionPage() {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis
                   dataKey="date"
-                  tickFormatter={(date) => format(new Date(date), 'MMM d')}
+                  tickFormatter={(date) => formatShortDate(date)}
                   tick={{ fontSize: 12 }}
                 />
                 <YAxis
@@ -203,7 +203,7 @@ function ExerciseProgressionPage() {
                 />
                 <Tooltip
                   formatter={(value: number, _name: string) => [`${value} reps`, 'Reps']}
-                  labelFormatter={(date) => format(new Date(date), 'MMM d, yyyy')}
+                  labelFormatter={(date) => formatLongDate(date)}
                   contentStyle={{ fontSize: '12px', padding: '8px' }}
                   wrapperStyle={{ zIndex: 1000 }}
                   isAnimationActive={false}

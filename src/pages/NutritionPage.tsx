@@ -10,7 +10,7 @@ import {
 } from '../api';
 import { Meal, WeightEntry } from '../types';
 import { useUserContext } from '../contexts/useUserContext';
-import { format } from 'date-fns';
+import { getLocalDateString } from '../utils/dates';
 import { MdOutlineEdit } from 'react-icons/md';
 import classNames from 'classnames';
 import styles from './NutritionPage.module.css';
@@ -19,7 +19,7 @@ import buttonStyles from '../styles/common/buttons.module.css';
 function NutritionPage(): React.ReactElement {
   const [, setLocation] = useLocation();
   const { user } = useUserContext();
-  const [selectedDate, setSelectedDate] = useState<string>(format(new Date(), 'yyyy-MM-dd'));
+  const [selectedDate, setSelectedDate] = useState<string>(getLocalDateString());
   const [meals, setMeals] = useState<Meal[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -95,7 +95,7 @@ function NutritionPage(): React.ReactElement {
   };
 
   const handleToday = () => {
-    setSelectedDate(format(new Date(), 'yyyy-MM-dd'));
+    setSelectedDate(getLocalDateString());
   };
 
   const handleSaveWeight = async () => {

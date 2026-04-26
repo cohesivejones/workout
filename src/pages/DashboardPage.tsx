@@ -18,7 +18,8 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
-import { format, eachDayOfInterval } from 'date-fns';
+import { eachDayOfInterval } from 'date-fns';
+import { formatLongDate } from '../utils/dates';
 import styles from './DashboardPage.module.css';
 
 // Utility function to get standard 12-week date range
@@ -323,7 +324,7 @@ function DashboardPage() {
                       />
                       <Tooltip
                         formatter={formatTooltip}
-                        labelFormatter={(date) => format(new Date(date), 'MMM d, yyyy')}
+                        labelFormatter={(date) => formatLongDate(date)}
                         contentStyle={{ fontSize: '12px', padding: '8px' }}
                         wrapperStyle={{ zIndex: 1000 }}
                         isAnimationActive={false}
@@ -400,7 +401,7 @@ function DashboardPage() {
                   />
                   <Tooltip
                     formatter={(value) => [`${value}/10`, 'Pain Level']}
-                    labelFormatter={(date) => format(new Date(date), 'MMM d, yyyy')}
+                    labelFormatter={(date) => formatLongDate(date)}
                     contentStyle={{ fontSize: '12px', padding: '8px' }}
                     wrapperStyle={{ zIndex: 1000 }}
                     isAnimationActive={false}
@@ -458,7 +459,7 @@ function DashboardPage() {
                   />
                   <Tooltip
                     formatter={(value) => [`${value}/5`, 'Sleep Quality']}
-                    labelFormatter={(date) => format(new Date(date), 'MMM d, yyyy')}
+                    labelFormatter={(date) => formatLongDate(date)}
                     contentStyle={{ fontSize: '12px', padding: '8px' }}
                     wrapperStyle={{ zIndex: 1000 }}
                     isAnimationActive={false}
