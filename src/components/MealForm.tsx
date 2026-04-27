@@ -69,6 +69,13 @@ function MealForm({
 
   // Watch description field for changes
   const descriptionValue = watch('description');
+  const [caloriesValue, proteinValue, carbsValue, fatValue] = watch([
+    'calories',
+    'protein',
+    'carbs',
+    'fat',
+  ]);
+  const nutritionEmpty = !caloriesValue && !proteinValue && !carbsValue && !fatValue;
 
   // Handle clicks outside suggestions to close them
   useEffect(() => {
@@ -127,6 +134,13 @@ function MealForm({
     setValue('fat', meal.fat.toString());
     setShowSuggestions(false);
     setSearchResults([]);
+  };
+
+  const handleClearNutrition = () => {
+    setValue('calories', '');
+    setValue('protein', '');
+    setValue('carbs', '');
+    setValue('fat', '');
   };
 
   // Handle AI nutrition analysis
@@ -278,6 +292,15 @@ function MealForm({
           >
             {isScanning && <span className={styles.spinner} data-testid="loading-spinner" />}
             {isScanning ? 'Scanning...' : 'Scan Label'}
+          </button>
+          <button
+            type="button"
+            onClick={handleClearNutrition}
+            disabled={nutritionEmpty || isSubmitting}
+            className={classNames(styles.aiAnalyzeBtn, buttonStyles.secondaryBtn)}
+            title="Clear nutrition fields"
+          >
+            Clear
           </button>
           <input {...fileInputProps} />
           {scanError && <p className={styles.aiHint}>{scanError}</p>}

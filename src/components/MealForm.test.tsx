@@ -722,4 +722,44 @@ describe('MealForm', () => {
       });
     });
   });
+
+  describe('Clear Nutrition', () => {
+    it('shows a clear button for new meals', () => {
+      render(<MealForm {...defaultProps} />);
+      expect(screen.getByRole('button', { name: /clear/i })).toBeInTheDocument();
+    });
+
+    it('clear button is disabled when all nutrition fields are empty', () => {
+      render(<MealForm {...defaultProps} />);
+      expect(screen.getByRole('button', { name: /clear/i })).toBeDisabled();
+    });
+
+    it('clear button is enabled when a nutrition field has a value', () => {
+      render(<MealForm {...defaultProps} />);
+      fireEvent.change(screen.getByLabelText(/Calories:/i), { target: { value: '500' } });
+      expect(screen.getByRole('button', { name: /clear/i })).toBeEnabled();
+    });
+
+    it('clears calories, protein, carbs and fat but leaves description', () => {
+      render(<MealForm {...defaultProps} />);
+
+      fireEvent.change(screen.getByLabelText(/Description:/i), {
+        target: { value: 'Chicken and Rice' },
+      });
+      fireEvent.change(screen.getByLabelText(/Calories:/i), { target: { value: '500' } });
+      fireEvent.change(screen.getByLabelText(/Protein \(g\):/i), { target: { value: '40' } });
+      fireEvent.change(screen.getByLabelText(/Carbs \(g\):/i), { target: { value: '60' } });
+      fireEvent.change(screen.getByLabelText(/Fat \(g\):/i), { target: { value: '15' } });
+
+      fireEvent.click(screen.getByRole('button', { name: /clear/i }));
+
+      expect((screen.getByLabelText(/Description:/i) as HTMLInputElement).value).toBe(
+        'Chicken and Rice'
+      );
+      expect((screen.getByLabelText(/Calories:/i) as HTMLInputElement).value).toBe('');
+      expect((screen.getByLabelText(/Protein \(g\):/i) as HTMLInputElement).value).toBe('');
+      expect((screen.getByLabelText(/Carbs \(g\):/i) as HTMLInputElement).value).toBe('');
+      expect((screen.getByLabelText(/Fat \(g\):/i) as HTMLInputElement).value).toBe('');
+    });
+  });
 });
