@@ -551,6 +551,28 @@ describe('MealForm', () => {
       });
     });
 
+    it('shows a spinner while AI analysis is in progress and hides it after', async () => {
+      vi.mocked(api.analyzeMealNutrition).mockImplementation(
+        () =>
+          new Promise((resolve) =>
+            setTimeout(() => resolve({ calories: 500, protein: 30, carbs: 50, fat: 20 }), 100)
+          )
+      );
+
+      render(<MealForm {...defaultProps} />);
+
+      fireEvent.change(screen.getByLabelText(/Description:/i), {
+        target: { value: 'Pizza slice' },
+      });
+      fireEvent.click(screen.getByText(/Get Nutrition with AI/i));
+
+      expect(screen.getByTestId('loading-spinner')).toBeInTheDocument();
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument();
+      });
+    });
+
     it('disables buttons during AI analysis', async () => {
       vi.mocked(api.analyzeMealNutrition).mockImplementation(() => {
         return new Promise((resolve) => {
@@ -603,6 +625,30 @@ describe('MealForm', () => {
       // Fields should remain empty
       expect((screen.getByLabelText(/Calories:/i) as HTMLInputElement).value).toBe('');
       expect((screen.getByLabelText(/Protein \(g\):/i) as HTMLInputElement).value).toBe('');
+    });
+
+    it('shows a spinner while scanning is in progress and hides it after', async () => {
+      vi.mocked(api.scanNutritionLabel).mockImplementation(
+        () =>
+          new Promise((resolve) =>
+            setTimeout(() => resolve({ calories: 484, protein: 42, fat: 10.7, carbs: 50.2 }), 100)
+          )
+      );
+
+      render(<MealForm {...defaultProps} />);
+
+      const fileInput = document.querySelector(
+        'input[type="file"][accept="image/*"]'
+      ) as HTMLInputElement;
+      const file = new File(['fake-image'], 'label.jpg', { type: 'image/jpeg' });
+      Object.defineProperty(fileInput, 'files', { value: [file] });
+      fireEvent.change(fileInput);
+
+      expect(screen.getByTestId('loading-spinner')).toBeInTheDocument();
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument();
+      });
     });
 
     it('scans a nutrition label image and pre-fills the nutrition fields', async () => {

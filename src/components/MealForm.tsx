@@ -266,7 +266,8 @@ function MealForm({
             className={classNames(styles.aiAnalyzeBtn, buttonStyles.secondaryBtn)}
             title="Use AI to estimate nutrition from description"
           >
-            {isAnalyzingAI ? '🤖 Analyzing...' : '🤖 Get Nutrition with AI'}
+            {isAnalyzingAI && <span className={styles.spinner} data-testid="loading-spinner" />}
+            {isAnalyzingAI ? 'Analyzing...' : '🤖 Get Nutrition with AI'}
           </button>
           <button
             type="button"
@@ -275,6 +276,7 @@ function MealForm({
             className={classNames(styles.aiAnalyzeBtn, buttonStyles.secondaryBtn)}
             title="Scan a nutrition label"
           >
+            {isScanning && <span className={styles.spinner} data-testid="loading-spinner" />}
             {isScanning ? 'Scanning...' : 'Scan Label'}
           </button>
           <input {...fileInputProps} />
