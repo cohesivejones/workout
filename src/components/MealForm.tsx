@@ -3,6 +3,7 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import { Meal } from '../types';
 import { searchMeals, analyzeMealNutrition } from '../api';
 import { getLocalDateString } from '../utils/dates';
+import { useNutritionLabelScanner } from '../hooks/useNutritionLabelScanner';
 import styles from './MealForm.module.css';
 import classNames from 'classnames';
 import buttonStyles from '../styles/common/buttons.module.css';
@@ -56,6 +57,15 @@ function MealForm({
   const [isAnalyzingAI, setIsAnalyzingAI] = useState(false);
   const suggestionsRef = useRef<HTMLDivElement>(null);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const { triggerScan, isScanning, scanError, fileInputProps } = useNutritionLabelScanner(
+    (data) => {
+      if (data.calories != null) setValue('calories', data.calories.toString());
+      if (data.protein != null) setValue('protein', data.protein.toString());
+      if (data.fat != null) setValue('fat', data.fat.toString());
+      if (data.carbs != null) setValue('carbs', data.carbs.toString());
+    }
+  );
 
   // Watch description field for changes
   const descriptionValue = watch('description');
@@ -258,6 +268,17 @@ function MealForm({
           >
             {isAnalyzingAI ? '🤖 Analyzing...' : '🤖 Get Nutrition with AI'}
           </button>
+          <button
+            type="button"
+            onClick={triggerScan}
+            disabled={isScanning || isSubmitting}
+            className={classNames(styles.aiAnalyzeBtn, buttonStyles.secondaryBtn)}
+            title="Scan a nutrition label"
+          >
+            {isScanning ? 'Scanning...' : 'Scan Label'}
+          </button>
+          <input {...fileInputProps} />
+          {scanError && <p className={styles.aiHint}>{scanError}</p>}
           <p className={styles.aiHint}>
             Enter a meal description above, then click to get estimated nutrition info
           </p>

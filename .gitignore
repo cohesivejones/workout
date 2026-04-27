@@ -16,6 +16,10 @@ dist-ssr
 # SSL Certificates
 nginx/certs/
 
+# Tesseract language data auto-downloaded to CWD — canonical copy is in server/tessdata/
+/eng.traineddata
+/server/eng.traineddata
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

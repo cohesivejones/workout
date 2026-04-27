@@ -121,6 +121,21 @@ export interface AnalyzeMealNutritionResponse {
 export const analyzeMealNutrition = (description: string): Promise<AnalyzeMealNutritionResponse> =>
   api.post('/meal-nutrition-ai/analyze', { description });
 
+export interface ScannedNutritionResponse {
+  calories: number | null;
+  protein: number | null;
+  carbs: number | null;
+  fat: number | null;
+}
+
+export const scanNutritionLabel = (image: File): Promise<ScannedNutritionResponse> => {
+  const formData = new FormData();
+  formData.append('image', image);
+  return api.post('/nutrition-label/scan', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+};
+
 // Weight Entry API functions
 export const fetchWeightEntryByDate = (date: string): Promise<WeightEntry> =>
   api.get(`/weight-entries/by-date?date=${date}`);
