@@ -41,6 +41,9 @@ RUN --mount=type=cache,target=/root/.npm \
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/server/dist ./server/dist
 
+# Tesseract language data — placed at CWD (/app) so it's found on first request
+COPY server/tessdata/eng.traineddata ./eng.traineddata
+
 # Copy runtime files
 COPY server/src/migrations ./server/src/migrations
 COPY server/src/data-source.ts ./server/src/data-source.ts

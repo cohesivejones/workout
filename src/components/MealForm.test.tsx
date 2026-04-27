@@ -8,6 +8,7 @@ import * as api from '../api';
 vi.mock('../api', () => ({
   searchMeals: vi.fn(),
   analyzeMealNutrition: vi.fn(),
+  scanNutritionLabel: vi.fn(),
 }));
 
 describe('MealForm', () => {
@@ -602,6 +603,34 @@ describe('MealForm', () => {
       // Fields should remain empty
       expect((screen.getByLabelText(/Calories:/i) as HTMLInputElement).value).toBe('');
       expect((screen.getByLabelText(/Protein \(g\):/i) as HTMLInputElement).value).toBe('');
+    });
+
+    it('scans a nutrition label image and pre-fills the nutrition fields', async () => {
+      vi.mocked(api.scanNutritionLabel).mockResolvedValue({
+        calories: 484,
+        protein: 42,
+        fat: 10.7,
+        carbs: 50.2,
+      });
+
+      render(<MealForm {...defaultProps} />);
+
+      const scanButton = screen.getByRole('button', { name: /scan label/i });
+      fireEvent.click(scanButton);
+
+      const fileInput = document.querySelector(
+        'input[type="file"][accept="image/*"]'
+      ) as HTMLInputElement;
+      const file = new File(['fake-image'], 'label.jpg', { type: 'image/jpeg' });
+      Object.defineProperty(fileInput, 'files', { value: [file] });
+      fireEvent.change(fileInput);
+
+      await waitFor(() => {
+        expect((screen.getByLabelText(/Calories:/i) as HTMLInputElement).value).toBe('484');
+        expect((screen.getByLabelText(/Protein \(g\):/i) as HTMLInputElement).value).toBe('42');
+        expect((screen.getByLabelText(/Fat \(g\):/i) as HTMLInputElement).value).toBe('10.7');
+        expect((screen.getByLabelText(/Carbs \(g\):/i) as HTMLInputElement).value).toBe('50.2');
+      });
     });
 
     it('can submit form after AI populates fields', async () => {
