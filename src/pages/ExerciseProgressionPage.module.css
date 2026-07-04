@@ -14,11 +14,11 @@
 .pageHeader h2 {
   margin: 0;
   font-size: 1.8rem;
-  color: #333;
+  color: var(--color-ink);
 }
 
 .subtitle {
-  color: #666;
+  color: var(--color-text-muted);
   margin-bottom: 20px;
   font-size: 0.95rem;
 }
@@ -27,14 +27,14 @@
   text-align: center;
   padding: 40px;
   font-size: 1.1rem;
-  color: #666;
+  color: var(--color-text-muted);
 }
 
 .errorMessage {
-  background-color: #fee;
-  color: #c33;
+  background-color: var(--color-danger-tint);
+  color: var(--color-danger);
   padding: 15px;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   margin: 20px 0;
   text-align: center;
 }
@@ -42,14 +42,14 @@
 .noData {
   text-align: center;
   padding: 40px;
-  background-color: #f8f9fa;
-  border-radius: 8px;
+  background-color: var(--color-surface-2);
+  border-radius: var(--radius-md);
   margin: 20px 0;
 }
 
 .noData p {
   margin: 10px 0;
-  color: #666;
+  color: var(--color-text-muted);
 }
 
 .chartsContainer {
@@ -66,17 +66,17 @@
 }
 
 .chartCard {
-  background: white;
-  border-radius: 8px;
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
   padding: 20px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-1);
 }
 
 .chartCard h3 {
   margin-top: 0;
   margin-bottom: 15px;
   font-size: 1.3rem;
-  color: #333;
+  color: var(--color-ink);
 }
 
 .prLegend {
@@ -85,7 +85,7 @@
   justify-content: center;
   margin-top: 15px;
   padding-top: 10px;
-  border-top: 1px solid #eee;
+  border-top: 1px solid var(--color-border);
 }
 
 .legendItem {
@@ -93,7 +93,7 @@
   align-items: center;
   gap: 8px;
   font-size: 0.9rem;
-  color: #666;
+  color: var(--color-text-muted);
 }
 
 .legendDot {
@@ -103,8 +103,8 @@
 }
 
 .progressionInfo {
-  background-color: #f8f9fa;
-  border-radius: 8px;
+  background-color: var(--color-surface-2);
+  border-radius: var(--radius-md);
   padding: 20px;
   margin-top: 20px;
 }
@@ -113,12 +113,12 @@
   margin-top: 0;
   margin-bottom: 10px;
   font-size: 1.2rem;
-  color: #333;
+  color: var(--color-ink);
 }
 
 .progressionInfo p {
   margin-bottom: 15px;
-  color: #666;
+  color: var(--color-text-muted);
   line-height: 1.6;
 }
 
@@ -129,12 +129,12 @@
 
 .progressionInfo li {
   margin-bottom: 8px;
-  color: #666;
+  color: var(--color-text-muted);
   line-height: 1.6;
 }
 
 .progressionInfo strong {
-  color: #333;
+  color: var(--color-ink);
 }
 
 @media (max-width: 768px) {

@@ -1,62 +1,80 @@
+/* Shared button styles — consume design tokens (src/styles/tokens.css) */
+
+.primaryBtn,
+.secondaryBtn,
+.tertiaryBtn {
+  font-family: inherit;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition:
+    transform 0.06s ease,
+    background 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.primaryBtn:active,
+.secondaryBtn:active,
+.tertiaryBtn:active {
+  transform: translateY(1px);
+}
+
 /* Primary Button Style */
 .primaryBtn {
-  background: #007bff;
+  background: var(--color-primary);
   color: white;
-  border: 1px solid #007bff;
-  border-radius: 4px;
-  cursor: pointer;
+  border-color: var(--color-primary);
+  box-shadow: 0 1px 2px rgba(11, 90, 77, 0.35);
 }
 
 .primaryBtn:hover {
-  background: #0069d9;
-  border-color: #0069d9;
+  background: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
   text-decoration: none;
   color: white;
 }
 
 .primaryBtn:focus {
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
+  box-shadow: var(--focus-ring);
   outline: none;
 }
 
 /* Secondary Button Style */
 .secondaryBtn {
-  background-color: white;
-  border: 1px solid #007bff;
-  color: #007bff;
-  border-radius: 4px;
-  cursor: pointer;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-primary-active);
 }
 
 .secondaryBtn:hover {
-  background-color: #e6f7ff;
+  background-color: var(--color-primary-tint);
   text-decoration: none;
-  color: #0069d9;
-  border-color: #0069d9;
+  color: var(--color-primary-active);
+  border-color: var(--color-primary);
 }
 
 .secondaryBtn:focus {
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
+  box-shadow: var(--focus-ring);
   outline: none;
 }
 
 /* Tertiary Button Style */
 .tertiaryBtn {
-  background-color: white;
+  background-color: transparent;
   border: none;
-  color: #007bff;
-  border-radius: 4px;
-  cursor: pointer;
+  color: var(--color-primary);
 }
 
 .tertiaryBtn:hover {
-  background-color: #f0f8ff;
+  background-color: var(--color-primary-tint);
   text-decoration: none;
-  color: #0069d9;
+  color: var(--color-primary-hover);
 }
 
 .tertiaryBtn:focus {
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
+  box-shadow: var(--focus-ring);
   outline: none;
 }
 
@@ -69,57 +87,62 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   font-size: 16px;
   cursor: pointer;
+  border: 1px solid transparent;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
 .primaryIconBtn {
-  background: #007bff;
+  background: var(--color-primary);
   color: white;
-  border: 1px solid #007bff;
+  border-color: var(--color-primary);
 }
 
 .primaryIconBtn:hover {
-  background: #0069d9;
-  border-color: #0069d9;
+  background: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
 }
 
 .primaryIconBtn:focus {
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
+  box-shadow: var(--focus-ring);
   outline: none;
 }
 
 .secondaryIconBtn {
-  background-color: white;
-  border: 1px solid #007bff;
-  color: #007bff;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-primary);
 }
 
 .secondaryIconBtn:hover {
-  background-color: #e6f7ff;
-  color: #0069d9;
-  border-color: #0069d9;
+  background-color: var(--color-primary-tint);
+  color: var(--color-primary-hover);
+  border-color: var(--color-primary);
 }
 
 .secondaryIconBtn:focus {
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
+  box-shadow: var(--focus-ring);
   outline: none;
 }
 
 .tertiaryIconBtn {
-  background-color: white;
+  background-color: transparent;
   border: none;
-  color: #007bff;
+  color: var(--color-primary);
 }
 
 .tertiaryIconBtn:hover {
-  background-color: #f0f8ff;
-  color: #0069d9;
+  background-color: var(--color-primary-tint);
+  color: var(--color-primary-hover);
 }
 
 .tertiaryIconBtn:focus {
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
+  box-shadow: var(--focus-ring);
   outline: none;
 }
 
@@ -130,8 +153,10 @@
 .primaryIconBtn:disabled,
 .secondaryIconBtn:disabled,
 .tertiaryIconBtn:disabled {
-  background-color: #cccccc !important;
-  border-color: #cccccc !important;
-  color: #666666 !important;
+  background-color: var(--color-surface-2) !important;
+  border-color: var(--color-border) !important;
+  color: var(--color-text-faint) !important;
+  box-shadow: none !important;
   cursor: not-allowed;
+  transform: none !important;
 }

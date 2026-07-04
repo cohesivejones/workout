@@ -7,10 +7,10 @@
 .workoutForm {
   text-align: left;
   padding: 32px;
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-2);
 }
 
 .workoutForm h2 {
@@ -18,19 +18,19 @@
   margin-bottom: 24px;
   font-size: 28px;
   font-weight: 700;
-  color: #1f2937;
+  color: var(--color-ink);
   letter-spacing: -0.02em;
 }
 
 .errorMessage {
-  color: #ff4444;
+  color: var(--color-danger);
   margin-bottom: 20px;
 }
 
 .formSection {
   padding-bottom: 24px;
   margin-bottom: 24px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .formSection:last-of-type {
@@ -42,7 +42,7 @@
 .sectionTitle {
   font-size: 14px;
   font-weight: 600;
-  color: #6b7280;
+  color: var(--color-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-bottom: 16px;
@@ -56,7 +56,7 @@
   display: block;
   margin-bottom: 8px;
   font-weight: 500;
-  color: #374151;
+  color: var(--color-ink);
   font-size: 14px;
 }
 
@@ -64,12 +64,12 @@
   width: 100%;
   height: 44px;
   padding: 0 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
   box-sizing: border-box;
   font-size: 16px;
-  color: #374151;
-  background: #ffffff;
+  color: var(--color-ink);
+  background: var(--color-surface);
   transition:
     border-color 0.15s ease,
     box-shadow 0.15s ease;
@@ -77,8 +77,8 @@
 
 .dateInput input[type='date']:focus {
   outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+  border-color: var(--color-primary);
+  box-shadow: var(--focus-ring);
 }
 
 .exerciseInputField {
@@ -86,11 +86,11 @@
   padding: 0 12px;
   height: 44px;
   margin-bottom: 10px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
   box-sizing: border-box;
   font-size: 16px;
-  color: #374151;
+  color: var(--color-ink);
   transition:
     border-color 0.15s ease,
     box-shadow 0.15s ease;
@@ -98,8 +98,8 @@
 
 .exerciseInputField:focus {
   outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+  border-color: var(--color-primary);
+  box-shadow: var(--focus-ring);
 }
 
 .instructorCheckbox {
@@ -112,13 +112,13 @@
   cursor: pointer;
   font-size: 14px;
   font-weight: 500;
-  color: #374151;
+  color: var(--color-ink);
   padding: 4px 0;
   transition: color 0.15s ease;
 }
 
 .instructorCheckbox label:hover {
-  color: #1f2937;
+  color: var(--color-ink);
 }
 
 .instructorCheckbox input[type='checkbox'] {
@@ -126,8 +126,8 @@
   width: 18px;
   height: 18px;
   cursor: pointer;
-  accent-color: #007bff;
-  border-radius: 4px;
+  accent-color: var(--color-primary);
+  border-radius: var(--radius-sm);
 }
 
 .exerciseInput {
@@ -149,8 +149,8 @@
 .unitToggle {
   display: flex;
   flex-shrink: 0;
-  background: #e8e8e8;
-  border-radius: 8px;
+  background: var(--color-border);
+  border-radius: var(--radius-md);
   padding: 4px;
   gap: 2px;
   height: 44px;
@@ -163,8 +163,8 @@
   font-weight: 600;
   border: none;
   background: transparent;
-  color: #666;
-  border-radius: 6px;
+  color: var(--color-text-muted);
+  border-radius: var(--radius-sm);
   cursor: pointer;
   transition: all 0.15s ease;
   min-width: 40px;
@@ -175,7 +175,7 @@
 }
 
 .unitButton:hover {
-  color: #333;
+  color: var(--color-ink);
 }
 
 .unitButton:active {
@@ -183,9 +183,9 @@
 }
 
 .unitButtonActive {
-  background: white;
-  color: #4caf50;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  background: var(--color-surface);
+  color: var(--color-primary);
+  box-shadow: var(--shadow-1);
 }
 
 .weightInputGroup {
@@ -211,7 +211,7 @@
   right: 10px;
   top: 50%;
   transform: translateY(-50%);
-  color: #666;
+  color: var(--color-text-muted);
   font-size: 13px;
   pointer-events: none; /* Allows clicks to pass through to the input */
   white-space: nowrap;
@@ -232,15 +232,15 @@
 }
 
 .reactSelect__control {
-  border: 1px solid #ddd !important;
-  border-radius: 4px !important;
+  border: 1px solid var(--color-border) !important;
+  border-radius: var(--radius-sm) !important;
   box-shadow: none !important;
   min-height: 38px !important;
 }
 
 .reactSelect__control--is-focused {
-  border-color: #4caf50 !important;
-  box-shadow: 0 0 0 1px #4caf50 !important;
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 1px var(--color-primary) !important;
 }
 
 .reactSelect__value-container {
@@ -256,7 +256,7 @@
 }
 
 .reactSelect__option--is-selected {
-  background-color: #4caf50 !important;
+  background-color: var(--color-primary) !important;
 }
 
 /* Button styles are now imported from common styles */
@@ -275,9 +275,9 @@
 }
 
 .addExerciseBtn:disabled {
-  background-color: #cccccc !important;
-  border-color: #cccccc !important;
-  color: #666666 !important;
+  background-color: var(--color-border-strong) !important;
+  border-color: var(--color-border-strong) !important;
+  color: var(--color-text-muted) !important;
   cursor: not-allowed;
 }
 
@@ -288,7 +288,7 @@
 .exerciseList h3 {
   font-size: 16px;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--color-ink);
   margin-bottom: 12px;
 }
 
@@ -305,17 +305,17 @@
   justify-content: space-between;
   align-items: center;
   padding: 14px 16px;
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-1);
   transition: all 0.15s ease;
   gap: 12px;
 }
 
 .exerciseItem:hover {
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-  border-color: #d1d5db;
+  box-shadow: var(--shadow-1);
+  border-color: var(--color-border);
 }
 
 .exerciseInfo {
@@ -329,17 +329,17 @@
 .exerciseName {
   font-weight: 600;
   font-size: 15px;
-  color: #1f2937;
+  color: var(--color-ink);
 }
 
 .exerciseName a {
-  color: #007bff;
+  color: var(--color-primary);
   text-decoration: none;
   transition: color 0.15s ease;
 }
 
 .exerciseName a:hover {
-  color: #0056b3;
+  color: var(--color-primary-active);
   text-decoration: underline;
 }
 
@@ -348,7 +348,7 @@
   flex-wrap: wrap;
   gap: 12px;
   font-size: 14px;
-  color: #6b7280;
+  color: var(--color-text-muted);
 }
 
 .exerciseDetail {
@@ -372,12 +372,12 @@
 }
 
 .newBadge {
-  background-color: #ff6b6b;
+  background-color: var(--color-accent);
   color: white;
   font-size: 0.7rem;
   font-weight: 600;
   padding: 2px 6px;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   text-transform: uppercase;
 }
 
@@ -410,8 +410,8 @@
 
 .saveWorkoutBtn:disabled,
 .cancelBtn:disabled {
-  background-color: #cccccc !important;
-  border-color: #cccccc !important;
-  color: #666666 !important;
+  background-color: var(--color-border-strong) !important;
+  border-color: var(--color-border-strong) !important;
+  color: var(--color-text-muted) !important;
   cursor: not-allowed;
 }

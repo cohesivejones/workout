@@ -11,13 +11,13 @@
 .notFoundContainer h2 {
   font-size: 2.5rem;
   margin-bottom: 1rem;
-  color: #e74c3c;
+  color: var(--color-danger);
 }
 
 .notFoundContainer p {
   font-size: 1.2rem;
   margin-bottom: 2rem;
-  color: #555;
+  color: var(--color-text-muted);
 }
 
 /* Link styles are now imported from common styles */

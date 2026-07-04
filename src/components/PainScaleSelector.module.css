@@ -24,6 +24,8 @@
   font-weight: 600;
   margin-bottom: 5px;
   font-size: 1rem;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
 }
 
 .painScaleFace {
@@ -48,8 +50,8 @@
 .painScaleDescriptionContainer {
   margin-top: 10px;
   padding: 15px;
-  background-color: #f0f8ff;
-  border-radius: 4px;
+  background-color: var(--color-primary-tint);
+  border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
   gap: 15px;
@@ -64,12 +66,12 @@
 
 .painScaleDescription {
   font-size: 0.9rem;
-  color: #333;
+  color: var(--color-ink);
   flex: 1;
 }
 
 .errorMessage {
-  color: #dc3545;
+  color: var(--color-danger);
   margin-top: 5px;
   font-size: 0.9rem;
 }

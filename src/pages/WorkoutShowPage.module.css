@@ -34,17 +34,17 @@
 }
 
 .workoutDetailCard {
-  background: #f5f5f5;
-  border-radius: 8px;
+  background: var(--color-surface-2);
+  border-radius: var(--radius-md);
   padding: 20px;
   margin-bottom: 20px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-1);
   border-left: 4px solid transparent;
 }
 
 .withInstructor {
-  background: #e6f7ff;
-  border-left: 4px solid #1890ff;
+  background: var(--color-primary-tint);
+  border-left: 4px solid var(--color-primary);
 }
 
 .workoutDetailHeader {
@@ -53,7 +53,7 @@
   align-items: center;
   margin-bottom: 20px;
   padding-bottom: 15px;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .workoutDetailHeader h3 {
@@ -62,10 +62,10 @@
 }
 
 .instructorBadge {
-  background-color: #1890ff;
+  background-color: var(--color-primary);
   color: white;
   padding: 4px 8px;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   font-size: 0.8rem;
   font-weight: 500;
 }
@@ -92,7 +92,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 12px 0;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .exerciseDetailItem:last-child {
@@ -107,16 +107,18 @@
 .exerciseDetailStats {
   display: flex;
   gap: 15px;
-  color: #666;
+  color: var(--color-text-muted);
 }
 
 .exerciseDetailReps,
 .exerciseDetailWeight,
 .exerciseDetailTime {
-  background-color: #f1f1f1;
+  background-color: var(--color-surface-2);
   padding: 4px 8px;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   font-size: 0.9rem;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
 }
 
 .workoutDetailActions {
@@ -125,7 +127,7 @@
   justify-content: flex-end;
   margin-top: 20px;
   padding-top: 15px;
-  border-top: 1px solid #ddd;
+  border-top: 1px solid var(--color-border);
 }
 
 .loading,
@@ -136,9 +138,9 @@
 }
 
 .errorMessage {
-  color: #ff4444;
-  background-color: #ffebeb;
-  border-radius: 4px;
+  color: var(--color-danger);
+  background-color: var(--color-danger-tint);
+  border-radius: var(--radius-sm);
 }
 
 .badgeContainer {
@@ -148,12 +150,12 @@
 }
 
 .newBadge {
-  background-color: #ff6b6b;
+  background-color: var(--color-accent);
   color: white;
   font-size: 0.7rem;
   font-weight: 600;
   padding: 2px 6px;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   text-transform: uppercase;
   white-space: nowrap;
 }

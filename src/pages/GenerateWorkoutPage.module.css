@@ -12,15 +12,15 @@
   display: block;
   margin-bottom: 8px;
   font-weight: 600;
-  color: #333;
+  color: var(--color-ink);
   font-size: 14px;
 }
 
 .textarea {
   width: 100%;
   padding: 12px;
-  border: 2px solid #e1e5e9;
-  border-radius: 8px;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
   font-size: 14px;
   font-family: inherit;
   resize: vertical;
@@ -30,24 +30,24 @@
 
 .textarea:focus {
   outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+  border-color: var(--color-primary);
+  box-shadow: var(--focus-ring);
 }
 
 .textarea:disabled {
-  background-color: #f8f9fa;
+  background-color: var(--color-surface-2);
   cursor: not-allowed;
   opacity: 0.6;
 }
 
 .textarea::placeholder {
-  color: #6c757d;
+  color: var(--color-text-muted);
 }
 
 .helpText {
   margin-top: 6px;
   font-size: 12px;
-  color: #6c757d;
+  color: var(--color-text-muted);
   line-height: 1.4;
 }
 
@@ -58,11 +58,11 @@
 }
 
 .generateButton {
-  background-color: #007bff;
+  background-color: var(--color-primary);
   color: white;
   border: none;
   padding: 12px 24px;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
@@ -71,13 +71,13 @@
 }
 
 .generateButton:hover:not(:disabled) {
-  background-color: #0056b3;
+  background-color: var(--color-primary-active);
   transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.2);
+  box-shadow: var(--shadow-2);
 }
 
 .generateButton:disabled {
-  background-color: #6c757d;
+  background-color: var(--color-text-muted);
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
@@ -111,11 +111,11 @@
 }
 
 .resetButton {
-  background-color: #6c757d;
+  background-color: var(--color-text-muted);
   color: white;
   border: none;
   padding: 12px 20px;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
@@ -123,7 +123,7 @@
 }
 
 .resetButton:hover:not(:disabled) {
-  background-color: #545b62;
+  background-color: var(--color-ink-800);
   transform: translateY(-1px);
 }
 
@@ -135,33 +135,34 @@
 
 .resultsContainer {
   margin-top: 32px;
-  background-color: #f8f9fa;
-  border-radius: 12px;
+  background-color: var(--color-surface-2);
+  border-radius: var(--radius-lg);
   padding: 24px;
-  border: 1px solid #e9ecef;
+  border: 1px solid var(--color-border);
 }
 
 .resultsTitle {
   margin: 0 0 20px 0;
-  color: #333;
+  color: var(--color-ink);
   font-size: 20px;
   font-weight: 600;
 }
 
 .workoutContent {
-  background-color: white;
-  border-radius: 8px;
+  background-color: var(--color-surface);
+  border-radius: var(--radius-md);
   padding: 20px;
-  border: 1px solid #dee2e6;
+  border: 1px solid var(--color-border);
   margin-bottom: 20px;
 }
 
 .workoutText {
   margin: 0;
-  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 14px;
   line-height: 1.6;
-  color: #333;
+  color: var(--color-ink);
   white-space: pre-wrap;
   word-wrap: break-word;
 }
@@ -172,11 +173,11 @@
 }
 
 .generateAnotherButton {
-  background-color: #28a745;
+  background-color: var(--color-success);
   color: white;
   border: none;
   padding: 12px 24px;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -184,9 +185,9 @@
 }
 
 .generateAnotherButton:hover {
-  background-color: #218838;
+  background-color: var(--color-success-ink);
   transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(40, 167, 69, 0.2);
+  box-shadow: var(--shadow-2);
 }
 
 /* Responsive design */

@@ -15,10 +15,12 @@
   position: absolute;
   left: 0;
   top: 100%;
-  background: #222;
+  margin-top: 8px;
+  background: var(--color-nav-to);
   min-width: 180px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  border-radius: 4px;
+  box-shadow: var(--shadow-2);
+  border-radius: var(--radius-md);
+  overflow: hidden;
   z-index: 100;
 }
 
@@ -29,10 +31,10 @@
 .dropdownMenuItem {
   display: block;
   padding: 10px 18px;
-  color: #fff;
+  color: var(--color-nav-text-strong);
   text-decoration: none;
   font-size: 1rem;
-  border-bottom: 1px solid #333;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   transition: background 0.2s;
 }
 
@@ -41,19 +43,20 @@
 }
 
 .dropdownMenuItem:hover {
-  background: #333;
+  background: var(--color-nav-hover);
 }
 .app {
   text-align: center;
 }
 
 .appHeader {
-  background-color: #282c34;
-  padding: 20px;
+  background: linear-gradient(180deg, var(--color-nav-from) 0%, var(--color-nav-to) 100%);
+  padding: 16px 24px;
   color: white;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  box-shadow: var(--shadow-2);
 }
 
 .headerLeft {
@@ -86,7 +89,7 @@
 }
 
 .mobileNavToggle:focus {
-  outline: 2px solid #888;
+  outline: 2px solid var(--color-nav-text);
   outline-offset: 2px;
 }
 
@@ -104,7 +107,7 @@
   height: 100vh;
   width: 80vw;
   max-width: 320px;
-  background: #1e1e1e;
+  background: linear-gradient(180deg, var(--color-nav-from) 0%, var(--color-nav-to) 100%);
   color: white;
   z-index: 1001;
   box-shadow: -2px 0 10px rgba(0, 0, 0, 0.3);
@@ -128,10 +131,10 @@
 
 .mobileCloseButton {
   background: none;
-  border: 1px solid #444;
+  border: 1px solid rgba(255, 255, 255, 0.2);
   color: white;
   padding: 4px 8px;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
 }
 
@@ -145,16 +148,16 @@
   color: white;
   text-decoration: none;
   padding: 10px 8px;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
 }
 
 .mobileMenuLink:hover {
-  background: #2a2a2a;
+  background: var(--color-nav-hover);
 }
 
 .mobileMenuSection {
   margin-top: 12px;
-  border-top: 1px solid #2c2c2c;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
   padding-top: 8px;
   display: flex;
   flex-direction: column;
@@ -163,7 +166,7 @@
 
 .mobileMenuSectionTitle {
   font-size: 12px;
-  color: #bbbbbb;
+  color: rgba(255, 255, 255, 0.6);
   text-transform: uppercase;
   letter-spacing: 0.06em;
   margin: 6px 0 4px;
@@ -185,30 +188,26 @@
 }
 
 .navLink {
-  color: white;
+  color: var(--color-nav-text);
   text-decoration: none;
-  font-size: 16px;
-  padding: 5px 0;
+  font-size: 15px;
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
   position: relative;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
 }
 
 .navLink:hover {
-  color: #f0f0f0;
+  color: var(--color-nav-text-strong);
+  background: var(--color-nav-hover);
 }
 
-.navLink:after {
-  content: '';
-  position: absolute;
-  width: 0;
-  height: 2px;
-  bottom: 0;
-  left: 0;
-  background-color: white;
-  transition: width 0.3s;
-}
-
-.navLink:hover:after {
-  width: 100%;
+.navLink.active {
+  color: var(--color-nav-text-strong);
+  background: var(--color-nav-active);
+  font-weight: 600;
 }
 
 /* User dropdown styles */
@@ -228,10 +227,12 @@
   position: absolute;
   right: 0;
   top: 100%;
-  background: #222;
+  margin-top: 8px;
+  background: var(--color-nav-to);
   min-width: 180px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  border-radius: 4px;
+  box-shadow: var(--shadow-2);
+  border-radius: var(--radius-md);
+  overflow: hidden;
   z-index: 100;
 }
 
@@ -240,8 +241,8 @@
 }
 
 .appMain {
-  padding: 20px;
-  background-color: #f1f5f9;
+  padding: 24px 20px;
+  background-color: var(--color-ground);
   min-height: calc(100vh - 80px);
 }
 
@@ -261,15 +262,21 @@
 .exerciseTypeToggle button {
   flex: 1;
   padding: 8px;
-  border: 1px solid #4caf50;
-  background: white;
-  color: #4caf50;
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-surface);
+  color: var(--color-primary-active);
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
 }
 
 .exerciseTypeToggle button.active {
-  background: #4caf50;
+  background: var(--color-primary);
+  border-color: var(--color-primary);
   color: white;
 }
 
@@ -277,7 +284,7 @@
   text-align: center;
   padding: 20px;
   font-size: 1.2em;
-  color: #666;
+  color: var(--color-text-muted);
 }
 
 ul {

@@ -20,8 +20,8 @@
   flex-direction: column;
   margin-bottom: 16px;
   padding: 16px;
-  background-color: #f8f9fa;
-  border-radius: 8px 8px 0 0;
+  background-color: var(--color-surface-2);
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
   gap: 16px;
 }
 
@@ -30,13 +30,13 @@
   flex-direction: column;
   gap: 8px;
   padding-bottom: 12px;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .filterLabel {
   font-weight: 600;
   font-size: 0.9rem;
-  color: #555;
+  color: var(--color-text-muted);
 }
 
 .filterCheckboxes {
@@ -79,7 +79,7 @@
   display: inline-flex;
   align-items: center;
   text-decoration: none;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   padding: 4px 10px;
   font-size: 14px;
 }
@@ -98,16 +98,25 @@
 }
 
 .listCard {
-  background: #f5f5f5;
+  background: var(--color-surface);
   padding: 20px;
-  border-radius: 8px;
-  border-left: 4px solid transparent;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  border-left: 3px solid transparent;
+  box-shadow: var(--shadow-1);
+  transition:
+    box-shadow 0.18s ease,
+    transform 0.18s ease;
+}
+
+.listCard:hover {
+  box-shadow: var(--shadow-2);
+  transform: translateY(-2px);
 }
 
 .listCard.workoutCard.withInstructor {
-  background: #e6f7ff;
-  border-left: 4px solid #1890ff;
+  background: linear-gradient(90deg, var(--color-primary-tint) 0%, var(--color-surface) 32%);
+  border-left: 3px solid var(--color-primary);
 }
 
 .listCardHeader {
@@ -126,7 +135,7 @@
   font-size: 0.85rem;
   font-weight: 600;
   text-transform: uppercase;
-  color: #666;
+  color: var(--color-text-muted);
   width: 100px; /* Fixed width for consistent alignment */
   text-align: left;
   margin-right: 10px;
@@ -142,7 +151,7 @@
   left: 0;
   width: auto; /* Only as wide as the content */
   height: 2px;
-  background-color: #ddd;
+  background-color: var(--color-border-strong);
   /* For "Workout" */
   width: 65px;
 }
@@ -165,34 +174,34 @@
 
 .editBtn {
   text-decoration: none;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   width: 32px;
   height: 32px;
   font-size: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: white;
+  background-color: transparent;
   border: none;
-  color: #007bff;
+  color: var(--color-primary);
 }
 
 .editBtn:hover {
-  background-color: #f0f8ff;
+  background-color: var(--color-primary-tint);
   text-decoration: none;
-  color: #0069d9;
+  color: var(--color-primary-hover);
 }
 
 .editBtn:focus {
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
+  box-shadow: var(--focus-ring);
   outline: none;
 }
 
 .deleteBtn {
-  background-color: white;
-  border: 1px solid #007bff;
-  color: #007bff;
-  border-radius: 4px;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-primary);
+  border-radius: var(--radius-sm);
   width: 32px;
   height: 32px;
   font-size: 16px;
@@ -204,18 +213,19 @@
 }
 
 .deleteBtn:hover {
-  background-color: #e6f7ff;
-  color: #0069d9;
-  border-color: #0069d9;
+  background-color: var(--color-danger-tint);
+  color: var(--color-danger);
+  border-color: var(--color-danger);
 }
 
 .deleteBtn:focus {
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
+  box-shadow: var(--focus-ring);
   outline: none;
 }
 
 .deleteBtn:disabled {
-  background: #cccccc;
+  background: var(--color-surface-2);
+  color: var(--color-text-faint);
   cursor: not-allowed;
 }
 
@@ -243,7 +253,10 @@
 }
 
 .exerciseDetails {
-  color: #555;
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.9rem;
   flex: 1; /* This will allow it to take up available space */
 }
 
@@ -254,12 +267,12 @@
 }
 
 .newBadge {
-  background-color: #ff6b6b;
+  background-color: var(--color-accent);
   color: white;
   font-size: 0.7rem;
   font-weight: 600;
   padding: 2px 6px;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   text-transform: uppercase;
 }
 
@@ -277,7 +290,9 @@
 }
 
 .painScoreValue {
-  color: #555;
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
 }
 
 /* Sleep score styles */
@@ -294,17 +309,19 @@
 }
 
 .sleepScoreValue {
-  color: #555;
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
 }
 
 .sleepScoreNote {
-  background-color: #f9f9f9;
+  background-color: var(--color-success-tint);
   padding: 8px 12px;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   margin: 8px 0;
-  border-left: 3px solid #8bc34a;
+  border-left: 3px solid var(--color-success);
   font-style: italic;
-  color: #666;
+  color: var(--color-success-ink);
 }
 
 .sleepScoreNoteText {
@@ -337,11 +354,11 @@
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  background-color: #007bff;
+  background-color: var(--color-accent);
   color: white;
   border: none;
   cursor: pointer;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-3);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -349,14 +366,14 @@
 }
 
 .fab:hover {
-  background-color: #0056b3;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-  transform: scale(1.05);
+  background-color: var(--color-accent-hover);
+  box-shadow: var(--shadow-3);
+  transform: translateY(-2px) scale(1.04);
 }
 
 .fab:focus {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
+  box-shadow: 0 0 0 3px rgba(255, 106, 69, 0.35);
 }
 
 .fabIcon {
@@ -390,24 +407,26 @@
 }
 
 .fabMenuItem {
-  background-color: white;
-  border: 1px solid #007bff;
-  color: #007bff;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-primary-active);
   padding: 10px 16px;
-  border-radius: 24px;
+  border-radius: var(--radius-pill);
   cursor: pointer;
   white-space: nowrap;
   display: flex;
   align-items: center;
   gap: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-2);
   transition: all 0.2s ease;
   text-decoration: none;
   font-size: 0.9rem;
+  font-weight: 600;
 }
 
 .fabMenuItem:hover {
-  background-color: #007bff;
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
   color: white;
   transform: translateX(-4px);
   text-decoration: none;
@@ -415,7 +434,7 @@
 
 .fabMenuItem:focus {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
+  box-shadow: var(--focus-ring);
 }
 
 @media (max-width: 768px) {

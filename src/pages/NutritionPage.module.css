@@ -10,7 +10,7 @@
 
 .pageHeader h2 {
   font-size: 2rem;
-  color: #333;
+  color: var(--color-ink);
   margin: 0;
 }
 
@@ -20,16 +20,16 @@
   align-items: center;
   min-height: 400px;
   font-size: 1.2rem;
-  color: #666;
+  color: var(--color-text-muted);
 }
 
 .errorMessage {
-  background-color: #f8d7da;
-  color: #721c24;
+  background-color: var(--color-danger-tint);
+  color: var(--color-danger-ink);
   padding: 12px;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   margin-bottom: 20px;
-  border: 1px solid #f5c6cb;
+  border: 1px solid var(--color-danger-tint);
 }
 
 .dateNavigator {
@@ -38,24 +38,24 @@
   align-items: center;
   margin-bottom: 30px;
   padding: 15px;
-  background-color: #f8f9fa;
-  border-radius: 8px;
+  background-color: var(--color-surface-2);
+  border-radius: var(--radius-md);
 }
 
 .navButton {
   padding: 8px 16px;
-  background-color: #fff;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
   cursor: pointer;
   font-size: 0.9rem;
   transition: all 0.2s;
 }
 
 .navButton:hover {
-  background-color: #007bff;
+  background-color: var(--color-primary);
   color: white;
-  border-color: #007bff;
+  border-color: var(--color-primary);
 }
 
 .dateDisplay {
@@ -68,22 +68,22 @@
 .dateText {
   font-size: 1.1rem;
   font-weight: 600;
-  color: #333;
+  color: var(--color-ink);
 }
 
 .todayButton {
   padding: 4px 12px;
-  background-color: #28a745;
+  background-color: var(--color-success);
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   font-size: 0.85rem;
   transition: background-color 0.2s;
 }
 
 .todayButton:hover {
-  background-color: #218838;
+  background-color: var(--color-success-ink);
 }
 
 .contentContainer {
@@ -93,10 +93,10 @@
 }
 
 .mealsSection {
-  background-color: #fff;
+  background-color: var(--color-surface);
   padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-1);
 }
 
 .sectionHeader {
@@ -109,22 +109,22 @@
 .sectionHeader h3 {
   margin: 0;
   font-size: 1.5rem;
-  color: #333;
+  color: var(--color-ink);
 }
 
 .addMealButton {
   padding: 10px 20px;
-  background-color: #007bff;
+  background-color: var(--color-primary);
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   font-size: 0.95rem;
   transition: background-color 0.2s;
 }
 
 .addMealButton:hover {
-  background-color: #0056b3;
+  background-color: var(--color-primary-active);
 }
 
 .emptyState {
@@ -138,23 +138,23 @@
 
 .emptyState p {
   font-size: 1.1rem;
-  color: #666;
+  color: var(--color-text-muted);
   margin-bottom: 20px;
 }
 
 .addMealButtonLarge {
   padding: 14px 28px;
   font-size: 1.1rem;
-  background-color: #007bff;
+  background-color: var(--color-primary);
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   transition: background-color 0.2s;
 }
 
 .addMealButtonLarge:hover {
-  background-color: #0056b3;
+  background-color: var(--color-primary-active);
 }
 
 .mealsList {
@@ -165,9 +165,9 @@
 
 .mealCard {
   padding: 15px;
-  background-color: #f8f9fa;
-  border-radius: 6px;
-  border-left: 4px solid #007bff;
+  background-color: var(--color-surface-2);
+  border-radius: var(--radius-sm);
+  border-left: 4px solid var(--color-primary);
 }
 
 .mealHeader {
@@ -180,7 +180,7 @@
 .mealDescription {
   margin: 0;
   font-size: 1.1rem;
-  color: #333;
+  color: var(--color-ink);
   flex: 1;
 }
 
@@ -191,7 +191,7 @@
 
 .editBtn {
   text-decoration: none;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   width: 32px;
   height: 32px;
   font-size: 16px;
@@ -202,7 +202,7 @@
 }
 
 .deleteBtn {
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   width: 32px;
   height: 32px;
   font-size: 16px;
@@ -220,19 +220,21 @@
 
 .macroItem {
   font-size: 0.9rem;
-  color: #666;
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
 }
 
 .macroItem strong {
-  color: #333;
+  color: var(--color-ink);
   font-weight: 600;
 }
 
 .summarySection {
-  background-color: #fff;
+  background-color: var(--color-surface);
   padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-1);
   height: fit-content;
   position: sticky;
   top: 20px;
@@ -241,21 +243,21 @@
 .summarySection h3 {
   margin: 0 0 20px 0;
   font-size: 1.5rem;
-  color: #333;
+  color: var(--color-ink);
 }
 
 .summarySection h4 {
   margin: 20px 0 15px 0;
   font-size: 1.2rem;
-  color: #555;
-  border-bottom: 2px solid #e0e0e0;
+  color: var(--color-text-muted);
+  border-bottom: 2px solid var(--color-border);
   padding-bottom: 8px;
 }
 
 .weightSection {
   margin-bottom: 30px;
   padding-bottom: 20px;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .lastKnownWeight {
@@ -264,26 +266,28 @@
   gap: 5px;
   margin-bottom: 15px;
   padding: 12px;
-  background-color: #f0f8ff;
-  border-radius: 6px;
-  border-left: 4px solid #007bff;
+  background-color: var(--color-primary-tint);
+  border-radius: var(--radius-sm);
+  border-left: 4px solid var(--color-primary);
 }
 
 .weightLabel {
   font-size: 0.9rem;
-  color: #666;
+  color: var(--color-text-muted);
   font-weight: 600;
 }
 
 .weightValue {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #007bff;
+  color: var(--color-primary);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
 }
 
 .weightDate {
   font-size: 0.85rem;
-  color: #888;
+  color: var(--color-text-faint);
 }
 
 .weightInputGroup {
@@ -294,7 +298,7 @@
 
 .weightInputGroup label {
   font-weight: 600;
-  color: #333;
+  color: var(--color-ink);
   font-size: 0.95rem;
 }
 
@@ -306,23 +310,23 @@
 .weightInput {
   flex: 1;
   padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
   font-size: 1rem;
   transition: border-color 0.2s;
 }
 
 .weightInput:focus {
   outline: none;
-  border-color: #007bff;
+  border-color: var(--color-primary);
 }
 
 .saveWeightButton {
   padding: 10px 20px;
-  background-color: #28a745;
+  background-color: var(--color-success);
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   font-size: 0.95rem;
   font-weight: 600;
@@ -331,31 +335,31 @@
 }
 
 .saveWeightButton:hover:not(:disabled) {
-  background-color: #218838;
+  background-color: var(--color-success-ink);
 }
 
 .saveWeightButton:disabled {
-  background-color: #6c757d;
+  background-color: var(--color-text-muted);
   cursor: not-allowed;
 }
 
 .weightError {
-  color: #dc3545;
+  color: var(--color-danger);
   font-size: 0.9rem;
   padding: 8px;
-  background-color: #f8d7da;
-  border-radius: 4px;
-  border: 1px solid #f5c6cb;
+  background-color: var(--color-danger-tint);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-danger-tint);
 }
 
 .currentWeight {
   font-size: 0.9rem;
-  color: #28a745;
+  color: var(--color-success);
   font-weight: 600;
   padding: 8px;
-  background-color: #d4edda;
-  border-radius: 4px;
-  border: 1px solid #c3e6cb;
+  background-color: var(--color-success-tint);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-success-tint);
 }
 
 .totalsCard {
@@ -369,19 +373,21 @@
   justify-content: space-between;
   align-items: center;
   padding: 12px;
-  background-color: #f8f9fa;
-  border-radius: 4px;
+  background-color: var(--color-surface-2);
+  border-radius: var(--radius-sm);
 }
 
 .totalLabel {
   font-weight: 600;
-  color: #666;
+  color: var(--color-text-muted);
 }
 
 .totalValue {
   font-size: 1.2rem;
   font-weight: 700;
-  color: #007bff;
+  color: var(--color-primary);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
 }
 
 @media (max-width: 768px) {

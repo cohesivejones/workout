@@ -11,15 +11,15 @@
 .pageHeader h2 {
   margin: 0;
   font-size: 1.8rem;
-  color: #333;
+  color: var(--color-ink);
 }
 
 .errorMessage {
-  color: #dc3545;
+  color: var(--color-danger);
   margin-bottom: 16px;
   padding: 8px;
-  background-color: #f8d7da;
-  border-radius: 4px;
+  background-color: var(--color-danger-tint);
+  border-radius: var(--radius-sm);
 }
 
 .loading {
@@ -28,7 +28,7 @@
   align-items: center;
   height: 200px;
   font-size: 18px;
-  color: #6c757d;
+  color: var(--color-text-muted);
 }
 
 /* Button styles are now imported from common styles */

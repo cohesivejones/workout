@@ -1,18 +1,18 @@
 .calendar {
   width: 100%;
-  border: 1px solid #ddd;
-  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
   overflow: hidden;
-  background-color: #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-1);
 }
 
 .calendarHeader {
   display: flex;
   flex-direction: column;
   padding: 16px;
-  background-color: #f8f9fa;
-  border-bottom: 1px solid #ddd;
+  background-color: var(--color-surface-2);
+  border-bottom: 1px solid var(--color-border);
   gap: 10px;
 }
 
@@ -23,9 +23,9 @@
 }
 
 .navButton {
-  background-color: #fff;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
   padding: 6px;
   cursor: pointer;
   min-width: 40px;
@@ -37,14 +37,14 @@
 
 .navButton svg {
   font-size: 24px;
-  color: #555;
+  color: var(--color-text-muted);
 }
 
 .todayButton {
-  background-color: #007bff;
+  background-color: var(--color-primary);
   color: white;
-  border: 1px solid #0069d9;
-  border-radius: 4px;
+  border: 1px solid var(--color-primary-hover);
+  border-radius: var(--radius-sm);
   padding: 8px 12px;
   cursor: pointer;
   font-size: 14px;
@@ -52,11 +52,11 @@
 }
 
 .navButton:hover {
-  background-color: #f1f1f1;
+  background-color: var(--color-surface-2);
 }
 
 .todayButton:hover {
-  background-color: #0069d9;
+  background-color: var(--color-primary-hover);
 }
 
 .calendarHeader h2 {
@@ -68,8 +68,8 @@
 .calendarDays {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  background-color: #f8f9fa;
-  border-bottom: 1px solid #ddd;
+  background-color: var(--color-surface-2);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .calendarDayName {
@@ -86,7 +86,7 @@
 .calendarRow {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .calendarRow:last-child {
@@ -96,7 +96,7 @@
 .calendarCell {
   min-height: 100px;
   padding: 8px;
-  border-right: 1px solid #ddd;
+  border-right: 1px solid var(--color-border);
   position: relative;
   cursor: pointer;
 }
@@ -106,13 +106,13 @@
 }
 
 .calendarCell.disabled {
-  color: #ccc;
-  background-color: #f9f9f9;
+  color: var(--color-text-faint);
+  background-color: var(--color-surface-2);
   cursor: default;
 }
 
 .calendarCell.today {
-  background-color: #f0f7ff;
+  background-color: var(--color-primary-tint);
 }
 
 .calendarDate {
@@ -135,7 +135,7 @@
 
 .calendarItems a:hover {
   text-decoration: underline;
-  color: #1890ff;
+  color: var(--color-primary);
 }
 
 /* Vertical day view styles for mobile */
@@ -147,21 +147,21 @@
 }
 
 .verticalDay {
-  background-color: #fff;
-  border-radius: 8px;
-  border: 1px solid #ddd;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background-color: var(--color-surface);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-1);
   overflow: hidden;
 }
 
 .verticalDay.today {
-  border-left: 4px solid #007bff;
+  border-left: 4px solid var(--color-primary);
 }
 
 .verticalDayHeader {
-  background-color: #f8f9fa;
+  background-color: var(--color-surface-2);
   padding: 12px 16px;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .verticalDayName {
@@ -170,7 +170,7 @@
 }
 
 .verticalDayDate {
-  color: #666;
+  color: var(--color-text-muted);
   font-size: 0.9rem;
 }
 
@@ -193,7 +193,7 @@
 
 .noItems {
   padding: 12px;
-  color: #999;
+  color: var(--color-text-faint);
   text-align: center;
   font-style: italic;
 }
