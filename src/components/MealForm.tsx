@@ -19,6 +19,7 @@ interface MealFormProps {
 interface FormValues {
   date: string;
   description: string;
+  multiplier: string;
   calories: string;
   protein: string;
   carbs: string;
@@ -43,6 +44,7 @@ function MealForm({
     defaultValues: {
       date: existingMeal ? existingMeal.date : selectedDate || getLocalDateString(),
       description: existingMeal?.description || '',
+      multiplier: '1',
       calories: existingMeal?.calories?.toString() || '',
       protein: existingMeal?.protein?.toString() || '',
       carbs: existingMeal?.carbs?.toString() || '',
@@ -180,20 +182,25 @@ function MealForm({
   // Form submission handler
   const onFormSubmit: SubmitHandler<FormValues> = async (data) => {
     try {
-      const success = await onSubmit({
+      const multiplier = Math.max(1, parseInt(data.multiplier || '1', 10) || 1);
+      const meal = {
         date: data.date,
         description: data.description,
         calories: parseFloat(data.calories),
         protein: parseFloat(data.protein),
         carbs: parseFloat(data.carbs),
         fat: parseFloat(data.fat),
-      });
+      };
 
-      if (!success) {
-        setError('root', {
-          type: 'manual',
-          message: 'Failed to save meal. Please try again.',
-        });
+      for (let i = 0; i < multiplier; i++) {
+        const success = await onSubmit(meal);
+        if (!success) {
+          setError('root', {
+            type: 'manual',
+            message: 'Failed to save meal. Please try again.',
+          });
+          return;
+        }
       }
     } catch (err) {
       setError('root', {
@@ -268,6 +275,19 @@ function MealForm({
           )}
         </div>
       </div>
+
+      {!existingMeal && (
+        <div className={styles.formRow}>
+          <div className={styles.formGroup}>
+            <label htmlFor="meal-multiplier">Multiplier:</label>
+            <select id="meal-multiplier" {...register('multiplier')}>
+              <option value="1">1x</option>
+              <option value="2">2x</option>
+              <option value="3">3x</option>
+            </select>
+          </div>
+        </div>
+      )}
 
       {!existingMeal && (
         <div className={styles.formRow}>

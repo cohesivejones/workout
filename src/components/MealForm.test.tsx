@@ -94,6 +94,54 @@ describe('MealForm', () => {
     expect(screen.getByText('Update Meal')).toBeInTheDocument();
   });
 
+  it('does not show the multiplier when editing an existing meal', () => {
+    const existingMeal: Meal = {
+      id: 1,
+      userId: 1,
+      date: '2025-04-10',
+      description: 'Chicken and Rice',
+      calories: 650,
+      protein: 45,
+      carbs: 70,
+      fat: 15,
+    };
+
+    render(<MealForm {...defaultProps} existingMeal={existingMeal} />);
+
+    expect(screen.queryByLabelText(/Multiplier:/i)).not.toBeInTheDocument();
+  });
+
+  it('creates one meal per multiplier (2x submits two identical meals)', async () => {
+    render(<MealForm {...defaultProps} />);
+
+    fireEvent.change(screen.getByLabelText(/Date:/i), { target: { value: '2025-04-15' } });
+    fireEvent.change(screen.getByLabelText(/Description:/i), {
+      target: { value: 'Cheese Burger' },
+    });
+    fireEvent.change(screen.getByLabelText(/Calories:/i), { target: { value: '300' } });
+    fireEvent.change(screen.getByLabelText(/Protein \(g\):/i), { target: { value: '20' } });
+    fireEvent.change(screen.getByLabelText(/Carbs \(g\):/i), { target: { value: '30' } });
+    fireEvent.change(screen.getByLabelText(/Fat \(g\):/i), { target: { value: '15' } });
+
+    fireEvent.change(screen.getByLabelText(/Multiplier:/i), { target: { value: '2' } });
+
+    fireEvent.click(screen.getByText('Save Meal'));
+
+    await waitFor(() => {
+      expect(mockOnSubmit).toHaveBeenCalledTimes(2);
+    });
+    const expectedMeal = {
+      date: '2025-04-15',
+      description: 'Cheese Burger',
+      calories: 300,
+      protein: 20,
+      carbs: 30,
+      fat: 15,
+    };
+    expect(mockOnSubmit).toHaveBeenNthCalledWith(1, expectedMeal);
+    expect(mockOnSubmit).toHaveBeenNthCalledWith(2, expectedMeal);
+  });
+
   it('calls onSubmit with correct data when form is submitted', async () => {
     render(<MealForm {...defaultProps} />);
 
