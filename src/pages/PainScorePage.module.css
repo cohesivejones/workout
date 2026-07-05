@@ -4,16 +4,6 @@
   padding: 20px;
 }
 
-.pageHeader {
-  margin-bottom: 20px;
-}
-
-.pageHeader h2 {
-  margin: 0;
-  font-size: 1.8rem;
-  color: var(--color-ink);
-}
-
 .errorMessage {
   color: var(--color-danger);
   margin-bottom: 16px;

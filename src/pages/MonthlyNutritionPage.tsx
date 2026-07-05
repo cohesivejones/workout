@@ -16,6 +16,8 @@ import { chartColors } from '../styles/chartColors';
 import styles from './MonthlyNutritionPage.module.css';
 import { PageHeader } from '../components/ui/PageHeader';
 import { Card } from '../components/ui/Card';
+import { LoadingState } from '../components/ui/LoadingState';
+import { ErrorState } from '../components/ui/ErrorState';
 
 function MonthlyNutritionPage() {
   const [monthStart, setMonthStart] = useState<Date>(() => startOfMonth(new Date()));
@@ -59,11 +61,11 @@ function MonthlyNutritionPage() {
   };
 
   if (loading) {
-    return <div className={styles.loading}>Loading...</div>;
+    return <LoadingState label="Loading..." />;
   }
 
   if (error) {
-    return <div className={styles.errorMessage}>{error}</div>;
+    return <ErrorState>{error}</ErrorState>;
   }
 
   // Format chart data for display

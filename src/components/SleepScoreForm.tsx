@@ -4,6 +4,7 @@ import { SleepScore } from '../types';
 import { getLocalDateString } from '../utils/dates';
 import styles from './SleepScoreForm.module.css';
 import { Button } from './ui/Button';
+import { Field, Input, Textarea } from './ui/Field';
 import SleepScaleSelector from './SleepScaleSelector';
 import FormContainer from './common/FormContainer';
 
@@ -89,15 +90,14 @@ function SleepScoreForm({
       onSubmit={handleSubmit(onFormSubmit)}
       className={styles.sleepScoreForm}
     >
-      <div className={styles.dateInput}>
-        <label htmlFor="sleep-score-date">Date:</label>
-        <input
+      <Field label="Date:" htmlFor="sleep-score-date" error={errors.date?.message}>
+        <Input
           type="date"
           id="sleep-score-date"
+          invalid={!!errors.date}
           {...register('date', { required: 'Date is required' })}
         />
-        {errors.date && <span className={styles.errorMessage}>{errors.date.message}</span>}
-      </div>
+      </Field>
 
       <div className={styles.sleepScoreInput}>
         <label htmlFor="sleep-score">Sleep Score (1-5):</label>
@@ -112,14 +112,13 @@ function SleepScoreForm({
         />
       </div>
 
-      <div className={styles.notesInput}>
-        <label htmlFor="sleep-score-notes">Notes (optional):</label>
-        <textarea
+      <Field label="Notes (optional):" htmlFor="sleep-score-notes">
+        <Textarea
           id="sleep-score-notes"
           {...register('notes')}
           placeholder="Add any additional notes about your sleep quality"
         />
-      </div>
+      </Field>
 
       <div className={styles.formButtons}>
         <Button

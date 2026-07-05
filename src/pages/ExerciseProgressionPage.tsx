@@ -1,6 +1,5 @@
-import { useState, useEffect } from 'react';
 import { useParams } from 'wouter';
-import { fetchExerciseProgression, ExerciseProgressionResponse } from '../api';
+import { fetchExerciseProgression } from '../api';
 import {
   LineChart,
   Line,
@@ -16,6 +15,10 @@ import { chartColors, prColors } from '../styles/chartColors';
 import styles from './ExerciseProgressionPage.module.css';
 import { PageHeader } from '../components/ui/PageHeader';
 import { Button } from '../components/ui/Button';
+import { LoadingState } from '../components/ui/LoadingState';
+import { ErrorState } from '../components/ui/ErrorState';
+import { EmptyState } from '../components/ui/EmptyState';
+import { useAsync } from '../hooks/useAsync';
 
 // Custom dot component for weight chart
 const WeightDot = (props: {
@@ -57,38 +60,24 @@ function ExerciseProgressionPage() {
   const { id } = useParams<{ id: string }>();
   const exerciseId = parseInt(id || '0');
 
-  const [progressionData, setProgressionData] = useState<ExerciseProgressionResponse | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const data = await fetchExerciseProgression(exerciseId);
-        setProgressionData(data);
-      } catch (err) {
-        console.error('Failed to load progression data:', err);
-        setError(err instanceof Error ? err.message : 'Failed to load progression data');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadData();
-  }, [exerciseId]);
+  const {
+    data: progressionData,
+    loading,
+    error,
+  } = useAsync(() => fetchExerciseProgression(exerciseId), [exerciseId], {
+    errorMessage: 'Failed to load progression data',
+  });
 
   if (loading) {
-    return <div className={styles.loading}>Loading progression data...</div>;
+    return <LoadingState label="Loading progression data..." />;
   }
 
   if (error) {
-    return <div className={styles.errorMessage}>{error}</div>;
+    return <ErrorState>{error}</ErrorState>;
   }
 
   if (!progressionData) {
-    return <div className={styles.errorMessage}>No progression data found</div>;
+    return <ErrorState>No progression data found</ErrorState>;
   }
 
   // Check if there's any actual data
@@ -106,10 +95,10 @@ function ExerciseProgressionPage() {
             </Button>
           }
         />
-        <div className={styles.noData}>
-          <p>No progression data available for this exercise.</p>
-          <p>Start tracking this exercise in your workouts to see your progress over time!</p>
-        </div>
+        <EmptyState
+          title="No progression data available for this exercise."
+          message="Start tracking this exercise in your workouts to see your progress over time!"
+        />
       </div>
     );
   }

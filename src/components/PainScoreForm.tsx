@@ -4,6 +4,7 @@ import { PainScore } from '../types';
 import { getLocalDateString } from '../utils/dates';
 import styles from './PainScoreForm.module.css';
 import { Button } from './ui/Button';
+import { Field, Input, Textarea } from './ui/Field';
 import PainScaleSelector from './PainScaleSelector';
 import FormContainer from './common/FormContainer';
 
@@ -91,15 +92,14 @@ function PainScoreForm({
       onSubmit={handleSubmit(onFormSubmit)}
       className={styles.painScoreForm}
     >
-      <div className={styles.dateInput}>
-        <label htmlFor="pain-score-date">Date:</label>
-        <input
+      <Field label="Date:" htmlFor="pain-score-date" error={errors.date?.message}>
+        <Input
           type="date"
           id="pain-score-date"
+          invalid={!!errors.date}
           {...register('date', { required: 'Date is required' })}
         />
-        {errors.date && <span className={styles.errorMessage}>{errors.date.message}</span>}
-      </div>
+      </Field>
 
       <div className={styles.painScoreInput}>
         <label htmlFor="pain-score">Pain Score (0-10):</label>
@@ -114,14 +114,13 @@ function PainScoreForm({
         />
       </div>
 
-      <div className={styles.notesInput}>
-        <label htmlFor="pain-score-notes">Notes (optional):</label>
-        <textarea
+      <Field label="Notes (optional):" htmlFor="pain-score-notes">
+        <Textarea
           id="pain-score-notes"
           {...register('notes')}
           placeholder="Add any additional notes about your pain level"
         />
-      </div>
+      </Field>
 
       <div className={styles.formButtons}>
         <Button

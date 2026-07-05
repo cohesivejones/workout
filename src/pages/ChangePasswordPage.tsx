@@ -3,9 +3,9 @@ import { useState } from 'react';
 import axios from 'axios';
 import { FaLock } from 'react-icons/fa';
 import { useUserContext } from '../contexts/useUserContext';
-import styles from './ChangePasswordPage.module.css';
 import FormContainer from '../components/common/FormContainer';
 import { Button } from '../components/ui/Button';
+import { Field, Input } from '../components/ui/Field';
 
 type FormValues = {
   currentPassword: string;
@@ -89,11 +89,7 @@ function ChangePasswordPage() {
 
   if (!user) {
     return (
-      <FormContainer
-        title="Change Password"
-        className={styles.changePasswordContainer}
-        asForm={false}
-      >
+      <FormContainer title="Change Password" asForm={false}>
         <p>You must be logged in to change your password.</p>
       </FormContainer>
     );
@@ -108,29 +104,29 @@ function ChangePasswordPage() {
       errorMessage={errors.root?.message}
       successMessage={successMessage}
       onSubmit={handleSubmit(onSubmit)}
-      className={styles.changePasswordContainer}
     >
-      <div className={styles.formGroup}>
-        <label htmlFor="currentPassword">Current Password</label>
-        <input
+      <Field
+        label="Current Password"
+        htmlFor="currentPassword"
+        error={errors.currentPassword?.message}
+      >
+        <Input
           id="currentPassword"
           type="password"
           placeholder="Enter your current password"
+          invalid={!!errors.currentPassword}
           {...register('currentPassword', {
             required: 'Current password is required',
           })}
         />
-        {errors.currentPassword && (
-          <div className={styles.fieldError}>{errors.currentPassword.message}</div>
-        )}
-      </div>
+      </Field>
 
-      <div className={styles.formGroup}>
-        <label htmlFor="newPassword">New Password</label>
-        <input
+      <Field label="New Password" htmlFor="newPassword" error={errors.newPassword?.message}>
+        <Input
           id="newPassword"
           type="password"
           placeholder="Enter your new password"
+          invalid={!!errors.newPassword}
           {...register('newPassword', {
             required: 'New password is required',
             minLength: {
@@ -139,26 +135,24 @@ function ChangePasswordPage() {
             },
           })}
         />
-        {errors.newPassword && (
-          <div className={styles.fieldError}>{errors.newPassword.message}</div>
-        )}
-      </div>
+      </Field>
 
-      <div className={styles.formGroup}>
-        <label htmlFor="confirmPassword">Confirm New Password</label>
-        <input
+      <Field
+        label="Confirm New Password"
+        htmlFor="confirmPassword"
+        error={errors.confirmPassword?.message}
+      >
+        <Input
           id="confirmPassword"
           type="password"
           placeholder="Confirm your new password"
+          invalid={!!errors.confirmPassword}
           {...register('confirmPassword', {
             required: 'Please confirm your new password',
             validate: (value) => value === watch('newPassword') || 'Passwords do not match',
           })}
         />
-        {errors.confirmPassword && (
-          <div className={styles.fieldError}>{errors.confirmPassword.message}</div>
-        )}
-      </div>
+      </Field>
 
       <Button type="submit" variant="primary" fullWidth disabled={isSubmitting}>
         {isSubmitting ? 'Changing Password...' : 'Change Password'}

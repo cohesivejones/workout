@@ -24,6 +24,8 @@ import { chartColors, prColors } from '../styles/chartColors';
 import styles from './DashboardPage.module.css';
 import { PageHeader } from '../components/ui/PageHeader';
 import { Card } from '../components/ui/Card';
+import { LoadingState } from '../components/ui/LoadingState';
+import { ErrorState } from '../components/ui/ErrorState';
 
 // Utility function to get standard 12-week date range
 const getStandardDateRange = () => {
@@ -250,11 +252,11 @@ function DashboardPage() {
   }, []);
 
   if (loading) {
-    return <div className={styles.loading}>Loading...</div>;
+    return <LoadingState label="Loading..." />;
   }
 
   if (error) {
-    return <div className={styles.errorMessage}>{error}</div>;
+    return <ErrorState>{error}</ErrorState>;
   }
 
   // If no data is available

@@ -4,21 +4,6 @@
   margin: 0 auto;
 }
 
-.pageHeader {
-  margin-bottom: 30px;
-}
-
-.pageHeader h2 {
-  margin: 0 0 10px 0;
-  color: var(--color-ink);
-}
-
-.subtitle {
-  margin: 0;
-  color: var(--color-text-muted);
-  font-size: 14px;
-}
-
 .weekNavigator {
   display: flex;
   justify-content: space-between;
@@ -114,24 +99,6 @@
   display: flex;
   align-items: center;
   gap: 5px;
-}
-
-.loading {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 400px;
-  font-size: 18px;
-  color: var(--color-text-muted);
-}
-
-.errorMessage {
-  padding: 20px;
-  background: var(--color-danger-tint);
-  color: var(--color-danger-ink);
-  border: 1px solid var(--color-danger-tint);
-  border-radius: var(--radius-sm);
-  margin: 20px 0;
 }
 
 .emptyState {

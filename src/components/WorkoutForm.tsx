@@ -4,6 +4,7 @@ import { WorkoutFormProps, WorkoutExercise } from '../types';
 import CreatableSelect from 'react-select/creatable';
 import styles from './WorkoutForm.module.css';
 import { Button } from './ui/Button';
+import { Field, Input } from './ui/Field';
 import { useUserContext } from '../contexts/useUserContext';
 import { fetchRecentExerciseData } from '../api';
 import { useForm, useFieldArray, Controller, SubmitHandler } from 'react-hook-form';
@@ -185,15 +186,9 @@ function WorkoutForm({
       {errors.root && <div className={styles.errorMessage}>{errors.root.message}</div>}
       <form onSubmit={handleSubmit(onFormSubmit)}>
         <div className={styles.formSection}>
-          <div className={styles.dateInput}>
-            <label htmlFor="workout-date">Workout Date</label>
-            <input
-              type="date"
-              id="workout-date"
-              className={styles.exerciseInputField}
-              {...register('date')}
-            />
-          </div>
+          <Field label="Workout Date" htmlFor="workout-date">
+            <Input type="date" id="workout-date" {...register('date')} />
+          </Field>
           <div className={styles.instructorCheckbox}>
             <label htmlFor="with-instructor">
               <input type="checkbox" id="with-instructor" {...register('withInstructor')} />
@@ -229,13 +224,7 @@ function WorkoutForm({
                 );
               }}
             />
-            <input
-              type="number"
-              placeholder="Reps"
-              min="1"
-              className={styles.exerciseInputField}
-              {...register('currentExercise.reps')}
-            />
+            <Input type="number" placeholder="Reps" min="1" {...register('currentExercise.reps')} />
             <div className={styles.weightInputContainer}>
               <div className={styles.weightInputWrapper}>
                 <div className={styles.unitToggle}>
@@ -269,12 +258,12 @@ function WorkoutForm({
                   </button>
                 </div>
                 <div className={styles.weightInputGroup}>
-                  <input
+                  <Input
                     type="number"
                     placeholder={`Weight (${weightUnit})`}
                     min="0"
                     step="0.5"
-                    className={`${styles.exerciseInputField} ${styles.weightInput}`}
+                    className={styles.weightInput}
                     {...register('currentExercise.weight')}
                   />
                   {currentExercise.weight && (
@@ -287,12 +276,11 @@ function WorkoutForm({
                 </div>
               </div>
             </div>
-            <input
+            <Input
               type="number"
               placeholder="Time (sec)"
               min="0"
               step="1"
-              className={styles.exerciseInputField}
               {...register('currentExercise.timeSeconds')}
             />
             <Button

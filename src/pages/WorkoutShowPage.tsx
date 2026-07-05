@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useParams, Link, useLocation } from 'wouter';
 import { fetchWorkout, deleteWorkout } from '../api';
-import { Workout } from '../types';
 import styles from './WorkoutShowPage.module.css';
 import { format } from 'date-fns';
 import classNames from 'classnames';
@@ -11,35 +10,20 @@ import { formatWeightWithKg } from '../utils/weight';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { useConfirm } from '../components/ui/useConfirm';
+import { LoadingState } from '../components/ui/LoadingState';
+import { ErrorState } from '../components/ui/ErrorState';
+import { useAsync } from '../hooks/useAsync';
 
 const WorkoutShowPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const workoutId = parseInt(id || '0');
   const [, setLocation] = useLocation();
 
-  const [workout, setWorkout] = useState<Workout | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data, loading, error } = useAsync(() => fetchWorkout(workoutId), [workoutId], {
+    errorMessage: 'Failed to load workout',
+  });
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const { confirm, alert, dialog } = useConfirm();
-
-  useEffect(() => {
-    const loadWorkout = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const data = await fetchWorkout(workoutId);
-        setWorkout(data);
-      } catch (err) {
-        console.error('Failed to load workout:', err);
-        setError(err instanceof Error ? err.message : 'Failed to load workout');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadWorkout();
-  }, [workoutId]);
 
   const handleDelete = async () => {
     const confirmed = await confirm({
@@ -65,16 +49,18 @@ const WorkoutShowPage: React.FC = () => {
   };
 
   if (loading) {
-    return <div className={styles.loading}>Loading workout details...</div>;
+    return <LoadingState label="Loading workout details..." />;
   }
 
   if (error) {
-    return <div className={styles.errorMessage}>{error}</div>;
+    return <ErrorState>{error}</ErrorState>;
   }
 
-  if (!workout) {
-    return <div className={styles.errorMessage}>Workout not found</div>;
+  if (!data) {
+    return <ErrorState>Workout not found</ErrorState>;
   }
+
+  const workout = data;
 
   return (
     <div className={styles.workoutShowPage}>

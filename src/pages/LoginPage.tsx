@@ -1,8 +1,8 @@
 import { useForm } from 'react-hook-form';
 import { FaDumbbell } from 'react-icons/fa';
 import { useUserContext } from '../contexts/useUserContext';
-import styles from './LoginPage.module.css';
 import { Button } from '../components/ui/Button';
+import { Field, Input } from '../components/ui/Field';
 import FormContainer from '../components/common/FormContainer';
 
 type FormValues = {
@@ -41,13 +41,12 @@ function LoginPage() {
       centered
       errorMessage={errors.root?.message}
       onSubmit={handleSubmit(onSubmit)}
-      className={styles.loginContainer}
     >
-      <div className={styles.formGroup}>
-        <label htmlFor="email">Email</label>
-        <input
+      <Field label="Email" htmlFor="email" error={errors.email?.message}>
+        <Input
           id="email"
           placeholder="Enter your email"
+          invalid={!!errors.email}
           {...register('email', {
             required: 'Email is required',
             pattern: {
@@ -56,15 +55,14 @@ function LoginPage() {
             },
           })}
         />
-        {errors.email && <div className={styles.fieldError}>{errors.email.message}</div>}
-      </div>
+      </Field>
 
-      <div className={styles.formGroup}>
-        <label htmlFor="password">Password</label>
-        <input
+      <Field label="Password" htmlFor="password" error={errors.password?.message}>
+        <Input
           id="password"
           type="password"
           placeholder="Enter your password"
+          invalid={!!errors.password}
           {...register('password', {
             required: 'Password is required',
             minLength: {
@@ -73,8 +71,7 @@ function LoginPage() {
             },
           })}
         />
-        {errors.password && <div className={styles.fieldError}>{errors.password.message}</div>}
-      </div>
+      </Field>
 
       <Button type="submit" variant="primary" fullWidth disabled={isSubmitting || loading}>
         {isSubmitting || loading ? 'Logging in...' : 'Login'}

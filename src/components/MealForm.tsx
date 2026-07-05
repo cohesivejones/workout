@@ -6,6 +6,7 @@ import { getLocalDateString } from '../utils/dates';
 import { useNutritionLabelScanner } from '../hooks/useNutritionLabelScanner';
 import styles from './MealForm.module.css';
 import { Button } from './ui/Button';
+import { Field, Input } from './ui/Field';
 import FormContainer from './common/FormContainer';
 
 interface MealFormProps {
@@ -225,24 +226,23 @@ function MealForm({
       className={styles.mealForm}
     >
       <div className={styles.formRow}>
-        <div className={styles.formGroup}>
-          <label htmlFor="meal-date">Date:</label>
-          <input
+        <Field label="Date:" htmlFor="meal-date" error={errors.date?.message}>
+          <Input
             type="date"
             id="meal-date"
+            invalid={!!errors.date}
             {...register('date', { required: 'Date is required' })}
           />
-          {errors.date && <span className={styles.errorMessage}>{errors.date.message}</span>}
-        </div>
+        </Field>
       </div>
 
       <div className={styles.formRow}>
-        <div className={styles.formGroup}>
-          <label htmlFor="meal-description">Description:</label>
+        <Field label="Description:" htmlFor="meal-description" error={errors.description?.message}>
           <div className={styles.autocompleteWrapper}>
-            <input
+            <Input
               type="text"
               id="meal-description"
+              invalid={!!errors.description}
               {...register('description', { required: 'Description is required' })}
               placeholder="e.g., Chicken and Rice, Breakfast - Oats"
               autoComplete="off"
@@ -277,10 +277,7 @@ function MealForm({
               </div>
             )}
           </div>
-          {errors.description && (
-            <span className={styles.errorMessage}>{errors.description.message}</span>
-          )}
-        </div>
+        </Field>
       </div>
 
       {!existingMeal && (
@@ -360,65 +357,59 @@ function MealForm({
       )}
 
       <div className={styles.formRow}>
-        <div className={styles.formGroup}>
-          <label htmlFor="meal-calories">Calories:</label>
-          <input
+        <Field label="Calories:" htmlFor="meal-calories" error={errors.calories?.message}>
+          <Input
             type="number"
             id="meal-calories"
             step="0.1"
+            invalid={!!errors.calories}
             {...register('calories', {
               required: 'Calories is required',
               min: { value: 0, message: 'Calories must be positive' },
             })}
           />
-          {errors.calories && (
-            <span className={styles.errorMessage}>{errors.calories.message}</span>
-          )}
-        </div>
+        </Field>
       </div>
 
       <div className={styles.macrosRow}>
-        <div className={styles.formGroup}>
-          <label htmlFor="meal-protein">Protein (g):</label>
-          <input
+        <Field label="Protein (g):" htmlFor="meal-protein" error={errors.protein?.message}>
+          <Input
             type="number"
             id="meal-protein"
             step="0.1"
+            invalid={!!errors.protein}
             {...register('protein', {
               required: 'Protein is required',
               min: { value: 0, message: 'Protein must be positive' },
             })}
           />
-          {errors.protein && <span className={styles.errorMessage}>{errors.protein.message}</span>}
-        </div>
+        </Field>
 
-        <div className={styles.formGroup}>
-          <label htmlFor="meal-carbs">Carbs (g):</label>
-          <input
+        <Field label="Carbs (g):" htmlFor="meal-carbs" error={errors.carbs?.message}>
+          <Input
             type="number"
             id="meal-carbs"
             step="0.1"
+            invalid={!!errors.carbs}
             {...register('carbs', {
               required: 'Carbs is required',
               min: { value: 0, message: 'Carbs must be positive' },
             })}
           />
-          {errors.carbs && <span className={styles.errorMessage}>{errors.carbs.message}</span>}
-        </div>
+        </Field>
 
-        <div className={styles.formGroup}>
-          <label htmlFor="meal-fat">Fat (g):</label>
-          <input
+        <Field label="Fat (g):" htmlFor="meal-fat" error={errors.fat?.message}>
+          <Input
             type="number"
             id="meal-fat"
             step="0.1"
+            invalid={!!errors.fat}
             {...register('fat', {
               required: 'Fat is required',
               min: { value: 0, message: 'Fat must be positive' },
             })}
           />
-          {errors.fat && <span className={styles.errorMessage}>{errors.fat.message}</span>}
-        </div>
+        </Field>
       </div>
 
       <div className={styles.formButtons}>

@@ -11,11 +11,14 @@ import {
 import { Meal, WeightEntry } from '../types';
 import { useUserContext } from '../contexts/useUserContext';
 import { getLocalDateString } from '../utils/dates';
-import { MdOutlineEdit } from 'react-icons/md';
+import { MdOutlineEdit, MdRestaurant } from 'react-icons/md';
 import styles from './NutritionPage.module.css';
 import { PageHeader } from '../components/ui/PageHeader';
 import { Button } from '../components/ui/Button';
 import { useConfirm } from '../components/ui/useConfirm';
+import { LoadingState } from '../components/ui/LoadingState';
+import { ErrorState } from '../components/ui/ErrorState';
+import { EmptyState } from '../components/ui/EmptyState';
 
 function NutritionPage(): React.ReactElement {
   const [, setLocation] = useLocation();
@@ -160,7 +163,7 @@ function NutritionPage(): React.ReactElement {
   };
 
   if (loading && meals.length === 0) {
-    return <div className={styles.loading}>Loading...</div>;
+    return <LoadingState label="Loading..." />;
   }
 
   return (
@@ -182,7 +185,7 @@ function NutritionPage(): React.ReactElement {
         </button>
       </div>
 
-      {error && <div className={styles.errorMessage}>{error}</div>}
+      {error && <ErrorState>{error}</ErrorState>}
 
       <div className={styles.contentContainer}>
         <div className={styles.mealsSection}>
@@ -194,12 +197,11 @@ function NutritionPage(): React.ReactElement {
           </div>
 
           {meals.length === 0 ? (
-            <div className={styles.emptyState}>
-              <p>No meals logged for this date.</p>
-              <button onClick={handleAddMeal} className={styles.addMealButtonLarge}>
-                Add Your First Meal
-              </button>
-            </div>
+            <EmptyState
+              icon={<MdRestaurant />}
+              title="No meals logged for this date."
+              action={<Button onClick={handleAddMeal}>Add Your First Meal</Button>}
+            />
           ) : (
             <div className={styles.mealsList}>
               {meals.map((meal) => (
