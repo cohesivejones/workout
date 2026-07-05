@@ -665,9 +665,7 @@ describe('Exercise API Routes', () => {
         // Mint the token under the faked clock so it is not treated as expired
         const authToken = generateToken(testUserData.user);
         const authReq = authenticatedRequest(app, authToken);
-        const response = await authReq
-          .get(`/api/exercises/${exercise.id}/progression`)
-          .expect(200);
+        const response = await authReq.get(`/api/exercises/${exercise.id}/progression`).expect(200);
 
         expect(response.body.weightData).toHaveLength(1);
         expect(response.body.repsData).toHaveLength(1);
