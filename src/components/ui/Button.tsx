@@ -3,7 +3,7 @@ import { Link } from 'wouter';
 import classNames from 'classnames';
 import styles from './Button.module.css';
 
-export type ButtonVariant = 'primary' | 'secondary' | 'tertiary' | 'danger';
+export type ButtonVariant = 'primary' | 'secondary' | 'tertiary' | 'danger' | 'dangerSolid';
 export type ButtonSize = 'sm' | 'md' | 'lg';
 
 interface CommonProps {

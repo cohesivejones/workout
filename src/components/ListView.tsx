@@ -19,6 +19,7 @@ import { Card } from './ui/Card';
 import { listViewReducer, createInitialListViewState } from './listView.reducer';
 import { formatWeightWithKg } from '../utils/weight';
 import { Badge } from './ui/Badge';
+import { useConfirm } from './ui/useConfirm';
 import { getPainSeverityColor, getSleepSeverityColor } from '../styles/chartColors';
 
 export const ListView = () => {
@@ -39,6 +40,7 @@ export const ListView = () => {
   } = state;
 
   const fabRef = useRef<HTMLDivElement | null>(null);
+  const { confirm, alert, dialog } = useConfirm();
 
   // Fetch data on mount
   useEffect(() => {
@@ -156,47 +158,71 @@ export const ListView = () => {
   };
 
   const handleDeleteWorkout = async (workoutId: number) => {
-    if (window.confirm('Are you sure you want to delete this workout?')) {
-      try {
-        dispatch({ type: 'SET_DELETING', payload: { type: 'workout', id: workoutId } });
-        await deleteWorkout(workoutId);
-        handleWorkoutDeleted(workoutId);
-      } catch (err) {
-        console.error('Failed to delete workout:', err);
-        alert('Failed to delete workout. Please try again.');
-      } finally {
-        dispatch({ type: 'SET_DELETING', payload: null });
-      }
+    const confirmed = await confirm({
+      title: 'Delete workout?',
+      message: 'This will permanently remove this workout. This can’t be undone.',
+      confirmText: 'Delete',
+      variant: 'danger',
+    });
+    if (!confirmed) return;
+    try {
+      dispatch({ type: 'SET_DELETING', payload: { type: 'workout', id: workoutId } });
+      await deleteWorkout(workoutId);
+      handleWorkoutDeleted(workoutId);
+    } catch (err) {
+      console.error('Failed to delete workout:', err);
+      await alert({
+        title: 'Delete failed',
+        message: 'Failed to delete workout. Please try again.',
+      });
+    } finally {
+      dispatch({ type: 'SET_DELETING', payload: null });
     }
   };
 
   const handleDeletePainScore = async (painScoreId: number) => {
-    if (window.confirm('Are you sure you want to delete this pain score?')) {
-      try {
-        dispatch({ type: 'SET_DELETING', payload: { type: 'painScore', id: painScoreId } });
-        await deletePainScore(painScoreId);
-        handlePainScoreDeleted(painScoreId);
-      } catch (err) {
-        console.error('Failed to delete pain score:', err);
-        alert('Failed to delete pain score. Please try again.');
-      } finally {
-        dispatch({ type: 'SET_DELETING', payload: null });
-      }
+    const confirmed = await confirm({
+      title: 'Delete pain score?',
+      message: 'This will permanently remove this pain score.',
+      confirmText: 'Delete',
+      variant: 'danger',
+    });
+    if (!confirmed) return;
+    try {
+      dispatch({ type: 'SET_DELETING', payload: { type: 'painScore', id: painScoreId } });
+      await deletePainScore(painScoreId);
+      handlePainScoreDeleted(painScoreId);
+    } catch (err) {
+      console.error('Failed to delete pain score:', err);
+      await alert({
+        title: 'Delete failed',
+        message: 'Failed to delete pain score. Please try again.',
+      });
+    } finally {
+      dispatch({ type: 'SET_DELETING', payload: null });
     }
   };
 
   const handleDeleteSleepScore = async (sleepScoreId: number) => {
-    if (window.confirm('Are you sure you want to delete this sleep score?')) {
-      try {
-        dispatch({ type: 'SET_DELETING', payload: { type: 'sleepScore', id: sleepScoreId } });
-        await deleteSleepScore(sleepScoreId);
-        handleSleepScoreDeleted(sleepScoreId);
-      } catch (err) {
-        console.error('Failed to delete sleep score:', err);
-        alert('Failed to delete sleep score. Please try again.');
-      } finally {
-        dispatch({ type: 'SET_DELETING', payload: null });
-      }
+    const confirmed = await confirm({
+      title: 'Delete sleep score?',
+      message: 'This will permanently remove this sleep score.',
+      confirmText: 'Delete',
+      variant: 'danger',
+    });
+    if (!confirmed) return;
+    try {
+      dispatch({ type: 'SET_DELETING', payload: { type: 'sleepScore', id: sleepScoreId } });
+      await deleteSleepScore(sleepScoreId);
+      handleSleepScoreDeleted(sleepScoreId);
+    } catch (err) {
+      console.error('Failed to delete sleep score:', err);
+      await alert({
+        title: 'Delete failed',
+        message: 'Failed to delete sleep score. Please try again.',
+      });
+    } finally {
+      dispatch({ type: 'SET_DELETING', payload: null });
     }
   };
 
@@ -483,6 +509,7 @@ export const ListView = () => {
           </div>
         )}
       </div>
+      {dialog}
     </div>
   );
 };

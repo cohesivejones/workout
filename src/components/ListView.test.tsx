@@ -453,11 +453,11 @@ describe('ListView', () => {
     const deleteButtons = screen.getAllByTitle('Delete workout');
     expect(deleteButtons.length).toBe(2);
 
-    // Click the first delete button
+    // Click the first delete button — opens the confirm modal
     fireEvent.click(deleteButtons[0]);
 
-    // Check that confirm was called
-    expect(window.confirm).toHaveBeenCalledWith('Are you sure you want to delete this workout?');
+    // Confirm in the modal
+    fireEvent.click(await screen.findByRole('button', { name: 'Delete' }));
 
     // Check that the workout was removed from the list
     await waitFor(() => {
@@ -492,11 +492,11 @@ describe('ListView', () => {
     const deleteButtons = screen.getAllByTitle('Delete pain score');
     expect(deleteButtons.length).toBe(2);
 
-    // Click the first delete button
+    // Click the first delete button — opens the confirm modal
     fireEvent.click(deleteButtons[0]);
 
-    // Check that confirm was called
-    expect(window.confirm).toHaveBeenCalledWith('Are you sure you want to delete this pain score?');
+    // Confirm in the modal
+    fireEvent.click(await screen.findByRole('button', { name: 'Delete' }));
 
     // Check that the pain score was removed from the list
     await waitFor(() => {
@@ -509,10 +509,6 @@ describe('ListView', () => {
     // Mock console.error
     const originalConsoleError = console.error;
     console.error = vi.fn();
-
-    // Mock window.alert
-    const originalAlert = window.alert;
-    window.alert = vi.fn();
 
     // Mock timeline data and failed deletion
     server.use(
@@ -538,28 +534,26 @@ describe('ListView', () => {
     // Find delete buttons for workouts
     const deleteButtons = screen.getAllByTitle('Delete workout');
 
-    // Click the first delete button
+    // Click the first delete button, then confirm in the modal
     fireEvent.click(deleteButtons[0]);
+    fireEvent.click(await screen.findByRole('button', { name: 'Delete' }));
 
-    // Check that the error was handled
+    // Check that the error was handled and surfaced via the alert modal
     await waitFor(() => {
       expect(console.error).toHaveBeenCalledWith('Failed to delete workout:', expect.any(Error));
-      expect(window.alert).toHaveBeenCalledWith('Failed to delete workout. Please try again.');
     });
+    expect(
+      await screen.findByText('Failed to delete workout. Please try again.')
+    ).toBeInTheDocument();
 
     // Restore mocks
     console.error = originalConsoleError;
-    window.alert = originalAlert;
   });
 
   it('handles pain score deletion error', async () => {
     // Mock console.error
     const originalConsoleError = console.error;
     console.error = vi.fn();
-
-    // Mock window.alert
-    const originalAlert = window.alert;
-    window.alert = vi.fn();
 
     // Mock timeline data and failed deletion
     server.use(
@@ -585,24 +579,23 @@ describe('ListView', () => {
     // Find delete buttons for pain scores
     const deleteButtons = screen.getAllByTitle('Delete pain score');
 
-    // Click the first delete button
+    // Click the first delete button, then confirm in the modal
     fireEvent.click(deleteButtons[0]);
+    fireEvent.click(await screen.findByRole('button', { name: 'Delete' }));
 
-    // Check that the error was handled
+    // Check that the error was handled and surfaced via the alert modal
     await waitFor(() => {
       expect(console.error).toHaveBeenCalledWith('Failed to delete pain score:', expect.any(Error));
-      expect(window.alert).toHaveBeenCalledWith('Failed to delete pain score. Please try again.');
     });
+    expect(
+      await screen.findByText('Failed to delete pain score. Please try again.')
+    ).toBeInTheDocument();
 
     // Restore mocks
     console.error = originalConsoleError;
-    window.alert = originalAlert;
   });
 
   it('does not delete when user cancels confirmation', async () => {
-    // Override the mock to return false (user clicked "Cancel")
-    (window.confirm as ReturnType<typeof vi.fn>).mockReturnValue(false);
-
     server.use(
       http.get('/api/activity', () => {
         return HttpResponse.json(mockActivityData);
@@ -624,15 +617,15 @@ describe('ListView', () => {
     const deleteButtons = screen.getAllByTitle('Delete workout');
     const initialCount = deleteButtons.length;
 
-    // Click the first delete button
+    // Click the first delete button, then cancel in the modal
     fireEvent.click(deleteButtons[0]);
+    fireEvent.click(await screen.findByRole('button', { name: 'Cancel' }));
 
-    // Check that confirm was called
-    expect(window.confirm).toHaveBeenCalledWith('Are you sure you want to delete this workout?');
-
-    // Check that the workout count hasn't changed
-    const stillDeleteButtons = screen.getAllByTitle('Delete workout');
-    expect(stillDeleteButtons.length).toBe(initialCount);
+    // Modal closes and the workout count hasn't changed
+    await waitFor(() => {
+      expect(screen.queryByRole('button', { name: 'Delete' })).not.toBeInTheDocument();
+    });
+    expect(screen.getAllByTitle('Delete workout').length).toBe(initialCount);
   });
 
   it('displays filter controls', async () => {

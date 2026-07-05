@@ -195,9 +195,10 @@ test.describe('Nutrition Tracking', () => {
       .locator('[class*="mealCard"]', { hasText: 'Dinner - Pasta' })
       .first();
 
-    // Handle the confirm dialog
-    page.on('dialog', (dialog) => dialog.accept());
     await mealCardForDelete.getByRole('button', { name: 'Delete meal' }).click();
+
+    // Confirm in the modal
+    await page.getByRole('button', { name: 'Delete', exact: true }).click();
 
     // Verify meal is removed
     await expect(page.getByText('Dinner - Pasta')).not.toBeVisible({ timeout: 5000 });
