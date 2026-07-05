@@ -3,6 +3,7 @@ import type { ReactElement } from 'react';
 import { fetchExercises, updateExercise, suggestExerciseName } from '../api';
 import { Exercise } from '../types';
 import { useUserContext } from '../contexts/useUserContext';
+import { MdFitnessCenter } from 'react-icons/md';
 import classNames from 'classnames';
 import styles from './ExerciseListPage.module.css';
 import { Button } from '../components/ui/Button';
@@ -127,9 +128,15 @@ function ExerciseListPage(): ReactElement {
 
       <div className={styles.exerciseList}>
         {exercises.length === 0 ? (
-          <p className={styles.noExercises}>
-            No exercises found. Add exercises when creating a workout.
-          </p>
+          <div className={styles.emptyState}>
+            <div className={styles.emptyIcon}>
+              <MdFitnessCenter />
+            </div>
+            <h3 className={styles.emptyTitle}>No exercises yet</h3>
+            <p className={styles.emptyText}>
+              Exercises are added automatically as you log them in a workout.
+            </p>
+          </div>
         ) : (
           <div className={styles.tableWrapper}>
             <table className={styles.exerciseTable} role="table">
@@ -168,7 +175,12 @@ function ExerciseListPage(): ReactElement {
                           placeholder="Exercise name"
                         />
                       ) : (
-                        <span className={styles.exerciseName}>{exercise.name}</span>
+                        <span className={styles.exerciseName}>
+                          <span className={styles.exerciseIcon} aria-hidden="true">
+                            <MdFitnessCenter />
+                          </span>
+                          {exercise.name}
+                        </span>
                       )}
                     </td>
                     <td className={styles.actionsCell}>
