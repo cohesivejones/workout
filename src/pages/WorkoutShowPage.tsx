@@ -4,7 +4,7 @@ import { fetchWorkout, deleteWorkout } from '../api';
 import styles from './WorkoutShowPage.module.css';
 import { format } from 'date-fns';
 import classNames from 'classnames';
-import { FaTrophy } from 'react-icons/fa';
+import { FaTrophy, FaDumbbell } from 'react-icons/fa';
 import { toHomePath, toWorkoutEditPath, toExerciseProgressionPath } from '../utils/paths';
 import { formatWeightWithKg } from '../utils/weight';
 import { Badge } from '../components/ui/Badge';
@@ -12,6 +12,7 @@ import { Button } from '../components/ui/Button';
 import { useConfirm } from '../components/ui/useConfirm';
 import { LoadingState } from '../components/ui/LoadingState';
 import { ErrorState } from '../components/ui/ErrorState';
+import { EmptyState } from '../components/ui/EmptyState';
 import { useAsync } from '../hooks/useAsync';
 
 const WorkoutShowPage: React.FC = () => {
@@ -86,7 +87,11 @@ const WorkoutShowPage: React.FC = () => {
         <div className={styles.workoutDetailContent}>
           <h4>Exercises</h4>
           {workout.exercises.length === 0 ? (
-            <p>No exercises recorded for this workout.</p>
+            <EmptyState
+              icon={<FaDumbbell />}
+              title="No exercises recorded"
+              message="This workout doesn’t have any exercises."
+            />
           ) : (
             <ul className={styles.exerciseDetailList}>
               {workout.exercises.map((exercise, index) => {

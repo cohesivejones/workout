@@ -13,6 +13,7 @@ import CreatableSelect from 'react-select/creatable';
 import styles from './WorkoutForm.module.css';
 import { Button } from './ui/Button';
 import { Field, Input } from './ui/Field';
+import { EmptyState } from './ui/EmptyState';
 import { useUserContext } from '../contexts/useUserContext';
 import { fetchRecentExerciseData } from '../api';
 import { useForm, useFieldArray, Controller, SubmitHandler } from 'react-hook-form';
@@ -310,24 +311,11 @@ function WorkoutForm({
           <div className={styles.exerciseList}>
             <h3>Exercises</h3>
             {fields.length === 0 ? (
-              <p
-                style={{
-                  textAlign: 'center',
-                  color: '#9ca3af',
-                  padding: '32px 16px',
-                  fontSize: '14px',
-                }}
-              >
-                <GiMuscleUp
-                  style={{
-                    display: 'inline',
-                    marginRight: '8px',
-                    fontSize: '20px',
-                    verticalAlign: 'middle',
-                  }}
-                />{' '}
-                No exercises added yet. Add your first exercise above to get started!
-              </p>
+              <EmptyState
+                icon={<GiMuscleUp />}
+                title="No exercises added yet"
+                message="Add your first exercise above to get started."
+              />
             ) : (
               <ul data-testid="exercise-list">
                 {fields.map((field, index) => (
