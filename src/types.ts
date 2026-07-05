@@ -3,10 +3,6 @@ export interface User {
   name: string;
 }
 
-export interface UserListProps {
-  users: User[];
-}
-
 export interface PainScore {
   id: number;
   userId?: number;
@@ -64,19 +60,6 @@ export interface Workout {
   userId?: number;
   withInstructor: boolean;
   exercises: WorkoutExercise[];
-}
-
-export interface WorkoutFormProps {
-  onSubmit: (workout: Omit<Workout, 'id'>) => Promise<boolean>;
-  savedExercises: Exercise[];
-  onSaveExercise: (exerciseName: string) => Promise<boolean>;
-  existingWorkout?: Workout;
-  onCancel?: () => void;
-}
-
-export interface WorkoutListProps {
-  workouts: Workout[];
-  onWorkoutDeleted: (workoutId: number) => void;
 }
 
 export interface TimelineResponse {

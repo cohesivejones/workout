@@ -11,11 +11,15 @@ import {
 import { Meal, WeightEntry } from '../types';
 import { useUserContext } from '../contexts/useUserContext';
 import { getLocalDateString } from '../utils/dates';
-import { MdOutlineEdit } from 'react-icons/md';
+import { MdOutlineEdit, MdRestaurant, MdClose } from 'react-icons/md';
 import styles from './NutritionPage.module.css';
 import { PageHeader } from '../components/ui/PageHeader';
 import { Button } from '../components/ui/Button';
 import { useConfirm } from '../components/ui/useConfirm';
+import { LoadingState } from '../components/ui/LoadingState';
+import { ErrorState } from '../components/ui/ErrorState';
+import { EmptyState } from '../components/ui/EmptyState';
+import { DateNavigator } from '../components/ui/DateNavigator';
 
 function NutritionPage(): React.ReactElement {
   const [, setLocation] = useLocation();
@@ -160,29 +164,24 @@ function NutritionPage(): React.ReactElement {
   };
 
   if (loading && meals.length === 0) {
-    return <div className={styles.loading}>Loading...</div>;
+    return <LoadingState label="Loading..." />;
   }
 
   return (
     <div className={styles.nutritionPage}>
       <PageHeader title="Nutrition" />
 
-      <div className={styles.dateNavigator}>
-        <button onClick={() => handleDateChange(-1)} className={styles.navButton}>
-          ← Previous Day
-        </button>
-        <div className={styles.dateDisplay}>
-          <span className={styles.dateText}>{formatDate(selectedDate)}</span>
-          <button onClick={handleToday} className={styles.todayButton}>
-            Today
-          </button>
-        </div>
-        <button onClick={() => handleDateChange(1)} className={styles.navButton}>
-          Next Day →
-        </button>
-      </div>
+      <DateNavigator
+        label={formatDate(selectedDate)}
+        prevLabel="← Previous Day"
+        nextLabel="Next Day →"
+        resetLabel="Today"
+        onPrev={() => handleDateChange(-1)}
+        onNext={() => handleDateChange(1)}
+        onReset={handleToday}
+      />
 
-      {error && <div className={styles.errorMessage}>{error}</div>}
+      {error && <ErrorState>{error}</ErrorState>}
 
       <div className={styles.contentContainer}>
         <div className={styles.mealsSection}>
@@ -194,12 +193,11 @@ function NutritionPage(): React.ReactElement {
           </div>
 
           {meals.length === 0 ? (
-            <div className={styles.emptyState}>
-              <p>No meals logged for this date.</p>
-              <button onClick={handleAddMeal} className={styles.addMealButtonLarge}>
-                Add Your First Meal
-              </button>
-            </div>
+            <EmptyState
+              icon={<MdRestaurant />}
+              title="No meals logged for this date."
+              action={<Button onClick={handleAddMeal}>Add Your First Meal</Button>}
+            />
           ) : (
             <div className={styles.mealsList}>
               {meals.map((meal) => (
@@ -222,7 +220,7 @@ function NutritionPage(): React.ReactElement {
                         title="Delete meal"
                         aria-label="Delete meal"
                       >
-                        x
+                        <MdClose />
                       </Button>
                     </div>
                   </div>

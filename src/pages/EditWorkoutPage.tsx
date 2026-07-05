@@ -5,8 +5,9 @@ import { fetchWorkout, updateWorkout, createExercise, fetchExercises } from '../
 import { Exercise, Workout } from '../types';
 import { useUserContext } from '../contexts/useUserContext';
 import { toWorkoutPath } from '../utils/paths';
+import { LoadingState } from '../components/ui/LoadingState';
+import { ErrorState } from '../components/ui/ErrorState';
 import styles from '../components/WorkoutForm.module.css';
-import loadingStyles from '../App.module.css';
 
 export default function EditWorkoutPage() {
   const [, setLocation] = useLocation();
@@ -83,11 +84,11 @@ export default function EditWorkoutPage() {
   };
 
   if (loading) {
-    return <div className={loadingStyles.loading}>Loading...</div>;
+    return <LoadingState label="Loading..." />;
   }
 
   if (error) {
-    return <div className={styles.errorMessage}>{error}</div>;
+    return <ErrorState>{error}</ErrorState>;
   }
 
   const handleCancel = () => {
@@ -95,12 +96,12 @@ export default function EditWorkoutPage() {
   };
 
   if (!workout) {
-    return <div className={styles.errorMessage}>Workout not found</div>;
+    return <ErrorState>Workout not found</ErrorState>;
   }
 
   return (
     <div className={styles.container}>
-      {error && <div className={styles.errorMessage}>{error}</div>}
+      {error && <ErrorState>{error}</ErrorState>}
       <WorkoutForm
         onSubmit={handleUpdateWorkout}
         savedExercises={savedExercises}

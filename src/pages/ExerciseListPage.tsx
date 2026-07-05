@@ -1,17 +1,30 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import type { ReactElement } from 'react';
 import { fetchExercises, updateExercise, suggestExerciseName } from '../api';
 import { Exercise } from '../types';
 import { useUserContext } from '../contexts/useUserContext';
-import { MdFitnessCenter } from 'react-icons/md';
+import { MdFitnessCenter, MdOutlineEdit, MdAutoAwesome } from 'react-icons/md';
 import classNames from 'classnames';
 import styles from './ExerciseListPage.module.css';
 import { Button } from '../components/ui/Button';
 import { PageHeader } from '../components/ui/PageHeader';
+import { LoadingState } from '../components/ui/LoadingState';
+import { ErrorState } from '../components/ui/ErrorState';
+import { EmptyState } from '../components/ui/EmptyState';
+import { useAsync } from '../hooks/useAsync';
 
 function ExerciseListPage(): ReactElement {
-  const [exercises, setExercises] = useState<Exercise[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const { user } = useUserContext();
+  const {
+    data: exercisesData,
+    loading,
+    error: loadError,
+    setData: setExercises,
+  } = useAsync(() => fetchExercises(), [user], {
+    enabled: !!user,
+    errorMessage: 'Failed to load exercises. Please try again later.',
+  });
+  const exercises = useMemo(() => exercisesData ?? [], [exercisesData]);
   const [error, setError] = useState<string | null>(null);
   const [editingExercise, setEditingExercise] = useState<Exercise | null>(null);
   const [newName, setNewName] = useState<string>('');
@@ -20,23 +33,8 @@ function ExerciseListPage(): ReactElement {
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState<number | null>(null);
   const [sortDirection, setSortDirection] = useState<'none' | 'ascending' | 'descending'>('none');
-  const { user } = useUserContext();
 
-  useEffect(() => {
-    const loadExercises = async () => {
-      if (!user) return;
-      try {
-        const exercisesData = await fetchExercises();
-        setExercises(exercisesData);
-        setLoading(false);
-      } catch (err) {
-        console.error('Failed to load exercises:', err);
-        setError('Failed to load exercises. Please try again later.');
-        setLoading(false);
-      }
-    };
-    loadExercises();
-  }, [user]);
+  const displayError = loadError ?? error;
 
   const handleEditClick = (exercise: Exercise) => {
     setEditingExercise(exercise);
@@ -57,7 +55,7 @@ function ExerciseListPage(): ReactElement {
 
       // Update the exercises list with the updated exercise
       setExercises((prevExercises) =>
-        prevExercises.map((ex) => (ex.id === updatedExercise.id ? updatedExercise : ex))
+        (prevExercises ?? []).map((ex) => (ex.id === updatedExercise.id ? updatedExercise : ex))
       );
 
       // Reset editing state
@@ -114,7 +112,7 @@ function ExerciseListPage(): ReactElement {
   }, [exercises, sortDirection]);
 
   if (loading) {
-    return <div className={styles.loading}>Loading...</div>;
+    return <LoadingState label="Loading..." />;
   }
 
   return (
@@ -124,19 +122,15 @@ function ExerciseListPage(): ReactElement {
         subtitle={`Manage your exercise library (${exercises.length} exercises)`}
       />
 
-      {error && <div className={styles.errorMessage}>{error}</div>}
+      {displayError && <ErrorState>{displayError}</ErrorState>}
 
       <div className={styles.exerciseList}>
         {exercises.length === 0 ? (
-          <div className={styles.emptyState}>
-            <div className={styles.emptyIcon}>
-              <MdFitnessCenter />
-            </div>
-            <h3 className={styles.emptyTitle}>No exercises yet</h3>
-            <p className={styles.emptyText}>
-              Exercises are added automatically as you log them in a workout.
-            </p>
-          </div>
+          <EmptyState
+            icon={<MdFitnessCenter />}
+            title="No exercises yet"
+            message="Exercises are added automatically as you log them in a workout."
+          />
         ) : (
           <div className={styles.tableWrapper}>
             <table className={styles.exerciseTable} role="table">
@@ -240,7 +234,10 @@ function ExerciseListPage(): ReactElement {
                                 aria-label={`Suggest name for ${exercise.name}`}
                                 disabled={isSuggesting === exercise.id}
                               >
-                                {isSuggesting === exercise.id ? 'Suggesting...' : 'Suggest Name'}
+                                <MdAutoAwesome className={styles.actionIcon} aria-hidden="true" />
+                                <span className={styles.actionText}>
+                                  {isSuggesting === exercise.id ? 'Suggesting...' : 'Suggest Name'}
+                                </span>
                               </Button>
                               <Button
                                 variant="tertiary"
@@ -248,7 +245,8 @@ function ExerciseListPage(): ReactElement {
                                 onClick={() => handleEditClick(exercise)}
                                 aria-label={`Edit ${exercise.name}`}
                               >
-                                Edit
+                                <MdOutlineEdit className={styles.actionIcon} aria-hidden="true" />
+                                <span className={styles.actionText}>Edit</span>
                               </Button>
                             </>
                           )}

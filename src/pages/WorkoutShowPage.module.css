@@ -82,28 +82,27 @@
   list-style-type: none;
   padding: 0;
   margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
 }
 
 .exerciseDetailItem {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 0;
-  border-bottom: 1px solid var(--color-border);
-}
-
-.exerciseDetailItem:last-child {
-  border-bottom: none;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  background-color: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
 }
 
 /* Personal-record row — coral "achievement" accent */
 .prItem {
-  background: linear-gradient(90deg, var(--color-accent-tint) 0%, transparent 55%);
+  background: linear-gradient(90deg, var(--color-accent-tint) 0%, var(--color-surface-2) 60%);
+  border-color: var(--color-accent);
   box-shadow: inset 3px 0 0 var(--color-accent);
-  border-radius: var(--radius-sm);
-  margin: 0 -12px;
-  padding-left: 12px;
-  padding-right: 12px;
 }
 
 .prTrophy {
@@ -146,19 +145,6 @@
   border-top: 1px solid var(--color-border);
 }
 
-.loading,
-.errorMessage {
-  text-align: center;
-  padding: 40px;
-  font-size: 1.2rem;
-}
-
-.errorMessage {
-  color: var(--color-danger);
-  background-color: var(--color-danger-tint);
-  border-radius: var(--radius-sm);
-}
-
 .badgeContainer {
   display: flex;
   align-items: center;
@@ -175,7 +161,7 @@
   .exerciseDetailItem {
     flex-direction: column;
     align-items: flex-start;
-    gap: 5px;
+    gap: var(--space-2);
   }
 
   .workoutDetailActions {

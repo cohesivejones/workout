@@ -10,6 +10,8 @@ import { fetchTimeline } from '../api';
 import { formatWeightWithKg } from '../utils/weight';
 import { MdFitnessCenter } from 'react-icons/md';
 import { ScoreChip } from './ui/ScoreChip';
+import { LoadingState } from './ui/LoadingState';
+import { ErrorState } from './ui/ErrorState';
 import { useUserContext } from '../contexts/useUserContext';
 import { format } from 'date-fns';
 
@@ -124,11 +126,11 @@ const CalendarView = () => {
   };
 
   if (loading) {
-    return <div className={styles.loading}>Loading...</div>;
+    return <LoadingState label="Loading..." />;
   }
 
   if (error) {
-    return <div className={styles.errorMessage}>{error}</div>;
+    return <ErrorState>{error}</ErrorState>;
   }
 
   // Convert workouts, pain scores, and sleep scores to calendar items

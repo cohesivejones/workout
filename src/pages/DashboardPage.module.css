@@ -1,14 +1,3 @@
-.pageHeader {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 20px;
-}
-
-.subtitle {
-  color: var(--color-text-muted);
-  margin-top: 0;
-}
-
 /* Dashboard container with alphabet nav */
 .dashboardContainer {
   display: flex;
@@ -140,14 +129,6 @@
   .chartCard h4 {
     font-size: 1.1rem;
   }
-
-  .pageHeader h2 {
-    font-size: 1.5rem;
-  }
-
-  .subtitle {
-    font-size: 0.9rem;
-  }
 }
 
 .chartCard {
@@ -155,22 +136,6 @@
   border-radius: var(--radius-md);
   padding: 20px;
   box-shadow: var(--shadow-1);
-}
-
-.loading {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 200px;
-  font-size: 18px;
-}
-
-.errorMessage {
-  color: var(--color-danger);
-  background-color: var(--color-danger-tint);
-  padding: 10px;
-  border-radius: var(--radius-sm);
-  margin-bottom: 20px;
 }
 
 .noData {

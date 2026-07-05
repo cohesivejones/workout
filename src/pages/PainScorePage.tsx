@@ -4,6 +4,8 @@ import PainScoreForm from '../components/PainScoreForm';
 import { createPainScore, updatePainScore, fetchPainScore } from '../api';
 import { PainScore } from '../types';
 import { useUserContext } from '../contexts/useUserContext';
+import { LoadingState } from '../components/ui/LoadingState';
+import { ErrorState } from '../components/ui/ErrorState';
 import styles from './PainScorePage.module.css';
 
 function PainScorePage(): React.ReactElement {
@@ -63,12 +65,12 @@ function PainScorePage(): React.ReactElement {
   };
 
   if (loading) {
-    return <div className={styles.loading}>Loading...</div>;
+    return <LoadingState label="Loading..." />;
   }
 
   return (
     <div className={styles.painScorePage}>
-      {error && <div className={styles.errorMessage}>{error}</div>}
+      {error && <ErrorState>{error}</ErrorState>}
 
       <PainScoreForm
         onSubmit={handlePainScoreSubmit}

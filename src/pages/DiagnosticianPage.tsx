@@ -4,6 +4,8 @@ import { fetchDiagnosticData, analyzeDiagnosticData } from '../api';
 import styles from './DiagnosticianPage.module.css';
 import { PageHeader } from '../components/ui/PageHeader';
 import { Button } from '../components/ui/Button';
+import { LoadingState } from '../components/ui/LoadingState';
+import { ErrorState } from '../components/ui/ErrorState';
 
 function DiagnosticianPage(): React.ReactElement {
   const { user } = useUserContext();
@@ -51,9 +53,9 @@ function DiagnosticianPage(): React.ReactElement {
           </Button>
         </div>
 
-        {error && <div className={styles.errorMessage}>{error}</div>}
+        {error && <ErrorState>{error}</ErrorState>}
 
-        {loading && <div className={styles.loading}>Analyzing your workout and pain data...</div>}
+        {loading && <LoadingState label="Analyzing your workout and pain data..." />}
 
         {analysis && (
           <div className={styles.analysisResults}>

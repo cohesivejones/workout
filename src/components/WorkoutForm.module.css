@@ -48,102 +48,40 @@
   margin-bottom: 16px;
 }
 
-.dateInput {
-  margin-bottom: 16px;
-}
-
-.dateInput label {
-  display: block;
-  margin-bottom: 8px;
-  font-weight: 500;
-  color: var(--color-ink);
-  font-size: 14px;
-}
-
-.dateInput input[type='date'] {
-  width: 100%;
-  height: 44px;
-  padding: 0 12px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  box-sizing: border-box;
-  font-size: 16px;
-  color: var(--color-ink);
-  background: var(--color-surface);
-  transition:
-    border-color 0.15s ease,
-    box-shadow 0.15s ease;
-}
-
-.dateInput input[type='date']:focus {
-  outline: none;
-  border-color: var(--color-primary);
-  box-shadow: var(--focus-ring);
-}
-
-.exerciseInputField {
-  width: 100%;
-  padding: 0 12px;
-  height: 44px;
-  margin-bottom: 10px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  box-sizing: border-box;
-  font-size: 16px;
-  color: var(--color-ink);
-  transition:
-    border-color 0.15s ease,
-    box-shadow 0.15s ease;
-}
-
-.exerciseInputField:focus {
-  outline: none;
-  border-color: var(--color-primary);
-  box-shadow: var(--focus-ring);
-}
-
 .instructorCheckbox {
   margin-bottom: 0;
 }
 
-.instructorCheckbox label {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--color-ink);
-  padding: 4px 0;
-  transition: color 0.15s ease;
-}
-
-.instructorCheckbox label:hover {
-  color: var(--color-ink);
-}
-
-.instructorCheckbox input[type='checkbox'] {
-  margin-right: 10px;
-  width: 18px;
-  height: 18px;
-  cursor: pointer;
-  accent-color: var(--color-primary);
-  border-radius: var(--radius-sm);
-}
-
 .exerciseInput {
-  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
 }
 
 .weightInputContainer {
   width: 100%;
-  margin-bottom: 10px;
 }
 
 .weightInputWrapper {
   display: flex;
   flex-direction: row;
-  gap: 8px;
+  gap: var(--space-3);
   align-items: stretch;
+}
+
+/* On narrow screens the toggle beside the input squeezes it; stack the
+   unit toggle above the full-width weight input instead. */
+@media (max-width: 640px) {
+  .weightInputWrapper {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-2);
+  }
+
+  .unitToggle {
+    align-self: flex-start;
+  }
 }
 
 .unitToggle {
@@ -215,14 +153,6 @@
   font-size: 13px;
   pointer-events: none; /* Allows clicks to pass through to the input */
   white-space: nowrap;
-}
-
-/* Ensure consistent input height and alignment */
-.exerciseInputField[type='number'] {
-  height: 44px; /* Mobile-friendly height (44px minimum for touch targets) */
-  padding: 0 12px; /* Horizontal padding */
-  line-height: 44px; /* Match line-height to height */
-  font-size: 16px; /* Prevents zoom on iOS */
 }
 
 /* React Select Styles */

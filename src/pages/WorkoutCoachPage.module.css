@@ -269,9 +269,9 @@
 }
 
 .restartButton:hover {
-  background-color: #545b62;
+  background-color: var(--color-ink-800);
   transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(108, 117, 125, 0.2);
+  box-shadow: 0 4px 8px rgba(16, 32, 28, 0.2);
 }
 
 /* Responsive design */

@@ -1,7 +1,14 @@
 import { useRef, useEffect, useReducer } from 'react';
 import { Link } from 'wouter';
 import { format } from 'date-fns';
-import { MdOutlineEdit, MdAdd, MdFitnessCenter, MdLocalHospital, MdHotel } from 'react-icons/md';
+import {
+  MdOutlineEdit,
+  MdClose,
+  MdAdd,
+  MdFitnessCenter,
+  MdLocalHospital,
+  MdHotel,
+} from 'react-icons/md';
 import {
   toPainScoreNewPath,
   toPainScoreEditPath,
@@ -16,6 +23,9 @@ import styles from './ListView.module.css';
 import { useUserContext } from '../contexts/useUserContext';
 import { Button } from './ui/Button';
 import { Card } from './ui/Card';
+import { Checkbox } from './ui/Checkbox';
+import { LoadingState } from './ui/LoadingState';
+import { ErrorState } from './ui/ErrorState';
 import { listViewReducer, createInitialListViewState } from './listView.reducer';
 import { formatWeightWithKg } from '../utils/weight';
 import { Badge } from './ui/Badge';
@@ -109,11 +119,11 @@ export const ListView = () => {
   };
 
   if (loading) {
-    return <div className={styles.loading}>Loading...</div>;
+    return <LoadingState label="Loading..." />;
   }
 
   if (error) {
-    return <div className={styles.errorMessage}>{error}</div>;
+    return <ErrorState>{error}</ErrorState>;
   }
 
   // Filter items based on filter state
@@ -237,30 +247,21 @@ export const ListView = () => {
         <div className={styles.filterControls}>
           <div className={styles.filterLabel}>Filter by Type:</div>
           <div className={styles.filterCheckboxes}>
-            <label className={styles.filterCheckbox}>
-              <input
-                type="checkbox"
-                checked={showWorkouts}
-                onChange={() => dispatch({ type: 'TOGGLE_FILTER', payload: 'workouts' })}
-              />
-              Workouts
-            </label>
-            <label className={styles.filterCheckbox}>
-              <input
-                type="checkbox"
-                checked={showPainScores}
-                onChange={() => dispatch({ type: 'TOGGLE_FILTER', payload: 'painScores' })}
-              />
-              Pain Scores
-            </label>
-            <label className={styles.filterCheckbox}>
-              <input
-                type="checkbox"
-                checked={showSleepScores}
-                onChange={() => dispatch({ type: 'TOGGLE_FILTER', payload: 'sleepScores' })}
-              />
-              Sleep Scores
-            </label>
+            <Checkbox
+              label="Workouts"
+              checked={showWorkouts}
+              onChange={() => dispatch({ type: 'TOGGLE_FILTER', payload: 'workouts' })}
+            />
+            <Checkbox
+              label="Pain Scores"
+              checked={showPainScores}
+              onChange={() => dispatch({ type: 'TOGGLE_FILTER', payload: 'painScores' })}
+            />
+            <Checkbox
+              label="Sleep Scores"
+              checked={showSleepScores}
+              onChange={() => dispatch({ type: 'TOGGLE_FILTER', payload: 'sleepScores' })}
+            />
             <Button variant="secondary" size="sm" onClick={showAll} className={styles.showAllBtn}>
               Show All
             </Button>
@@ -308,10 +309,13 @@ export const ListView = () => {
                         onClick={() => handleDeleteWorkout(workout.id)}
                         disabled={isDeleting?.type === 'workout' && isDeleting.id === workout.id}
                         title="Delete workout"
+                        aria-label="Delete workout"
                       >
-                        {isDeleting?.type === 'workout' && isDeleting.id === workout.id
-                          ? '...'
-                          : 'x'}
+                        {isDeleting?.type === 'workout' && isDeleting.id === workout.id ? (
+                          '…'
+                        ) : (
+                          <MdClose />
+                        )}
                       </Button>
                     </div>
                   </div>
@@ -379,10 +383,13 @@ export const ListView = () => {
                           isDeleting?.type === 'painScore' && isDeleting.id === painScore.id
                         }
                         title="Delete pain score"
+                        aria-label="Delete pain score"
                       >
-                        {isDeleting?.type === 'painScore' && isDeleting.id === painScore.id
-                          ? '...'
-                          : 'x'}
+                        {isDeleting?.type === 'painScore' && isDeleting.id === painScore.id ? (
+                          '…'
+                        ) : (
+                          <MdClose />
+                        )}
                       </Button>
                     </div>
                   </div>
@@ -431,10 +438,13 @@ export const ListView = () => {
                           isDeleting?.type === 'sleepScore' && isDeleting.id === sleepScore.id
                         }
                         title="Delete sleep score"
+                        aria-label="Delete sleep score"
                       >
-                        {isDeleting?.type === 'sleepScore' && isDeleting.id === sleepScore.id
-                          ? '...'
-                          : 'x'}
+                        {isDeleting?.type === 'sleepScore' && isDeleting.id === sleepScore.id ? (
+                          '…'
+                        ) : (
+                          <MdClose />
+                        )}
                       </Button>
                     </div>
                   </div>

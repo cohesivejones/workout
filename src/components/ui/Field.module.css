@@ -1,20 +1,23 @@
-.formGroup {
+.field {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-.formGroup label {
+.label {
   font-weight: 600;
   font-size: 14px;
   color: var(--color-ink);
 }
 
-.formGroup input {
+.control {
+  width: 100%;
+  box-sizing: border-box;
   padding: 11px 13px;
   border: 1px solid var(--color-border-strong);
   border-radius: var(--radius-sm);
   font-size: 16px;
+  font-family: inherit;
   background: var(--color-surface);
   color: var(--color-ink);
   transition:
@@ -22,13 +25,37 @@
     box-shadow 0.15s ease;
 }
 
-.formGroup input:focus {
+.control:focus {
   outline: none;
   border-color: var(--color-primary);
   box-shadow: var(--focus-ring);
 }
 
-.fieldError {
+.control:disabled {
+  background: var(--color-surface-2);
+  color: var(--color-text-faint);
+  cursor: not-allowed;
+}
+
+select.control {
+  height: 44px;
+  cursor: pointer;
+}
+
+textarea.control {
+  min-height: 90px;
+  resize: vertical;
+}
+
+.invalid {
+  border-color: var(--color-danger);
+}
+
+.invalid:focus {
+  box-shadow: 0 0 0 3px rgba(219, 75, 63, 0.18);
+}
+
+.error {
   color: var(--color-danger);
   font-size: 0.875rem;
 }

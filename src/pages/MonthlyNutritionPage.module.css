@@ -4,31 +4,6 @@
   margin: 0 auto;
 }
 
-.pageHeader {
-  margin-bottom: 30px;
-}
-
-.pageHeader h2 {
-  margin: 0 0 10px 0;
-  color: var(--color-ink);
-}
-
-.subtitle {
-  margin: 0;
-  color: var(--color-text-muted);
-  font-size: 14px;
-}
-
-.weekNavigator {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 30px;
-  padding: 15px;
-  background: var(--color-surface-2);
-  border-radius: var(--radius-md);
-}
-
 .navButton {
   padding: 10px 20px;
   background: var(--color-primary);
@@ -42,34 +17,6 @@
 
 .navButton:hover {
   background: var(--color-primary-active);
-}
-
-.weekDisplay {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-}
-
-.weekText {
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--color-ink);
-}
-
-.currentWeekButton {
-  padding: 6px 12px;
-  background: var(--color-text-muted);
-  color: white;
-  border: none;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  font-size: 12px;
-  transition: background 0.2s;
-}
-
-.currentWeekButton:hover {
-  background: var(--color-ink-800);
 }
 
 .chartsContainer {
@@ -116,24 +63,6 @@
   gap: 5px;
 }
 
-.loading {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 400px;
-  font-size: 18px;
-  color: var(--color-text-muted);
-}
-
-.errorMessage {
-  padding: 20px;
-  background: var(--color-danger-tint);
-  color: var(--color-danger-ink);
-  border: 1px solid var(--color-danger-tint);
-  border-radius: var(--radius-sm);
-  margin: 20px 0;
-}
-
 .emptyState {
   text-align: center;
   padding: 60px 20px;
@@ -160,17 +89,8 @@
     padding: 15px;
   }
 
-  .weekNavigator {
-    flex-direction: column;
-    gap: 15px;
-  }
-
   .navButton {
     width: 100%;
-  }
-
-  .weekText {
-    font-size: 16px;
   }
 
   .chartCard {

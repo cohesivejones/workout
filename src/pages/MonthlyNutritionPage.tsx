@@ -15,7 +15,10 @@ import { formatShortDate, formatDayOfMonth } from '../utils/dates';
 import { chartColors } from '../styles/chartColors';
 import styles from './MonthlyNutritionPage.module.css';
 import { PageHeader } from '../components/ui/PageHeader';
+import { DateNavigator } from '../components/ui/DateNavigator';
 import { Card } from '../components/ui/Card';
+import { LoadingState } from '../components/ui/LoadingState';
+import { ErrorState } from '../components/ui/ErrorState';
 
 function MonthlyNutritionPage() {
   const [monthStart, setMonthStart] = useState<Date>(() => startOfMonth(new Date()));
@@ -59,11 +62,11 @@ function MonthlyNutritionPage() {
   };
 
   if (loading) {
-    return <div className={styles.loading}>Loading...</div>;
+    return <LoadingState label="Loading..." />;
   }
 
   if (error) {
-    return <div className={styles.errorMessage}>{error}</div>;
+    return <ErrorState>{error}</ErrorState>;
   }
 
   // Format chart data for display
@@ -116,20 +119,15 @@ function MonthlyNutritionPage() {
         subtitle="Track your weight and calorie trends throughout the month"
       />
 
-      <div className={styles.weekNavigator}>
-        <button onClick={handlePreviousMonth} className={styles.navButton}>
-          ← Previous Month
-        </button>
-        <div className={styles.weekDisplay}>
-          <span className={styles.weekText}>{formatMonthDisplay()}</span>
-          <button onClick={handleCurrentMonth} className={styles.currentWeekButton}>
-            Current Month
-          </button>
-        </div>
-        <button onClick={handleNextMonth} className={styles.navButton}>
-          Next Month →
-        </button>
-      </div>
+      <DateNavigator
+        label={formatMonthDisplay()}
+        prevLabel="← Previous Month"
+        nextLabel="Next Month →"
+        resetLabel="Current Month"
+        onPrev={handlePreviousMonth}
+        onNext={handleNextMonth}
+        onReset={handleCurrentMonth}
+      />
 
       {!hasAnyData && (
         <div className={styles.emptyState}>

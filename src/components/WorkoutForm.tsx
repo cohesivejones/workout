@@ -1,9 +1,20 @@
 import * as React from 'react';
 import { Link } from 'wouter';
-import { WorkoutFormProps, WorkoutExercise } from '../types';
+import { Workout, Exercise, WorkoutExercise } from '../types';
+
+export interface WorkoutFormProps {
+  onSubmit: (workout: Omit<Workout, 'id'>) => Promise<boolean>;
+  savedExercises: Exercise[];
+  onSaveExercise: (exerciseName: string) => Promise<boolean>;
+  existingWorkout?: Workout;
+  onCancel?: () => void;
+}
 import CreatableSelect from 'react-select/creatable';
 import styles from './WorkoutForm.module.css';
 import { Button } from './ui/Button';
+import { Field, Input } from './ui/Field';
+import { EmptyState } from './ui/EmptyState';
+import { Checkbox } from './ui/Checkbox';
 import { useUserContext } from '../contexts/useUserContext';
 import { fetchRecentExerciseData } from '../api';
 import { useForm, useFieldArray, Controller, SubmitHandler } from 'react-hook-form';
@@ -185,20 +196,15 @@ function WorkoutForm({
       {errors.root && <div className={styles.errorMessage}>{errors.root.message}</div>}
       <form onSubmit={handleSubmit(onFormSubmit)}>
         <div className={styles.formSection}>
-          <div className={styles.dateInput}>
-            <label htmlFor="workout-date">Workout Date</label>
-            <input
-              type="date"
-              id="workout-date"
-              className={styles.exerciseInputField}
-              {...register('date')}
-            />
-          </div>
+          <Field label="Workout Date" htmlFor="workout-date">
+            <Input type="date" id="workout-date" {...register('date')} />
+          </Field>
           <div className={styles.instructorCheckbox}>
-            <label htmlFor="with-instructor">
-              <input type="checkbox" id="with-instructor" {...register('withInstructor')} />
-              With Instructor
-            </label>
+            <Checkbox
+              id="with-instructor"
+              label="With Instructor"
+              {...register('withInstructor')}
+            />
           </div>
         </div>
 
@@ -229,13 +235,7 @@ function WorkoutForm({
                 );
               }}
             />
-            <input
-              type="number"
-              placeholder="Reps"
-              min="1"
-              className={styles.exerciseInputField}
-              {...register('currentExercise.reps')}
-            />
+            <Input type="number" placeholder="Reps" min="1" {...register('currentExercise.reps')} />
             <div className={styles.weightInputContainer}>
               <div className={styles.weightInputWrapper}>
                 <div className={styles.unitToggle}>
@@ -269,12 +269,12 @@ function WorkoutForm({
                   </button>
                 </div>
                 <div className={styles.weightInputGroup}>
-                  <input
+                  <Input
                     type="number"
                     placeholder={`Weight (${weightUnit})`}
                     min="0"
                     step="0.5"
-                    className={`${styles.exerciseInputField} ${styles.weightInput}`}
+                    className={styles.weightInput}
                     {...register('currentExercise.weight')}
                   />
                   {currentExercise.weight && (
@@ -287,12 +287,11 @@ function WorkoutForm({
                 </div>
               </div>
             </div>
-            <input
+            <Input
               type="number"
               placeholder="Time (sec)"
               min="0"
               step="1"
-              className={styles.exerciseInputField}
               {...register('currentExercise.timeSeconds')}
             />
             <Button
@@ -314,24 +313,11 @@ function WorkoutForm({
           <div className={styles.exerciseList}>
             <h3>Exercises</h3>
             {fields.length === 0 ? (
-              <p
-                style={{
-                  textAlign: 'center',
-                  color: '#9ca3af',
-                  padding: '32px 16px',
-                  fontSize: '14px',
-                }}
-              >
-                <GiMuscleUp
-                  style={{
-                    display: 'inline',
-                    marginRight: '8px',
-                    fontSize: '20px',
-                    verticalAlign: 'middle',
-                  }}
-                />{' '}
-                No exercises added yet. Add your first exercise above to get started!
-              </p>
+              <EmptyState
+                icon={<GiMuscleUp />}
+                title="No exercises added yet"
+                message="Add your first exercise above to get started."
+              />
             ) : (
               <ul data-testid="exercise-list">
                 {fields.map((field, index) => (

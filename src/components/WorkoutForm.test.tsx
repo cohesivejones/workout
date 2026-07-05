@@ -3,8 +3,8 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { http, HttpResponse } from 'msw';
 import { server } from '../mocks/server';
-import WorkoutForm from './WorkoutForm';
-import { Workout, WorkoutFormProps } from '../types';
+import WorkoutForm, { WorkoutFormProps } from './WorkoutForm';
+import { Workout } from '../types';
 import * as UserContext from '../contexts/useUserContext';
 
 interface SelectOption {
