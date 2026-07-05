@@ -1,78 +1,45 @@
-/* Styles specific to workout and pain score calendar items */
-
-.calendarPainScore {
-  background-color: #f44336;
-  color: white;
-  padding: 4px 8px;
-  border-radius: 4px;
-  margin-top: 4px;
-  font-size: 12px;
-  border: none;
-  cursor: pointer;
-  width: 100%;
-  text-align: center;
-}
-
-.calendarPainScore:hover {
-  opacity: 0.9;
-}
-
-.calendarSleepScore {
-  background-color: #4caf50;
-  color: white;
-  padding: 4px 8px;
-  border-radius: 4px;
-  margin-top: 4px;
-  font-size: 12px;
-  border: none;
-  cursor: pointer;
-  width: 100%;
-  text-align: center;
-}
-
-.calendarSleepScore:hover {
-  opacity: 0.9;
-}
-
-.calendarPainScore:hover {
-  opacity: 0.9;
-  /* Remove the scale transform to prevent horizontal scrolling */
-  filter: brightness(1.1);
-}
-
-.calendarPainScore:focus {
-  outline: 2px solid #007bff;
-  outline-offset: 2px;
-}
+/* Styles specific to workout calendar items. Pain/sleep scores now render
+   via the shared <ScoreChip> component. */
 
 .calendarWorkout {
-  background-color: #e9ecef;
-  border-radius: 4px;
+  background-color: var(--color-surface-2);
+  border-radius: var(--radius-sm);
   padding: 4px 8px;
   font-size: 0.8rem;
   display: flex;
-  justify-content: space-between;
+  gap: 6px;
   align-items: flex-start;
   border-left: 3px solid transparent;
-  transition: all 0.2s ease;
+  transition:
+    background-color 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
 .calendarWorkout:hover {
-  background-color: #dee2e6;
+  background-color: var(--color-border);
+  box-shadow: var(--shadow-1);
   text-decoration: none;
 }
 
 .calendarWorkout.withInstructor {
-  background-color: #e6f7ff;
-  border-left: 3px solid #1890ff;
+  background-color: var(--color-primary-tint);
+  border-left: 3px solid var(--color-primary);
 }
 
 .calendarWorkout.withInstructor:hover {
-  background-color: #d6eaff;
+  background-color: var(--color-primary-tint);
+}
+
+.workoutIcon {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--color-primary);
+  font-size: 12px;
 }
 
 .workoutExercises {
   flex: 1;
+  min-width: 0;
 }
 
 .workoutExercise {
@@ -81,69 +48,32 @@
   text-overflow: ellipsis;
 }
 
-.verticalPainScore {
-  background-color: #f44336;
-  color: white;
-  padding: 6px 10px;
-  border-radius: 4px;
-  margin-bottom: 8px;
-  font-size: 14px;
-  border: none;
-  cursor: pointer;
-  width: 100%;
-  text-align: left;
-}
-
-.verticalPainScore:hover {
-  opacity: 0.9;
-}
-
-.verticalSleepScore {
-  background-color: #4caf50;
-  color: white;
-  padding: 6px 10px;
-  border-radius: 4px;
-  margin-bottom: 8px;
-  font-size: 14px;
-  border: none;
-  cursor: pointer;
-  width: 100%;
-  text-align: left;
-}
-
-.verticalSleepScore:hover {
-  opacity: 0.9;
-}
-
-.verticalPainScore:hover {
-  opacity: 0.9;
-  /* Remove the scale transform to prevent potential overflow issues */
-  filter: brightness(1.1);
-}
-
 .verticalWorkout {
-  background-color: #e9ecef;
-  border-radius: 4px;
+  background-color: var(--color-surface-2);
+  border-radius: var(--radius-sm);
   padding: 12px;
   text-decoration: none;
   color: inherit;
   display: block;
   border-left: 3px solid transparent;
-  transition: all 0.2s ease;
+  transition:
+    background-color 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
 .verticalWorkout:hover {
-  background-color: #dee2e6;
+  background-color: var(--color-border);
+  box-shadow: var(--shadow-1);
   text-decoration: none;
 }
 
 .verticalWorkout.withInstructor {
-  background-color: #e6f7ff;
-  border-left: 3px solid #1890ff;
+  background-color: var(--color-primary-tint);
+  border-left: 3px solid var(--color-primary);
 }
 
 .verticalWorkout.withInstructor:hover {
-  background-color: #d6eaff;
+  background-color: var(--color-primary-tint);
 }
 
 .verticalWorkoutExercises {
@@ -163,8 +93,10 @@
 }
 
 .exerciseDetails {
-  color: #666;
-  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.85rem;
 }
 
 /* Media query for mobile view */

@@ -13,10 +13,13 @@ import {
 import { deletePainScore, deleteWorkout, deleteSleepScore, fetchActivity } from '../api';
 import classNames from 'classnames';
 import styles from './ListView.module.css';
-import buttonStyles from '../styles/common/buttons.module.css';
 import { useUserContext } from '../contexts/useUserContext';
+import { Button } from './ui/Button';
+import { Card } from './ui/Card';
 import { listViewReducer, createInitialListViewState } from './listView.reducer';
 import { formatWeightWithKg } from '../utils/weight';
+import { Badge } from './ui/Badge';
+import { getPainSeverityColor, getSleepSeverityColor } from '../styles/chartColors';
 
 export const ListView = () => {
   const { user } = useUserContext();
@@ -121,15 +124,6 @@ export const ListView = () => {
 
   // Items are already sorted by date descending from the API
 
-  // Function to get color based on pain score
-  const getPainScoreColor = (score: number): string => {
-    if (score === 0) return '#4caf50'; // Green for no pain
-    if (score <= 3) return '#8bc34a'; // Light green for mild pain
-    if (score <= 5) return '#ffc107'; // Yellow for moderate pain
-    if (score <= 7) return '#ff9800'; // Orange for severe pain
-    return '#f44336'; // Red for extreme pain
-  };
-
   // Function to get pain score description
   const getPainScoreDescription = (score: number): string => {
     const descriptions = [
@@ -159,24 +153,6 @@ export const ListView = () => {
       'Excellent - Sleep was consistently uninterrupted and restorative, with minimal or no awakenings throughout the night.',
     ];
     return descriptions[score] || '';
-  };
-
-  // Function to get color based on sleep score
-  const getSleepScoreColor = (score: number): string => {
-    switch (score) {
-      case 5:
-        return '#4caf50'; // Green for excellent sleep
-      case 4:
-        return '#8bc34a'; // Light green for good sleep
-      case 3:
-        return '#ffc107'; // Yellow for fair sleep
-      case 2:
-        return '#ff9800'; // Orange for poor sleep
-      case 1:
-        return '#f44336'; // Red for very poor sleep
-      default:
-        return '#ffc107'; // Default to yellow
-    }
   };
 
   const handleDeleteWorkout = async (workoutId: number) => {
@@ -259,12 +235,9 @@ export const ListView = () => {
               />
               Sleep Scores
             </label>
-            <button
-              onClick={showAll}
-              className={classNames(buttonStyles.secondaryBtn, styles.showAllBtn)}
-            >
+            <Button variant="secondary" size="sm" onClick={showAll} className={styles.showAllBtn}>
               Show All
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -277,39 +250,43 @@ export const ListView = () => {
             if (item.type === 'workout' && item.workout) {
               const workout = item.workout;
               return (
-                <div
+                <Card
+                  interactive
                   key={`workout-${workout.id}`}
                   data-testid={`workout-card-${workout.date}`}
-                  className={classNames(styles.listCard, styles.workoutCard, {
-                    [styles.withInstructor]: workout.withInstructor,
-                  })}
+                  accent={workout.withInstructor ? 'var(--color-primary)' : undefined}
+                  className={workout.withInstructor ? styles.instructorCard : undefined}
                 >
                   <div className={styles.listCardHeader}>
                     <div className={styles.listCardType}>Workout</div>
                     <h3>
                       {format(`${workout.date}T12:00:00.000`, 'MMM d, yyyy (eeee)')}
                       {workout.withInstructor && (
-                        <span className={styles.srOnly}>With Instructor</span>
+                        <Badge variant="primary" size="sm" className={styles.inlineBadge}>
+                          With Instructor
+                        </Badge>
                       )}
                     </h3>
                     <div className={styles.listCardActions}>
-                      <Link
+                      <Button
                         to={toWorkoutEditPath(workout)}
-                        className={classNames(styles.editBtn, buttonStyles.tertiaryIconBtn)}
+                        iconOnly
+                        variant="tertiary"
                         title="Edit workout"
                       >
                         <MdOutlineEdit />
-                      </Link>
-                      <button
+                      </Button>
+                      <Button
+                        iconOnly
+                        variant="danger"
                         onClick={() => handleDeleteWorkout(workout.id)}
                         disabled={isDeleting?.type === 'workout' && isDeleting.id === workout.id}
-                        className={classNames(styles.deleteBtn, buttonStyles.secondaryIconBtn)}
                         title="Delete workout"
                       >
                         {isDeleting?.type === 'workout' && isDeleting.id === workout.id
                           ? '...'
                           : 'x'}
-                      </button>
+                      </Button>
                     </div>
                   </div>
                   <div className={styles.listCardContent}>
@@ -326,54 +303,61 @@ export const ListView = () => {
                             </span>
                             <div className={styles.badgeContainer}>
                               {exercise.newReps && (
-                                <span className={styles.newBadge}>NEW REPS</span>
+                                <Badge variant="accent" size="sm">
+                                  NEW REPS
+                                </Badge>
                               )}
                               {exercise.newWeight && (
-                                <span className={styles.newBadge}>NEW WEIGHT</span>
+                                <Badge variant="accent" size="sm">
+                                  NEW WEIGHT
+                                </Badge>
                               )}
                               {exercise.newTime && (
-                                <span className={styles.newBadge}>NEW TIME</span>
+                                <Badge variant="accent" size="sm">
+                                  NEW TIME
+                                </Badge>
                               )}
                             </div>
                           </div>
                         ))}
                     </div>
                   </div>
-                </div>
+                </Card>
               );
             } else if (item.type === 'painScore' && item.painScore) {
               const painScore = item.painScore;
               return (
-                <div
+                <Card
+                  interactive
                   key={`pain-score-${painScore.id}`}
-                  className={classNames(styles.listCard, styles.painScoreCard)}
-                  style={{
-                    borderLeftColor: getPainScoreColor(painScore.score),
-                  }}
+                  className={styles.painScoreCard}
+                  accent={getPainSeverityColor(painScore.score)}
                 >
                   <div className={styles.listCardHeader}>
                     <div className={styles.listCardType}>Pain Score</div>
                     <h3>{format(`${painScore.date}T12:00:00.000`, 'MMM d, yyyy (eeee)')}</h3>
                     <div className={styles.listCardActions}>
-                      <Link
+                      <Button
                         to={toPainScoreEditPath(painScore)}
-                        className={classNames(styles.editBtn, buttonStyles.tertiaryIconBtn)}
+                        iconOnly
+                        variant="tertiary"
                         title="Edit pain score"
                       >
                         <MdOutlineEdit />
-                      </Link>
-                      <button
+                      </Button>
+                      <Button
+                        iconOnly
+                        variant="danger"
                         onClick={() => handleDeletePainScore(painScore.id)}
                         disabled={
                           isDeleting?.type === 'painScore' && isDeleting.id === painScore.id
                         }
-                        className={classNames(styles.deleteBtn, buttonStyles.secondaryIconBtn)}
                         title="Delete pain score"
                       >
                         {isDeleting?.type === 'painScore' && isDeleting.id === painScore.id
                           ? '...'
                           : 'x'}
-                      </button>
+                      </Button>
                     </div>
                   </div>
                   <div className={styles.listCardContent}>
@@ -390,41 +374,42 @@ export const ListView = () => {
                       </div>
                     )}
                   </div>
-                </div>
+                </Card>
               );
             } else if (item.type === 'sleepScore' && item.sleepScore) {
               const sleepScore = item.sleepScore;
               return (
-                <div
+                <Card
+                  interactive
                   key={`sleep-score-${sleepScore.id}`}
-                  className={classNames(styles.listCard, styles.sleepScoreCard)}
-                  style={{
-                    borderLeftColor: getSleepScoreColor(sleepScore.score),
-                  }}
+                  className={styles.sleepScoreCard}
+                  accent={getSleepSeverityColor(sleepScore.score)}
                 >
                   <div className={styles.listCardHeader}>
                     <div className={styles.listCardType}>Sleep Score</div>
                     <h3>{format(`${sleepScore.date}T12:00:00.000`, 'MMM d, yyyy (eeee)')}</h3>
                     <div className={styles.listCardActions}>
-                      <Link
+                      <Button
                         to={toSleepScoreEditPath(sleepScore)}
-                        className={classNames(styles.editBtn, buttonStyles.tertiaryIconBtn)}
+                        iconOnly
+                        variant="tertiary"
                         title="Edit sleep score"
                       >
                         <MdOutlineEdit />
-                      </Link>
-                      <button
+                      </Button>
+                      <Button
+                        iconOnly
+                        variant="danger"
                         onClick={() => handleDeleteSleepScore(sleepScore.id)}
                         disabled={
                           isDeleting?.type === 'sleepScore' && isDeleting.id === sleepScore.id
                         }
-                        className={classNames(styles.deleteBtn, buttonStyles.secondaryIconBtn)}
                         title="Delete sleep score"
                       >
                         {isDeleting?.type === 'sleepScore' && isDeleting.id === sleepScore.id
                           ? '...'
                           : 'x'}
-                      </button>
+                      </Button>
                     </div>
                   </div>
                   <div className={styles.listCardContent}>
@@ -446,7 +431,7 @@ export const ListView = () => {
                       </div>
                     )}
                   </div>
-                </div>
+                </Card>
               );
             }
           })}
@@ -456,13 +441,9 @@ export const ListView = () => {
       {/* Load More Button */}
       {activityItems.length < totalCount && (
         <div className={styles.loadMoreContainer}>
-          <button
-            onClick={handleLoadMore}
-            disabled={isLoadingMore}
-            className={classNames(buttonStyles.secondaryBtn, styles.loadMoreBtn)}
-          >
+          <Button variant="secondary" size="lg" onClick={handleLoadMore} disabled={isLoadingMore}>
             {isLoadingMore ? 'Loading...' : 'Load Previous Month'}
-          </button>
+          </Button>
         </div>
       )}
 

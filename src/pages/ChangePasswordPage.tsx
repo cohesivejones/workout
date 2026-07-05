@@ -1,9 +1,11 @@
 import { useForm } from 'react-hook-form';
 import { useState } from 'react';
 import axios from 'axios';
+import { FaLock } from 'react-icons/fa';
 import { useUserContext } from '../contexts/useUserContext';
 import styles from './ChangePasswordPage.module.css';
 import FormContainer from '../components/common/FormContainer';
+import { Button } from '../components/ui/Button';
 
 type FormValues = {
   currentPassword: string;
@@ -100,12 +102,14 @@ function ChangePasswordPage() {
   return (
     <FormContainer
       title="Change Password"
+      subtitle="Update your password below"
+      icon={<FaLock aria-hidden="true" />}
+      centered
       errorMessage={errors.root?.message}
       successMessage={successMessage}
       onSubmit={handleSubmit(onSubmit)}
       className={styles.changePasswordContainer}
     >
-      <p>Update your password below</p>
       <div className={styles.formGroup}>
         <label htmlFor="currentPassword">Current Password</label>
         <input
@@ -156,9 +160,9 @@ function ChangePasswordPage() {
         )}
       </div>
 
-      <button type="submit" className={styles.changePasswordButton} disabled={isSubmitting}>
+      <Button type="submit" variant="primary" fullWidth disabled={isSubmitting}>
         {isSubmitting ? 'Changing Password...' : 'Change Password'}
-      </button>
+      </Button>
     </FormContainer>
   );
 }

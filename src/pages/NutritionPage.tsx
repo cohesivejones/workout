@@ -12,9 +12,9 @@ import { Meal, WeightEntry } from '../types';
 import { useUserContext } from '../contexts/useUserContext';
 import { getLocalDateString } from '../utils/dates';
 import { MdOutlineEdit } from 'react-icons/md';
-import classNames from 'classnames';
 import styles from './NutritionPage.module.css';
-import buttonStyles from '../styles/common/buttons.module.css';
+import { PageHeader } from '../components/ui/PageHeader';
+import { Button } from '../components/ui/Button';
 
 function NutritionPage(): React.ReactElement {
   const [, setLocation] = useLocation();
@@ -159,9 +159,7 @@ function NutritionPage(): React.ReactElement {
 
   return (
     <div className={styles.nutritionPage}>
-      <div className={styles.pageHeader}>
-        <h2>Nutrition</h2>
-      </div>
+      <PageHeader title="Nutrition" />
 
       <div className={styles.dateNavigator}>
         <button onClick={() => handleDateChange(-1)} className={styles.navButton}>
@@ -203,21 +201,23 @@ function NutritionPage(): React.ReactElement {
                   <div className={styles.mealHeader}>
                     <h4 className={styles.mealDescription}>{meal.description}</h4>
                     <div className={styles.mealActions}>
-                      <button
+                      <Button
+                        iconOnly
+                        variant="tertiary"
                         onClick={() => handleEditMeal(meal.id)}
-                        className={classNames(styles.editBtn, buttonStyles.tertiaryIconBtn)}
                         title="Edit meal"
                       >
                         <MdOutlineEdit />
-                      </button>
-                      <button
+                      </Button>
+                      <Button
+                        iconOnly
+                        variant="secondary"
                         onClick={() => handleDeleteMeal(meal.id)}
-                        className={classNames(styles.deleteBtn, buttonStyles.secondaryIconBtn)}
                         title="Delete meal"
                         aria-label="Delete meal"
                       >
                         x
-                      </button>
+                      </Button>
                     </div>
                   </div>
                   <div className={styles.mealMacros}>
@@ -288,21 +288,23 @@ function NutritionPage(): React.ReactElement {
           {/* Daily Totals Section */}
           <h4>Daily Totals</h4>
           <div className={styles.totalsCard}>
-            <div className={styles.totalRow}>
-              <span className={styles.totalLabel}>Calories:</span>
-              <span className={styles.totalValue}>{dailyTotals.calories.toFixed(0)}</span>
+            <div className={styles.caloriesHero}>
+              <span className={styles.caloriesValue}>{dailyTotals.calories.toFixed(0)}</span>
+              <span className={styles.caloriesUnit}>calories today</span>
             </div>
-            <div className={styles.totalRow}>
-              <span className={styles.totalLabel}>Protein:</span>
-              <span className={styles.totalValue}>{dailyTotals.protein.toFixed(1)}g</span>
-            </div>
-            <div className={styles.totalRow}>
-              <span className={styles.totalLabel}>Carbs:</span>
-              <span className={styles.totalValue}>{dailyTotals.carbs.toFixed(1)}g</span>
-            </div>
-            <div className={styles.totalRow}>
-              <span className={styles.totalLabel}>Fat:</span>
-              <span className={styles.totalValue}>{dailyTotals.fat.toFixed(1)}g</span>
+            <div className={styles.macroGrid}>
+              <div className={styles.macroTile}>
+                <span className={styles.macroValue}>{dailyTotals.protein.toFixed(0)}g</span>
+                <span className={styles.macroName}>Protein</span>
+              </div>
+              <div className={styles.macroTile}>
+                <span className={styles.macroValue}>{dailyTotals.carbs.toFixed(0)}g</span>
+                <span className={styles.macroName}>Carbs</span>
+              </div>
+              <div className={styles.macroTile}>
+                <span className={styles.macroValue}>{dailyTotals.fat.toFixed(0)}g</span>
+                <span className={styles.macroName}>Fat</span>
+              </div>
             </div>
           </div>
         </div>

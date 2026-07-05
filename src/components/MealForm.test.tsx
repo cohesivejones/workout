@@ -123,7 +123,7 @@ describe('MealForm', () => {
     fireEvent.change(screen.getByLabelText(/Carbs \(g\):/i), { target: { value: '30' } });
     fireEvent.change(screen.getByLabelText(/Fat \(g\):/i), { target: { value: '15' } });
 
-    fireEvent.change(screen.getByLabelText(/Multiplier:/i), { target: { value: '2' } });
+    fireEvent.click(screen.getByRole('button', { name: '2×' }));
 
     fireEvent.click(screen.getByText('Save Meal'));
 

@@ -34,17 +34,18 @@
 }
 
 .workoutDetailCard {
-  background: #f5f5f5;
-  border-radius: 8px;
-  padding: 20px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid transparent;
+  border-radius: var(--radius-md);
+  padding: 22px 24px;
   margin-bottom: 20px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  border-left: 4px solid transparent;
+  box-shadow: var(--shadow-1);
 }
 
 .withInstructor {
-  background: #e6f7ff;
-  border-left: 4px solid #1890ff;
+  border-left-color: var(--color-primary);
+  background: linear-gradient(90deg, var(--color-primary-tint) 0%, var(--color-surface) 30%);
 }
 
 .workoutDetailHeader {
@@ -53,21 +54,12 @@
   align-items: center;
   margin-bottom: 20px;
   padding-bottom: 15px;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .workoutDetailHeader h3 {
   margin: 0;
   font-size: 1.5rem;
-}
-
-.instructorBadge {
-  background-color: #1890ff;
-  color: white;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 0.8rem;
-  font-weight: 500;
 }
 
 .workoutDetailContent {
@@ -76,8 +68,13 @@
 
 .workoutDetailContent h4 {
   margin-top: 0;
-  margin-bottom: 15px;
-  font-size: 1.2rem;
+  margin-bottom: 12px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-faint);
   text-align: left;
 }
 
@@ -92,11 +89,27 @@
   justify-content: space-between;
   align-items: center;
   padding: 12px 0;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .exerciseDetailItem:last-child {
   border-bottom: none;
+}
+
+/* Personal-record row — coral "achievement" accent */
+.prItem {
+  background: linear-gradient(90deg, var(--color-accent-tint) 0%, transparent 55%);
+  box-shadow: inset 3px 0 0 var(--color-accent);
+  border-radius: var(--radius-sm);
+  margin: 0 -12px;
+  padding-left: 12px;
+  padding-right: 12px;
+}
+
+.prTrophy {
+  color: var(--color-accent);
+  font-size: 14px;
+  align-self: center;
 }
 
 .exerciseDetailName {
@@ -106,17 +119,22 @@
 
 .exerciseDetailStats {
   display: flex;
-  gap: 15px;
-  color: #666;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+  color: var(--color-text-muted);
 }
 
 .exerciseDetailReps,
 .exerciseDetailWeight,
 .exerciseDetailTime {
-  background-color: #f1f1f1;
+  background-color: var(--color-surface-2);
   padding: 4px 8px;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   font-size: 0.9rem;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 .workoutDetailActions {
@@ -125,7 +143,7 @@
   justify-content: flex-end;
   margin-top: 20px;
   padding-top: 15px;
-  border-top: 1px solid #ddd;
+  border-top: 1px solid var(--color-border);
 }
 
 .loading,
@@ -136,26 +154,15 @@
 }
 
 .errorMessage {
-  color: #ff4444;
-  background-color: #ffebeb;
-  border-radius: 4px;
+  color: var(--color-danger);
+  background-color: var(--color-danger-tint);
+  border-radius: var(--radius-sm);
 }
 
 .badgeContainer {
   display: flex;
+  align-items: center;
   gap: 4px;
-  margin-left: 10px;
-}
-
-.newBadge {
-  background-color: #ff6b6b;
-  color: white;
-  font-size: 0.7rem;
-  font-weight: 600;
-  padding: 2px 6px;
-  border-radius: 4px;
-  text-transform: uppercase;
-  white-space: nowrap;
 }
 
 @media (max-width: 768px) {

@@ -1,0 +1,75 @@
+/* ============================================================
+   Design tokens — single source of truth for the app's look.
+   Refresh of the old Bootstrap-era palette. See MEMORY / design-pitch.
+   Consume everywhere via var(--token), never hardcode hex.
+   ============================================================ */
+
+:root {
+  /* ---- Brand ---- */
+  --color-primary: #0e6e5e;
+  --color-primary-hover: #0b5a4d;
+  --color-primary-active: #084739;
+  --color-primary-tint: #e4f1ed; /* light bg for hover/selected states */
+
+  /* Energy accent — use sparingly: primary CTA, FAB, streaks/highlights only */
+  --color-accent: #ff6a45;
+  --color-accent-hover: #ee5530;
+  --color-accent-tint: #ffe9e2;
+
+  /* ---- Semantic (status) — kept separate from the accent ---- */
+  --color-success: #2e9e6b;
+  --color-success-tint: #e7f4ec;
+  --color-success-ink: #1f7a4f;
+  --color-warning: #e0a13b;
+  --color-warning-tint: #fbf1de;
+  --color-danger: #db4b3f;
+  --color-danger-tint: #fcebea;
+  --color-danger-ink: #a5342b;
+
+  /* ---- Neutrals — warm-cool grays with a faint green bias ---- */
+  --color-ink: #16201c; /* primary text */
+  --color-ink-800: #33413b;
+  --color-text: #16201c;
+  --color-text-muted: #5b6b64; /* secondary text */
+  --color-text-faint: #8a968f; /* captions, placeholders, labels */
+
+  --color-ground: #f5f7f4; /* app background */
+  --color-surface: #ffffff; /* cards, inputs */
+  --color-surface-2: #eef2ef; /* subtle fills, section headers, pills */
+  --color-border: #dbe3de;
+  --color-border-strong: #c6d1cb;
+
+  /* ---- Dark nav surface ---- */
+  --color-nav-from: #12463c;
+  --color-nav-to: #0e3a31;
+  --color-nav-text: rgba(255, 255, 255, 0.85);
+  --color-nav-text-strong: #ffffff;
+  --color-nav-hover: rgba(255, 255, 255, 0.1);
+  --color-nav-active: rgba(255, 255, 255, 0.14);
+
+  /* ---- Radii ---- */
+  --radius-sm: 6px; /* buttons, inputs */
+  --radius-md: 10px; /* cards */
+  --radius-lg: 16px; /* large panels */
+  --radius-pill: 999px;
+
+  /* ---- Shadows (ambient + key light) ---- */
+  --shadow-1: 0 1px 2px rgba(16, 32, 28, 0.06), 0 1px 1px rgba(16, 32, 28, 0.04);
+  --shadow-2: 0 2px 4px rgba(16, 32, 28, 0.06), 0 8px 20px -8px rgba(16, 32, 28, 0.14);
+  --shadow-3: 0 6px 12px rgba(16, 32, 28, 0.1), 0 18px 40px -12px rgba(14, 110, 94, 0.28);
+  --focus-ring: 0 0 0 3px rgba(14, 110, 94, 0.18);
+
+  /* ---- Spacing scale (4px base) ---- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  /* ---- Typography ---- */
+  --font-display: ui-rounded, 'SF Pro Rounded', 'Hiragino Maru Gothic ProN', system-ui, sans-serif;
+  --font-body: system-ui, -apple-system, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', 'Cascadia Code', 'Roboto Mono', Menlo, monospace;
+}

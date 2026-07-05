@@ -3,8 +3,7 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import { SleepScore } from '../types';
 import { getLocalDateString } from '../utils/dates';
 import styles from './SleepScoreForm.module.css';
-import classNames from 'classnames';
-import buttonStyles from '../styles/common/buttons.module.css';
+import { Button } from './ui/Button';
 import SleepScaleSelector from './SleepScaleSelector';
 import FormContainer from './common/FormContainer';
 
@@ -123,10 +122,11 @@ function SleepScoreForm({
       </div>
 
       <div className={styles.formButtons}>
-        <button
+        <Button
           type="submit"
+          variant="primary"
+          fullWidth
           disabled={isSubmitting}
-          className={classNames(styles.saveSleepScoreBtn, buttonStyles.primaryBtn)}
           title={existingSleepScore ? 'Update sleep score' : 'Save sleep score'}
         >
           {isSubmitting ? (
@@ -134,17 +134,18 @@ function SleepScoreForm({
           ) : (
             <>{existingSleepScore ? 'Update Sleep Score' : 'Save Sleep Score'}</>
           )}
-        </button>
+        </Button>
 
         {onCancel && (
-          <button
+          <Button
             type="button"
+            variant="secondary"
+            fullWidth
             onClick={onCancel}
-            className={classNames(styles.cancelBtn, buttonStyles.secondaryBtn)}
             disabled={isSubmitting}
           >
             Cancel
-          </button>
+          </Button>
         )}
       </div>
     </FormContainer>

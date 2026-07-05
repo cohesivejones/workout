@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'wouter';
+import { useParams } from 'wouter';
 import { fetchExerciseProgression, ExerciseProgressionResponse } from '../api';
 import {
   LineChart,
@@ -12,9 +12,10 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { formatShortDate, formatLongDate } from '../utils/dates';
+import { chartColors, prColors } from '../styles/chartColors';
 import styles from './ExerciseProgressionPage.module.css';
-import buttonStyles from '../styles/common/buttons.module.css';
-import classNames from 'classnames';
+import { PageHeader } from '../components/ui/PageHeader';
+import { Button } from '../components/ui/Button';
 
 // Custom dot component for weight chart
 const WeightDot = (props: {
@@ -28,7 +29,7 @@ const WeightDot = (props: {
     return null;
   }
 
-  const fill = payload.newWeight ? '#4caf50' : '#8884d8';
+  const fill = payload.newWeight ? prColors.weight : prColors.none;
   const r = payload.newWeight ? 6 : 4;
 
   return <circle cx={cx} cy={cy} r={r} fill={fill} stroke={fill} strokeWidth={2} />;
@@ -46,7 +47,7 @@ const RepsDot = (props: {
     return null;
   }
 
-  const fill = payload.newReps ? '#ffd700' : '#ff6b35';
+  const fill = payload.newReps ? prColors.reps : chartColors.accent;
   const r = payload.newReps ? 6 : 4;
 
   return <circle cx={cx} cy={cy} r={r} fill={fill} stroke={fill} strokeWidth={2} />;
@@ -97,12 +98,14 @@ function ExerciseProgressionPage() {
   if (!hasWeightData && !hasRepsData) {
     return (
       <div className={styles.progressionPage}>
-        <div className={styles.pageHeader}>
-          <h2>{progressionData.exerciseName}</h2>
-          <Link to="/" className={classNames(buttonStyles.tertiaryBtn)}>
-            Back
-          </Link>
-        </div>
+        <PageHeader
+          title={progressionData.exerciseName}
+          actions={
+            <Button to="/" variant="tertiary">
+              Back
+            </Button>
+          }
+        />
         <div className={styles.noData}>
           <p>No progression data available for this exercise.</p>
           <p>Start tracking this exercise in your workouts to see your progress over time!</p>
@@ -113,14 +116,15 @@ function ExerciseProgressionPage() {
 
   return (
     <div className={styles.progressionPage}>
-      <div className={styles.pageHeader}>
-        <h2>{progressionData.exerciseName}</h2>
-        <Link to="/" className={classNames(buttonStyles.tertiaryBtn)}>
-          Back
-        </Link>
-      </div>
-
-      <p className={styles.subtitle}>Track your progressive overload over time</p>
+      <PageHeader
+        title={progressionData.exerciseName}
+        subtitle="Track your progressive overload over time"
+        actions={
+          <Button to="/" variant="tertiary">
+            Back
+          </Button>
+        }
+      />
 
       <div className={styles.chartsContainer}>
         {/* Weight Progression Chart */}
@@ -157,7 +161,7 @@ function ExerciseProgressionPage() {
                 <Line
                   type="monotone"
                   dataKey="weight"
-                  stroke="#8884d8"
+                  stroke={chartColors.primary}
                   activeDot={{ r: 8 }}
                   connectNulls={true}
                   name="Weight"
@@ -167,11 +171,14 @@ function ExerciseProgressionPage() {
             </ResponsiveContainer>
             <div className={styles.prLegend}>
               <div className={styles.legendItem}>
-                <div className={styles.legendDot} style={{ backgroundColor: '#8884d8' }}></div>
+                <div className={styles.legendDot} style={{ backgroundColor: prColors.none }}></div>
                 <span>Normal</span>
               </div>
               <div className={styles.legendItem}>
-                <div className={styles.legendDot} style={{ backgroundColor: '#4caf50' }}></div>
+                <div
+                  className={styles.legendDot}
+                  style={{ backgroundColor: prColors.weight }}
+                ></div>
                 <span>New Weight PR</span>
               </div>
             </div>
@@ -212,7 +219,7 @@ function ExerciseProgressionPage() {
                 <Line
                   type="monotone"
                   dataKey="reps"
-                  stroke="#ff6b35"
+                  stroke={chartColors.accent}
                   activeDot={{ r: 8 }}
                   connectNulls={true}
                   name="Reps"
@@ -222,11 +229,14 @@ function ExerciseProgressionPage() {
             </ResponsiveContainer>
             <div className={styles.prLegend}>
               <div className={styles.legendItem}>
-                <div className={styles.legendDot} style={{ backgroundColor: '#ff6b35' }}></div>
+                <div
+                  className={styles.legendDot}
+                  style={{ backgroundColor: chartColors.accent }}
+                ></div>
                 <span>Normal</span>
               </div>
               <div className={styles.legendItem}>
-                <div className={styles.legendDot} style={{ backgroundColor: '#ffd700' }}></div>
+                <div className={styles.legendDot} style={{ backgroundColor: prColors.reps }}></div>
                 <span>New Rep PR</span>
               </div>
             </div>

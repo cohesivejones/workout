@@ -13,16 +13,16 @@
 
 .subtitle {
   margin: 0;
-  color: #6c757d;
+  color: var(--color-text-muted);
   font-size: 14px;
 }
 
 .errorMessage {
-  color: #dc3545;
+  color: var(--color-danger);
   margin-bottom: 16px;
   padding: 8px;
-  background-color: #f8d7da;
-  border-radius: 4px;
+  background-color: var(--color-danger-tint);
+  border-radius: var(--radius-sm);
 }
 
 .loading {
@@ -31,13 +31,48 @@
   align-items: center;
   height: 200px;
   font-size: 18px;
-  color: #6c757d;
+  color: var(--color-text-muted);
 }
 
-.noExercises {
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
-  color: #6c757d;
-  margin-top: 40px;
+  gap: 6px;
+  padding: 56px 24px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-1);
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.emptyIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--color-primary-tint);
+  color: var(--color-primary);
+  font-size: 28px;
+  margin-bottom: 6px;
+}
+
+.emptyTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  color: var(--color-ink);
+}
+
+.emptyText {
+  margin: 0;
+  color: var(--color-text-muted);
+  max-width: 42ch;
 }
 
 .exerciseList {
@@ -48,11 +83,12 @@
 .tableWrapper {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-1);
   margin: 0 auto;
-  padding: 12px 16px;
+  padding: 8px 20px;
   max-width: 900px;
 }
 
@@ -63,15 +99,15 @@
 }
 
 .exerciseTable thead {
-  background-color: #f8f9fa;
-  border-bottom: 2px solid #e9ecef;
+  background-color: var(--color-surface-2);
+  border-bottom: 2px solid var(--color-border);
 }
 
 .exerciseTable th {
   text-align: left;
   padding: 12px 16px;
   font-weight: 600;
-  color: #212529;
+  color: var(--color-ink);
   font-size: 14px;
 }
 
@@ -89,17 +125,17 @@
 }
 
 .exerciseTable tbody tr {
-  border-bottom: 1px solid #e9ecef;
+  border-bottom: 1px solid var(--color-border);
   transition: background-color 0.15s ease;
 }
 
 .exerciseTable tbody tr:hover {
-  background-color: #f8f9fa;
+  background-color: var(--color-surface-2);
 }
 
 .exerciseTable td {
   padding: 12px 16px;
-  color: #212529;
+  color: var(--color-ink);
 }
 
 .nameCell {
@@ -108,8 +144,23 @@
 }
 
 .exerciseName {
-  display: block;
-  color: #212529;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--color-ink);
+  font-size: 15px;
+}
+
+.exerciseIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--color-primary-tint);
+  color: var(--color-primary);
   font-size: 15px;
 }
 
@@ -140,13 +191,13 @@
 }
 
 .sortButton:focus-visible {
-  outline: 2px solid #80bdff;
+  outline: 2px solid var(--color-primary);
   outline-offset: 2px;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
 }
 
 .sortButton:hover span {
-  color: #0056b3;
+  color: var(--color-primary-active);
 }
 
 .sortIndicator {
@@ -155,55 +206,55 @@
   display: inline-block;
   width: 10px;
   text-align: center;
-  color: #6c757d;
+  color: var(--color-text-muted);
   transition:
     transform 0.15s ease,
     color 0.15s ease;
 }
 
 .sortButton:hover .sortIndicator {
-  color: #0056b3;
+  color: var(--color-primary-active);
 }
 
 .sortActive .sortIndicator {
-  color: #007bff;
+  color: var(--color-primary);
 }
 
 /* Button styles are now imported from common styles */
 
 .suggestBtn {
-  background-color: white;
+  background-color: var(--color-surface);
   border: none;
-  color: #28a745;
+  color: var(--color-success);
   cursor: pointer;
   font-size: 0.9rem;
   padding: 4px 8px;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
 }
 
 .suggestBtn:hover:not(:disabled) {
-  background-color: #e8f5e9;
-  color: #218838;
+  background-color: var(--color-success-tint);
+  color: var(--color-success-ink);
   text-decoration: none;
 }
 
 .suggestBtn:focus {
-  box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.3);
+  box-shadow: var(--focus-ring);
   outline: none;
 }
 
 .suggestBtn:disabled {
-  color: #6c757d;
+  color: var(--color-text-muted);
   cursor: not-allowed;
   opacity: 0.6;
 }
 
 .suggestionsDropdown {
   position: relative;
-  background: white;
-  border: 1px solid #28a745;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background: var(--color-surface);
+  border: 1px solid var(--color-success);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-2);
   padding: 12px;
   min-width: 250px;
   z-index: 10;
@@ -215,13 +266,13 @@
   align-items: center;
   margin-bottom: 8px;
   padding-bottom: 8px;
-  border-bottom: 1px solid #e9ecef;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .suggestionsTitle {
   font-size: 0.85rem;
   font-weight: 600;
-  color: #28a745;
+  color: var(--color-success);
 }
 
 .closeSuggestionsBtn {
@@ -229,7 +280,7 @@
   border: none;
   font-size: 1.5rem;
   line-height: 1;
-  color: #6c757d;
+  color: var(--color-text-muted);
   cursor: pointer;
   padding: 0;
   width: 24px;
@@ -240,7 +291,7 @@
 }
 
 .closeSuggestionsBtn:hover {
-  color: #dc3545;
+  color: var(--color-danger);
 }
 
 .suggestionsList {
@@ -250,46 +301,46 @@
 }
 
 .suggestionItem {
-  background: white;
-  border: 1px solid #e9ecef;
-  border-radius: 4px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
   padding: 8px 12px;
   text-align: left;
   cursor: pointer;
   font-size: 0.9rem;
-  color: #212529;
+  color: var(--color-ink);
   transition: all 0.15s ease;
 }
 
 .suggestionItem:hover {
-  background: #e8f5e9;
-  border-color: #28a745;
-  color: #218838;
+  background: var(--color-success-tint);
+  border-color: var(--color-success);
+  color: var(--color-success-ink);
 }
 
 .suggestionItem:focus {
-  outline: 2px solid #28a745;
+  outline: 2px solid var(--color-success);
   outline-offset: 2px;
 }
 
 .editBtn {
-  background-color: white;
+  background-color: var(--color-surface);
   border: none;
-  color: #007bff;
+  color: var(--color-primary);
   cursor: pointer;
   font-size: 0.9rem;
   padding: 4px 8px;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
 }
 
 .editBtn:hover {
-  background-color: #f0f8ff;
-  color: #0069d9;
+  background-color: var(--color-primary-tint);
+  color: var(--color-primary-hover);
   text-decoration: none;
 }
 
 .editBtn:focus {
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
+  box-shadow: var(--focus-ring);
   outline: none;
 }
 
@@ -302,8 +353,8 @@
 .exerciseNameInput {
   width: 100%;
   padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
   font-size: 1rem;
 }
 
@@ -317,51 +368,51 @@
 .cancelBtn {
   padding: 6px 12px;
   border: none;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   font-size: 0.9rem;
 }
 
 .saveBtn {
-  background: #007bff;
+  background: var(--color-primary);
   color: white;
-  border: 1px solid #007bff;
+  border: 1px solid var(--color-primary);
   padding: 6px 12px;
   font-size: 0.9rem;
 }
 
 .saveBtn:hover:not(:disabled) {
-  background: #0069d9;
-  border-color: #0069d9;
+  background: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
 }
 
 .saveBtn:focus:not(:disabled) {
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
+  box-shadow: var(--focus-ring);
   outline: none;
 }
 
 .cancelBtn {
-  background-color: white;
-  border: 1px solid #007bff;
-  color: #007bff;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-primary);
+  color: var(--color-primary);
   padding: 6px 12px;
   font-size: 0.9rem;
 }
 
 .cancelBtn:hover:not(:disabled) {
-  background-color: #e6f7ff;
-  color: #0069d9;
-  border-color: #0069d9;
+  background-color: var(--color-primary-tint);
+  color: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
 }
 
 .cancelBtn:focus:not(:disabled) {
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
+  box-shadow: var(--focus-ring);
   outline: none;
 }
 
 .saveBtn:disabled,
 .cancelBtn:disabled {
-  background-color: #cccccc;
+  background-color: var(--color-border-strong);
   cursor: not-allowed;
 }
 

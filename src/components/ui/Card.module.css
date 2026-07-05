@@ -1,0 +1,35 @@
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-1);
+}
+
+.pad-none {
+  padding: 0;
+}
+.pad-sm {
+  padding: 12px;
+}
+.pad-md {
+  padding: 20px;
+}
+.pad-lg {
+  padding: 24px;
+}
+
+.interactive {
+  transition:
+    box-shadow 0.18s ease,
+    transform 0.18s ease;
+}
+
+.interactive:hover {
+  box-shadow: var(--shadow-2);
+  transform: translateY(-2px);
+}
+
+.accented {
+  border-left-width: 3px;
+  border-left-style: solid;
+}

@@ -2,9 +2,8 @@ import * as React from 'react';
 import { Link } from 'wouter';
 import { WorkoutFormProps, WorkoutExercise } from '../types';
 import CreatableSelect from 'react-select/creatable';
-import classNames from 'classnames';
 import styles from './WorkoutForm.module.css';
-import buttonStyles from '../styles/common/buttons.module.css';
+import { Button } from './ui/Button';
 import { useUserContext } from '../contexts/useUserContext';
 import { fetchRecentExerciseData } from '../api';
 import { useForm, useFieldArray, Controller, SubmitHandler } from 'react-hook-form';
@@ -16,7 +15,8 @@ import { getLocalDateString } from '../utils/dates';
 import { GiMuscleUp } from 'react-icons/gi';
 import { IoRepeat } from 'react-icons/io5';
 import { IoMdStopwatch } from 'react-icons/io';
-import { FaWeightHanging } from 'react-icons/fa';
+import { FaWeightHanging, FaTrophy } from 'react-icons/fa';
+import { Badge } from './ui/Badge';
 
 interface FormValues {
   date: string;
@@ -295,17 +295,18 @@ function WorkoutForm({
               className={styles.exerciseInputField}
               {...register('currentExercise.timeSeconds')}
             />
-            <button
+            <Button
               type="button"
+              variant="secondary"
+              fullWidth
               onClick={addExercise}
               disabled={
                 !currentExercise.name || !currentExercise.reps || isSavingExercise || isSubmitting
               }
-              className={classNames(styles.addExerciseBtn, buttonStyles.secondaryBtn)}
               title="Add exercise to workout"
             >
               {isSavingExercise ? 'Adding...' : <>Add Exercise</>}
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -336,7 +337,13 @@ function WorkoutForm({
                 {fields.map((field, index) => (
                   <li
                     key={field.id}
-                    className={styles.exerciseItem}
+                    className={`${styles.exerciseItem} ${
+                      exercises[index].newReps ||
+                      exercises[index].newWeight ||
+                      exercises[index].newTime
+                        ? styles.prItem
+                        : ''
+                    }`}
                     data-testid={`added-exercise-${toKebabCase(exercises[index].name)}`}
                   >
                     <div className={styles.exerciseInfo}>
@@ -376,30 +383,39 @@ function WorkoutForm({
                           exercises[index].newWeight ||
                           exercises[index].newTime) && (
                           <div className={styles.badgeContainer}>
+                            <FaTrophy
+                              className={styles.prTrophy}
+                              aria-hidden="true"
+                              title="Personal record"
+                            />
                             {exercises[index].newReps && (
-                              <span className={styles.newBadge}>NEW REPS</span>
+                              <Badge variant="accent" size="sm">
+                                NEW REPS
+                              </Badge>
                             )}
                             {exercises[index].newWeight && (
-                              <span className={styles.newBadge}>NEW WEIGHT</span>
+                              <Badge variant="accent" size="sm">
+                                NEW WEIGHT
+                              </Badge>
                             )}
                             {exercises[index].newTime && (
-                              <span className={styles.newBadge}>NEW TIME</span>
+                              <Badge variant="accent" size="sm">
+                                NEW TIME
+                              </Badge>
                             )}
                           </div>
                         )}
                       </div>
                     </div>
-                    <button
+                    <Button
                       type="button"
-                      className={classNames(
-                        styles.removeExerciseBtn,
-                        buttonStyles.secondaryIconBtn
-                      )}
+                      variant="secondary"
+                      iconOnly
                       onClick={() => remove(index)}
                       title="Remove exercise"
                     >
                       x
-                    </button>
+                    </Button>
                   </li>
                 ))}
               </ul>
@@ -408,10 +424,11 @@ function WorkoutForm({
         </div>
 
         <div className={styles.formButtons}>
-          <button
+          <Button
             type="submit"
+            variant="primary"
+            fullWidth
             disabled={fields.length === 0 || isSubmitting}
-            className={classNames(styles.saveWorkoutBtn, buttonStyles.primaryBtn)}
             title={existingWorkout ? 'Update workout' : 'Save workout'}
           >
             {isSubmitting ? (
@@ -419,17 +436,18 @@ function WorkoutForm({
             ) : (
               <>{existingWorkout ? 'Update Workout' : 'Save Workout'}</>
             )}
-          </button>
+          </Button>
 
           {onCancel && (
-            <button
+            <Button
               type="button"
+              variant="secondary"
+              fullWidth
               onClick={onCancel}
-              className={classNames(styles.cancelBtn, buttonStyles.secondaryBtn)}
               disabled={isSubmitting}
             >
               Cancel
-            </button>
+            </Button>
           )}
         </div>
       </form>

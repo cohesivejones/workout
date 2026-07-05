@@ -3,29 +3,47 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 2rem;
   text-align: center;
-  min-height: 50vh;
+  gap: 12px;
+  padding: 3rem 1.5rem;
+  min-height: calc(100vh - 200px);
 }
 
-.notFoundContainer h2 {
-  font-size: 2.5rem;
-  margin-bottom: 1rem;
-  color: #e74c3c;
+.iconBadge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  background: var(--color-primary-tint);
+  color: var(--color-primary);
+  font-size: 38px;
+  box-shadow: var(--shadow-1);
+  margin-bottom: 8px;
 }
 
-.notFoundContainer p {
-  font-size: 1.2rem;
-  margin-bottom: 2rem;
-  color: #555;
+.code {
+  font-family: var(--font-display);
+  font-size: clamp(64px, 12vw, 104px);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: var(--color-primary);
 }
 
-/* Link styles are now imported from common styles */
+.title {
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--color-ink);
+  margin: 0;
+}
 
-.homeLink {
-  display: inline-block;
-  padding: 0.8rem 1.5rem;
-  font-weight: bold;
-  transition: background-color 0.3s;
-  font-size: 16px;
+.message {
+  font-size: 1.05rem;
+  color: var(--color-text-muted);
+  margin: 0 0 12px;
+  max-width: 42ch;
 }

@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { useUserContext } from '../contexts/useUserContext';
 import { fetchDiagnosticData, analyzeDiagnosticData } from '../api';
 import styles from './DiagnosticianPage.module.css';
-import buttonStyles from '../styles/common/buttons.module.css';
+import { PageHeader } from '../components/ui/PageHeader';
+import { Button } from '../components/ui/Button';
 
 function DiagnosticianPage(): React.ReactElement {
   const { user } = useUserContext();
@@ -36,9 +37,7 @@ function DiagnosticianPage(): React.ReactElement {
 
   return (
     <div className={styles.diagnosticianPage}>
-      <div className={styles.pageHeader}>
-        <h2>Workout Pain Analysis</h2>
-      </div>
+      <PageHeader title="Workout Pain Analysis" />
 
       <div className={styles.diagnosticContent}>
         <p>
@@ -47,9 +46,9 @@ function DiagnosticianPage(): React.ReactElement {
         </p>
 
         <div className={styles.actionSection}>
-          <button className={buttonStyles.primaryBtn} onClick={handleDiagnose} disabled={loading}>
+          <Button variant="primary" onClick={handleDiagnose} disabled={loading}>
             {loading ? 'Analyzing...' : 'Diagnose'}
-          </button>
+          </Button>
         </div>
 
         {error && <div className={styles.errorMessage}>{error}</div>}

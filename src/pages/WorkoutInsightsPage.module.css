@@ -6,7 +6,7 @@
 
 .description {
   margin-bottom: 30px;
-  color: #666;
+  color: var(--color-text-muted);
   line-height: 1.6;
 }
 
@@ -18,55 +18,55 @@
 
 .label {
   font-weight: 600;
-  color: #333;
+  color: var(--color-ink);
   margin-bottom: 5px;
 }
 
 .timeframeSelect {
   padding: 10px;
   font-size: 16px;
-  border: 2px solid #ddd;
-  border-radius: 8px;
-  background-color: white;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
   cursor: pointer;
   transition: border-color 0.2s;
 }
 
 .timeframeSelect:hover {
-  border-color: #999;
+  border-color: var(--color-text-faint);
 }
 
 .timeframeSelect:focus {
   outline: none;
-  border-color: #007bff;
+  border-color: var(--color-primary);
 }
 
 .timeframeSelect:disabled {
-  background-color: #f5f5f5;
+  background-color: var(--color-surface-2);
   cursor: not-allowed;
 }
 
 .questionInput {
   padding: 12px;
   font-size: 16px;
-  border: 2px solid #ddd;
-  border-radius: 8px;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
   font-family: inherit;
   resize: vertical;
   transition: border-color 0.2s;
 }
 
 .questionInput:hover {
-  border-color: #999;
+  border-color: var(--color-text-faint);
 }
 
 .questionInput:focus {
   outline: none;
-  border-color: #007bff;
+  border-color: var(--color-primary);
 }
 
 .questionInput:disabled {
-  background-color: #f5f5f5;
+  background-color: var(--color-surface-2);
   cursor: not-allowed;
 }
 
@@ -75,9 +75,9 @@
   font-size: 16px;
   font-weight: 600;
   color: white;
-  background-color: #007bff;
+  background-color: var(--color-primary);
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   transition:
     background-color 0.2s,
@@ -86,7 +86,7 @@
 }
 
 .askButton:hover:not(:disabled) {
-  background-color: #0056b3;
+  background-color: var(--color-primary-active);
   transform: translateY(-1px);
 }
 
@@ -95,23 +95,23 @@
 }
 
 .askButton:disabled {
-  background-color: #ccc;
+  background-color: var(--color-border-strong);
   cursor: not-allowed;
   transform: none;
 }
 
 .askButton.loading {
-  background-color: #6c757d;
+  background-color: var(--color-text-muted);
 }
 
 .dataSummary {
   padding: 12px;
-  background-color: #e7f3ff;
-  border-left: 4px solid #007bff;
-  border-radius: 4px;
+  background-color: var(--color-primary-tint);
+  border-left: 4px solid var(--color-primary);
+  border-radius: var(--radius-sm);
   margin-bottom: 20px;
   font-size: 14px;
-  color: #555;
+  color: var(--color-text-muted);
 }
 
 .conversationContainer {
@@ -126,7 +126,7 @@
 
 .message {
   padding: 16px;
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   max-width: 85%;
   animation: fadeIn 0.3s ease-in;
 }
@@ -143,13 +143,13 @@
 }
 
 .userMessage {
-  background-color: #e3f2fd;
+  background-color: var(--color-primary-tint);
   align-self: flex-end;
   margin-left: auto;
 }
 
 .aiMessage {
-  background-color: #f5f5f5;
+  background-color: var(--color-surface-2);
   align-self: flex-start;
 }
 
@@ -157,13 +157,13 @@
   font-weight: 600;
   font-size: 14px;
   margin-bottom: 8px;
-  color: #555;
+  color: var(--color-text-muted);
 }
 
 .messageText {
   font-size: 15px;
   line-height: 1.6;
-  color: #333;
+  color: var(--color-ink);
   white-space: pre-wrap;
   word-wrap: break-word;
 }
@@ -177,7 +177,7 @@
 .loadingDots span {
   width: 8px;
   height: 8px;
-  background-color: #999;
+  background-color: var(--color-text-faint);
   border-radius: 50%;
   animation: bounce 1.4s infinite ease-in-out both;
 }
@@ -211,16 +211,16 @@
   padding: 12px 24px;
   font-size: 16px;
   font-weight: 600;
-  color: #007bff;
-  background-color: white;
-  border: 2px solid #007bff;
-  border-radius: 8px;
+  color: var(--color-primary);
+  background-color: var(--color-surface);
+  border: 2px solid var(--color-primary);
+  border-radius: var(--radius-md);
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .resetButton:hover:not(:disabled) {
-  background-color: #007bff;
+  background-color: var(--color-primary);
   color: white;
   transform: translateY(-1px);
 }
@@ -241,14 +241,14 @@
   gap: 12px;
   margin-top: 20px;
   padding-top: 20px;
-  border-top: 2px solid #e0e0e0;
+  border-top: 2px solid var(--color-border);
 }
 
 .chatInput {
   padding: 12px;
   font-size: 16px;
-  border: 2px solid #ddd;
-  border-radius: 8px;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
   font-family: inherit;
   resize: vertical;
   transition: border-color 0.2s;
@@ -256,16 +256,16 @@
 }
 
 .chatInput:hover {
-  border-color: #999;
+  border-color: var(--color-text-faint);
 }
 
 .chatInput:focus {
   outline: none;
-  border-color: #007bff;
+  border-color: var(--color-primary);
 }
 
 .chatInput:disabled {
-  background-color: #f5f5f5;
+  background-color: var(--color-surface-2);
   cursor: not-allowed;
 }
 
@@ -280,9 +280,9 @@
   font-size: 16px;
   font-weight: 600;
   color: white;
-  background-color: #007bff;
+  background-color: var(--color-primary);
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   transition:
     background-color 0.2s,
@@ -290,7 +290,7 @@
 }
 
 .sendButton:hover:not(:disabled) {
-  background-color: #0056b3;
+  background-color: var(--color-primary-active);
   transform: translateY(-1px);
 }
 
@@ -299,29 +299,29 @@
 }
 
 .sendButton:disabled {
-  background-color: #ccc;
+  background-color: var(--color-border-strong);
   cursor: not-allowed;
   transform: none;
 }
 
 .sendButton.loading {
-  background-color: #6c757d;
+  background-color: var(--color-text-muted);
 }
 
 .clearButton {
   padding: 12px 24px;
   font-size: 16px;
   font-weight: 600;
-  color: #dc3545;
-  background-color: white;
-  border: 2px solid #dc3545;
-  border-radius: 8px;
+  color: var(--color-danger);
+  background-color: var(--color-surface);
+  border: 2px solid var(--color-danger);
+  border-radius: var(--radius-md);
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .clearButton:hover:not(:disabled) {
-  background-color: #dc3545;
+  background-color: var(--color-danger);
   color: white;
   transform: translateY(-1px);
 }

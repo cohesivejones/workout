@@ -12,7 +12,10 @@ import {
 } from 'recharts';
 import { startOfMonth, addMonths, format } from 'date-fns';
 import { formatShortDate, formatDayOfMonth } from '../utils/dates';
+import { chartColors } from '../styles/chartColors';
 import styles from './MonthlyNutritionPage.module.css';
+import { PageHeader } from '../components/ui/PageHeader';
+import { Card } from '../components/ui/Card';
 
 function MonthlyNutritionPage() {
   const [monthStart, setMonthStart] = useState<Date>(() => startOfMonth(new Date()));
@@ -90,7 +93,14 @@ function MonthlyNutritionPage() {
     const { cx, cy, payload } = props;
     if (cx && cy && payload?.workoutDay && payload?.totalCalories !== null) {
       return (
-        <text x={cx} y={cy - 15} textAnchor="middle" fill="#666" fontSize="16" fontWeight="bold">
+        <text
+          x={cx}
+          y={cy - 15}
+          textAnchor="middle"
+          fill={chartColors.axis}
+          fontSize="16"
+          fontWeight="bold"
+        >
           🏋️
         </text>
       );
@@ -101,10 +111,10 @@ function MonthlyNutritionPage() {
 
   return (
     <div className={styles.MonthlyNutritionPage}>
-      <div className={styles.pageHeader}>
-        <h2>Monthly Nutrition Analytics</h2>
-        <p className={styles.subtitle}>Track your weight and calorie trends throughout the month</p>
-      </div>
+      <PageHeader
+        title="Monthly Nutrition Analytics"
+        subtitle="Track your weight and calorie trends throughout the month"
+      />
 
       <div className={styles.weekNavigator}>
         <button onClick={handlePreviousMonth} className={styles.navButton}>
@@ -132,7 +142,7 @@ function MonthlyNutritionPage() {
         <div className={styles.chartsContainer}>
           {/* Weight Chart */}
           {hasWeightData && (
-            <div className={styles.chartCard}>
+            <Card>
               <h3>Weight Trend</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={chartData}>
@@ -178,7 +188,7 @@ function MonthlyNutritionPage() {
                   <Line
                     type="monotone"
                     dataKey="weight"
-                    stroke="#8884d8"
+                    stroke={chartColors.primary}
                     strokeWidth={2}
                     activeDot={{ r: 6 }}
                     connectNulls={true}
@@ -187,12 +197,12 @@ function MonthlyNutritionPage() {
                   />
                 </LineChart>
               </ResponsiveContainer>
-            </div>
+            </Card>
           )}
 
           {/* Calories Chart */}
           {hasCalorieData && (
-            <div className={styles.chartCard}>
+            <Card>
               <div className={styles.chartHeader}>
                 <h3>Calorie Intake</h3>
                 <div className={styles.legend}>
@@ -245,7 +255,7 @@ function MonthlyNutritionPage() {
                   <Line
                     type="monotone"
                     dataKey="totalCalories"
-                    stroke="#ff6b35"
+                    stroke={chartColors.accent}
                     strokeWidth={2}
                     activeDot={{ r: 6 }}
                     connectNulls={true}
@@ -255,7 +265,7 @@ function MonthlyNutritionPage() {
                   />
                 </LineChart>
               </ResponsiveContainer>
-            </div>
+            </Card>
           )}
         </div>
       )}

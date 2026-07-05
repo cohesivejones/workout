@@ -4,6 +4,7 @@ import CalendarView from '../components/CalendarView';
 import classNames from 'classnames';
 import styles from './TimelinePage.module.css';
 import { ListView } from '../components/ListView';
+import { PageHeader } from '../components/ui/PageHeader';
 
 function TimelinePage(): ReactElement {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -13,9 +14,9 @@ function TimelinePage(): ReactElement {
 
   return (
     <div>
-      <div className={styles.pageHeader}>
-        <h2>Activity Timeline</h2>
-        <div className={styles.pageActions}>
+      <PageHeader
+        title="Activity Timeline"
+        actions={
           <div className={styles.viewToggle}>
             <button
               className={classNames({
@@ -34,8 +35,8 @@ function TimelinePage(): ReactElement {
               List
             </button>
           </div>
-        </div>
-      </div>
+        }
+      />
 
       {viewMode === 'calendar' ? <CalendarView /> : <ListView />}
     </div>

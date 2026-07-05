@@ -1,35 +1,78 @@
 .formContainer {
   max-width: 500px;
   margin: 0 auto;
-  padding: 20px;
-  background-color: #f5f5f5;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 28px;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-2);
   text-align: left;
 }
 
 .formTitle {
   margin-top: 0;
   margin-bottom: 15px;
-  color: #333;
+  color: var(--color-ink);
+  font-family: var(--font-display);
   font-size: 24px;
+  letter-spacing: -0.02em;
+}
+
+/* ---- Branded / centered header (auth pages) ---- */
+.centered {
+  margin-top: 24px;
+}
+
+.centered .formTitle {
+  text-align: center;
+  margin-bottom: 6px;
+}
+
+.iconBadge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  background: var(--color-primary-tint);
+  color: var(--color-primary);
+  font-size: 26px;
+  box-shadow: var(--shadow-1);
+}
+
+.formSubtitle {
+  margin: 0 0 20px;
+  color: var(--color-text-muted);
+  font-size: 0.95rem;
+}
+
+.centered .formSubtitle {
+  text-align: center;
+}
+
+@media (max-width: 560px) {
+  .formContainer {
+    padding: 20px;
+  }
 }
 
 .errorMessage {
-  color: #d32f2f;
+  color: var(--color-danger-ink);
   margin-bottom: 15px;
   padding: 10px;
-  background-color: rgba(211, 47, 47, 0.1);
-  border-radius: 4px;
+  background-color: var(--color-danger-tint);
+  border-radius: var(--radius-sm);
   font-size: 14px;
 }
 
 .successMessage {
-  color: #28a745;
+  color: var(--color-success-ink);
   margin-bottom: 15px;
   padding: 10px;
-  background-color: rgba(40, 167, 69, 0.1);
-  border-radius: 4px;
+  background-color: var(--color-success-tint);
+  border-radius: var(--radius-sm);
   font-size: 14px;
 }
 

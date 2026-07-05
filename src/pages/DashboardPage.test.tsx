@@ -351,9 +351,9 @@ describe('DashboardPage', () => {
         (dot) => (dot as HTMLElement).style.backgroundColor
       );
 
-      // Should contain our simplified PR indicator colors
-      expect(colors).toContain('rgb(136, 132, 216)'); // #8884d8 - Previous Rep
-      expect(colors).toContain('rgb(255, 215, 0)'); // #ffd700 - New Rep PR
+      // Should contain our PR indicator colors (from the design-system palette)
+      expect(colors).toContain('rgb(14, 110, 94)'); // prColors.none #0e6e5e - Previous Rep
+      expect(colors).toContain('rgb(224, 161, 59)'); // prColors.reps #e0a13b - New Rep PR
     });
   });
 

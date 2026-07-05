@@ -1,0 +1,59 @@
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: #fff;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+  transition:
+    transform 0.12s ease,
+    filter 0.15s ease;
+}
+
+.chip:hover {
+  filter: brightness(1.06);
+}
+
+.chip:active {
+  transform: translateY(1px);
+}
+
+.chip:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.icon {
+  flex-shrink: 0;
+  opacity: 0.9;
+}
+
+/* Calendar month-grid cells: small, centered */
+.compact {
+  justify-content: center;
+  padding: 4px 8px;
+  margin-top: 4px;
+  font-size: 12px;
+}
+
+.compact .icon {
+  font-size: 11px;
+}
+
+/* Week / vertical view: larger, left-aligned */
+.full {
+  justify-content: flex-start;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.full .icon {
+  font-size: 14px;
+}

@@ -29,7 +29,7 @@ test.describe('Create Meal', () => {
     await page.getByLabel('Protein (g):').fill('20');
     await page.getByLabel('Carbs (g):').fill('30');
     await page.getByLabel('Fat (g):').fill('15');
-    await page.getByLabel('Multiplier:').selectOption('2');
+    await page.getByRole('button', { name: '2×' }).click();
     await page.getByRole('button', { name: 'Save Meal' }).click();
 
     // 2x creates two separate meal entries, not one doubled entry

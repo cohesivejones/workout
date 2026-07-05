@@ -401,10 +401,12 @@ describe('ExerciseListPage - Table Layout', () => {
       renderWithContext();
 
       await waitFor(() => {
-        expect(screen.getByText(/no exercises found/i)).toBeInTheDocument();
+        expect(screen.getByText(/no exercises yet/i)).toBeInTheDocument();
       });
 
-      expect(screen.getByText(/add exercises when creating a workout/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/exercises are added automatically as you log them/i)
+      ).toBeInTheDocument();
     });
   });
 

@@ -12,10 +12,10 @@
 }
 
 .diagnosticContent {
-  background-color: white;
-  border-radius: 8px;
+  background-color: var(--color-surface);
+  border-radius: var(--radius-md);
   padding: 20px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-1);
 }
 
 .actionSection {
@@ -25,22 +25,22 @@
 }
 
 .errorMessage {
-  color: #dc3545;
+  color: var(--color-danger);
   margin-bottom: 16px;
   padding: 8px;
-  background-color: #f8d7da;
-  border-radius: 4px;
+  background-color: var(--color-danger-tint);
+  border-radius: var(--radius-sm);
 }
 
 .analysisResults {
   margin-top: 30px;
-  border-top: 1px solid #e0e0e0;
+  border-top: 1px solid var(--color-border);
   padding-top: 20px;
 }
 
 .analysisContent {
-  background-color: #f5f5f5;
-  border-radius: 4px;
+  background-color: var(--color-surface-2);
+  border-radius: var(--radius-sm);
   padding: 15px;
   white-space: pre-wrap;
   line-height: 1.5;
@@ -53,7 +53,7 @@
   align-items: center;
   height: 200px;
   font-size: 18px;
-  color: #6c757d;
+  color: var(--color-text-muted);
 }
 
 @media (max-width: 768px) {

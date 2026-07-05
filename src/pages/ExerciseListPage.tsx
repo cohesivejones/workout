@@ -3,9 +3,11 @@ import type { ReactElement } from 'react';
 import { fetchExercises, updateExercise, suggestExerciseName } from '../api';
 import { Exercise } from '../types';
 import { useUserContext } from '../contexts/useUserContext';
+import { MdFitnessCenter } from 'react-icons/md';
 import classNames from 'classnames';
 import styles from './ExerciseListPage.module.css';
-import buttonStyles from '../styles/common/buttons.module.css';
+import { Button } from '../components/ui/Button';
+import { PageHeader } from '../components/ui/PageHeader';
 
 function ExerciseListPage(): ReactElement {
   const [exercises, setExercises] = useState<Exercise[]>([]);
@@ -117,20 +119,24 @@ function ExerciseListPage(): ReactElement {
 
   return (
     <div className={styles.exerciseListPage}>
-      <div className={styles.pageHeader}>
-        <h2>Exercises</h2>
-        <p className={styles.subtitle}>
-          Manage your exercise library ({exercises.length} exercises)
-        </p>
-      </div>
+      <PageHeader
+        title="Exercises"
+        subtitle={`Manage your exercise library (${exercises.length} exercises)`}
+      />
 
       {error && <div className={styles.errorMessage}>{error}</div>}
 
       <div className={styles.exerciseList}>
         {exercises.length === 0 ? (
-          <p className={styles.noExercises}>
-            No exercises found. Add exercises when creating a workout.
-          </p>
+          <div className={styles.emptyState}>
+            <div className={styles.emptyIcon}>
+              <MdFitnessCenter />
+            </div>
+            <h3 className={styles.emptyTitle}>No exercises yet</h3>
+            <p className={styles.emptyText}>
+              Exercises are added automatically as you log them in a workout.
+            </p>
+          </div>
         ) : (
           <div className={styles.tableWrapper}>
             <table className={styles.exerciseTable} role="table">
@@ -169,26 +175,33 @@ function ExerciseListPage(): ReactElement {
                           placeholder="Exercise name"
                         />
                       ) : (
-                        <span className={styles.exerciseName}>{exercise.name}</span>
+                        <span className={styles.exerciseName}>
+                          <span className={styles.exerciseIcon} aria-hidden="true">
+                            <MdFitnessCenter />
+                          </span>
+                          {exercise.name}
+                        </span>
                       )}
                     </td>
                     <td className={styles.actionsCell}>
                       {editingExercise?.id === exercise.id ? (
                         <div className={styles.exerciseEditActions}>
-                          <button
+                          <Button
+                            variant="primary"
+                            size="sm"
                             onClick={handleSaveEdit}
                             disabled={!newName.trim() || isSubmitting}
-                            className={classNames(styles.saveBtn, buttonStyles.primaryBtn)}
                           >
                             {isSubmitting ? 'Saving...' : 'Save'}
-                          </button>
-                          <button
+                          </Button>
+                          <Button
+                            variant="secondary"
+                            size="sm"
                             onClick={handleCancelEdit}
-                            className={classNames(styles.cancelBtn, buttonStyles.secondaryBtn)}
                             disabled={isSubmitting}
                           >
                             Cancel
-                          </button>
+                          </Button>
                         </div>
                       ) : (
                         <div className={styles.exerciseActions}>
@@ -220,21 +233,23 @@ function ExerciseListPage(): ReactElement {
                             </div>
                           ) : (
                             <>
-                              <button
+                              <Button
+                                variant="tertiary"
+                                className={styles.suggestBtn}
                                 onClick={() => handleSuggestName(exercise)}
-                                className={classNames(styles.suggestBtn, buttonStyles.tertiaryBtn)}
                                 aria-label={`Suggest name for ${exercise.name}`}
                                 disabled={isSuggesting === exercise.id}
                               >
                                 {isSuggesting === exercise.id ? 'Suggesting...' : 'Suggest Name'}
-                              </button>
-                              <button
+                              </Button>
+                              <Button
+                                variant="tertiary"
+                                className={styles.editBtn}
                                 onClick={() => handleEditClick(exercise)}
-                                className={classNames(styles.editBtn, buttonStyles.tertiaryBtn)}
                                 aria-label={`Edit ${exercise.name}`}
                               >
                                 Edit
-                              </button>
+                              </Button>
                             </>
                           )}
                         </div>

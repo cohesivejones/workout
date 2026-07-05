@@ -1,4 +1,4 @@
-import { Link } from 'wouter';
+import { Link, useLocation } from 'wouter';
 import { useState, useRef, useEffect } from 'react';
 import { FaUser } from 'react-icons/fa'; // User icon
 import { UserContextProvider } from './contexts/UserContextProvider';
@@ -15,6 +15,12 @@ const Header = () => {
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const userDropdownRef = useRef<HTMLDivElement | null>(null);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [location] = useLocation();
+
+  const navLinkClass = (path: string) => {
+    const isActive = path === '/' ? location === '/' : location.startsWith(path);
+    return isActive ? `${styles.navLink} ${styles.active}` : styles.navLink;
+  };
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -117,13 +123,13 @@ const Header = () => {
         )}
         {user && (
           <nav className={styles.mainNav}>
-            <Link to="/" className={styles.navLink}>
+            <Link to="/" className={navLinkClass('/')}>
               Timeline
             </Link>
-            <Link to="/dashboard" className={styles.navLink}>
+            <Link to="/dashboard" className={navLinkClass('/dashboard')}>
               Dashboard
             </Link>
-            <Link to="/exercises" className={styles.navLink}>
+            <Link to="/exercises" className={navLinkClass('/exercises')}>
               Exercises
             </Link>
             <div
