@@ -87,7 +87,7 @@ const WorkoutShowPage: React.FC = () => {
         </div>
 
         <div className={styles.workoutDetailContent}>
-          <h4>Exercises:</h4>
+          <h4>Exercises</h4>
           {workout.exercises.length === 0 ? (
             <p>No exercises recorded for this workout.</p>
           ) : (

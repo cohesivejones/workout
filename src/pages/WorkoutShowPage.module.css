@@ -34,17 +34,18 @@
 }
 
 .workoutDetailCard {
-  background: var(--color-surface-2);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid transparent;
   border-radius: var(--radius-md);
-  padding: 20px;
+  padding: 22px 24px;
   margin-bottom: 20px;
   box-shadow: var(--shadow-1);
-  border-left: 4px solid transparent;
 }
 
 .withInstructor {
-  background: var(--color-primary-tint);
-  border-left: 4px solid var(--color-primary);
+  border-left-color: var(--color-primary);
+  background: linear-gradient(90deg, var(--color-primary-tint) 0%, var(--color-surface) 30%);
 }
 
 .workoutDetailHeader {
@@ -67,8 +68,13 @@
 
 .workoutDetailContent h4 {
   margin-top: 0;
-  margin-bottom: 15px;
-  font-size: 1.2rem;
+  margin-bottom: 12px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-faint);
   text-align: left;
 }
 
@@ -113,7 +119,9 @@
 
 .exerciseDetailStats {
   display: flex;
-  gap: 15px;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
   color: var(--color-text-muted);
 }
 
@@ -126,6 +134,7 @@
   font-size: 0.9rem;
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 .workoutDetailActions {
@@ -152,8 +161,8 @@
 
 .badgeContainer {
   display: flex;
+  align-items: center;
   gap: 4px;
-  margin-left: 10px;
 }
 
 @media (max-width: 768px) {
