@@ -6,6 +6,7 @@ import { useUserContext } from '../contexts/useUserContext';
 import classNames from 'classnames';
 import styles from './ExerciseListPage.module.css';
 import buttonStyles from '../styles/common/buttons.module.css';
+import { PageHeader } from '../components/ui/PageHeader';
 
 function ExerciseListPage(): ReactElement {
   const [exercises, setExercises] = useState<Exercise[]>([]);
@@ -117,12 +118,10 @@ function ExerciseListPage(): ReactElement {
 
   return (
     <div className={styles.exerciseListPage}>
-      <div className={styles.pageHeader}>
-        <h2>Exercises</h2>
-        <p className={styles.subtitle}>
-          Manage your exercise library ({exercises.length} exercises)
-        </p>
-      </div>
+      <PageHeader
+        title="Exercises"
+        subtitle={`Manage your exercise library (${exercises.length} exercises)`}
+      />
 
       {error && <div className={styles.errorMessage}>{error}</div>}
 

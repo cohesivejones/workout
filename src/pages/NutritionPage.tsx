@@ -15,6 +15,7 @@ import { MdOutlineEdit } from 'react-icons/md';
 import classNames from 'classnames';
 import styles from './NutritionPage.module.css';
 import buttonStyles from '../styles/common/buttons.module.css';
+import { PageHeader } from '../components/ui/PageHeader';
 
 function NutritionPage(): React.ReactElement {
   const [, setLocation] = useLocation();
@@ -159,9 +160,7 @@ function NutritionPage(): React.ReactElement {
 
   return (
     <div className={styles.nutritionPage}>
-      <div className={styles.pageHeader}>
-        <h2>Nutrition</h2>
-      </div>
+      <PageHeader title="Nutrition" />
 
       <div className={styles.dateNavigator}>
         <button onClick={() => handleDateChange(-1)} className={styles.navButton}>

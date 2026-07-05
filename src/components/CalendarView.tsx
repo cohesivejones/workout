@@ -8,6 +8,8 @@ import { toWorkoutPath, toPainScoreEditPath, toSleepScoreEditPath } from '../uti
 import { GenericCalendarView, CalendarItem } from './GenericCalendarView';
 import { fetchTimeline } from '../api';
 import { formatWeightWithKg } from '../utils/weight';
+import { MdFitnessCenter } from 'react-icons/md';
+import { ScoreChip } from './ui/ScoreChip';
 import { useUserContext } from '../contexts/useUserContext';
 import { format } from 'date-fns';
 
@@ -28,33 +30,6 @@ export type SleepScoreCalendarItem = SleepScore & {
 
 // Union type for all calendar items in this application
 export type AppCalendarItem = WorkoutCalendarItem | PainScoreCalendarItem | SleepScoreCalendarItem;
-
-// Function to get color based on pain score
-const getPainScoreColor = (score: number): string => {
-  if (score === 0) return '#4caf50'; // Green for no pain
-  if (score <= 3) return '#8bc34a'; // Light green for mild pain
-  if (score <= 5) return '#ffc107'; // Yellow for moderate pain
-  if (score <= 7) return '#ff9800'; // Orange for severe pain
-  return '#f44336'; // Red for extreme pain
-};
-
-// Function to get color based on sleep score
-const getSleepScoreColor = (score: number): string => {
-  switch (score) {
-    case 5:
-      return '#4caf50'; // Green for excellent sleep
-    case 4:
-      return '#8bc34a'; // Light green for good sleep
-    case 3:
-      return '#ffc107'; // Yellow for fair sleep
-    case 2:
-      return '#ff9800'; // Orange for poor sleep
-    case 1:
-      return '#f44336'; // Red for very poor sleep
-    default:
-      return '#ffc107'; // Default to yellow
-  }
-};
 
 const CalendarView = () => {
   const [, setLocation] = useLocation();
@@ -194,48 +169,26 @@ const CalendarView = () => {
     if (item.type === 'painScore') {
       const painScore = item as PainScoreCalendarItem;
       return (
-        <button
+        <ScoreChip
           key={`pain-${painScore.id}`}
-          className={styles.calendarPainScore}
-          style={{ backgroundColor: getPainScoreColor(painScore.score) }}
-          onClick={(e) => {
-            e.stopPropagation();
-            setLocation(toPainScoreEditPath(painScore));
-          }}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              e.stopPropagation();
-              setLocation(toPainScoreEditPath(painScore));
-            }
-          }}
-          aria-label={`Edit pain score ${painScore.score} for ${dateStr}`}
-        >
-          Pain: {painScore.score}
-        </button>
+          kind="pain"
+          score={painScore.score}
+          layout="compact"
+          onClick={() => setLocation(toPainScoreEditPath(painScore))}
+          ariaLabel={`Edit pain score ${painScore.score} for ${dateStr}`}
+        />
       );
     } else if (item.type === 'sleepScore') {
       const sleepScore = item as SleepScoreCalendarItem;
       return (
-        <button
+        <ScoreChip
           key={`sleep-${sleepScore.id}`}
-          className={styles.calendarSleepScore}
-          style={{ backgroundColor: getSleepScoreColor(sleepScore.score) }}
-          onClick={(e) => {
-            e.stopPropagation();
-            setLocation(toSleepScoreEditPath(sleepScore));
-          }}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              e.stopPropagation();
-              setLocation(toSleepScoreEditPath(sleepScore));
-            }
-          }}
-          aria-label={`Edit sleep score ${sleepScore.score} for ${dateStr}`}
-        >
-          Sleep: {sleepScore.score}
-        </button>
+          kind="sleep"
+          score={sleepScore.score}
+          layout="compact"
+          onClick={() => setLocation(toSleepScoreEditPath(sleepScore))}
+          ariaLabel={`Edit sleep score ${sleepScore.score} for ${dateStr}`}
+        />
       );
     } else {
       const workout = item as WorkoutCalendarItem;
@@ -249,6 +202,7 @@ const CalendarView = () => {
           onClick={(e) => e.stopPropagation()}
           data-testid={`calendar-workout-${workout.id}`}
         >
+          <MdFitnessCenter className={styles.workoutIcon} aria-hidden="true" />
           <div className={styles.workoutExercises}>
             {workout.exercises.map((exercise, idx) => (
               <div key={idx} className={styles.workoutExercise}>
@@ -266,28 +220,26 @@ const CalendarView = () => {
     if (item.type === 'painScore') {
       const painScore = item as PainScoreCalendarItem;
       return (
-        <button
+        <ScoreChip
           key={`pain-${painScore.id}`}
-          className={styles.verticalPainScore}
-          style={{ backgroundColor: getPainScoreColor(painScore.score) }}
+          kind="pain"
+          score={painScore.score}
+          layout="full"
           onClick={() => setLocation(toPainScoreEditPath(painScore))}
-          aria-label={`Edit pain score ${painScore.score} for ${dateStr}`}
-        >
-          Pain: {painScore.score}
-        </button>
+          ariaLabel={`Edit pain score ${painScore.score} for ${dateStr}`}
+        />
       );
     } else if (item.type === 'sleepScore') {
       const sleepScore = item as SleepScoreCalendarItem;
       return (
-        <button
+        <ScoreChip
           key={`sleep-${sleepScore.id}`}
-          className={styles.verticalSleepScore}
-          style={{ backgroundColor: getSleepScoreColor(sleepScore.score) }}
+          kind="sleep"
+          score={sleepScore.score}
+          layout="full"
           onClick={() => setLocation(toSleepScoreEditPath(sleepScore))}
-          aria-label={`Edit sleep score ${sleepScore.score} for ${dateStr}`}
-        >
-          Sleep: {sleepScore.score}
-        </button>
+          ariaLabel={`Edit sleep score ${sleepScore.score} for ${dateStr}`}
+        />
       );
     } else {
       const workout = item as WorkoutCalendarItem;

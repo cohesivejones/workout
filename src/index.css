@@ -17,6 +17,16 @@ h4 {
   letter-spacing: -0.01em;
 }
 
+/* Brand color for otherwise-unstyled links. Components with their own link
+   classes (nav, dropdowns) override this via higher specificity. */
+a {
+  color: var(--color-primary);
+}
+
+a:hover {
+  color: var(--color-primary-hover);
+}
+
 code {
   font-family: var(--font-mono);
 }

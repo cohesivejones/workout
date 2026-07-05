@@ -8,6 +8,7 @@ import { format } from 'date-fns';
 import classNames from 'classnames';
 import { toHomePath, toWorkoutEditPath, toExerciseProgressionPath } from '../utils/paths';
 import { formatWeightWithKg } from '../utils/weight';
+import { Badge } from '../components/ui/Badge';
 
 const WorkoutShowPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -85,7 +86,7 @@ const WorkoutShowPage: React.FC = () => {
       >
         <div className={styles.workoutDetailHeader}>
           <h3>{format(`${workout.date}T12:00:00.000`, 'MMM d, yyyy (eeee)')}</h3>
-          {workout.withInstructor && <div className={styles.instructorBadge}>With Instructor</div>}
+          {workout.withInstructor && <Badge variant="primary">With Instructor</Badge>}
         </div>
 
         <div className={styles.workoutDetailContent}>
@@ -115,9 +116,21 @@ const WorkoutShowPage: React.FC = () => {
                     )}
                     {(exercise.newReps || exercise.newWeight || exercise.newTime) && (
                       <div className={styles.badgeContainer}>
-                        {exercise.newReps && <span className={styles.newBadge}>NEW REPS</span>}
-                        {exercise.newWeight && <span className={styles.newBadge}>NEW WEIGHT</span>}
-                        {exercise.newTime && <span className={styles.newBadge}>NEW TIME</span>}
+                        {exercise.newReps && (
+                          <Badge variant="accent" size="sm">
+                            NEW REPS
+                          </Badge>
+                        )}
+                        {exercise.newWeight && (
+                          <Badge variant="accent" size="sm">
+                            NEW WEIGHT
+                          </Badge>
+                        )}
+                        {exercise.newTime && (
+                          <Badge variant="accent" size="sm">
+                            NEW TIME
+                          </Badge>
+                        )}
                       </div>
                     )}
                   </div>

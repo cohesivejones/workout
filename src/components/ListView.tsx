@@ -17,6 +17,8 @@ import buttonStyles from '../styles/common/buttons.module.css';
 import { useUserContext } from '../contexts/useUserContext';
 import { listViewReducer, createInitialListViewState } from './listView.reducer';
 import { formatWeightWithKg } from '../utils/weight';
+import { Badge } from './ui/Badge';
+import { getPainSeverityColor, getSleepSeverityColor } from '../styles/chartColors';
 
 export const ListView = () => {
   const { user } = useUserContext();
@@ -121,15 +123,6 @@ export const ListView = () => {
 
   // Items are already sorted by date descending from the API
 
-  // Function to get color based on pain score
-  const getPainScoreColor = (score: number): string => {
-    if (score === 0) return '#4caf50'; // Green for no pain
-    if (score <= 3) return '#8bc34a'; // Light green for mild pain
-    if (score <= 5) return '#ffc107'; // Yellow for moderate pain
-    if (score <= 7) return '#ff9800'; // Orange for severe pain
-    return '#f44336'; // Red for extreme pain
-  };
-
   // Function to get pain score description
   const getPainScoreDescription = (score: number): string => {
     const descriptions = [
@@ -159,24 +152,6 @@ export const ListView = () => {
       'Excellent - Sleep was consistently uninterrupted and restorative, with minimal or no awakenings throughout the night.',
     ];
     return descriptions[score] || '';
-  };
-
-  // Function to get color based on sleep score
-  const getSleepScoreColor = (score: number): string => {
-    switch (score) {
-      case 5:
-        return '#4caf50'; // Green for excellent sleep
-      case 4:
-        return '#8bc34a'; // Light green for good sleep
-      case 3:
-        return '#ffc107'; // Yellow for fair sleep
-      case 2:
-        return '#ff9800'; // Orange for poor sleep
-      case 1:
-        return '#f44336'; // Red for very poor sleep
-      default:
-        return '#ffc107'; // Default to yellow
-    }
   };
 
   const handleDeleteWorkout = async (workoutId: number) => {
@@ -289,7 +264,9 @@ export const ListView = () => {
                     <h3>
                       {format(`${workout.date}T12:00:00.000`, 'MMM d, yyyy (eeee)')}
                       {workout.withInstructor && (
-                        <span className={styles.srOnly}>With Instructor</span>
+                        <Badge variant="primary" size="sm" className={styles.inlineBadge}>
+                          With Instructor
+                        </Badge>
                       )}
                     </h3>
                     <div className={styles.listCardActions}>
@@ -326,13 +303,19 @@ export const ListView = () => {
                             </span>
                             <div className={styles.badgeContainer}>
                               {exercise.newReps && (
-                                <span className={styles.newBadge}>NEW REPS</span>
+                                <Badge variant="accent" size="sm">
+                                  NEW REPS
+                                </Badge>
                               )}
                               {exercise.newWeight && (
-                                <span className={styles.newBadge}>NEW WEIGHT</span>
+                                <Badge variant="accent" size="sm">
+                                  NEW WEIGHT
+                                </Badge>
                               )}
                               {exercise.newTime && (
-                                <span className={styles.newBadge}>NEW TIME</span>
+                                <Badge variant="accent" size="sm">
+                                  NEW TIME
+                                </Badge>
                               )}
                             </div>
                           </div>
@@ -348,7 +331,7 @@ export const ListView = () => {
                   key={`pain-score-${painScore.id}`}
                   className={classNames(styles.listCard, styles.painScoreCard)}
                   style={{
-                    borderLeftColor: getPainScoreColor(painScore.score),
+                    borderLeftColor: getPainSeverityColor(painScore.score),
                   }}
                 >
                   <div className={styles.listCardHeader}>
@@ -399,7 +382,7 @@ export const ListView = () => {
                   key={`sleep-score-${sleepScore.id}`}
                   className={classNames(styles.listCard, styles.sleepScoreCard)}
                   style={{
-                    borderLeftColor: getSleepScoreColor(sleepScore.score),
+                    borderLeftColor: getSleepSeverityColor(sleepScore.score),
                   }}
                 >
                   <div className={styles.listCardHeader}>

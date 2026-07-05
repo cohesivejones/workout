@@ -20,7 +20,9 @@ import {
 } from 'recharts';
 import { eachDayOfInterval } from 'date-fns';
 import { formatLongDate } from '../utils/dates';
+import { chartColors, prColors } from '../styles/chartColors';
 import styles from './DashboardPage.module.css';
+import { PageHeader } from '../components/ui/PageHeader';
 
 // Utility function to get standard 12-week date range
 const getStandardDateRange = () => {
@@ -98,17 +100,17 @@ const CustomDot = (props: {
   }
 
   // Determine color and size based on PR flags
-  let fill = '#8884d8'; // Default blue
+  let fill = prColors.none; // Default
   let r = 4; // Default radius
 
   if (payload.newReps && payload.newWeight) {
-    fill = '#ff6b35'; // Orange for both PRs
+    fill = prColors.both; // Both PRs
     r = 6;
   } else if (payload.newReps) {
-    fill = '#ffd700'; // Gold for new reps
+    fill = prColors.reps; // New reps
     r = 6;
   } else if (payload.newWeight) {
-    fill = '#4caf50'; // Green for new weight
+    fill = prColors.weight; // New weight
     r = 6;
   }
 
@@ -283,10 +285,11 @@ function DashboardPage() {
       )}
 
       <div className={styles.dashboardContent}>
-        <div className={styles.pageHeader}>
-          <h2>Exercise Weight Progression</h2>
-          <p className={styles.subtitle}>Tracking your strength gains over the past 12 weeks</p>
-        </div>
+        <PageHeader
+          align="center"
+          title="Exercise Weight Progression"
+          subtitle="Tracking your strength gains over the past 12 weeks"
+        />
 
         <div className={styles.chartsContainer}>
           {Array.from(exercisesByLetter.entries()).map(([letter, exercises]) => (
@@ -333,7 +336,7 @@ function DashboardPage() {
                       <Line
                         type="monotone"
                         dataKey="weight"
-                        stroke="#8884d8"
+                        stroke={chartColors.primary}
                         activeDot={{ r: 8 }}
                         connectNulls={true}
                         name="Weight"
@@ -345,14 +348,14 @@ function DashboardPage() {
                     <div className={styles.legendItem}>
                       <div
                         className={styles.legendDot}
-                        style={{ backgroundColor: '#8884d8' }}
+                        style={{ backgroundColor: prColors.none }}
                       ></div>
                       <span>Previous Rep</span>
                     </div>
                     <div className={styles.legendItem}>
                       <div
                         className={styles.legendDot}
-                        style={{ backgroundColor: '#ffd700' }}
+                        style={{ backgroundColor: prColors.reps }}
                       ></div>
                       <span>New Rep PR</span>
                     </div>
@@ -366,10 +369,11 @@ function DashboardPage() {
         {/* Pain Score Chart */}
         {!painLoading && painData && painData.dataPoints.length > 0 && (
           <>
-            <div className={styles.pageHeader}>
-              <h2>Pain Score Progression</h2>
-              <p className={styles.subtitle}>Tracking your pain levels over the past 12 weeks</p>
-            </div>
+            <PageHeader
+              align="center"
+              title="Pain Score Progression"
+              subtitle="Tracking your pain levels over the past 12 weeks"
+            />
 
             <div className={styles.chartCard}>
               <ResponsiveContainer width="100%" height={300}>
@@ -410,7 +414,7 @@ function DashboardPage() {
                   <Line
                     type="monotone"
                     dataKey="score"
-                    stroke="#ff5252"
+                    stroke={chartColors.danger}
                     activeDot={{ r: 8 }}
                     connectNulls={true}
                     name="Pain Level"
@@ -424,10 +428,11 @@ function DashboardPage() {
         {/* Sleep Score Chart */}
         {!sleepLoading && sleepData && sleepData.dataPoints.length > 0 && (
           <>
-            <div className={styles.pageHeader}>
-              <h2>Sleep Quality Progression</h2>
-              <p className={styles.subtitle}>Tracking your sleep quality over the past 12 weeks</p>
-            </div>
+            <PageHeader
+              align="center"
+              title="Sleep Quality Progression"
+              subtitle="Tracking your sleep quality over the past 12 weeks"
+            />
 
             <div className={styles.chartCard}>
               <ResponsiveContainer width="100%" height={300}>
@@ -468,7 +473,7 @@ function DashboardPage() {
                   <Line
                     type="monotone"
                     dataKey="score"
-                    stroke="#4caf50"
+                    stroke={chartColors.success}
                     activeDot={{ r: 8 }}
                     connectNulls={true}
                     name="Sleep Quality"

@@ -17,6 +17,7 @@ import { GiMuscleUp } from 'react-icons/gi';
 import { IoRepeat } from 'react-icons/io5';
 import { IoMdStopwatch } from 'react-icons/io';
 import { FaWeightHanging } from 'react-icons/fa';
+import { Badge } from './ui/Badge';
 
 interface FormValues {
   date: string;
@@ -377,13 +378,19 @@ function WorkoutForm({
                           exercises[index].newTime) && (
                           <div className={styles.badgeContainer}>
                             {exercises[index].newReps && (
-                              <span className={styles.newBadge}>NEW REPS</span>
+                              <Badge variant="accent" size="sm">
+                                NEW REPS
+                              </Badge>
                             )}
                             {exercises[index].newWeight && (
-                              <span className={styles.newBadge}>NEW WEIGHT</span>
+                              <Badge variant="accent" size="sm">
+                                NEW WEIGHT
+                              </Badge>
                             )}
                             {exercises[index].newTime && (
-                              <span className={styles.newBadge}>NEW TIME</span>
+                              <Badge variant="accent" size="sm">
+                                NEW TIME
+                              </Badge>
                             )}
                           </div>
                         )}

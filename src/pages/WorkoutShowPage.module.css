@@ -61,15 +61,6 @@
   font-size: 1.5rem;
 }
 
-.instructorBadge {
-  background-color: var(--color-primary);
-  color: white;
-  padding: 4px 8px;
-  border-radius: var(--radius-sm);
-  font-size: 0.8rem;
-  font-weight: 500;
-}
-
 .workoutDetailContent {
   margin-bottom: 30px;
 }
@@ -147,17 +138,6 @@
   display: flex;
   gap: 4px;
   margin-left: 10px;
-}
-
-.newBadge {
-  background-color: var(--color-accent);
-  color: white;
-  font-size: 0.7rem;
-  font-weight: 600;
-  padding: 2px 6px;
-  border-radius: var(--radius-sm);
-  text-transform: uppercase;
-  white-space: nowrap;
 }
 
 @media (max-width: 768px) {
