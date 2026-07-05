@@ -5,6 +5,7 @@ import { Workout } from '../types';
 import styles from './WorkoutShowPage.module.css';
 import { format } from 'date-fns';
 import classNames from 'classnames';
+import { FaTrophy } from 'react-icons/fa';
 import { toHomePath, toWorkoutEditPath, toExerciseProgressionPath } from '../utils/paths';
 import { formatWeightWithKg } from '../utils/weight';
 import { Badge } from '../components/ui/Badge';
@@ -91,47 +92,60 @@ const WorkoutShowPage: React.FC = () => {
             <p>No exercises recorded for this workout.</p>
           ) : (
             <ul className={styles.exerciseDetailList}>
-              {workout.exercises.map((exercise, index) => (
-                <li key={index} className={styles.exerciseDetailItem}>
-                  <div className={styles.exerciseDetailName}>
-                    {exercise.id ? (
-                      <Link to={toExerciseProgressionPath(exercise.id)}>{exercise.name}</Link>
-                    ) : (
-                      exercise.name
-                    )}
-                  </div>
-                  <div className={styles.exerciseDetailStats}>
-                    <span className={styles.exerciseDetailReps}>{exercise.reps} reps</span>
-                    {exercise.weight && (
-                      <span className={styles.exerciseDetailWeight}>
-                        {formatWeightWithKg(exercise.weight)}
-                      </span>
-                    )}
-                    {exercise.timeSeconds && (
-                      <span className={styles.exerciseDetailTime}>{exercise.timeSeconds} sec</span>
-                    )}
-                    {(exercise.newReps || exercise.newWeight || exercise.newTime) && (
-                      <div className={styles.badgeContainer}>
-                        {exercise.newReps && (
-                          <Badge variant="accent" size="sm">
-                            NEW REPS
-                          </Badge>
-                        )}
-                        {exercise.newWeight && (
-                          <Badge variant="accent" size="sm">
-                            NEW WEIGHT
-                          </Badge>
-                        )}
-                        {exercise.newTime && (
-                          <Badge variant="accent" size="sm">
-                            NEW TIME
-                          </Badge>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </li>
-              ))}
+              {workout.exercises.map((exercise, index) => {
+                const isPR = exercise.newReps || exercise.newWeight || exercise.newTime;
+                return (
+                  <li
+                    key={index}
+                    className={classNames(styles.exerciseDetailItem, { [styles.prItem]: isPR })}
+                  >
+                    <div className={styles.exerciseDetailName}>
+                      {exercise.id ? (
+                        <Link to={toExerciseProgressionPath(exercise.id)}>{exercise.name}</Link>
+                      ) : (
+                        exercise.name
+                      )}
+                    </div>
+                    <div className={styles.exerciseDetailStats}>
+                      <span className={styles.exerciseDetailReps}>{exercise.reps} reps</span>
+                      {exercise.weight && (
+                        <span className={styles.exerciseDetailWeight}>
+                          {formatWeightWithKg(exercise.weight)}
+                        </span>
+                      )}
+                      {exercise.timeSeconds && (
+                        <span className={styles.exerciseDetailTime}>
+                          {exercise.timeSeconds} sec
+                        </span>
+                      )}
+                      {isPR && (
+                        <div className={styles.badgeContainer}>
+                          <FaTrophy
+                            className={styles.prTrophy}
+                            aria-hidden="true"
+                            title="Personal record"
+                          />
+                          {exercise.newReps && (
+                            <Badge variant="accent" size="sm">
+                              NEW REPS
+                            </Badge>
+                          )}
+                          {exercise.newWeight && (
+                            <Badge variant="accent" size="sm">
+                              NEW WEIGHT
+                            </Badge>
+                          )}
+                          {exercise.newTime && (
+                            <Badge variant="accent" size="sm">
+                              NEW TIME
+                            </Badge>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </div>

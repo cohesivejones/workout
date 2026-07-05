@@ -90,6 +90,22 @@
   border-bottom: none;
 }
 
+/* Personal-record row — coral "achievement" accent */
+.prItem {
+  background: linear-gradient(90deg, var(--color-accent-tint) 0%, transparent 55%);
+  box-shadow: inset 3px 0 0 var(--color-accent);
+  border-radius: var(--radius-sm);
+  margin: 0 -12px;
+  padding-left: 12px;
+  padding-right: 12px;
+}
+
+.prTrophy {
+  color: var(--color-accent);
+  font-size: 14px;
+  align-self: center;
+}
+
 .exerciseDetailName {
   font-weight: 500;
   font-size: 1.1rem;

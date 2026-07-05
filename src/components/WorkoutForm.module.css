@@ -318,6 +318,18 @@
   border-color: var(--color-border);
 }
 
+/* Personal-record row — coral "achievement" accent */
+.prItem {
+  border-left: 3px solid var(--color-accent);
+  background: linear-gradient(90deg, var(--color-accent-tint) 0%, var(--color-surface) 55%);
+}
+
+.prTrophy {
+  color: var(--color-accent);
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
 .exerciseInfo {
   flex: 1;
   display: flex;

@@ -15,7 +15,7 @@ import { getLocalDateString } from '../utils/dates';
 import { GiMuscleUp } from 'react-icons/gi';
 import { IoRepeat } from 'react-icons/io5';
 import { IoMdStopwatch } from 'react-icons/io';
-import { FaWeightHanging } from 'react-icons/fa';
+import { FaWeightHanging, FaTrophy } from 'react-icons/fa';
 import { Badge } from './ui/Badge';
 
 interface FormValues {
@@ -337,7 +337,13 @@ function WorkoutForm({
                 {fields.map((field, index) => (
                   <li
                     key={field.id}
-                    className={styles.exerciseItem}
+                    className={`${styles.exerciseItem} ${
+                      exercises[index].newReps ||
+                      exercises[index].newWeight ||
+                      exercises[index].newTime
+                        ? styles.prItem
+                        : ''
+                    }`}
                     data-testid={`added-exercise-${toKebabCase(exercises[index].name)}`}
                   >
                     <div className={styles.exerciseInfo}>
@@ -377,6 +383,11 @@ function WorkoutForm({
                           exercises[index].newWeight ||
                           exercises[index].newTime) && (
                           <div className={styles.badgeContainer}>
+                            <FaTrophy
+                              className={styles.prTrophy}
+                              aria-hidden="true"
+                              title="Personal record"
+                            />
                             {exercises[index].newReps && (
                               <Badge variant="accent" size="sm">
                                 NEW REPS
