@@ -4,23 +4,6 @@
   padding: 20px;
 }
 
-.errorMessage {
-  color: var(--color-danger);
-  margin-bottom: 16px;
-  padding: 8px;
-  background-color: var(--color-danger-tint);
-  border-radius: var(--radius-sm);
-}
-
-.loading {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 200px;
-  font-size: 18px;
-  color: var(--color-text-muted);
-}
-
 /* Button styles are now imported from common styles */
 
 .cancelButtonContainer {

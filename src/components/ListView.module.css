@@ -46,18 +46,6 @@
   align-items: center;
 }
 
-.filterCheckbox {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  cursor: pointer;
-  user-select: none;
-}
-
-.filterCheckbox input {
-  margin: 0;
-}
-
 .showAllBtn {
   font-size: 0.85rem;
   padding: 4px 10px;

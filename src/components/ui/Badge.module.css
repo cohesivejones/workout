@@ -48,6 +48,6 @@
 
 .warning {
   background: var(--color-warning-tint);
-  color: #8a5a12;
+  color: var(--color-warning-ink);
   border-color: var(--color-warning);
 }

@@ -4,6 +4,8 @@ import MealForm from '../components/MealForm';
 import { createMeal, updateMeal, fetchMeal } from '../api';
 import { Meal } from '../types';
 import { useUserContext } from '../contexts/useUserContext';
+import { LoadingState } from '../components/ui/LoadingState';
+import { ErrorState } from '../components/ui/ErrorState';
 import styles from './MealFormPage.module.css';
 
 function MealFormPage(): React.ReactElement {
@@ -58,12 +60,12 @@ function MealFormPage(): React.ReactElement {
   };
 
   if (loading) {
-    return <div className={styles.loading}>Loading...</div>;
+    return <LoadingState label="Loading..." />;
   }
 
   return (
     <div className={styles.mealFormPage}>
-      {error && <div className={styles.errorMessage}>{error}</div>}
+      {error && <ErrorState>{error}</ErrorState>}
 
       <MealForm
         onSubmit={handleMealSubmit}

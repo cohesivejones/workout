@@ -14,6 +14,7 @@ import styles from './WorkoutForm.module.css';
 import { Button } from './ui/Button';
 import { Field, Input } from './ui/Field';
 import { EmptyState } from './ui/EmptyState';
+import { Checkbox } from './ui/Checkbox';
 import { useUserContext } from '../contexts/useUserContext';
 import { fetchRecentExerciseData } from '../api';
 import { useForm, useFieldArray, Controller, SubmitHandler } from 'react-hook-form';
@@ -199,10 +200,11 @@ function WorkoutForm({
             <Input type="date" id="workout-date" {...register('date')} />
           </Field>
           <div className={styles.instructorCheckbox}>
-            <label htmlFor="with-instructor">
-              <input type="checkbox" id="with-instructor" {...register('withInstructor')} />
-              With Instructor
-            </label>
+            <Checkbox
+              id="with-instructor"
+              label="With Instructor"
+              {...register('withInstructor')}
+            />
           </div>
         </div>
 

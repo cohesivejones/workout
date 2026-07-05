@@ -5,6 +5,7 @@ import { createWorkout, createExercise, fetchExercises } from '../api';
 import { Exercise, Workout } from '../types';
 import { useUserContext } from '../contexts/useUserContext';
 import { toWorkoutPath } from '../utils/paths';
+import { ErrorState } from '../components/ui/ErrorState';
 import styles from '../components/WorkoutForm.module.css';
 
 export default function AddWorkoutPage() {
@@ -63,7 +64,7 @@ export default function AddWorkoutPage() {
 
   return (
     <div className={styles.container}>
-      {error && <div className={styles.errorMessage}>{error}</div>}
+      {error && <ErrorState>{error}</ErrorState>}
       <WorkoutForm
         onSubmit={addWorkout}
         savedExercises={savedExercises}
