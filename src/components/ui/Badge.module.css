@@ -1,7 +1,7 @@
 .badge {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-1);
   padding: 3px 10px;
   border-radius: var(--radius-pill);
   font-size: 0.78rem;
@@ -12,7 +12,7 @@
 }
 
 .sm {
-  padding: 2px 8px;
+  padding: 2px var(--space-2);
   font-size: 0.7rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;

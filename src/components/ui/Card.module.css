@@ -9,13 +9,13 @@
   padding: 0;
 }
 .pad-sm {
-  padding: 12px;
+  padding: var(--space-3);
 }
 .pad-md {
-  padding: 20px;
+  padding: var(--space-5);
 }
 .pad-lg {
-  padding: 24px;
+  padding: var(--space-6);
 }
 
 .interactive {

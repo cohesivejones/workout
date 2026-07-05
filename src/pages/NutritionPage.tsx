@@ -19,6 +19,7 @@ import { useConfirm } from '../components/ui/useConfirm';
 import { LoadingState } from '../components/ui/LoadingState';
 import { ErrorState } from '../components/ui/ErrorState';
 import { EmptyState } from '../components/ui/EmptyState';
+import { DateNavigator } from '../components/ui/DateNavigator';
 
 function NutritionPage(): React.ReactElement {
   const [, setLocation] = useLocation();
@@ -170,20 +171,15 @@ function NutritionPage(): React.ReactElement {
     <div className={styles.nutritionPage}>
       <PageHeader title="Nutrition" />
 
-      <div className={styles.dateNavigator}>
-        <button onClick={() => handleDateChange(-1)} className={styles.navButton}>
-          ← Previous Day
-        </button>
-        <div className={styles.dateDisplay}>
-          <span className={styles.dateText}>{formatDate(selectedDate)}</span>
-          <button onClick={handleToday} className={styles.todayButton}>
-            Today
-          </button>
-        </div>
-        <button onClick={() => handleDateChange(1)} className={styles.navButton}>
-          Next Day →
-        </button>
-      </div>
+      <DateNavigator
+        label={formatDate(selectedDate)}
+        prevLabel="← Previous Day"
+        nextLabel="Next Day →"
+        resetLabel="Today"
+        onPrev={() => handleDateChange(-1)}
+        onNext={() => handleDateChange(1)}
+        onReset={handleToday}
+      />
 
       {error && <ErrorState>{error}</ErrorState>}
 

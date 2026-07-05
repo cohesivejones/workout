@@ -4,16 +4,6 @@
   margin: 0 auto;
 }
 
-.dateNavigator {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 30px;
-  padding: 15px;
-  background-color: var(--color-surface-2);
-  border-radius: var(--radius-md);
-}
-
 .navButton {
   padding: 8px 16px;
   background-color: var(--color-surface);
@@ -28,35 +18,6 @@
   background-color: var(--color-primary);
   color: white;
   border-color: var(--color-primary);
-}
-
-.dateDisplay {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-}
-
-.dateText {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--color-ink);
-}
-
-.todayButton {
-  padding: 4px 12px;
-  background-color: var(--color-primary);
-  color: white;
-  border: none;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  font-size: 0.85rem;
-  font-weight: 600;
-  transition: background-color 0.2s;
-}
-
-.todayButton:hover {
-  background-color: var(--color-primary-hover);
 }
 
 .contentContainer {
@@ -382,11 +343,6 @@
 @media (max-width: 768px) {
   .contentContainer {
     grid-template-columns: 1fr;
-  }
-
-  .dateNavigator {
-    flex-direction: column;
-    gap: 15px;
   }
 
   .navButton {
