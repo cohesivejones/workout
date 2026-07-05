@@ -49,12 +49,13 @@ test.describe('Nutrition Tracking', () => {
     await expect(page.getByText(mealDescription)).toBeVisible({ timeout: 5000 });
     await expect(page.getByText(`${calories} cal`)).toBeVisible();
 
-    // Step 9: Verify daily summary
+    // Step 9: Verify daily summary (calorie hero + macro tiles)
     await expect(page.getByText(/daily total/i)).toBeVisible();
-    await expect(page.getByText(new RegExp(`${calories}.*cal`, 'i'))).toBeVisible();
-    await expect(page.getByText(new RegExp(`${protein}.*g.*protein`, 'i'))).toBeVisible();
-    await expect(page.getByText(new RegExp(`${carbs}.*g.*carbs`, 'i'))).toBeVisible();
-    await expect(page.getByText(new RegExp(`${fat}.*g.*fat`, 'i'))).toBeVisible();
+    const summary = page.locator('[class*="summarySection"]');
+    await expect(summary.getByText(calories)).toBeVisible(); // calories hero
+    await expect(summary.getByText(`${protein}g`)).toBeVisible(); // protein tile
+    await expect(summary.getByText(`${carbs}g`)).toBeVisible(); // carbs tile
+    await expect(summary.getByText(`${fat}g`)).toBeVisible(); // fat tile
   });
 
   test('should add multiple meals and show correct totals', async ({ page, request }) => {
@@ -98,9 +99,9 @@ test.describe('Nutrition Tracking', () => {
     // Check the totals section for the values
     const totalsSection = page.locator('.summarySection, [class*="summarySection"]');
     await expect(totalsSection.getByText('950')).toBeVisible(); // calories
-    await expect(totalsSection.getByText('55.0g')).toBeVisible(); // protein: 15 + 40
-    await expect(totalsSection.getByText('100.0g')).toBeVisible(); // carbs: 65 + 35
-    await expect(totalsSection.getByText('35.0g')).toBeVisible(); // fat: 10 + 25
+    await expect(totalsSection.getByText('55g')).toBeVisible(); // protein: 15 + 40
+    await expect(totalsSection.getByText('100g')).toBeVisible(); // carbs: 65 + 35
+    await expect(totalsSection.getByText('35g')).toBeVisible(); // fat: 10 + 25
   });
 
   test('should search for past meals and auto-populate', async ({ page, request }) => {
