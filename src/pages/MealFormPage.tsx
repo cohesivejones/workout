@@ -46,7 +46,6 @@ function MealFormPage(): React.ReactElement {
         await createMeal(mealData);
       }
 
-      setLocation('/nutrition');
       return true;
     } catch (err) {
       console.error('Failed to save meal:', err);
@@ -68,6 +67,7 @@ function MealFormPage(): React.ReactElement {
 
       <MealForm
         onSubmit={handleMealSubmit}
+        onSuccess={() => setLocation('/nutrition')}
         existingMeal={meal || undefined}
         onCancel={handleCancel}
       />

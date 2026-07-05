@@ -112,7 +112,8 @@ describe('MealForm', () => {
   });
 
   it('creates one meal per multiplier (2x submits two identical meals)', async () => {
-    render(<MealForm {...defaultProps} />);
+    const onSuccess = vi.fn();
+    render(<MealForm {...defaultProps} onSuccess={onSuccess} />);
 
     fireEvent.change(screen.getByLabelText(/Date:/i), { target: { value: '2025-04-15' } });
     fireEvent.change(screen.getByLabelText(/Description:/i), {
@@ -140,6 +141,10 @@ describe('MealForm', () => {
     };
     expect(mockOnSubmit).toHaveBeenNthCalledWith(1, expectedMeal);
     expect(mockOnSubmit).toHaveBeenNthCalledWith(2, expectedMeal);
+    // onSuccess (navigation) must fire exactly once, after all creates
+    await waitFor(() => {
+      expect(onSuccess).toHaveBeenCalledTimes(1);
+    });
   });
 
   it('calls onSubmit with correct data when form is submitted', async () => {

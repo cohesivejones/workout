@@ -10,6 +10,8 @@ import FormContainer from './common/FormContainer';
 
 interface MealFormProps {
   onSubmit: (meal: Omit<Meal, 'id'>) => Promise<boolean>;
+  /** Called once after all meals are saved (e.g. to navigate away). */
+  onSuccess?: () => void;
   existingMeal?: Meal;
   selectedDate?: string;
   onCancel?: () => void;
@@ -27,6 +29,7 @@ interface FormValues {
 
 function MealForm({
   onSubmit,
+  onSuccess,
   existingMeal,
   selectedDate,
   onCancel,
@@ -202,6 +205,10 @@ function MealForm({
           return;
         }
       }
+
+      // Navigate (or otherwise finish) only after every meal is saved, so the
+      // destination page fetches the complete list.
+      onSuccess?.();
     } catch (err) {
       setError('root', {
         type: 'manual',
