@@ -288,21 +288,23 @@ function NutritionPage(): React.ReactElement {
           {/* Daily Totals Section */}
           <h4>Daily Totals</h4>
           <div className={styles.totalsCard}>
-            <div className={styles.totalRow}>
-              <span className={styles.totalLabel}>Calories:</span>
-              <span className={styles.totalValue}>{dailyTotals.calories.toFixed(0)}</span>
+            <div className={styles.caloriesHero}>
+              <span className={styles.caloriesValue}>{dailyTotals.calories.toFixed(0)}</span>
+              <span className={styles.caloriesUnit}>calories today</span>
             </div>
-            <div className={styles.totalRow}>
-              <span className={styles.totalLabel}>Protein:</span>
-              <span className={styles.totalValue}>{dailyTotals.protein.toFixed(1)}g</span>
-            </div>
-            <div className={styles.totalRow}>
-              <span className={styles.totalLabel}>Carbs:</span>
-              <span className={styles.totalValue}>{dailyTotals.carbs.toFixed(1)}g</span>
-            </div>
-            <div className={styles.totalRow}>
-              <span className={styles.totalLabel}>Fat:</span>
-              <span className={styles.totalValue}>{dailyTotals.fat.toFixed(1)}g</span>
+            <div className={styles.macroGrid}>
+              <div className={styles.macroTile}>
+                <span className={styles.macroValue}>{dailyTotals.protein.toFixed(0)}g</span>
+                <span className={styles.macroName}>Protein</span>
+              </div>
+              <div className={styles.macroTile}>
+                <span className={styles.macroValue}>{dailyTotals.carbs.toFixed(0)}g</span>
+                <span className={styles.macroName}>Carbs</span>
+              </div>
+              <div className={styles.macroTile}>
+                <span className={styles.macroValue}>{dailyTotals.fat.toFixed(0)}g</span>
+                <span className={styles.macroName}>Fat</span>
+              </div>
             </div>
           </div>
         </div>
