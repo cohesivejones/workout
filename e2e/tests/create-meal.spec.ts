@@ -13,6 +13,29 @@ test.describe('Create Meal', () => {
     await page.goto('/');
   });
 
+  test('user can log the same meal multiple times at once with a multiplier', async ({
+    page,
+    request,
+  }) => {
+    await login(page);
+    await clearTestData(request);
+
+    await page.goto('/nutrition');
+    await page.getByRole('button', { name: /add meal/i }).click();
+    await expect(page.getByRole('heading', { name: 'Add Meal' })).toBeVisible({ timeout: 5000 });
+
+    await page.getByLabel('Description:').fill('Cheese Burger');
+    await page.getByLabel('Calories:').fill('300');
+    await page.getByLabel('Protein (g):').fill('20');
+    await page.getByLabel('Carbs (g):').fill('30');
+    await page.getByLabel('Fat (g):').fill('15');
+    await page.getByLabel('Multiplier:').selectOption('2');
+    await page.getByRole('button', { name: 'Save Meal' }).click();
+
+    // 2x creates two separate meal entries, not one doubled entry
+    await expect(page.getByRole('heading', { name: 'Cheese Burger' })).toHaveCount(2);
+  });
+
   test('should scan a nutrition label and populate form fields', async ({ page, request }) => {
     await login(page);
     await clearTestData(request);

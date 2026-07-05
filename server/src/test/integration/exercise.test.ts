@@ -4,6 +4,7 @@ import express from 'express';
 import dataSource from '../../data-source';
 import { Exercise, Workout, WorkoutExercise } from '../../entities';
 import exercisesRouter from '../../routes/exercises.routes';
+import { generateToken } from '../../middleware/auth';
 import { openai } from '../../services/openai';
 import {
   createTestApp,
@@ -618,6 +619,60 @@ describe('Exercise API Routes', () => {
       // Check reps data
       expect(response.body.repsData[0].reps).toBe(8);
       expect(response.body.repsData[1].reps).toBe(10);
+    });
+
+    it('includes a workout logged today in the user local timezone', async () => {
+      // Perth is UTC+8. At 16:30 UTC it is already 00:30 the next day locally.
+      // Workouts are stored with the local date (getLocalDateString), but the
+      // progression range end is derived from toISOString() (UTC), so a workout
+      // logged "today" locally can fall past the UTC end date and be dropped.
+      vi.stubEnv('TZ', 'Australia/Perth');
+      vi.useFakeTimers({ toFake: ['Date'] });
+      vi.setSystemTime(new Date('2026-07-05T16:30:00.000Z'));
+
+      try {
+        const exerciseRepository = dataSource.getRepository(Exercise);
+        const workoutRepository = dataSource.getRepository(Workout);
+        const workoutExerciseRepository = dataSource.getRepository(WorkoutExercise);
+
+        const exercise = exerciseRepository.create({
+          name: 'Front Squat',
+          userId: testUserData.user.id,
+        });
+        await exerciseRepository.save(exercise);
+
+        // The local date in Perth at the faked instant (what getLocalDateString returns)
+        const localToday = '2026-07-06';
+        const workout = workoutRepository.create({
+          userId: testUserData.user.id,
+          date: localToday,
+          withInstructor: false,
+        });
+        await workoutRepository.save(workout);
+
+        const workoutExercise = workoutExerciseRepository.create({
+          workout_id: workout.id,
+          exercise_id: exercise.id,
+          reps: 5,
+          weight: 225,
+          time_seconds: null,
+          new_reps: false,
+          new_weight: false,
+          new_time: false,
+        });
+        await workoutExerciseRepository.save(workoutExercise);
+
+        // Mint the token under the faked clock so it is not treated as expired
+        const authToken = generateToken(testUserData.user);
+        const authReq = authenticatedRequest(app, authToken);
+        const response = await authReq.get(`/api/exercises/${exercise.id}/progression`).expect(200);
+
+        expect(response.body.weightData).toHaveLength(1);
+        expect(response.body.repsData).toHaveLength(1);
+      } finally {
+        vi.useRealTimers();
+        vi.unstubAllEnvs();
+      }
     });
 
     it('should only return data from the last year (365 days)', async () => {
