@@ -5,8 +5,7 @@ import { searchMeals, analyzeMealNutrition } from '../api';
 import { getLocalDateString } from '../utils/dates';
 import { useNutritionLabelScanner } from '../hooks/useNutritionLabelScanner';
 import styles from './MealForm.module.css';
-import classNames from 'classnames';
-import buttonStyles from '../styles/common/buttons.module.css';
+import { Button } from './ui/Button';
 import FormContainer from './common/FormContainer';
 
 interface MealFormProps {
@@ -291,37 +290,43 @@ function MealForm({
 
       {!existingMeal && (
         <div className={styles.formRow}>
-          <button
+          <Button
             type="button"
+            variant="secondary"
+            fullWidth
+            className={styles.aiAnalyzeBtn}
             onClick={handleAIAnalysis}
             disabled={
               isAnalyzingAI || isSubmitting || !descriptionValue || descriptionValue.length < 3
             }
-            className={classNames(styles.aiAnalyzeBtn, buttonStyles.secondaryBtn)}
             title="Use AI to estimate nutrition from description"
           >
             {isAnalyzingAI && <span className={styles.spinner} data-testid="loading-spinner" />}
             {isAnalyzingAI ? 'Analyzing...' : '🤖 Get Nutrition with AI'}
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
+            variant="secondary"
+            fullWidth
+            className={styles.aiAnalyzeBtn}
             onClick={triggerScan}
             disabled={isScanning || isSubmitting}
-            className={classNames(styles.aiAnalyzeBtn, buttonStyles.secondaryBtn)}
             title="Scan a nutrition label"
           >
             {isScanning && <span className={styles.spinner} data-testid="loading-spinner" />}
             {isScanning ? 'Scanning...' : 'Scan Label'}
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
+            variant="secondary"
+            fullWidth
+            className={styles.aiAnalyzeBtn}
             onClick={handleClearNutrition}
             disabled={nutritionEmpty || isSubmitting}
-            className={classNames(styles.aiAnalyzeBtn, buttonStyles.secondaryBtn)}
             title="Clear nutrition fields"
           >
             Clear
-          </button>
+          </Button>
           <input {...fileInputProps} />
           {scanError && <p className={styles.aiHint}>{scanError}</p>}
           <p className={styles.aiHint}>
@@ -393,24 +398,26 @@ function MealForm({
       </div>
 
       <div className={styles.formButtons}>
-        <button
+        <Button
           type="submit"
+          variant="primary"
+          className={styles.saveMealBtn}
           disabled={isSubmitting}
-          className={classNames(styles.saveMealBtn, buttonStyles.primaryBtn)}
           title={existingMeal ? 'Update meal' : 'Save meal'}
         >
           {isSubmitting ? 'Saving...' : <>{existingMeal ? 'Update Meal' : 'Save Meal'}</>}
-        </button>
+        </Button>
 
         {onCancel && (
-          <button
+          <Button
             type="button"
+            variant="secondary"
+            className={styles.cancelBtn}
             onClick={onCancel}
-            className={classNames(styles.cancelBtn, buttonStyles.secondaryBtn)}
             disabled={isSubmitting}
           >
             Cancel
-          </button>
+          </Button>
         )}
       </div>
     </FormContainer>

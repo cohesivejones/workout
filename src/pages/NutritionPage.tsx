@@ -12,10 +12,9 @@ import { Meal, WeightEntry } from '../types';
 import { useUserContext } from '../contexts/useUserContext';
 import { getLocalDateString } from '../utils/dates';
 import { MdOutlineEdit } from 'react-icons/md';
-import classNames from 'classnames';
 import styles from './NutritionPage.module.css';
-import buttonStyles from '../styles/common/buttons.module.css';
 import { PageHeader } from '../components/ui/PageHeader';
+import { Button } from '../components/ui/Button';
 
 function NutritionPage(): React.ReactElement {
   const [, setLocation] = useLocation();
@@ -202,21 +201,23 @@ function NutritionPage(): React.ReactElement {
                   <div className={styles.mealHeader}>
                     <h4 className={styles.mealDescription}>{meal.description}</h4>
                     <div className={styles.mealActions}>
-                      <button
+                      <Button
+                        iconOnly
+                        variant="tertiary"
                         onClick={() => handleEditMeal(meal.id)}
-                        className={classNames(styles.editBtn, buttonStyles.tertiaryIconBtn)}
                         title="Edit meal"
                       >
                         <MdOutlineEdit />
-                      </button>
-                      <button
+                      </Button>
+                      <Button
+                        iconOnly
+                        variant="secondary"
                         onClick={() => handleDeleteMeal(meal.id)}
-                        className={classNames(styles.deleteBtn, buttonStyles.secondaryIconBtn)}
                         title="Delete meal"
                         aria-label="Delete meal"
                       >
                         x
-                      </button>
+                      </Button>
                     </div>
                   </div>
                   <div className={styles.mealMacros}>

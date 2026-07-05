@@ -5,7 +5,7 @@ import { Exercise } from '../types';
 import { useUserContext } from '../contexts/useUserContext';
 import classNames from 'classnames';
 import styles from './ExerciseListPage.module.css';
-import buttonStyles from '../styles/common/buttons.module.css';
+import { Button } from '../components/ui/Button';
 import { PageHeader } from '../components/ui/PageHeader';
 
 function ExerciseListPage(): ReactElement {
@@ -174,20 +174,22 @@ function ExerciseListPage(): ReactElement {
                     <td className={styles.actionsCell}>
                       {editingExercise?.id === exercise.id ? (
                         <div className={styles.exerciseEditActions}>
-                          <button
+                          <Button
+                            variant="primary"
+                            size="sm"
                             onClick={handleSaveEdit}
                             disabled={!newName.trim() || isSubmitting}
-                            className={classNames(styles.saveBtn, buttonStyles.primaryBtn)}
                           >
                             {isSubmitting ? 'Saving...' : 'Save'}
-                          </button>
-                          <button
+                          </Button>
+                          <Button
+                            variant="secondary"
+                            size="sm"
                             onClick={handleCancelEdit}
-                            className={classNames(styles.cancelBtn, buttonStyles.secondaryBtn)}
                             disabled={isSubmitting}
                           >
                             Cancel
-                          </button>
+                          </Button>
                         </div>
                       ) : (
                         <div className={styles.exerciseActions}>
@@ -219,21 +221,23 @@ function ExerciseListPage(): ReactElement {
                             </div>
                           ) : (
                             <>
-                              <button
+                              <Button
+                                variant="tertiary"
+                                className={styles.suggestBtn}
                                 onClick={() => handleSuggestName(exercise)}
-                                className={classNames(styles.suggestBtn, buttonStyles.tertiaryBtn)}
                                 aria-label={`Suggest name for ${exercise.name}`}
                                 disabled={isSuggesting === exercise.id}
                               >
                                 {isSuggesting === exercise.id ? 'Suggesting...' : 'Suggest Name'}
-                              </button>
-                              <button
+                              </Button>
+                              <Button
+                                variant="tertiary"
+                                className={styles.editBtn}
                                 onClick={() => handleEditClick(exercise)}
-                                className={classNames(styles.editBtn, buttonStyles.tertiaryBtn)}
                                 aria-label={`Edit ${exercise.name}`}
                               >
                                 Edit
-                              </button>
+                              </Button>
                             </>
                           )}
                         </div>

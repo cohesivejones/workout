@@ -13,8 +13,9 @@ import {
 import { deletePainScore, deleteWorkout, deleteSleepScore, fetchActivity } from '../api';
 import classNames from 'classnames';
 import styles from './ListView.module.css';
-import buttonStyles from '../styles/common/buttons.module.css';
 import { useUserContext } from '../contexts/useUserContext';
+import { Button } from './ui/Button';
+import { Card } from './ui/Card';
 import { listViewReducer, createInitialListViewState } from './listView.reducer';
 import { formatWeightWithKg } from '../utils/weight';
 import { Badge } from './ui/Badge';
@@ -234,12 +235,9 @@ export const ListView = () => {
               />
               Sleep Scores
             </label>
-            <button
-              onClick={showAll}
-              className={classNames(buttonStyles.secondaryBtn, styles.showAllBtn)}
-            >
+            <Button variant="secondary" size="sm" onClick={showAll} className={styles.showAllBtn}>
               Show All
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -252,12 +250,12 @@ export const ListView = () => {
             if (item.type === 'workout' && item.workout) {
               const workout = item.workout;
               return (
-                <div
+                <Card
+                  interactive
                   key={`workout-${workout.id}`}
                   data-testid={`workout-card-${workout.date}`}
-                  className={classNames(styles.listCard, styles.workoutCard, {
-                    [styles.withInstructor]: workout.withInstructor,
-                  })}
+                  accent={workout.withInstructor ? 'var(--color-primary)' : undefined}
+                  className={workout.withInstructor ? styles.instructorCard : undefined}
                 >
                   <div className={styles.listCardHeader}>
                     <div className={styles.listCardType}>Workout</div>
@@ -270,23 +268,25 @@ export const ListView = () => {
                       )}
                     </h3>
                     <div className={styles.listCardActions}>
-                      <Link
+                      <Button
                         to={toWorkoutEditPath(workout)}
-                        className={classNames(styles.editBtn, buttonStyles.tertiaryIconBtn)}
+                        iconOnly
+                        variant="tertiary"
                         title="Edit workout"
                       >
                         <MdOutlineEdit />
-                      </Link>
-                      <button
+                      </Button>
+                      <Button
+                        iconOnly
+                        variant="danger"
                         onClick={() => handleDeleteWorkout(workout.id)}
                         disabled={isDeleting?.type === 'workout' && isDeleting.id === workout.id}
-                        className={classNames(styles.deleteBtn, buttonStyles.secondaryIconBtn)}
                         title="Delete workout"
                       >
                         {isDeleting?.type === 'workout' && isDeleting.id === workout.id
                           ? '...'
                           : 'x'}
-                      </button>
+                      </Button>
                     </div>
                   </div>
                   <div className={styles.listCardContent}>
@@ -322,41 +322,42 @@ export const ListView = () => {
                         ))}
                     </div>
                   </div>
-                </div>
+                </Card>
               );
             } else if (item.type === 'painScore' && item.painScore) {
               const painScore = item.painScore;
               return (
-                <div
+                <Card
+                  interactive
                   key={`pain-score-${painScore.id}`}
-                  className={classNames(styles.listCard, styles.painScoreCard)}
-                  style={{
-                    borderLeftColor: getPainSeverityColor(painScore.score),
-                  }}
+                  className={styles.painScoreCard}
+                  accent={getPainSeverityColor(painScore.score)}
                 >
                   <div className={styles.listCardHeader}>
                     <div className={styles.listCardType}>Pain Score</div>
                     <h3>{format(`${painScore.date}T12:00:00.000`, 'MMM d, yyyy (eeee)')}</h3>
                     <div className={styles.listCardActions}>
-                      <Link
+                      <Button
                         to={toPainScoreEditPath(painScore)}
-                        className={classNames(styles.editBtn, buttonStyles.tertiaryIconBtn)}
+                        iconOnly
+                        variant="tertiary"
                         title="Edit pain score"
                       >
                         <MdOutlineEdit />
-                      </Link>
-                      <button
+                      </Button>
+                      <Button
+                        iconOnly
+                        variant="danger"
                         onClick={() => handleDeletePainScore(painScore.id)}
                         disabled={
                           isDeleting?.type === 'painScore' && isDeleting.id === painScore.id
                         }
-                        className={classNames(styles.deleteBtn, buttonStyles.secondaryIconBtn)}
                         title="Delete pain score"
                       >
                         {isDeleting?.type === 'painScore' && isDeleting.id === painScore.id
                           ? '...'
                           : 'x'}
-                      </button>
+                      </Button>
                     </div>
                   </div>
                   <div className={styles.listCardContent}>
@@ -373,41 +374,42 @@ export const ListView = () => {
                       </div>
                     )}
                   </div>
-                </div>
+                </Card>
               );
             } else if (item.type === 'sleepScore' && item.sleepScore) {
               const sleepScore = item.sleepScore;
               return (
-                <div
+                <Card
+                  interactive
                   key={`sleep-score-${sleepScore.id}`}
-                  className={classNames(styles.listCard, styles.sleepScoreCard)}
-                  style={{
-                    borderLeftColor: getSleepSeverityColor(sleepScore.score),
-                  }}
+                  className={styles.sleepScoreCard}
+                  accent={getSleepSeverityColor(sleepScore.score)}
                 >
                   <div className={styles.listCardHeader}>
                     <div className={styles.listCardType}>Sleep Score</div>
                     <h3>{format(`${sleepScore.date}T12:00:00.000`, 'MMM d, yyyy (eeee)')}</h3>
                     <div className={styles.listCardActions}>
-                      <Link
+                      <Button
                         to={toSleepScoreEditPath(sleepScore)}
-                        className={classNames(styles.editBtn, buttonStyles.tertiaryIconBtn)}
+                        iconOnly
+                        variant="tertiary"
                         title="Edit sleep score"
                       >
                         <MdOutlineEdit />
-                      </Link>
-                      <button
+                      </Button>
+                      <Button
+                        iconOnly
+                        variant="danger"
                         onClick={() => handleDeleteSleepScore(sleepScore.id)}
                         disabled={
                           isDeleting?.type === 'sleepScore' && isDeleting.id === sleepScore.id
                         }
-                        className={classNames(styles.deleteBtn, buttonStyles.secondaryIconBtn)}
                         title="Delete sleep score"
                       >
                         {isDeleting?.type === 'sleepScore' && isDeleting.id === sleepScore.id
                           ? '...'
                           : 'x'}
-                      </button>
+                      </Button>
                     </div>
                   </div>
                   <div className={styles.listCardContent}>
@@ -429,7 +431,7 @@ export const ListView = () => {
                       </div>
                     )}
                   </div>
-                </div>
+                </Card>
               );
             }
           })}
@@ -439,13 +441,9 @@ export const ListView = () => {
       {/* Load More Button */}
       {activityItems.length < totalCount && (
         <div className={styles.loadMoreContainer}>
-          <button
-            onClick={handleLoadMore}
-            disabled={isLoadingMore}
-            className={classNames(buttonStyles.secondaryBtn, styles.loadMoreBtn)}
-          >
+          <Button variant="secondary" size="lg" onClick={handleLoadMore} disabled={isLoadingMore}>
             {isLoadingMore ? 'Loading...' : 'Load Previous Month'}
-          </button>
+          </Button>
         </div>
       )}
 

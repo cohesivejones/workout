@@ -15,6 +15,7 @@ import { formatShortDate, formatDayOfMonth } from '../utils/dates';
 import { chartColors } from '../styles/chartColors';
 import styles from './MonthlyNutritionPage.module.css';
 import { PageHeader } from '../components/ui/PageHeader';
+import { Card } from '../components/ui/Card';
 
 function MonthlyNutritionPage() {
   const [monthStart, setMonthStart] = useState<Date>(() => startOfMonth(new Date()));
@@ -141,7 +142,7 @@ function MonthlyNutritionPage() {
         <div className={styles.chartsContainer}>
           {/* Weight Chart */}
           {hasWeightData && (
-            <div className={styles.chartCard}>
+            <Card>
               <h3>Weight Trend</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={chartData}>
@@ -196,12 +197,12 @@ function MonthlyNutritionPage() {
                   />
                 </LineChart>
               </ResponsiveContainer>
-            </div>
+            </Card>
           )}
 
           {/* Calories Chart */}
           {hasCalorieData && (
-            <div className={styles.chartCard}>
+            <Card>
               <div className={styles.chartHeader}>
                 <h3>Calorie Intake</h3>
                 <div className={styles.legend}>
@@ -264,7 +265,7 @@ function MonthlyNutritionPage() {
                   />
                 </LineChart>
               </ResponsiveContainer>
-            </div>
+            </Card>
           )}
         </div>
       )}

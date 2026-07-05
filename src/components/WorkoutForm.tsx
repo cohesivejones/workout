@@ -2,9 +2,8 @@ import * as React from 'react';
 import { Link } from 'wouter';
 import { WorkoutFormProps, WorkoutExercise } from '../types';
 import CreatableSelect from 'react-select/creatable';
-import classNames from 'classnames';
 import styles from './WorkoutForm.module.css';
-import buttonStyles from '../styles/common/buttons.module.css';
+import { Button } from './ui/Button';
 import { useUserContext } from '../contexts/useUserContext';
 import { fetchRecentExerciseData } from '../api';
 import { useForm, useFieldArray, Controller, SubmitHandler } from 'react-hook-form';
@@ -296,17 +295,18 @@ function WorkoutForm({
               className={styles.exerciseInputField}
               {...register('currentExercise.timeSeconds')}
             />
-            <button
+            <Button
               type="button"
+              variant="secondary"
+              fullWidth
               onClick={addExercise}
               disabled={
                 !currentExercise.name || !currentExercise.reps || isSavingExercise || isSubmitting
               }
-              className={classNames(styles.addExerciseBtn, buttonStyles.secondaryBtn)}
               title="Add exercise to workout"
             >
               {isSavingExercise ? 'Adding...' : <>Add Exercise</>}
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -396,17 +396,15 @@ function WorkoutForm({
                         )}
                       </div>
                     </div>
-                    <button
+                    <Button
                       type="button"
-                      className={classNames(
-                        styles.removeExerciseBtn,
-                        buttonStyles.secondaryIconBtn
-                      )}
+                      variant="secondary"
+                      iconOnly
                       onClick={() => remove(index)}
                       title="Remove exercise"
                     >
                       x
-                    </button>
+                    </Button>
                   </li>
                 ))}
               </ul>
@@ -415,10 +413,11 @@ function WorkoutForm({
         </div>
 
         <div className={styles.formButtons}>
-          <button
+          <Button
             type="submit"
+            variant="primary"
+            fullWidth
             disabled={fields.length === 0 || isSubmitting}
-            className={classNames(styles.saveWorkoutBtn, buttonStyles.primaryBtn)}
             title={existingWorkout ? 'Update workout' : 'Save workout'}
           >
             {isSubmitting ? (
@@ -426,17 +425,18 @@ function WorkoutForm({
             ) : (
               <>{existingWorkout ? 'Update Workout' : 'Save Workout'}</>
             )}
-          </button>
+          </Button>
 
           {onCancel && (
-            <button
+            <Button
               type="button"
+              variant="secondary"
+              fullWidth
               onClick={onCancel}
-              className={classNames(styles.cancelBtn, buttonStyles.secondaryBtn)}
               disabled={isSubmitting}
             >
               Cancel
-            </button>
+            </Button>
           )}
         </div>
       </form>

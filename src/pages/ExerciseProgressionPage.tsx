@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'wouter';
+import { useParams } from 'wouter';
 import { fetchExerciseProgression, ExerciseProgressionResponse } from '../api';
 import {
   LineChart,
@@ -14,9 +14,8 @@ import {
 import { formatShortDate, formatLongDate } from '../utils/dates';
 import { chartColors, prColors } from '../styles/chartColors';
 import styles from './ExerciseProgressionPage.module.css';
-import buttonStyles from '../styles/common/buttons.module.css';
-import classNames from 'classnames';
 import { PageHeader } from '../components/ui/PageHeader';
+import { Button } from '../components/ui/Button';
 
 // Custom dot component for weight chart
 const WeightDot = (props: {
@@ -102,9 +101,9 @@ function ExerciseProgressionPage() {
         <PageHeader
           title={progressionData.exerciseName}
           actions={
-            <Link to="/" className={classNames(buttonStyles.tertiaryBtn)}>
+            <Button to="/" variant="tertiary">
               Back
-            </Link>
+            </Button>
           }
         />
         <div className={styles.noData}>
@@ -121,9 +120,9 @@ function ExerciseProgressionPage() {
         title={progressionData.exerciseName}
         subtitle="Track your progressive overload over time"
         actions={
-          <Link to="/" className={classNames(buttonStyles.tertiaryBtn)}>
+          <Button to="/" variant="tertiary">
             Back
-          </Link>
+          </Button>
         }
       />
 

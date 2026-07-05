@@ -23,6 +23,7 @@ import { formatLongDate } from '../utils/dates';
 import { chartColors, prColors } from '../styles/chartColors';
 import styles from './DashboardPage.module.css';
 import { PageHeader } from '../components/ui/PageHeader';
+import { Card } from '../components/ui/Card';
 
 // Utility function to get standard 12-week date range
 const getStandardDateRange = () => {
@@ -296,7 +297,7 @@ function DashboardPage() {
             <div key={letter} id={`letter-${letter}`} className={styles.letterSection}>
               <h3 className={styles.letterHeading}>{letter}</h3>
               {exercises.map((exercise) => (
-                <div key={exercise.exerciseName} className={styles.chartCard}>
+                <Card key={exercise.exerciseName}>
                   <h4>{exercise.exerciseName}</h4>
                   <ResponsiveContainer width="100%" height={300}>
                     <LineChart data={exercise.dataPoints}>
@@ -360,7 +361,7 @@ function DashboardPage() {
                       <span>New Rep PR</span>
                     </div>
                   </div>
-                </div>
+                </Card>
               ))}
             </div>
           ))}
@@ -375,7 +376,7 @@ function DashboardPage() {
               subtitle="Tracking your pain levels over the past 12 weeks"
             />
 
-            <div className={styles.chartCard}>
+            <Card>
               <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={painData.dataPoints}>
                   <CartesianGrid strokeDasharray="3 3" />
@@ -421,7 +422,7 @@ function DashboardPage() {
                   />
                 </LineChart>
               </ResponsiveContainer>
-            </div>
+            </Card>
           </>
         )}
 
@@ -434,7 +435,7 @@ function DashboardPage() {
               subtitle="Tracking your sleep quality over the past 12 weeks"
             />
 
-            <div className={styles.chartCard}>
+            <Card>
               <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={sleepData.dataPoints}>
                   <CartesianGrid strokeDasharray="3 3" />
@@ -480,7 +481,7 @@ function DashboardPage() {
                   />
                 </LineChart>
               </ResponsiveContainer>
-            </div>
+            </Card>
           </>
         )}
       </div>

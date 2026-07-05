@@ -1,8 +1,7 @@
 import { useForm } from 'react-hook-form';
 import { useUserContext } from '../contexts/useUserContext';
-import classNames from 'classnames';
 import styles from './LoginPage.module.css';
-import buttonStyles from '../styles/common/buttons.module.css';
+import { Button } from '../components/ui/Button';
 import FormContainer from '../components/common/FormContainer';
 
 type FormValues = {
@@ -74,13 +73,9 @@ function LoginPage() {
         {errors.password && <div className={styles.fieldError}>{errors.password.message}</div>}
       </div>
 
-      <button
-        type="submit"
-        className={classNames(styles.loginButton, buttonStyles.primaryBtn)}
-        disabled={isSubmitting || loading}
-      >
+      <Button type="submit" variant="primary" fullWidth disabled={isSubmitting || loading}>
         {isSubmitting || loading ? 'Logging in...' : 'Login'}
-      </button>
+      </Button>
     </FormContainer>
   );
 }

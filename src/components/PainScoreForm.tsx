@@ -3,8 +3,7 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import { PainScore } from '../types';
 import { getLocalDateString } from '../utils/dates';
 import styles from './PainScoreForm.module.css';
-import classNames from 'classnames';
-import buttonStyles from '../styles/common/buttons.module.css';
+import { Button } from './ui/Button';
 import PainScaleSelector from './PainScaleSelector';
 import FormContainer from './common/FormContainer';
 
@@ -125,10 +124,11 @@ function PainScoreForm({
       </div>
 
       <div className={styles.formButtons}>
-        <button
+        <Button
           type="submit"
+          variant="primary"
+          fullWidth
           disabled={isSubmitting}
-          className={classNames(styles.savePainScoreBtn, buttonStyles.primaryBtn)}
           title={existingPainScore ? 'Update pain score' : 'Save pain score'}
         >
           {isSubmitting ? (
@@ -136,17 +136,18 @@ function PainScoreForm({
           ) : (
             <>{existingPainScore ? 'Update Pain Score' : 'Save Pain Score'}</>
           )}
-        </button>
+        </Button>
 
         {onCancel && (
-          <button
+          <Button
             type="button"
+            variant="secondary"
+            fullWidth
             onClick={onCancel}
-            className={classNames(styles.cancelBtn, buttonStyles.secondaryBtn)}
             disabled={isSubmitting}
           >
             Cancel
-          </button>
+          </Button>
         )}
       </div>
       {/* Pain score legend is now integrated into the PainScaleSelector component */}

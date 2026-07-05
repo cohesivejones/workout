@@ -3,12 +3,12 @@ import { useParams, Link, useLocation } from 'wouter';
 import { fetchWorkout, deleteWorkout } from '../api';
 import { Workout } from '../types';
 import styles from './WorkoutShowPage.module.css';
-import buttonStyles from '../styles/common/buttons.module.css';
 import { format } from 'date-fns';
 import classNames from 'classnames';
 import { toHomePath, toWorkoutEditPath, toExerciseProgressionPath } from '../utils/paths';
 import { formatWeightWithKg } from '../utils/weight';
 import { Badge } from '../components/ui/Badge';
+import { Button } from '../components/ui/Button';
 
 const WorkoutShowPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -69,13 +69,9 @@ const WorkoutShowPage: React.FC = () => {
       <div className={styles.pageHeader}>
         <h2>Workout Details</h2>
         <div className={styles.pageActions}>
-          <Link
-            to={toHomePath()}
-            className={classNames(styles.button, buttonStyles.tertiaryBtn)}
-            style={{ display: 'inline-block', textAlign: 'center' }}
-          >
+          <Button to={toHomePath()} variant="tertiary" className={styles.button}>
             Back to List
-          </Link>
+          </Button>
         </div>
       </div>
 
@@ -141,20 +137,17 @@ const WorkoutShowPage: React.FC = () => {
         </div>
 
         <div className={styles.workoutDetailActions}>
-          <Link
-            to={toWorkoutEditPath(workout)}
-            className={classNames(styles.button, buttonStyles.primaryBtn)}
-            style={{ display: 'inline-block', textAlign: 'center' }}
-          >
+          <Button to={toWorkoutEditPath(workout)} variant="primary" className={styles.button}>
             Edit Workout
-          </Link>
-          <button
+          </Button>
+          <Button
             onClick={handleDelete}
             disabled={isDeleting}
-            className={classNames(styles.button, buttonStyles.secondaryBtn)}
+            variant="secondary"
+            className={styles.button}
           >
             {isDeleting ? 'Deleting...' : 'Delete Workout'}
-          </button>
+          </Button>
         </div>
       </div>
     </div>
