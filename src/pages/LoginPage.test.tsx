@@ -13,17 +13,20 @@ vi.mock('../components/common/FormContainer', () => ({
   __esModule: true,
   default: ({
     title,
+    subtitle,
     errorMessage,
     onSubmit,
     children,
   }: {
     title: string;
+    subtitle?: React.ReactNode;
     errorMessage?: string;
     onSubmit: (e: React.FormEvent) => void;
     children: React.ReactNode;
   }) => (
     <div>
       <h1>{title}</h1>
+      {subtitle && <p>{subtitle}</p>}
       {errorMessage && <div data-testid="error-message">{errorMessage}</div>}
       <form onSubmit={onSubmit}>{children}</form>
     </div>

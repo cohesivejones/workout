@@ -1,4 +1,5 @@
 import { useForm } from 'react-hook-form';
+import { FaDumbbell } from 'react-icons/fa';
 import { useUserContext } from '../contexts/useUserContext';
 import styles from './LoginPage.module.css';
 import { Button } from '../components/ui/Button';
@@ -35,11 +36,13 @@ function LoginPage() {
   return (
     <FormContainer
       title="Login"
+      subtitle="Enter your email and password to login"
+      icon={<FaDumbbell aria-hidden="true" />}
+      centered
       errorMessage={errors.root?.message}
       onSubmit={handleSubmit(onSubmit)}
       className={styles.loginContainer}
     >
-      <p>Enter your email and password to login</p>
       <div className={styles.formGroup}>
         <label htmlFor="email">Email</label>
         <input

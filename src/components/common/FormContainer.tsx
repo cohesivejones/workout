@@ -23,6 +23,15 @@ interface FormContainerProps {
 
   // Form submission handler (only used if asForm is true)
   onSubmit?: (e: React.FormEvent) => void;
+
+  // Optional icon rendered in a badge above the title (branded header)
+  icon?: ReactNode;
+
+  // Optional subtitle rendered under the title
+  subtitle?: ReactNode;
+
+  // Center the header (icon/title/subtitle) — used by the auth pages
+  centered?: boolean;
 }
 
 const FormContainer: React.FC<FormContainerProps> = ({
@@ -33,14 +42,19 @@ const FormContainer: React.FC<FormContainerProps> = ({
   className,
   asForm = true,
   onSubmit,
+  icon,
+  subtitle,
+  centered = false,
 }) => {
-  const containerClasses = className
-    ? `${styles.formContainer} ${className}`
-    : styles.formContainer;
+  const containerClasses = [styles.formContainer, centered ? styles.centered : '', className]
+    .filter(Boolean)
+    .join(' ');
 
   const content = (
     <>
+      {icon && <div className={styles.iconBadge}>{icon}</div>}
       <h2 className={styles.formTitle}>{title}</h2>
+      {subtitle && <p className={styles.formSubtitle}>{subtitle}</p>}
 
       {errorMessage && <div className={styles.errorMessage}>{errorMessage}</div>}
 

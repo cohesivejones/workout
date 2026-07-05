@@ -1,10 +1,10 @@
 .formContainer {
   max-width: 500px;
   margin: 0 auto;
-  padding: 24px;
+  padding: 28px;
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   box-shadow: var(--shadow-2);
   text-align: left;
 }
@@ -15,6 +15,47 @@
   color: var(--color-ink);
   font-family: var(--font-display);
   font-size: 24px;
+  letter-spacing: -0.02em;
+}
+
+/* ---- Branded / centered header (auth pages) ---- */
+.centered {
+  margin-top: 24px;
+}
+
+.centered .formTitle {
+  text-align: center;
+  margin-bottom: 6px;
+}
+
+.iconBadge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  background: var(--color-primary-tint);
+  color: var(--color-primary);
+  font-size: 26px;
+  box-shadow: var(--shadow-1);
+}
+
+.formSubtitle {
+  margin: 0 0 20px;
+  color: var(--color-text-muted);
+  font-size: 0.95rem;
+}
+
+.centered .formSubtitle {
+  text-align: center;
+}
+
+@media (max-width: 560px) {
+  .formContainer {
+    padding: 20px;
+  }
 }
 
 .errorMessage {
