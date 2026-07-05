@@ -31,6 +31,8 @@ type LinkProps = CommonProps &
  * The design system's button. Renders a <button>, or a router <Link> when
  * `to` is provided. Skin/behavior live here; sizing is controlled by props.
  */
+const OWN_PROP_KEYS = ['variant', 'size', 'fullWidth', 'iconOnly', 'className', 'children', 'to'];
+
 export function Button(props: ButtonProps | LinkProps) {
   const { variant = 'primary', size = 'md', fullWidth, iconOnly, className, children } = props;
 
@@ -42,36 +44,29 @@ export function Button(props: ButtonProps | LinkProps) {
     className
   );
 
+  // Forward only the native DOM props (onClick, disabled, type, aria-*, etc.),
+  // dropping this component's own props.
+  const rest: Record<string, unknown> = {};
+  for (const key of Object.keys(props)) {
+    if (!OWN_PROP_KEYS.includes(key)) {
+      rest[key] = (props as Record<string, unknown>)[key];
+    }
+  }
+
   if (props.to !== undefined) {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const {
-      variant: _v,
-      size: _s,
-      fullWidth: _f,
-      iconOnly: _i,
-      className: _c,
-      to,
-      ...rest
-    } = props;
     return (
-      <Link to={to} className={classes} {...rest}>
+      <Link
+        to={props.to}
+        className={classes}
+        {...(rest as React.AnchorHTMLAttributes<HTMLAnchorElement>)}
+      >
         {children}
       </Link>
     );
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const {
-    variant: _v,
-    size: _s,
-    fullWidth: _f,
-    iconOnly: _i,
-    className: _c,
-    to: _t,
-    ...rest
-  } = props;
   return (
-    <button className={classes} {...rest}>
+    <button className={classes} {...(rest as React.ButtonHTMLAttributes<HTMLButtonElement>)}>
       {children}
     </button>
   );
