@@ -3,6 +3,7 @@ import dataSource from '../data-source';
 import { Exercise, WorkoutExercise } from '../entities';
 import { authenticateToken } from '../middleware/auth';
 import { openai } from '../services/openai';
+import { getLocalDateString } from '../utils/dates';
 import logger from '../logger';
 
 const router = Router();
@@ -168,12 +169,15 @@ router.get('/:id/progression', authenticateToken, async (req: Request, res: Resp
       return res.status(404).json({ error: 'Exercise not found' });
     }
 
-    // Get date range (last year = 365 days)
+    // Get date range (last year = 365 days). Workout dates are stored as local
+    // calendar dates, so the range must be computed in local time too — using
+    // UTC (toISOString) would drop a workout logged "today" whenever the local
+    // date is ahead of the UTC date (e.g. evenings in UTC+8).
     const endDate = new Date();
     const startDate = new Date();
     startDate.setDate(endDate.getDate() - 365);
-    const startDateStr = startDate.toISOString().split('T')[0];
-    const endDateStr = endDate.toISOString().split('T')[0];
+    const startDateStr = getLocalDateString(startDate);
+    const endDateStr = getLocalDateString(endDate);
 
     // Fetch all workout exercises for this exercise within the date range
     const workoutExercises = await dataSource.manager.query(
