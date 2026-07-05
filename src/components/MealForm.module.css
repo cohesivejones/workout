@@ -82,6 +82,52 @@
   font-size: 14px;
 }
 
+/* Multiplier segmented toggle (matches the app's unit-toggle idiom) */
+.multiplierLabel {
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: var(--color-ink);
+  font-size: 14px;
+}
+
+.multiplierToggle {
+  display: inline-flex;
+  align-self: flex-start;
+  background: var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 4px;
+  gap: 2px;
+}
+
+.multiplierButton {
+  min-width: 52px;
+  height: 36px;
+  padding: 0 16px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-weight: 600;
+  font-size: 14px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.multiplierButton:hover {
+  color: var(--color-ink);
+}
+
+.multiplierButton:active {
+  transform: scale(0.97);
+}
+
+.multiplierButtonActive {
+  background: var(--color-surface);
+  color: var(--color-primary);
+  box-shadow: var(--shadow-1);
+}
+
 .formGroup input,
 .formGroup select {
   width: 100%;

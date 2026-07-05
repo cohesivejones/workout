@@ -70,6 +70,7 @@ function MealForm({
 
   // Watch description field for changes
   const descriptionValue = watch('description');
+  const multiplierValue = watch('multiplier');
   const [caloriesValue, proteinValue, carbsValue, fatValue] = watch([
     'calories',
     'protein',
@@ -278,12 +279,28 @@ function MealForm({
       {!existingMeal && (
         <div className={styles.formRow}>
           <div className={styles.formGroup}>
-            <label htmlFor="meal-multiplier">Multiplier:</label>
-            <select id="meal-multiplier" {...register('multiplier')}>
-              <option value="1">1x</option>
-              <option value="2">2x</option>
-              <option value="3">3x</option>
-            </select>
+            <span className={styles.multiplierLabel} id="multiplier-label">
+              Multiplier:
+            </span>
+            <div
+              className={styles.multiplierToggle}
+              role="group"
+              aria-labelledby="multiplier-label"
+            >
+              {['1', '2', '3'].map((value) => (
+                <button
+                  key={value}
+                  type="button"
+                  className={`${styles.multiplierButton} ${
+                    multiplierValue === value ? styles.multiplierButtonActive : ''
+                  }`}
+                  aria-pressed={multiplierValue === value}
+                  onClick={() => setValue('multiplier', value)}
+                >
+                  {value}×
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       )}
