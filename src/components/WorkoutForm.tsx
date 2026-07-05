@@ -1,6 +1,14 @@
 import * as React from 'react';
 import { Link } from 'wouter';
-import { WorkoutFormProps, WorkoutExercise } from '../types';
+import { Workout, Exercise, WorkoutExercise } from '../types';
+
+export interface WorkoutFormProps {
+  onSubmit: (workout: Omit<Workout, 'id'>) => Promise<boolean>;
+  savedExercises: Exercise[];
+  onSaveExercise: (exerciseName: string) => Promise<boolean>;
+  existingWorkout?: Workout;
+  onCancel?: () => void;
+}
 import CreatableSelect from 'react-select/creatable';
 import styles from './WorkoutForm.module.css';
 import { Button } from './ui/Button';

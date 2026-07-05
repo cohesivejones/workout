@@ -11,7 +11,7 @@ import {
 import { Meal, WeightEntry } from '../types';
 import { useUserContext } from '../contexts/useUserContext';
 import { getLocalDateString } from '../utils/dates';
-import { MdOutlineEdit, MdRestaurant } from 'react-icons/md';
+import { MdOutlineEdit, MdRestaurant, MdClose } from 'react-icons/md';
 import styles from './NutritionPage.module.css';
 import { PageHeader } from '../components/ui/PageHeader';
 import { Button } from '../components/ui/Button';
@@ -220,7 +220,7 @@ function NutritionPage(): React.ReactElement {
                         title="Delete meal"
                         aria-label="Delete meal"
                       >
-                        x
+                        <MdClose />
                       </Button>
                     </div>
                   </div>
