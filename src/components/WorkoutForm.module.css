@@ -90,8 +90,22 @@
 .weightInputWrapper {
   display: flex;
   flex-direction: row;
-  gap: 8px;
+  gap: var(--space-3);
   align-items: stretch;
+}
+
+/* On narrow screens the toggle beside the input squeezes it; stack the
+   unit toggle above the full-width weight input instead. */
+@media (max-width: 640px) {
+  .weightInputWrapper {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-2);
+  }
+
+  .unitToggle {
+    align-self: flex-start;
+  }
 }
 
 .unitToggle {
