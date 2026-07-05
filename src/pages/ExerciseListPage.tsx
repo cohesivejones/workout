@@ -3,7 +3,7 @@ import type { ReactElement } from 'react';
 import { fetchExercises, updateExercise, suggestExerciseName } from '../api';
 import { Exercise } from '../types';
 import { useUserContext } from '../contexts/useUserContext';
-import { MdFitnessCenter } from 'react-icons/md';
+import { MdFitnessCenter, MdOutlineEdit, MdAutoAwesome } from 'react-icons/md';
 import classNames from 'classnames';
 import styles from './ExerciseListPage.module.css';
 import { Button } from '../components/ui/Button';
@@ -234,7 +234,10 @@ function ExerciseListPage(): ReactElement {
                                 aria-label={`Suggest name for ${exercise.name}`}
                                 disabled={isSuggesting === exercise.id}
                               >
-                                {isSuggesting === exercise.id ? 'Suggesting...' : 'Suggest Name'}
+                                <MdAutoAwesome className={styles.actionIcon} aria-hidden="true" />
+                                <span className={styles.actionText}>
+                                  {isSuggesting === exercise.id ? 'Suggesting...' : 'Suggest Name'}
+                                </span>
                               </Button>
                               <Button
                                 variant="tertiary"
@@ -242,7 +245,8 @@ function ExerciseListPage(): ReactElement {
                                 onClick={() => handleEditClick(exercise)}
                                 aria-label={`Edit ${exercise.name}`}
                               >
-                                Edit
+                                <MdOutlineEdit className={styles.actionIcon} aria-hidden="true" />
+                                <span className={styles.actionText}>Edit</span>
                               </Button>
                             </>
                           )}

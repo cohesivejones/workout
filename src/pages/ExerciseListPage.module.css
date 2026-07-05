@@ -104,6 +104,12 @@
   gap: 8px;
 }
 
+/* Actions show text on desktop, icons on mobile */
+.actionIcon {
+  display: none;
+  font-size: 18px;
+}
+
 /* Sort button in header: looks like text, aligns left */
 .sortButton {
   background: none;
@@ -348,6 +354,15 @@
 @media (max-width: 768px) {
   .exerciseTable {
     min-width: 100%;
+  }
+
+  /* Compact icon-only actions on small screens */
+  .actionText {
+    display: none;
+  }
+
+  .actionIcon {
+    display: inline-flex;
   }
 
   .exerciseListPage {
