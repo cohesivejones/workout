@@ -15,6 +15,7 @@ import { MdOutlineEdit } from 'react-icons/md';
 import styles from './NutritionPage.module.css';
 import { PageHeader } from '../components/ui/PageHeader';
 import { Button } from '../components/ui/Button';
+import { useConfirm } from '../components/ui/useConfirm';
 
 function NutritionPage(): React.ReactElement {
   const [, setLocation] = useLocation();
@@ -28,6 +29,7 @@ function NutritionPage(): React.ReactElement {
   const [weightInput, setWeightInput] = useState<string>('');
   const [weightError, setWeightError] = useState<string | null>(null);
   const [savingWeight, setSavingWeight] = useState<boolean>(false);
+  const { confirm, dialog } = useConfirm();
 
   useEffect(() => {
     const loadData = async () => {
@@ -75,9 +77,13 @@ function NutritionPage(): React.ReactElement {
   };
 
   const handleDeleteMeal = async (mealId: number) => {
-    if (!window.confirm('Are you sure you want to delete this meal?')) {
-      return;
-    }
+    const confirmed = await confirm({
+      title: 'Delete meal?',
+      message: 'This will remove the meal from this day.',
+      confirmText: 'Delete',
+      variant: 'danger',
+    });
+    if (!confirmed) return;
 
     try {
       await deleteMeal(mealId);
@@ -309,6 +315,7 @@ function NutritionPage(): React.ReactElement {
           </div>
         </div>
       </div>
+      {dialog}
     </div>
   );
 }

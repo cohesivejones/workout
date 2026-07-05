@@ -10,6 +10,7 @@ import { toHomePath, toWorkoutEditPath, toExerciseProgressionPath } from '../uti
 import { formatWeightWithKg } from '../utils/weight';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
+import { useConfirm } from '../components/ui/useConfirm';
 
 const WorkoutShowPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -20,6 +21,7 @@ const WorkoutShowPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
+  const { confirm, alert, dialog } = useConfirm();
 
   useEffect(() => {
     const loadWorkout = async () => {
@@ -40,16 +42,25 @@ const WorkoutShowPage: React.FC = () => {
   }, [workoutId]);
 
   const handleDelete = async () => {
-    if (window.confirm('Are you sure you want to delete this workout?')) {
-      try {
-        setIsDeleting(true);
-        await deleteWorkout(workoutId);
-        setLocation('/');
-      } catch (err) {
-        console.error('Failed to delete workout:', err);
-        alert('Failed to delete workout. Please try again.');
-        setIsDeleting(false);
-      }
+    const confirmed = await confirm({
+      title: 'Delete workout?',
+      message: 'This will permanently remove this workout. This can’t be undone.',
+      confirmText: 'Delete',
+      variant: 'danger',
+    });
+    if (!confirmed) return;
+
+    try {
+      setIsDeleting(true);
+      await deleteWorkout(workoutId);
+      setLocation('/');
+    } catch (err) {
+      console.error('Failed to delete workout:', err);
+      await alert({
+        title: 'Delete failed',
+        message: 'Failed to delete workout. Please try again.',
+      });
+      setIsDeleting(false);
     }
   };
 
@@ -164,6 +175,7 @@ const WorkoutShowPage: React.FC = () => {
           </Button>
         </div>
       </div>
+      {dialog}
     </div>
   );
 };
