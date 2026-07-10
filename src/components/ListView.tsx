@@ -305,7 +305,7 @@ export const ListView = () => {
                       </Button>
                       <Button
                         iconOnly
-                        variant="danger"
+                        variant="dangerGhost"
                         onClick={() => handleDeleteWorkout(workout.id)}
                         disabled={isDeleting?.type === 'workout' && isDeleting.id === workout.id}
                         title="Delete workout"
@@ -377,7 +377,7 @@ export const ListView = () => {
                       </Button>
                       <Button
                         iconOnly
-                        variant="danger"
+                        variant="dangerGhost"
                         onClick={() => handleDeletePainScore(painScore.id)}
                         disabled={
                           isDeleting?.type === 'painScore' && isDeleting.id === painScore.id
@@ -432,7 +432,7 @@ export const ListView = () => {
                       </Button>
                       <Button
                         iconOnly
-                        variant="danger"
+                        variant="dangerGhost"
                         onClick={() => handleDeleteSleepScore(sleepScore.id)}
                         disabled={
                           isDeleting?.type === 'sleepScore' && isDeleting.id === sleepScore.id

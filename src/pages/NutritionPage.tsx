@@ -215,7 +215,7 @@ function NutritionPage(): React.ReactElement {
                       </Button>
                       <Button
                         iconOnly
-                        variant="secondary"
+                        variant="dangerGhost"
                         onClick={() => handleDeleteMeal(meal.id)}
                         title="Delete meal"
                         aria-label="Delete meal"

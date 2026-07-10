@@ -5,33 +5,43 @@
   gap: 16px;
 }
 
+/* Segmented toggle — matches the app's unit / multiplier toggle idiom. */
 .viewToggle {
-  display: flex;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  overflow: hidden;
+  display: inline-flex;
+  background: var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 4px;
+  gap: 2px;
 }
 
 .viewToggle button {
-  padding: 8px 16px;
-  background-color: var(--color-surface);
+  min-width: 72px;
+  height: 36px;
+  padding: 0 16px;
+  background: transparent;
   border: none;
-  cursor: pointer;
+  color: var(--color-text-muted);
+  font-family: inherit;
+  font-weight: 600;
   font-size: 14px;
-  transition: background-color 0.2s;
-}
-
-.viewToggle button:first-child {
-  border-right: 1px solid var(--color-border);
-}
-
-.active {
-  background-color: var(--color-primary) !important;
-  color: white;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .viewToggle button:hover:not(.active) {
-  background-color: var(--color-surface-2);
+  color: var(--color-ink);
+}
+
+.viewToggle button:active {
+  transform: scale(0.97);
+}
+
+.active {
+  background: var(--color-surface);
+  color: var(--color-primary);
+  box-shadow: var(--shadow-1);
 }
 
 .button {
@@ -180,19 +190,6 @@
 
 .editBtn:hover {
   color: var(--color-primary-active);
-}
-
-.deleteBtn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 0.9rem;
-  padding: 4px 8px;
-  color: var(--color-danger);
-}
-
-.deleteBtn:hover {
-  color: var(--color-danger-ink);
 }
 
 @media (max-width: 768px) {
