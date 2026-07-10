@@ -113,17 +113,6 @@
   padding: 0;
 }
 
-.deleteBtn {
-  border-radius: var(--radius-sm);
-  width: 32px;
-  height: 32px;
-  font-size: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-}
-
 .mealMacros {
   display: flex;
   gap: 15px;

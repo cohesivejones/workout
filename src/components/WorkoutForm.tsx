@@ -27,6 +27,7 @@ import { GiMuscleUp } from 'react-icons/gi';
 import { IoRepeat } from 'react-icons/io5';
 import { IoMdStopwatch } from 'react-icons/io';
 import { FaWeightHanging, FaTrophy } from 'react-icons/fa';
+import { MdClose } from 'react-icons/md';
 import { Badge } from './ui/Badge';
 
 interface FormValues {
@@ -395,12 +396,13 @@ function WorkoutForm({
                     </div>
                     <Button
                       type="button"
-                      variant="secondary"
+                      variant="dangerGhost"
                       iconOnly
                       onClick={() => remove(index)}
                       title="Remove exercise"
+                      aria-label="Remove exercise"
                     >
-                      x
+                      <MdClose />
                     </Button>
                   </li>
                 ))}

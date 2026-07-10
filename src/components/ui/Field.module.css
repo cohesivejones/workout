@@ -12,6 +12,9 @@
 
 .control {
   width: 100%;
+  /* Native date/time inputs have an intrinsic min-width and won't shrink
+     without this, overflowing the card's right padding on narrow screens. */
+  min-width: 0;
   box-sizing: border-box;
   padding: 11px 13px;
   border: 1px solid var(--color-border-strong);

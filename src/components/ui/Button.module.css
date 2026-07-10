@@ -103,6 +103,18 @@
   text-decoration: none;
 }
 
+/* Quiet destructive action (icon rows): muted until hover, then danger-red. */
+.dangerGhost {
+  background: transparent;
+  color: var(--color-text-faint);
+  border-color: transparent;
+}
+.dangerGhost:hover {
+  background: var(--color-danger-tint);
+  color: var(--color-danger);
+  text-decoration: none;
+}
+
 .dangerSolid {
   background: var(--color-danger);
   color: #fff;

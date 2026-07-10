@@ -73,6 +73,11 @@
 /* On narrow screens the toggle beside the input squeezes it; stack the
    unit toggle above the full-width weight input instead. */
 @media (max-width: 640px) {
+  /* Trim the heavy card padding so inputs get room and sit evenly inset. */
+  .workoutForm {
+    padding: 20px;
+  }
+
   .weightInputWrapper {
     flex-direction: column;
     align-items: stretch;
