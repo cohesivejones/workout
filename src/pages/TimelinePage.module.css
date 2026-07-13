@@ -44,6 +44,21 @@
   box-shadow: var(--shadow-1);
 }
 
+/* On mobile the header stacks and the actions row is full-width; let the
+   toggle fill it as a proper 50/50 segmented control instead of sitting
+   small and left-aligned. */
+@media (max-width: 768px) {
+  .viewToggle {
+    display: flex;
+    width: 100%;
+  }
+
+  .viewToggle button {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
 .button {
   display: inline-block;
   padding: 8px 16px;
