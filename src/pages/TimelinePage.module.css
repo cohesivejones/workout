@@ -15,12 +15,15 @@
 }
 
 .viewToggle button {
+  -webkit-appearance: none;
+  appearance: none;
   min-width: 72px;
   height: 36px;
   padding: 0 16px;
   background: transparent;
   border: none;
   color: var(--color-text-muted);
+  -webkit-text-fill-color: currentColor;
   font-family: inherit;
   font-weight: 600;
   font-size: 14px;
@@ -42,6 +45,21 @@
   background: var(--color-surface);
   color: var(--color-primary);
   box-shadow: var(--shadow-1);
+}
+
+/* On mobile the header stacks and the actions row is full-width; let the
+   toggle fill it as a proper 50/50 segmented control instead of sitting
+   small and left-aligned. */
+@media (max-width: 768px) {
+  .viewToggle {
+    display: flex;
+    width: 100%;
+  }
+
+  .viewToggle button {
+    flex: 1;
+    min-width: 0;
+  }
 }
 
 .button {

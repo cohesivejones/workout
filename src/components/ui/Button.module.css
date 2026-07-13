@@ -1,4 +1,8 @@
 .btn {
+  /* Kill Safari's native "borderless button" styling, which otherwise
+     renders transparent/ghost buttons with iOS system-blue text. */
+  -webkit-appearance: none;
+  appearance: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;

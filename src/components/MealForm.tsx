@@ -6,8 +6,10 @@ import { getLocalDateString } from '../utils/dates';
 import { useNutritionLabelScanner } from '../hooks/useNutritionLabelScanner';
 import styles from './MealForm.module.css';
 import { Button } from './ui/Button';
+import { Badge } from './ui/Badge';
 import { Field, Input } from './ui/Field';
 import FormContainer from './common/FormContainer';
+import { proteinQuality } from '../utils/nutrition';
 
 interface MealFormProps {
   onSubmit: (meal: Omit<Meal, 'id'>) => Promise<boolean>;
@@ -82,6 +84,9 @@ function MealForm({
     'fat',
   ]);
   const nutritionEmpty = !caloriesValue && !proteinValue && !carbsValue && !fatValue;
+
+  // Live protein-quality rating (protein per 100 kcal) for the weights program.
+  const quality = proteinQuality(parseFloat(caloriesValue), parseFloat(proteinValue));
 
   // Handle clicks outside suggestions to close them
   useEffect(() => {
@@ -411,6 +416,18 @@ function MealForm({
           />
         </Field>
       </div>
+
+      {quality && (
+        <div className={styles.proteinQuality} aria-live="polite" data-testid="protein-quality">
+          <div className={styles.pqInfo}>
+            <span className={styles.pqLabel}>Protein quality</span>
+            <span className={styles.pqRatio}>
+              <strong>{quality.ratio.toFixed(1)} g</strong> protein / 100 kcal
+            </span>
+          </div>
+          <Badge variant={quality.variant}>{quality.tier}</Badge>
+        </div>
+      )}
 
       <div className={styles.formButtons}>
         <Button

@@ -173,8 +173,8 @@ function NutritionPage(): React.ReactElement {
 
       <DateNavigator
         label={formatDate(selectedDate)}
-        prevLabel="← Previous Day"
-        nextLabel="Next Day →"
+        prevLabel="Previous Day"
+        nextLabel="Next Day"
         resetLabel="Today"
         onPrev={() => handleDateChange(-1)}
         onNext={() => handleDateChange(1)}

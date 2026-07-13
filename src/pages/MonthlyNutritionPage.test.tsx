@@ -70,8 +70,8 @@ describe('MonthlyNutritionPage', () => {
       expect(
         screen.getByText('Track your weight and calorie trends throughout the month')
       ).toBeInTheDocument();
-      expect(screen.getByText('← Previous Month')).toBeInTheDocument();
-      expect(screen.getByText('Next Month →')).toBeInTheDocument();
+      expect(screen.getByText('Previous Month')).toBeInTheDocument();
+      expect(screen.getByText('Next Month')).toBeInTheDocument();
       expect(screen.getByText('Current Month')).toBeInTheDocument();
     });
   });
@@ -191,10 +191,10 @@ describe('MonthlyNutritionPage', () => {
     render(<MonthlyNutritionPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('← Previous Month')).toBeInTheDocument();
+      expect(screen.getByText('Previous Month')).toBeInTheDocument();
     });
 
-    const previousButton = screen.getByText('← Previous Month');
+    const previousButton = screen.getByText('Previous Month');
     fireEvent.click(previousButton);
 
     await waitFor(() => {
@@ -226,10 +226,10 @@ describe('MonthlyNutritionPage', () => {
     render(<MonthlyNutritionPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('Next Month →')).toBeInTheDocument();
+      expect(screen.getByText('Next Month')).toBeInTheDocument();
     });
 
-    const nextButton = screen.getByText('Next Month →');
+    const nextButton = screen.getByText('Next Month');
     fireEvent.click(nextButton);
 
     await waitFor(() => {
@@ -269,7 +269,7 @@ describe('MonthlyNutritionPage', () => {
     });
 
     // Navigate to previous month first
-    const previousButton = screen.getByText('← Previous Month');
+    const previousButton = screen.getByText('Previous Month');
     fireEvent.click(previousButton);
 
     await waitFor(() => {

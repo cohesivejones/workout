@@ -100,12 +100,15 @@
 }
 
 .multiplierButton {
+  -webkit-appearance: none;
+  appearance: none;
   min-width: 52px;
   height: 36px;
   padding: 0 16px;
   border: none;
   background: transparent;
   color: var(--color-text-muted);
+  -webkit-text-fill-color: currentColor;
   font-weight: 600;
   font-size: 14px;
   border-radius: var(--radius-sm);
@@ -219,6 +222,71 @@
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
   margin-bottom: 20px;
+}
+
+/* Live protein-per-100kcal rating for the weights program. */
+.proteinQuality {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--color-surface-2);
+  border-radius: var(--radius-md);
+  margin-bottom: 20px;
+  animation: pqReveal 0.2s ease;
+}
+
+@keyframes pqReveal {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .proteinQuality {
+    animation: none;
+  }
+}
+
+/* Stack the ratio and badge on very narrow screens so nothing crowds. */
+@media (max-width: 400px) {
+  .proteinQuality {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}
+
+.pqInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pqLabel {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+}
+
+.pqRatio {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.95rem;
+  color: var(--color-text-muted);
+}
+
+.pqRatio strong {
+  color: var(--color-ink);
+  font-weight: 600;
 }
 
 .errorMessage {
