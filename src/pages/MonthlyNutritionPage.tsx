@@ -121,8 +121,8 @@ function MonthlyNutritionPage() {
 
       <DateNavigator
         label={formatMonthDisplay()}
-        prevLabel="← Previous Month"
-        nextLabel="Next Month →"
+        prevLabel="Previous Month"
+        nextLabel="Next Month"
         resetLabel="Current Month"
         onPrev={handlePreviousMonth}
         onNext={handleNextMonth}
