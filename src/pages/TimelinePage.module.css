@@ -15,12 +15,15 @@
 }
 
 .viewToggle button {
+  -webkit-appearance: none;
+  appearance: none;
   min-width: 72px;
   height: 36px;
   padding: 0 16px;
   background: transparent;
   border: none;
   color: var(--color-text-muted);
+  -webkit-text-fill-color: currentColor;
   font-family: inherit;
   font-weight: 600;
   font-size: 14px;

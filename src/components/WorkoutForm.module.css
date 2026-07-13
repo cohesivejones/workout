@@ -101,12 +101,15 @@
 }
 
 .unitButton {
+  -webkit-appearance: none;
+  appearance: none;
   padding: 0 14px;
   font-size: 13px;
   font-weight: 600;
   border: none;
   background: transparent;
   color: var(--color-text-muted);
+  -webkit-text-fill-color: currentColor;
   border-radius: var(--radius-sm);
   cursor: pointer;
   transition: all 0.15s ease;

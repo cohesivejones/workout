@@ -100,12 +100,15 @@
 }
 
 .multiplierButton {
+  -webkit-appearance: none;
+  appearance: none;
   min-width: 52px;
   height: 36px;
   padding: 0 16px;
   border: none;
   background: transparent;
   color: var(--color-text-muted);
+  -webkit-text-fill-color: currentColor;
   font-weight: 600;
   font-size: 14px;
   border-radius: var(--radius-sm);
@@ -231,6 +234,33 @@
   background: var(--color-surface-2);
   border-radius: var(--radius-md);
   margin-bottom: 20px;
+  animation: pqReveal 0.2s ease;
+}
+
+@keyframes pqReveal {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .proteinQuality {
+    animation: none;
+  }
+}
+
+/* Stack the ratio and badge on very narrow screens so nothing crowds. */
+@media (max-width: 400px) {
+  .proteinQuality {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
 }
 
 .pqInfo {
