@@ -36,7 +36,6 @@
     "pg": "^8.13.3",
     "reflect-metadata": "^0.2.2",
     "sharp": "^0.34.5",
-    "tesseract.js": "^7.0.0",
     "typeorm": "^0.3.20",
     "uuid": "^13.0.0",
     "winston": "^3.18.3"
