@@ -40,6 +40,17 @@ test.describe('Create Meal', () => {
     await login(page);
     await clearTestData(request);
 
+    // The scan endpoint calls OpenAI vision in production. Stub it at the
+    // network layer so the test is deterministic and doesn't depend on an
+    // external API or key — this test verifies the form wiring, not the model.
+    await page.route('**/api/nutrition-label/scan', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ calories: 484, protein: 42, carbs: 50.2, fat: 10.7 }),
+      });
+    });
+
     await page.goto('/nutrition');
     await page.getByRole('button', { name: /add meal/i }).click();
     await expect(page.getByRole('heading', { name: 'Add Meal' })).toBeVisible({ timeout: 5000 });
@@ -48,8 +59,8 @@ test.describe('Create Meal', () => {
     // without opening the native file picker
     await page.locator('input[type="file"]').setInputFiles(labelImage);
 
-    // Wait for scanning to finish — calories field will be populated once OCR completes
-    await expect(page.locator('input[name="calories"]')).not.toHaveValue('', { timeout: 30000 });
+    // Wait for scanning to finish — calories field is populated once the scan returns
+    await expect(page.locator('input[name="calories"]')).not.toHaveValue('', { timeout: 10000 });
 
     const caloriesValue = await page.locator('input[name="calories"]').inputValue();
     expect(parseFloat(caloriesValue)).toBe(484);
