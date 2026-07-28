@@ -131,6 +131,17 @@
   font-weight: 600;
 }
 
+/* Protein-per-100-kcal rating for a single meal, under its macro row. */
+.mealQuality {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--color-border);
+}
+
 .summarySection {
   background-color: var(--color-surface);
   padding: 20px;
@@ -327,6 +338,60 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--color-text-faint);
+}
+
+/* Whole-day rating, sitting under the macro tiles in the totals card. */
+.dayQuality {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  background-color: var(--color-surface-2);
+  border-radius: var(--radius-sm);
+}
+
+.dqInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  /* The summary card centres its text; the label has to line up with the ratio. */
+  text-align: left;
+}
+
+.dqLabel {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-faint);
+}
+
+.dqRatio {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+}
+
+.dqRatio strong {
+  color: var(--color-ink);
+  font-weight: 700;
+}
+
+/* On a phone the ratio and badge can't share a line without the ratio
+   breaking mid-phrase, so stack them and centre with the rest of the card. */
+@media (max-width: 480px) {
+  .dayQuality {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .dqInfo {
+    align-items: center;
+    text-align: center;
+  }
 }
 
 @media (max-width: 768px) {

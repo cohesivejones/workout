@@ -11,9 +11,11 @@ import {
 import { Meal, WeightEntry } from '../types';
 import { useUserContext } from '../contexts/useUserContext';
 import { getLocalDateString } from '../utils/dates';
+import { proteinQuality } from '../utils/nutrition';
 import { MdOutlineEdit, MdRestaurant, MdClose } from 'react-icons/md';
 import styles from './NutritionPage.module.css';
 import { PageHeader } from '../components/ui/PageHeader';
+import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { useConfirm } from '../components/ui/useConfirm';
 import { LoadingState } from '../components/ui/LoadingState';
@@ -153,6 +155,10 @@ function NutritionPage(): React.ReactElement {
     { calories: 0, protein: 0, carbs: 0, fat: 0 }
   );
 
+  // Rate the whole day from the day's totals, so each meal counts in proportion
+  // to the calories it contributed rather than being averaged flat.
+  const dayQuality = proteinQuality(dailyTotals.calories, dailyTotals.protein);
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
@@ -200,46 +206,59 @@ function NutritionPage(): React.ReactElement {
             />
           ) : (
             <div className={styles.mealsList}>
-              {meals.map((meal) => (
-                <div key={meal.id} className={styles.mealCard}>
-                  <div className={styles.mealHeader}>
-                    <h4 className={styles.mealDescription}>{meal.description}</h4>
-                    <div className={styles.mealActions}>
-                      <Button
-                        iconOnly
-                        variant="tertiary"
-                        onClick={() => handleEditMeal(meal.id)}
-                        title="Edit meal"
-                      >
-                        <MdOutlineEdit />
-                      </Button>
-                      <Button
-                        iconOnly
-                        variant="dangerGhost"
-                        onClick={() => handleDeleteMeal(meal.id)}
-                        title="Delete meal"
-                        aria-label="Delete meal"
-                      >
-                        <MdClose />
-                      </Button>
+              {meals.map((meal) => {
+                const quality = proteinQuality(Number(meal.calories), Number(meal.protein));
+                return (
+                  <div key={meal.id} className={styles.mealCard}>
+                    <div className={styles.mealHeader}>
+                      <h4 className={styles.mealDescription}>{meal.description}</h4>
+                      <div className={styles.mealActions}>
+                        <Button
+                          iconOnly
+                          variant="tertiary"
+                          onClick={() => handleEditMeal(meal.id)}
+                          title="Edit meal"
+                        >
+                          <MdOutlineEdit />
+                        </Button>
+                        <Button
+                          iconOnly
+                          variant="dangerGhost"
+                          onClick={() => handleDeleteMeal(meal.id)}
+                          title="Delete meal"
+                          aria-label="Delete meal"
+                        >
+                          <MdClose />
+                        </Button>
+                      </div>
                     </div>
+                    <div className={styles.mealMacros}>
+                      <span className={styles.macroItem}>
+                        <strong>{Number(meal.calories).toFixed(0)}</strong> cal
+                      </span>
+                      <span className={styles.macroItem}>
+                        <strong>{Number(meal.protein).toFixed(1)}</strong>g protein
+                      </span>
+                      <span className={styles.macroItem}>
+                        <strong>{Number(meal.carbs).toFixed(1)}</strong>g carbs
+                      </span>
+                      <span className={styles.macroItem}>
+                        <strong>{Number(meal.fat).toFixed(1)}</strong>g fat
+                      </span>
+                    </div>
+                    {quality && (
+                      <div className={styles.mealQuality} data-testid="meal-protein-quality">
+                        <span className={styles.macroItem}>
+                          <strong>{quality.ratio.toFixed(1)}</strong>g protein / 100 kcal
+                        </span>
+                        <Badge variant={quality.variant} size="sm">
+                          {quality.tier}
+                        </Badge>
+                      </div>
+                    )}
                   </div>
-                  <div className={styles.mealMacros}>
-                    <span className={styles.macroItem}>
-                      <strong>{Number(meal.calories).toFixed(0)}</strong> cal
-                    </span>
-                    <span className={styles.macroItem}>
-                      <strong>{Number(meal.protein).toFixed(1)}</strong>g protein
-                    </span>
-                    <span className={styles.macroItem}>
-                      <strong>{Number(meal.carbs).toFixed(1)}</strong>g carbs
-                    </span>
-                    <span className={styles.macroItem}>
-                      <strong>{Number(meal.fat).toFixed(1)}</strong>g fat
-                    </span>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
@@ -310,6 +329,17 @@ function NutritionPage(): React.ReactElement {
                 <span className={styles.macroName}>Fat</span>
               </div>
             </div>
+            {dayQuality && (
+              <div className={styles.dayQuality} data-testid="day-protein-quality">
+                <div className={styles.dqInfo}>
+                  <span className={styles.dqLabel}>Protein quality</span>
+                  <span className={styles.dqRatio}>
+                    <strong>{dayQuality.ratio.toFixed(1)} g</strong> protein / 100 kcal
+                  </span>
+                </div>
+                <Badge variant={dayQuality.variant}>{dayQuality.tier}</Badge>
+              </div>
+            )}
           </div>
         </div>
       </div>
