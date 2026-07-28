@@ -115,6 +115,69 @@ describe('NutritionPage', () => {
     expect(allWeightMatches.length).toBeGreaterThan(0);
   });
 
+  it('rates protein quality for each meal and for the day as a whole', async () => {
+    const today = format(new Date(), 'yyyy-MM-dd');
+    const todayMeals = [
+      {
+        id: 1,
+        userId: 1,
+        date: today,
+        description: 'Breakfast - Oats',
+        calories: 400,
+        protein: 15,
+        carbs: 65,
+        fat: 10,
+      },
+      {
+        id: 2,
+        userId: 1,
+        date: today,
+        description: 'Lunch - Chicken Salad',
+        calories: 550,
+        protein: 40,
+        carbs: 35,
+        fat: 25,
+      },
+    ];
+
+    server.use(
+      http.get('/api/meals', () => HttpResponse.json(todayMeals)),
+      http.get('/api/weight-entries/by-date', () => HttpResponse.json(null, { status: 404 })),
+      http.get('/api/weight-entries/latest', () => HttpResponse.json(null, { status: 404 }))
+    );
+
+    render(<NutritionPage />);
+
+    const mealRatings = await screen.findAllByTestId('meal-protein-quality');
+    expect(mealRatings).toHaveLength(2);
+
+    // 15g / 400 kcal = 3.8g per 100 kcal
+    expect(mealRatings[0]).toHaveTextContent('3.8');
+    expect(mealRatings[0]).toHaveTextContent('Low');
+
+    // 40g / 550 kcal = 7.3g per 100 kcal
+    expect(mealRatings[1]).toHaveTextContent('7.3');
+    expect(mealRatings[1]).toHaveTextContent('Good');
+
+    // Day totals of 55g / 950 kcal = 5.8g per 100 kcal, weighted by calories
+    const dayRating = screen.getByTestId('day-protein-quality');
+    expect(dayRating).toHaveTextContent('5.8');
+    expect(dayRating).toHaveTextContent('Moderate');
+  });
+
+  it('omits the protein quality rating when there are no meals', async () => {
+    server.use(
+      http.get('/api/meals', () => HttpResponse.json([])),
+      http.get('/api/weight-entries/by-date', () => HttpResponse.json(null, { status: 404 })),
+      http.get('/api/weight-entries/latest', () => HttpResponse.json(null, { status: 404 }))
+    );
+
+    render(<NutritionPage />);
+
+    await screen.findByText('No meals logged for this date.');
+    expect(screen.queryByTestId('day-protein-quality')).not.toBeInTheDocument();
+  });
+
   it('displays empty weight input when no weight entry exists for date', async () => {
     server.use(
       http.get('/api/meals', () => {
